@@ -1,0 +1,31 @@
+import { IsUUID, IsInt, Min, IsOptional, IsArray, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+
+export class SelectedModifierDto {
+  @IsUUID()
+  modifierGroupId: string;
+
+  @IsUUID()
+  modifierOptionId: string;
+
+  @IsOptional()
+  name?: string;
+
+  @IsOptional()
+  extraPrice?: number;
+}
+
+export class OrderItemInputDto {
+  @IsUUID()
+  menuItemId: string;
+
+  @IsInt()
+  @Min(1)
+  quantity: number;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => SelectedModifierDto)
+  @IsOptional()
+  selectedModifiers?: SelectedModifierDto[];
+}

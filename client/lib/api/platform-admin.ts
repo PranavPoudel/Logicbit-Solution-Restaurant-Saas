@@ -1,0 +1,139 @@
+// lib/api/platform-admin.ts — Module 20: Platform Admin
+import { platformApiClient } from "@/lib/api/platform-client";
+
+// --- Revenue & restaurants ---
+export async function getRevenueSummary(startDate?: string, endDate?: string) {
+  const { data } = await platformApiClient.get("/platform-admin/revenue-summary", {
+    params: { startDate, endDate },
+  });
+  return data;
+}
+
+export async function getTopRestaurants() {
+  const { data } = await platformApiClient.get("/platform-admin/top-restaurants");
+  return data;
+}
+
+export async function listAllRestaurants(page?: number, limit?: number) {
+  const { data } = await platformApiClient.get("/platform-admin/restaurants", {
+    params: { page, limit },
+  });
+  return data;
+}
+
+export async function getRestaurantFullDetail(id: string) {
+  const { data } = await platformApiClient.get(`/platform-admin/restaurants/${id}`);
+  return data;
+}
+
+// Emergency full-control override — TODO: confirm shape, blueprint calls
+// this a raw JSON editor ("Emergency use only").
+export async function overrideRestaurant(id: string, override: Record<string, unknown>) {
+  const { data } = await platformApiClient.patch(
+    `/platform-admin/restaurants/${id}/override`,
+    override
+  );
+  return data;
+}
+
+export async function suspendRestaurant(id: string, reason?: string) {
+  const { data } = await platformApiClient.patch(`/platform-admin/restaurants/${id}/suspend`, {
+    reason,
+  });
+  return data;
+}
+
+export async function setRestaurantCommission(id: string, commissionPercent: number) {
+  const { data } = await platformApiClient.patch(
+    `/platform-admin/restaurants/${id}/commission`,
+    { commissionPercent }
+  );
+  return data;
+}
+
+// --- Moderation ---
+export async function deleteStorefrontBanner(id: string) {
+  const { data } = await platformApiClient.delete(`/platform-admin/storefront-banners/${id}`);
+  return data;
+}
+
+// --- Deliveries & activity ---
+export async function listAllDeliveries() {
+  const { data } = await platformApiClient.get("/platform-admin/deliveries");
+  return data;
+}
+
+export async function getRestaurantActivityLogs(restaurantId: string) {
+  const { data } = await platformApiClient.get(
+    `/platform-admin/restaurants/${restaurantId}/activity-logs`
+  );
+  return data;
+}
+
+export async function getAllActivityLogs() {
+  const { data } = await platformApiClient.get("/platform-admin/activity-logs");
+  return data;
+}
+
+// --- Refunds ---
+export async function listPendingRefunds() {
+  const { data } = await platformApiClient.get("/platform-admin/refunds/pending");
+  return data;
+}
+
+export async function processRefund(id: string, approved: boolean) {
+  const { data } = await platformApiClient.patch(`/platform-admin/refunds/${id}/process`, {
+    approved,
+  });
+  return data;
+}
+
+// --- Platform Staff / Role management ---
+export async function listPlatformPermissions() {
+  const { data } = await platformApiClient.get("/platform-admin/staff/permissions");
+  return data;
+}
+
+export async function listPlatformRoles() {
+  const { data } = await platformApiClient.get("/platform-admin/staff/roles");
+  return data;
+}
+
+export interface PlatformRoleInput {
+  name: string;
+  description?: string;
+}
+
+export async function createPlatformRole(input: PlatformRoleInput) {
+  const { data } = await platformApiClient.post("/platform-admin/staff/roles", input);
+  return data;
+}
+
+export async function addPermissionToPlatformRole(roleId: string, permissionId: string) {
+  const { data } = await platformApiClient.post(
+    `/platform-admin/staff/roles/${roleId}/permissions/${permissionId}`
+  );
+  return data;
+}
+
+export async function listPlatformStaff() {
+  const { data } = await platformApiClient.get("/platform-admin/staff");
+  return data;
+}
+
+export interface AddPlatformStaffInput {
+  fullName: string;
+  email: string;
+  password: string;
+  roleId?: string;
+}
+
+export async function addPlatformStaff(input: AddPlatformStaffInput) {
+  const { data } = await platformApiClient.post("/platform-admin/staff", input);
+  return data;
+}
+
+export async function updatePlatformStaff(id: string, input: Partial<AddPlatformStaffInput>) {
+  const { data } = await platformApiClient.patch(`/platform-admin/staff/${id}`, input);
+  return data;
+}

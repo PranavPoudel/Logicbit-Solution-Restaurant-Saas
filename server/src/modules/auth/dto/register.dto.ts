@@ -1,0 +1,50 @@
+import { IsString, IsEmail, IsNotEmpty, MinLength, IsBoolean, IsOptional, Equals } from 'class-validator';
+
+export class RegisterDto {
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @IsEmail()
+  email: string;
+
+  @IsString()
+  @MinLength(8)
+  password: string;
+
+  @IsString()
+  @IsNotEmpty()
+  phone: string;
+
+  @IsString()
+  @IsNotEmpty()
+  restaurantName: string;
+
+  @IsString()
+  @IsNotEmpty()
+  restaurantAddress: string;
+
+  @IsBoolean()
+  @Equals(true, { message: 'You must accept the terms and conditions' })
+  acceptTerms: boolean;
+}
+
+export class InviteStaffDto {
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @IsEmail()
+  email: string;
+
+  @IsString()
+  @MinLength(8)
+  password: string;
+
+  @IsString()
+  @IsOptional()
+  phone?: string;
+
+  @IsString({ each: true })
+  roleIds: string[];
+}

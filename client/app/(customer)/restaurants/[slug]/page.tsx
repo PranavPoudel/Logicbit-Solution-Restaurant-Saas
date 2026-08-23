@@ -1,0 +1,119 @@
+// app/(customer)/restaurants/[slug]/page.tsx
+"use client";
+
+import { use, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { AlertTriangle } from "lucide-react";
+import { RestaurantHeader } from "@/components/menu/restaurant-header";
+import { CategoryNav } from "@/components/menu/category-nav";
+import { MenuItemRow } from "@/components/menu/menu-item-row";
+import { FloatingCartBar } from "@/components/menu/floating-cart-bar";
+import { ModifierModal } from "@/components/menu-modal/modifier-modal";
+import { getRestaurantByIdOrSlug, getRestaurantMenu } from "@/lib/api/discovery";
+
+export default function RestaurantDetailPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = use(params);
+
+  const restaurantQuery = useQuery({
+    queryKey: ["restaurant", slug],
+    queryFn: () => getRestaurantByIdOrSlug(slug),
+  });
+
+  const restaurantId = restaurantQuery.data?.id;
+
+  const menuQuery = useQuery({
+    queryKey: ["restaurant-menu", restaurantId],
+    queryFn: () => getRestaurantMenu(restaurantId as string),
+    enabled: !!restaurantId,
+  });
+
+  const categories = menuQuery.data ?? [];
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const [modifierItemId, setModifierItemId] = useState<string | null>(null);
+  const activeCategoryId = selectedCategoryId ?? categories[0]?.id ?? null;
+
+  function scrollToCategory(id: string) {
+    setSelectedCategoryId(id);
+    document.getElementById(`category-${id}`)?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }
+
+  if (restaurantQuery.isLoading) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-16 text-center text-sm text-neutral-400">
+        Loading restaurant…
+      </div>
+    );
+  }
+
+  if (restaurantQuery.isError || !restaurantQuery.data) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-16 flex flex-col items-center text-center gap-3">
+        <AlertTriangle className="text-neutral-300" size={28} />
+        <p className="text-sm text-neutral-500">
+          Couldn&apos;t load this restaurant. It may not exist, or the backend
+          isn&apos;t reachable.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="pb-24">
+      <RestaurantHeader restaurant={restaurantQuery.data} />
+
+      <CategoryNav
+        categories={categories}
+        activeId={activeCategoryId}
+        onSelect={scrollToCategory}
+      />
+
+      <div className="max-w-4xl mx-auto px-4">
+        {menuQuery.isLoading ? (
+          <p className="text-sm text-neutral-400 text-center py-12">Loading menu…</p>
+        ) : categories.length === 0 ? (
+          <p className="text-sm text-neutral-400 text-center py-12">
+            This restaurant hasn&apos;t added any menu items yet.
+          </p>
+        ) : (
+          categories.map((category) => (
+            <div key={category.id} id={`category-${category.id}`} className="scroll-mt-32 py-5">
+              <h3 className="font-display font-semibold text-base text-[#17181C] mb-1">
+                {category.name ?? "Menu"}
+              </h3>
+              <div>
+                {(category.items ?? []).map((item) => (
+                  <MenuItemRow
+                    key={item.id}
+                    item={item}
+                    restaurantId={restaurantQuery.data.id}
+                    onOpenModifiers={setModifierItemId}
+                  />
+                ))}
+                {(category.items ?? []).length === 0 && (
+                  <p className="text-xs text-neutral-400 py-3">No items in this category.</p>
+                )}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      <FloatingCartBar />
+
+      {modifierItemId && (
+        <ModifierModal
+          restaurantId={restaurantQuery.data.id}
+          menuItemId={modifierItemId}
+          onClose={() => setModifierItemId(null)}
+        />
+      )}
+    </div>
+  );
+}

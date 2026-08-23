@@ -1,0 +1,68 @@
+import { Controller, Get, Post, Patch, Body, Param, Query, UseGuards, Req } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CustomerJwtAuthGuard } from '../customer-auth/guards/customer-jwt-auth.guard';
+import { OrderService } from './order.service';
+import { CreateOrderDto } from './dto/create-order.dto';
+import { UpdateOrderStatusDto, CancelOrderDto } from './dto/update-order-status.dto';
+
+@ApiTags('Orders - Customer')
+@ApiBearerAuth()
+@UseGuards(CustomerJwtAuthGuard)
+@Controller('api/v1/orders')
+export class OrderController {
+  constructor(private readonly orderService: OrderService) {}
+
+  @Post()
+  checkout(@Req() req, @Body() dto: CreateOrderDto) {
+    return this.orderService.checkout(req.user.id, dto);
+  }
+
+  @Get()
+  findMyOrders(@Req() req) {
+    return this.orderService.findAllForCustomer(req.user.id);
+  }
+
+  @Get(':id')
+  findOne(@Req() req, @Param('id') id: string) {
+    return this.orderService.findOneForCustomer(req.user.id, id);
+  }
+
+  @Patch(':id/cancel')
+  cancel(@Req() req, @Param('id') id: string, @Body() dto: CancelOrderDto) {
+    return this.orderService.cancel('CUSTOMER', req.user.id, id, dto);
+  }
+}
+
+@ApiTags('Orders - Restaurant Owner')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
+@Controller('api/v1/restaurants/:restaurantId/orders')
+export class RestaurantOrderController {
+  constructor(private readonly orderService: OrderService) {}
+
+  @Get()
+  findAll(@Req() req, @Param('restaurantId') restaurantId: string, @Query('status') status?: string) {
+    return this.orderService.findAllForRestaurant(req.user.tenantId, restaurantId, status);
+  }
+
+  @Get(':id')
+  findOne(@Req() req, @Param('restaurantId') restaurantId: string, @Param('id') id: string) {
+    return this.orderService.findOneForRestaurant(req.user.tenantId, restaurantId, id);
+  }
+
+  @Patch(':id/status')
+  updateStatus(
+    @Req() req,
+    @Param('restaurantId') restaurantId: string,
+    @Param('id') id: string,
+    @Body() dto: UpdateOrderStatusDto,
+  ) {
+    return this.orderService.updateStatus(req.user.tenantId, restaurantId, id, dto, req.user.id);
+  }
+
+  @Patch(':id/cancel')
+  cancel(@Req() req, @Param('id') id: string, @Body() dto: CancelOrderDto) {
+    return this.orderService.cancel('RESTAURANT', req.user.id, id, dto);
+  }
+}

@@ -1,0 +1,31 @@
+// lib/api/restaurants.ts — Module 6: Restaurant (owner-facing)
+import { ownerApiClient } from "@/lib/api/owner-client";
+import type { Restaurant } from "@/types/owner";
+
+export async function listMyRestaurants(): Promise<Restaurant[]> {
+  const { data } = await ownerApiClient.get<Restaurant[]>("/restaurants");
+  return data;
+}
+
+export async function getMyRestaurant(id: string): Promise<Restaurant> {
+  const { data } = await ownerApiClient.get<Restaurant>(`/restaurants/${id}`);
+  return data;
+}
+
+// TODO: confirm exact patchable fields via Swagger (location, colors,
+// delivery settings, service type are all mentioned in the endpoint list).
+export interface UpdateRestaurantInput {
+  name?: string;
+  primaryColor?: string;
+  secondaryColor?: string;
+  lat?: number;
+  lng?: number;
+  address?: string;
+  isOpen?: boolean;
+  [key: string]: unknown;
+}
+
+export async function updateMyRestaurant(id: string, input: UpdateRestaurantInput) {
+  const { data } = await ownerApiClient.patch(`/restaurants/${id}`, input);
+  return data;
+}

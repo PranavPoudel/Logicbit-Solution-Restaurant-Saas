@@ -1,0 +1,939 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =========================================================
+// TENANT & AUTH
+// =========================================================
+
+model Tenant {
+  id        String   @id @default(uuid())
+  name      String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users       User[]
+  restaurants Restaurant[]
+  roles       Role[]
+  categories      Category[]
+  menuItems       MenuItem[]
+  modifierGroups  ModifierGroup[]
+  orders          Order[]
+}
+
+model User {
+  id           String   @id @default(uuid())
+  tenantId     String
+  name         String
+  email        String   @unique
+  phone        String?
+  passwordHash String
+  isSuperAdmin Boolean  @default(false) // Tenant भित्रैको सर्वोच्च (Owner) — register गर्दा auto true हुन्छ
+  isPlatformAdmin Boolean @default(false) // DEPRECATED — अब PlatformStaff model ले यो जिम्मेवारी लिन्छ। यो field हटाइएको छैन (existing data/migration जोगाउन), तर कुनै guard ले अब यो check गर्दैन।
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tenant Tenant     @relation(fields: [tenantId], references: [id])
+  roles  UserRole[]
+
+  @@index([tenantId])
+}
+
+model Role {
+  id        String   @id @default(uuid())
+  tenantId  String
+  name      String
+  createdAt DateTime @default(now())
+
+  tenant      Tenant           @relation(fields: [tenantId], references: [id])
+  users       UserRole[]
+  permissions RolePermission[]
+
+  @@unique([tenantId, name])
+}
+
+model Permission {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+
+  roles RolePermission[]
+}
+
+model UserRole {
+  id     String @id @default(uuid())
+  userId String
+  roleId String
+
+  user User @relation(fields: [userId], references: [id])
+  role Role @relation(fields: [roleId], references: [id])
+
+  @@unique([userId, roleId])
+}
+
+model RolePermission {
+  id           String @id @default(uuid())
+  roleId       String
+  permissionId String
+
+  role       Role       @relation(fields: [roleId], references: [id])
+  permission Permission @relation(fields: [permissionId], references: [id])
+
+  @@unique([roleId, permissionId])
+}
+
+// =========================================================
+// RESTAURANT (with Geolocation for Near-Me Discovery)
+// =========================================================
+
+// DeliveryMode — Order.deliveryHandledBy मा प्रयोग हुन्छ। यो restaurant-wide
+// global setting होइन — प्रत्येक order को distance अनुसार checkout बेलैमा
+// calculate भएर record हुन्छ (Restaurant.selfDeliveryRadiusKm भित्र भए
+// SELF_DELIVERY, बाहिर तर maxDeliveryRadiusKm भित्र भए THIRD_PARTY)।
+enum DeliveryMode {
+  SELF_DELIVERY
+  THIRD_PARTY
+}
+
+enum DeliveryFeeType {
+  FREE
+  FLAT
+  PER_KM
+}
+
+// =========================================================
+// CUISINE (Managed taxonomy — Platform Admin ले नियन्त्रण गर्ने)
+// =========================================================
+
+// Cuisine — "Nepali", "Japanese", "Thai", "Fast Food" जस्ता cuisine/style
+// टाइप। यो free-text होइन — Platform Admin ले manage गर्ने एउटै master
+// list हो, ताकि सबै restaurant मा उही standardized नाम प्रयोग होस्
+// (search/filter/analytics सधैं सही काम गरोस्), र frontend ले dropdown/
+// checklist देखाउन सकोस् (free text input होइन)।
+model Cuisine {
+  id       String  @id @default(uuid())
+  name     String  @unique
+  slug     String  @unique
+  iconUrl  String?
+  isActive Boolean @default(true)
+
+  restaurants RestaurantCuisine[]
+}
+
+model RestaurantCuisine {
+  id           String @id @default(uuid())
+  restaurantId String
+  cuisineId    String
+
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+  cuisine    Cuisine    @relation(fields: [cuisineId], references: [id])
+
+  @@unique([restaurantId, cuisineId])
+}
+
+model Restaurant {
+  id       String @id @default(uuid())
+  tenantId String
+  name     String
+  slug     String @unique
+
+  // Geolocation — Near-Me feature को लागि
+  latitude         Float?
+  longitude        Float?
+  address          String?
+  city             String?
+  state            String?
+  country          String?
+  postalCode       String?
+
+  // Discovery / Filter fields
+  priceRange   String?
+  avgRating    Float    @default(0)
+  totalReviews Int      @default(0)
+  totalOrders  Int      @default(0)
+  isOpen       Boolean  @default(true)
+  supportsDelivery Boolean @default(true)
+  supportsPickup   Boolean @default(true)
+  supportsDineIn   Boolean @default(false)
+
+  // --- Distance-tiered Delivery Settings (owner ले आफैं तोक्ने) ---
+  // 0 → selfDeliveryRadiusKm         : Restaurant आफैंले deliver गर्छ
+  // selfDeliveryRadiusKm → maxDeliveryRadiusKm : Third-party delivery person
+  // maxDeliveryRadiusKm भन्दा बाहिर  : Delivery नै उपलब्ध छैन
+  selfDeliveryRadiusKm   Float @default(0)   // 0 राख्दा "आफैं कहिल्यै deliver गर्दैन" भन्ने अर्थ हुन्छ
+  maxDeliveryRadiusKm    Float @default(5)   // यो भन्दा टाढा भए order नै लिइँदैन
+
+  selfDeliveryFeeType    DeliveryFeeType @default(FREE)
+  selfDeliveryFlatFee    Float @default(0)
+  selfDeliveryPerKmFee   Float @default(0)
+
+  thirdPartyFeeType      DeliveryFeeType @default(PER_KM)
+  thirdPartyBaseFee      Float @default(30)  // Base/pickup fee (जति टाढा भए पनि यति त लाग्छ)
+  thirdPartyPerKmFee     Float @default(15)  // प्रति km थप शुल्क
+  cancellationWindowMinutes Int @default(5)
+  platformCommissionPercent Float @default(10) // यो restaurant सँग सम्झौता भएको commission दर — तपाईं (platform owner) को आम्दानी यहीँबाट calculate हुन्छ
+
+  // Branding / SEO
+  logoUrl        String?
+  coverImageUrl  String?
+  primaryColor   String? @default("#E53E3E")
+  secondaryColor String? @default("#2D3748")
+  heroHeading    String?
+  heroSubheading String?
+  domain         String?
+  subdomain      String?
+  theme          Json?
+  seoTitle       String?
+  seoDescription String?
+  locale         String  @default("en")
+  currencyCode   String  @default("NPR")
+
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant         Tenant                 @relation(fields: [tenantId], references: [id])
+  categories     Category[]
+  menuItems      MenuItem[]
+  modifierGroups ModifierGroup[]
+  orders         Order[]
+  reviews        Review[]
+  favoritedBy    CustomerFavorite[]
+  cuisines       RestaurantCuisine[]
+
+  @@index([tenantId])
+  @@index([latitude, longitude])
+  @@index([city])
+}
+
+// =========================================================
+// MENU
+// =========================================================
+
+model Category {
+  id           String   @id @default(uuid())
+  tenantId     String
+  restaurantId String
+  name         String
+  description  String?
+  image        String?
+  displayOrder Int      @default(0)
+  isFeatured   Boolean  @default(false)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tenant     Tenant     @relation(fields: [tenantId], references: [id])
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+  menuItems  MenuItem[]
+
+  @@index([restaurantId])
+}
+
+model MenuItem {
+  id                     String    @id @default(uuid())
+  tenantId               String
+  restaurantId           String
+  categoryId             String
+  name                   String
+  description            String?
+  price                  Float
+  costPrice              Float?
+  image                  String?
+  isAvailable            Boolean   @default(true)
+  isFeatured             Boolean   @default(false)
+  isVegetarian           Boolean   @default(false)
+  isVegan                Boolean   @default(false)
+  spiceLevel             String?
+  allergenInfo           String?
+  calories               Int?
+  displayOrder           Int       @default(0)
+  preparationTimeMinutes Int?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+  deletedAt              DateTime?
+
+  tenant         Tenant                   @relation(fields: [tenantId], references: [id])
+  restaurant     Restaurant               @relation(fields: [restaurantId], references: [id])
+  category       Category                 @relation(fields: [categoryId], references: [id])
+  modifierGroups MenuItemModifierGroup[]
+  orderItems     OrderItem[]
+
+  @@index([restaurantId])
+  @@index([categoryId])
+}
+
+model ModifierGroup {
+  id           String   @id @default(uuid())
+  tenantId     String
+  restaurantId String
+  name         String
+  minSelect    Int      @default(0)
+  maxSelect    Int      @default(1)
+  isRequired   Boolean  @default(false)
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tenant     Tenant                   @relation(fields: [tenantId], references: [id])
+  restaurant Restaurant               @relation(fields: [restaurantId], references: [id])
+  options    ModifierOption[]
+  menuItems  MenuItemModifierGroup[]
+
+  @@index([restaurantId])
+}
+
+model ModifierOption {
+  id              String   @id @default(uuid())
+  tenantId        String
+  modifierGroupId String
+  name            String
+  extraPrice      Float    @default(0)
+  isAvailable     Boolean  @default(true)
+  displayOrder    Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  modifierGroup ModifierGroup @relation(fields: [modifierGroupId], references: [id])
+
+  @@index([modifierGroupId])
+}
+
+model MenuItemModifierGroup {
+  id              String @id @default(uuid())
+  menuItemId      String
+  modifierGroupId String
+
+  menuItem      MenuItem      @relation(fields: [menuItemId], references: [id])
+  modifierGroup ModifierGroup @relation(fields: [modifierGroupId], references: [id])
+
+  @@unique([menuItemId, modifierGroupId])
+}
+
+// =========================================================
+// CUSTOMER
+// =========================================================
+
+model Customer {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  phone        String?
+  passwordHash String?
+  isGuest      Boolean  @default(false)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  addresses CustomerAddress[]
+  orders    Order[]
+  reviews   Review[]
+  favorites CustomerFavorite[]
+}
+
+model CustomerAddress {
+  id          String  @id @default(uuid())
+  customerId  String
+  label       String
+  latitude    Float
+  longitude   Float
+  fullAddress String
+  isDefault   Boolean @default(false)
+
+  customer Customer @relation(fields: [customerId], references: [id])
+
+  @@index([customerId])
+}
+
+model CustomerFavorite {
+  id           String @id @default(uuid())
+  customerId   String
+  restaurantId String
+
+  customer   Customer   @relation(fields: [customerId], references: [id])
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+
+  @@unique([customerId, restaurantId])
+}
+
+// =========================================================
+// ORDER
+// =========================================================
+
+enum OrderStatus {
+  PENDING
+  ACCEPTED
+  PREPARING
+  READY
+  OUT_FOR_DELIVERY
+  DELIVERED
+  COMPLETED
+  CANCELLED
+}
+
+enum OrderType {
+  DELIVERY
+  PICKUP
+  DINE_IN
+}
+
+enum PaymentStatus {
+  UNPAID
+  PAID
+  REFUNDED
+}
+
+enum PaymentMethod {
+  COD
+  CREDIT_CARD
+  ESEWA
+  KHALTI
+  IPS
+  PHONEPAY
+}
+
+enum CancelledBy {
+  CUSTOMER
+  RESTAURANT
+  SYSTEM
+}
+
+enum RefundStatus {
+  PENDING
+  PROCESSED
+  FAILED
+  NOT_APPLICABLE
+}
+
+model Order {
+  id           String   @id @default(uuid())
+  tenantId     String
+  restaurantId String
+  customerId   String
+
+  orderNumber String      @unique
+  status      OrderStatus @default(PENDING)
+  orderType   OrderType
+
+  subtotal       Float
+  deliveryFee    Float  @default(0)
+  tax            Float  @default(0)
+  discountAmount Float  @default(0)
+  couponCode     String?
+  total          Float
+  platformCommissionAmount Float @default(0) // तपाईंको (platform owner) कमाई — यही order बाट कति कमिशन बन्यो
+
+  deliveryLatitude  Float?
+  deliveryLongitude Float?
+  deliveryAddress   String?
+  deliveryDistanceKm Float?
+  deliveryHandledBy DeliveryMode? // यही specific order को लागि Self हो कि Third-party हो भनेर checkout बेला नै तय भएर record हुन्छ
+
+  paymentStatus PaymentStatus @default(UNPAID)
+  paymentMethod PaymentMethod @default(COD)
+
+  // --- Cancellation tracking ---
+  cancelledBy     CancelledBy?
+  cancellationReason String?
+  cancelledAt     DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant        Tenant             @relation(fields: [tenantId], references: [id])
+  restaurant    Restaurant         @relation(fields: [restaurantId], references: [id])
+  customer      Customer           @relation(fields: [customerId], references: [id])
+  items         OrderItem[]
+  review        Review?
+  statusHistory OrderStatusHistory[]
+  refund        Refund?
+  delivery      Delivery?
+
+  @@index([restaurantId])
+  @@index([customerId])
+}
+
+// OrderStatusHistory — हरेक status change को audit trail।
+// "कहिले, कसले, के status मा बदल्यो" भन्ने पूरा इतिहास — WooCommerce को
+// order notes/log जस्तै, dispute भएमा वा customer support को लागि अनिवार्य।
+model OrderStatusHistory {
+  id        String      @id @default(uuid())
+  orderId   String
+  status    OrderStatus
+  note      String?
+  changedBy String?        // userId वा customerId, जसले बदल्यो
+  createdAt DateTime    @default(now())
+
+  order Order @relation(fields: [orderId], references: [id])
+
+  @@index([orderId])
+}
+
+// Refund — Order cancel/return भएपछि पैसा फिर्ता को track।
+// COD भए "NOT_APPLICABLE" (पैसा तिरिएकै थिएन), Online payment भए
+// gateway बाट फिर्ता processing track गर्ने।
+model Refund {
+  id          String       @id @default(uuid())
+  orderId     String       @unique
+  amount      Float
+  status      RefundStatus @default(PENDING)
+  reason      String?
+  processedAt DateTime?
+  createdAt   DateTime     @default(now())
+
+  order Order @relation(fields: [orderId], references: [id])
+}
+
+model OrderItem {
+  id                String @id @default(uuid())
+  orderId           String
+  menuItemId        String
+  quantity          Int
+  unitPrice         Float
+  subtotal          Float
+  selectedModifiers Json?
+
+  order    Order    @relation(fields: [orderId], references: [id])
+  menuItem MenuItem @relation(fields: [menuItemId], references: [id])
+
+  @@index([orderId])
+}
+
+// =========================================================
+// COUPON / DISCOUNT
+// =========================================================
+
+enum CouponType {
+  PERCENTAGE
+  FLAT
+}
+
+model Coupon {
+  id             String     @id @default(uuid())
+  tenantId       String
+  restaurantId   String?
+  code           String
+  type           CouponType
+  value          Float
+  maxDiscount    Float?
+  minOrderAmount Float?     @default(0)
+  usageLimit     Int?
+  usageLimitPerCustomer Int? @default(1)
+  usedCount      Int        @default(0)
+  validFrom      DateTime   @default(now())
+  validUntil     DateTime?
+  isActive       Boolean    @default(true)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  usages CouponUsage[]
+
+  @@unique([tenantId, code])
+  @@index([restaurantId])
+}
+
+model CouponUsage {
+  id             String   @id @default(uuid())
+  couponId       String
+  customerId     String
+  orderId        String   @unique
+  discountAmount Float
+  usedAt         DateTime @default(now())
+
+  coupon Coupon @relation(fields: [couponId], references: [id])
+
+  @@index([customerId])
+}
+
+// =========================================================
+// REVIEW
+// =========================================================
+
+model Review {
+  id           String   @id @default(uuid())
+  restaurantId String
+  customerId   String
+  orderId      String?  @unique
+  rating       Int
+  comment      String?
+  createdAt    DateTime @default(now())
+
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+  customer   Customer   @relation(fields: [customerId], references: [id])
+  order      Order?     @relation(fields: [orderId], references: [id])
+
+  @@index([restaurantId])
+}
+
+// =========================================================
+// DELIVERY
+// =========================================================
+
+enum DeliveryStatus {
+  UNASSIGNED
+  ASSIGNED
+  PICKED_UP
+  ON_THE_WAY
+  DELIVERED
+  FAILED
+}
+
+model DeliveryPerson {
+  id           String   @id @default(uuid())
+  tenantId     String?  // null भए platform-wide independent delivery person (एकभन्दा बढी restaurant को लागि काम गर्न सक्ने)
+  name         String
+  phone        String   @unique
+  email        String?  @unique
+  passwordHash String
+  vehicleType  String?
+  isAvailable  Boolean  @default(true)
+  isActive     Boolean  @default(true)
+  currentLatitude  Float?
+  currentLongitude Float?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  deliveries Delivery[]
+}
+
+model Delivery {
+  id               String         @id @default(uuid())
+  orderId          String         @unique
+  deliveryPersonId String?
+  status           DeliveryStatus @default(UNASSIGNED)
+  earningAmount    Float          @default(0) // यो delivery बाट rider ले कति कमाउने (Order.deliveryFee बाट calculate)
+  assignedAt       DateTime?
+  pickedUpAt       DateTime?
+  deliveredAt      DateTime?
+  failureReason    String?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  order          Order           @relation(fields: [orderId], references: [id])
+  deliveryPerson DeliveryPerson? @relation(fields: [deliveryPersonId], references: [id])
+
+  @@index([deliveryPersonId])
+}
+
+// =========================================================
+// SETTLEMENT (COD Commission Collection — Business Critical)
+// =========================================================
+
+enum SettlementStatus {
+  PENDING   // Invoice बनियो, restaurant ले अझै तिरेको छैन
+  PAID      // Restaurant ले platform लाई commission तिरिसक्यो
+  OVERDUE
+}
+
+// Settlement — किनभने COD मा पैसा customer बाट restaurant सम्म सिधै
+// जान्छ (platform बीचमा पर्दैन), तपाईंको commission स्वतः कहिल्यै उठ्दैन।
+// यसैले periodic (साप्ताहिक/मासिक) रूपमा "यो अवधिका सबै COD order मिलाएर
+// यति commission तिर्नुपर्छ" भन्ने invoice/statement बनाइन्छ, र restaurant
+// ले त्यो अलग्गै (bank transfer/manual) तिर्छन्।
+model Settlement {
+  id             String           @id @default(uuid())
+  tenantId       String
+  restaurantId   String
+  periodStart    DateTime
+  periodEnd      DateTime
+  totalOrders    Int
+  totalCodAmount Float            // COD बाट collect भएको कुल पैसा (restaurant ले लिएको)
+  commissionDue  Float            // तपाईंलाई तिर्नुपर्ने commission
+  status         SettlementStatus @default(PENDING)
+  paidAt         DateTime?
+  paymentReference String?
+  createdAt      DateTime         @default(now())
+
+  @@index([restaurantId])
+}
+
+// =========================================================
+// SUBSCRIPTION / MEMBERSHIP (Platform Billing — Domain-renewal जस्तो)
+// =========================================================
+
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+// SubscriptionPlan — "Free", "Monthly", "Quarterly", "1 Year"... जस्ता
+// membership plan। Platform Admin ले यी बनाउँछन्।
+model SubscriptionPlan {
+  id              String  @id @default(uuid())
+  name            String  @unique
+  durationMonths  Int     // 0 = Free/lifetime (कहिल्यै expire नहुने)
+  price           Float   @default(0)
+  isActive        Boolean @default(true)
+
+  subscriptions RestaurantSubscription[]
+}
+
+// RestaurantSubscription — एउटा restaurant को हालको membership status।
+// Domain renewal जस्तै — expiryDate नजिकिँदा notification जान्छ,
+// auto-renew भए आफैं renew हुन्छ, नभए expire भएर restaurant suspend हुन्छ।
+model RestaurantSubscription {
+  id               String             @id @default(uuid())
+  restaurantId     String             @unique
+  planId           String
+  startDate        DateTime           @default(now())
+  expiryDate       DateTime?          // null = Free/lifetime plan, कहिल्यै expire हुँदैन
+  status           SubscriptionStatus @default(ACTIVE)
+  autoRenew        Boolean            @default(false)
+  lastReminderSentDaysBefore Int?     // 30/15/7/3/1 मध्ये कुनसम्म पठाइसक्यो (duplicate notification रोक्न)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  plan SubscriptionPlan @relation(fields: [planId], references: [id])
+}
+
+// =========================================================
+// PLATFORM STAFF RBAC (Super Admin को आफ्नै team management)
+// =========================================================
+
+// PlatformPermission — Platform-level action हरूको global list (जस्तै
+// "restaurant suspend गर्ने", "commission बदल्ने")। यो tenant-level
+// Permission भन्दा फरक हो — यो LogicBit को आफ्नै internal team को लागि हो।
+model PlatformPermission {
+  id          String @id @default(uuid())
+  name        String @unique
+  description String?
+
+  roles PlatformRolePermission[]
+}
+
+model PlatformRole {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+
+  permissions PlatformRolePermission[]
+  staff       PlatformStaff[]
+}
+
+model PlatformRolePermission {
+  id           String @id @default(uuid())
+  roleId       String
+  permissionId String
+
+  role       PlatformRole       @relation(fields: [roleId], references: [id])
+  permission PlatformPermission @relation(fields: [permissionId], references: [id])
+
+  @@unique([roleId, permissionId])
+}
+
+// PlatformStaff — LogicBit को आफ्नै team member (तपाईं आफैं + तपाईंले
+// नियुक्त गरेको support/finance staff)। Restaurant owner को User model
+// भन्दा पूर्ण रूपमा छुट्टै — यो कहिल्यै tenant सँग बाँधिँदैन।
+model PlatformStaff {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  roleId       String
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  role PlatformRole @relation(fields: [roleId], references: [id])
+}
+
+// =========================================================
+// ACTIVITY LOG (Super Admin Dashboard — audit trail)
+// =========================================================
+
+// ActivityLog — प्रत्येक महत्वपूर्ण घटना (order भयो, menu बदलियो, commission
+// बदलियो, ad approve भयो...) यहाँ log हुन्छ। Super Admin dashboard ले
+// restaurant-wise यो data देखाउँछ — "यो restaurant मा के-के भइरहेको छ"
+// भन्ने पूरा पारदर्शी history।
+model ActivityLog {
+  id           String   @id @default(uuid())
+  tenantId     String?
+  restaurantId String?
+  actorType    String   // "OWNER" | "CUSTOMER" | "DELIVERY" | "PLATFORM_ADMIN" | "SYSTEM"
+  actorId      String?
+  action       String   // जस्तै "ORDER_CREATED", "MENU_ITEM_UPDATED", "COMMISSION_CHANGED"
+  description  String
+  metadata     Json?
+  createdAt    DateTime @default(now())
+
+  @@index([restaurantId])
+  @@index([tenantId])
+  @@index([action])
+}
+
+// =========================================================
+// ADVERTISEMENT (Platform-wide paid promotion — नयाँ आम्दानी स्रोत)
+// =========================================================
+
+enum AdPlacementType {
+  HOMEPAGE_BANNER // Discovery homepage (सबै customer ले देख्ने, restaurant-specific होइन) मा banner
+  SEARCH_BOOST    // Near-me ranking मा माथि देखिने ("Sponsored" tag सहित)
+  POPUP           // Website खोल्नेबित्तिकै platform-wide popup ad
+}
+
+enum AdStatus {
+  PENDING   // Owner ले request गर्यो, payment/approval बाँकी
+  ACTIVE    // Platform Admin ले payment confirm गरेर activate गर्यो
+  REJECTED
+  EXPIRED
+}
+
+// Advertisement — Restaurant owner ले पैसा तिरेर platform-wide visibility
+// किन्ने (जस्तै homepage मा सबैले देख्ने banner, वा near-me search मा
+// "Sponsored" tag सहित माथि देखिने)। यो प्रत्येक restaurant को आफ्नै
+// storefront भन्दा फरक हो — यो सम्पूर्ण platform का customer ले देख्ने हो।
+// 
+// Workflow: Owner request गर्छ (PENDING) → Platform Admin ले payment
+// confirm गरेर ACTIVE बनाउँछ → endDate cross भएपछि EXPIRED।
+model Advertisement {
+  id            String          @id @default(uuid())
+  tenantId      String
+  restaurantId  String
+  placementType AdPlacementType
+  title         String
+  imageUrl      String?
+  linkUrl       String?
+  startDate     DateTime
+  endDate       DateTime
+  amountPaid    Float           @default(0)
+  priority      Int             @default(0) // धेरै ad एकैचोटि भए, यसले क्रम तोक्छ
+  status        AdStatus        @default(PENDING)
+  rejectionReason String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  @@index([restaurantId])
+  @@index([status, placementType])
+}
+
+// =========================================================
+// STOREFRONT (Restaurant's own customizable website)
+// =========================================================
+
+// StorefrontBanner — Homepage मा देखिने slider/banner image हरू।
+// displayOrder ले नै drag-and-drop बाट owner ले मिलाएको क्रम राख्छ —
+// frontend मा customer ले drag गरेपछि, backend मा यही field अपडेट हुन्छ।
+model StorefrontBanner {
+  id           String   @id @default(uuid())
+  tenantId     String
+  restaurantId String
+  imageUrl     String
+  title        String?
+  subtitle     String?
+  linkUrl      String?  // Click गर्दा कहाँ जाने (menu item, coupon, external URL)
+  displayOrder Int      @default(0)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([restaurantId])
+}
+
+// StorefrontConfig — About/Contact text, अनि homepage मा section हरू कुन
+// क्रममा देखिने (drag-and-drop से owner ले तोकेको) भन्ने layout config।
+// एउटा restaurant मा एउटै मात्र config हुन्छ (@@unique)।
+model StorefrontConfig {
+  id             String   @id @default(uuid())
+  tenantId       String
+  restaurantId   String   @unique
+  aboutText      String?
+  contactPhone   String?
+  contactEmail   String?
+  contactAddress String?
+  socialLinks    Json?    // { facebook, instagram, tiktok... }
+  sectionOrder   Json     @default("[\"banner\",\"offers\",\"menu\",\"about\",\"contact\"]")
+  updatedAt      DateTime @updatedAt
+}
+
+// StorefrontPopup — Website खोल्ने बित्तिकै देखिने offer/notification popup।
+// Schedule (startDate/endDate) राखिएको छ ताकि owner ले "यो weekend मात्र
+// यो offer देखाऊ" जस्तो time-bound campaign चलाउन सकून्।
+model StorefrontPopup {
+  id           String    @id @default(uuid())
+  tenantId     String
+  restaurantId String
+  title        String
+  message      String?
+  imageUrl     String?
+  ctaText      String?   // Button को text, जस्तै "Order Now"
+  ctaLink      String?
+  startDate    DateTime?
+  endDate      DateTime?
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([restaurantId])
+}
+
+// =========================================================
+// TRANSLATION (Google Translate API cache)
+// =========================================================
+
+model TranslationCache {
+  id             String   @id @default(uuid())
+  sourceTextHash String   // SHA-256 hash of original text (fast lookup को लागि)
+  sourceText     String
+  targetLang     String   // "ja", "ne", "en"...
+  translatedText String
+  createdAt      DateTime @default(now())
+
+  @@unique([sourceTextHash, targetLang])
+}
+
+// =========================================================
+// MEDIA (Image Upload)
+// =========================================================
+
+model Media {
+  id           String   @id @default(uuid())
+  tenantId     String
+  restaurantId String?
+  url          String
+  key          String
+  mimeType     String
+  sizeBytes    Int
+  createdAt    DateTime @default(now())
+
+  @@index([tenantId])
+}
+
+// =========================================================
+// NOTIFICATION
+// =========================================================
+
+enum NotificationChannel {
+  EMAIL
+  SMS
+  PUSH
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+model Notification {
+  id         String              @id @default(uuid())
+  tenantId   String?
+  customerId String?
+  channel    NotificationChannel
+  recipient  String
+  subject    String?
+  body       String
+  status     NotificationStatus  @default(PENDING)
+  createdAt  DateTime            @default(now())
+  sentAt     DateTime?
+
+  @@index([tenantId])
+  @@index([customerId])
+}

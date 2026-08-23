@@ -1,0 +1,239 @@
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
+import { ActivityLogService } from '../activity-log/activity-log.service';
+
+@Injectable()
+export class PlatformAdminService {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly activityLog: ActivityLogService,
+  ) {}
+
+  /**
+   * getRevenueSummary()
+   * ---------------------
+   * तपाईं (platform owner) को लागि सबैभन्दा महत्वपूर्ण number — कुल कति
+   * commission कमाइयो, कति tenant/restaurant active छन्, कति order भए।
+   * यो PlatformAdminGuard ले protect गरेको छ — कुनै पनि restaurant owner
+   * (जो आफ्नो tenant भित्र isSuperAdmin भए पनि) यो हेर्न पाउँदैनन्।
+   */
+  async getRevenueSummary(startDate?: string, endDate?: string) {
+    const dateFilter =
+      startDate || endDate
+        ? {
+            createdAt: {
+              ...(startDate ? { gte: new Date(startDate) } : {}),
+              ...(endDate ? { lte: new Date(endDate) } : {}),
+            },
+          }
+        : {};
+
+    const [orderStats, tenantCount, restaurantCount, activeRestaurantCount, adRevenue] = await Promise.all([
+      this.prisma.order.aggregate({
+        where: { ...dateFilter, status: { not: 'CANCELLED' } },
+        _sum: { total: true, platformCommissionAmount: true },
+        _count: { id: true },
+      }),
+      this.prisma.tenant.count(),
+      this.prisma.restaurant.count(),
+      this.prisma.restaurant.count({ where: { isActive: true } }),
+      this.prisma.advertisement.aggregate({
+        where: { status: 'ACTIVE', ...dateFilter },
+        _sum: { amountPaid: true },
+        _count: { id: true },
+      }),
+    ]);
+
+    const commissionRevenue = orderStats._sum.platformCommissionAmount ?? 0;
+    const advertisingRevenue = adRevenue._sum.amountPaid ?? 0;
+
+    return {
+      success: true,
+      data: {
+        totalOrders: orderStats._count.id,
+        totalGMV: orderStats._sum.total ?? 0,
+        commissionRevenue,
+        advertisingRevenue,
+        totalPlatformRevenue: commissionRevenue + advertisingRevenue, // तपाईंको (platform owner) कुल आम्दानी — दुबै स्रोत जोडेर
+        activeAdvertisements: adRevenue._count.id,
+        totalTenants: tenantCount,
+        totalRestaurants: restaurantCount,
+        activeRestaurants: activeRestaurantCount,
+      },
+    };
+  }
+
+  /**
+   * listAllRestaurants()
+   * ----------------------
+   * GAP FIX: पहिले Platform Admin ले केवल aggregate number मात्र हेर्न
+   * पाउँथे — कुनै specific restaurant लाई access गर्ने/नियन्त्रण गर्ने
+   * बाटो नै थिएन। यसले सबै tenant भरिका restaurant list दिन्छ।
+   */
+  async listAllRestaurants(page = 1, limit = 20) {
+    const [restaurants, total] = await Promise.all([
+      this.prisma.restaurant.findMany({
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        include: { tenant: { select: { id: true, name: true } } },
+      }),
+      this.prisma.restaurant.count(),
+    ]);
+    return { success: true, data: { restaurants, pagination: { page, limit, total } } };
+  }
+
+  /** Problematic/fraudulent restaurant लाई platform बाट पूर्ण रूपमा suspend गर्ने (owner ले आफैं यो गर्न सक्दैनन्) */
+  async suspendRestaurant(restaurantId: string, suspend: boolean) {
+    const restaurant = await this.prisma.restaurant.update({
+      where: { id: restaurantId },
+      data: { isActive: !suspend },
+    });
+
+    await this.activityLog.log({
+      tenantId: restaurant.tenantId,
+      restaurantId,
+      actorType: 'PLATFORM_ADMIN',
+      action: suspend ? 'RESTAURANT_SUSPENDED' : 'RESTAURANT_REACTIVATED',
+      description: `Restaurant ${suspend ? 'suspended' : 'reactivated'} by Platform Admin`,
+    });
+
+    return { success: true, message: suspend ? 'Restaurant suspended' : 'Restaurant reactivated', data: restaurant };
+  }
+
+  /** सम्झौता अनुसार commission दर बदल्ने (owner ले आफैं आफ्नो commission बदल्न पाउँदैनन् — केवल platform ले) */
+  async updateCommissionRate(restaurantId: string, percent: number) {
+    const existing = await this.prisma.restaurant.findUnique({ where: { id: restaurantId } });
+    const restaurant = await this.prisma.restaurant.update({
+      where: { id: restaurantId },
+      data: { platformCommissionPercent: percent },
+    });
+
+    await this.activityLog.log({
+      tenantId: restaurant.tenantId,
+      restaurantId,
+      actorType: 'PLATFORM_ADMIN',
+      action: 'COMMISSION_CHANGED',
+      description: `Commission rate changed from ${existing?.platformCommissionPercent}% to ${percent}%`,
+      metadata: { oldPercent: existing?.platformCommissionPercent, newPercent: percent },
+    });
+
+    return { success: true, data: restaurant };
+  }
+
+  /** अनुचित/inappropriate banner वा popup content moderate गर्ने (customer complaint आएमा) */
+  async removeStorefrontBanner(bannerId: string) {
+    await this.prisma.storefrontBanner.delete({ where: { id: bannerId } });
+    return { success: true, message: 'Banner removed by platform moderation' };
+  }
+
+  /** GAP FIX: Platform Admin (Super Admin) ले पनि सबै delivery को status हेर्न पाउने — oversight/support को लागि */
+  async listAllDeliveries(status?: string) {
+    return this.prisma.delivery.findMany({
+      where: status ? { status: status as any } : {},
+      include: {
+        order: { select: { orderNumber: true, restaurantId: true, deliveryAddress: true } },
+        deliveryPerson: { select: { id: true, name: true, phone: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 100,
+    });
+  }
+
+  /**
+   * overrideRestaurantSetting()
+   * -----------------------------
+   * GAP FIX: "Super Admin ले चाह्यो भने सबै control गर्न सक्नुपर्छ" — यसअघि
+   * Restaurant Owner ले आफ्नो restaurant मात्र (आफ्नो JWT tenantId भित्र)
+   * edit गर्न सक्थे, Platform Admin ले कुनै restaurant को setting सिधै
+   * बदल्न पाउँदैनथे (किनभने ती endpoint tenant-scoped थिए)। अब Platform
+   * Admin ले जुनसुकै restaurant को कुनै पनि field (support/emergency को
+   * लागि) सिधै बदल्न सक्छन् — full override authority।
+   */
+  async overrideRestaurantSetting(restaurantId: string, data: Record<string, any>) {
+    const restaurant = await this.prisma.restaurant.update({ where: { id: restaurantId }, data });
+
+    await this.activityLog.log({
+      tenantId: restaurant.tenantId,
+      restaurantId,
+      actorType: 'PLATFORM_ADMIN',
+      action: 'RESTAURANT_SETTING_OVERRIDDEN',
+      description: `Platform Admin directly modified restaurant settings: ${Object.keys(data).join(', ')}`,
+      metadata: data,
+    });
+
+    return { success: true, data: restaurant };
+  }
+
+  /** Restaurant को पूरा detail (menu, category, storefront, ad, settlement सबै) एकैचोटि support/review को लागि */
+  async getRestaurantFullDetail(restaurantId: string) {
+    const restaurant = await this.prisma.restaurant.findUnique({
+      where: { id: restaurantId },
+      include: {
+        tenant: { select: { id: true, name: true } },
+        categories: true,
+        menuItems: { where: { deletedAt: null } },
+      },
+    });
+    if (!restaurant) return { success: false, message: 'Restaurant not found' };
+
+    const [orders, settlements, ads] = await Promise.all([
+      this.prisma.order.count({ where: { restaurantId } }),
+      this.prisma.settlement.findMany({ where: { restaurantId }, orderBy: { createdAt: 'desc' }, take: 5 }),
+      this.prisma.advertisement.findMany({ where: { restaurantId }, orderBy: { createdAt: 'desc' }, take: 5 }),
+    ]);
+
+    return { success: true, data: { ...restaurant, totalOrders: orders, recentSettlements: settlements, recentAds: ads } };
+  }
+
+  /** GAP FIX: Refund "PENDING" बाट "PROCESSED" मा मार्क गर्ने endpoint नै थिएन */
+  async listPendingRefunds() {
+    return this.prisma.refund.findMany({
+      where: { status: 'PENDING' },
+      include: { order: { select: { orderNumber: true, restaurantId: true } } },
+    });
+  }
+
+  async processRefund(refundId: string) {
+    const refund = await this.prisma.refund.update({
+      where: { id: refundId },
+      data: { status: 'PROCESSED', processedAt: new Date() },
+    });
+
+    await this.activityLog.log({
+      actorType: 'PLATFORM_ADMIN',
+      action: 'REFUND_PROCESSED',
+      description: `Refund of ${refund.amount} processed for order ${refund.orderId}`,
+      metadata: { refundId, orderId: refund.orderId, amount: refund.amount },
+    });
+
+    return { success: true, data: refund };
+  }
+  async getTopRestaurantsByRevenue(limit = 10) {
+    const restaurants = await this.prisma.order.groupBy({
+      by: ['restaurantId'],
+      where: { status: { not: 'CANCELLED' } },
+      _sum: { platformCommissionAmount: true, total: true },
+      _count: { id: true },
+      orderBy: { _sum: { platformCommissionAmount: 'desc' } },
+      take: limit,
+    });
+
+    const restaurantIds = restaurants.map((r) => r.restaurantId);
+    const restaurantDetails = await this.prisma.restaurant.findMany({
+      where: { id: { in: restaurantIds } },
+      select: { id: true, name: true, city: true },
+    });
+    const detailMap = new Map(restaurantDetails.map((r) => [r.id, r]));
+
+    return {
+      success: true,
+      data: restaurants.map((r) => ({
+        restaurant: detailMap.get(r.restaurantId),
+        totalOrders: r._count.id,
+        totalGMV: r._sum.total,
+        commissionEarned: r._sum.platformCommissionAmount,
+      })),
+    };
+  }
+}
