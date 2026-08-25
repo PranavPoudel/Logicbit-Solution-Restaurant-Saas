@@ -66,6 +66,22 @@ async function main() {
     console.log('Bootstrap Platform Admin already exists, skipping.');
   }
 
+  console.log('Seeding 6 Subscription Plans.');
+  const plans = [
+    {name: 'Free Tier', durationMonths:1, price: 0},
+    {name: 'Basic Monthly', durationMonths: 1, price: 2999},
+    { name: 'Pro Monthly', durationMonths: 1, price: 5999 },
+    { name: 'Basic Annual', durationMonths: 12, price: 29990 },
+    { name: 'Pro Annual', durationMonths: 12, price: 59990 },
+    { name: 'Lifetime Access', durationMonths: 0, price: 150000 },
+  ];
+  for(const plan of plans){
+    await prisma.subscriptionPlan.upsert({
+      where:{name:plan.name},
+      update: {},
+      create: plan,
+    });
+  }
   console.log('Seeding complete.');
 }
 
