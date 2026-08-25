@@ -8,6 +8,8 @@ export interface OwnerRegisterInput {
   password: string;
   restaurantName: string;
   restaurantAddress: string;
+  latitude?: number;
+  longitude?: number;
   acceptTerms: boolean;
 }
 

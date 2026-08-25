@@ -7,19 +7,6 @@ import { registerOwner, type OwnerRegisterInput } from "@/lib/api/auth";
 import { useOwnerAuthStore } from "@/store/owner-auth-store"; 
 import { DynamicMapPicker } from "@/components/map/dynamic-map-picker";
 
-// 1. Added latitude and longitude to the interface
-export interface OwnerRegisterInput {
-  name: string;
-  email: string;
-  phone: string;
-  password: string;
-  restaurantName: string;
-  restaurantAddress: string;
-  latitude?: number;
-  longitude?: number;
-  acceptTerms: boolean;
-}
-
 export default function OwnerRegisterPage() {
   const router = useRouter();
   const setAuth = useOwnerAuthStore((state) => state.setAuth); 
@@ -27,7 +14,6 @@ export default function OwnerRegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 2. Added default Kathmandu coordinates to the initial state
   const [formData, setFormData] = useState<OwnerRegisterInput>({
     name: "",
     email: "",
@@ -57,7 +43,14 @@ export default function OwnerRegisterPage() {
       const response = await registerOwner(formData);
         
       if (response.success && response.data?.tokens) {
-        setAuth(response.data.tokens.accessToken, response.data.user);
+        // ✅ FIX: Pass a single object matching your Zustand store's expected shape
+        setAuth({
+          accessToken: response.data.tokens.accessToken,
+          refreshToken: response.data.tokens.refreshToken,
+          user: response.data.user,
+          restaurants: response.data.restaurants || [], 
+        });
+        
         router.push("/owner/dashboard"); 
       } else {
         setError(response.message || "Registration failed. Please try again.");
@@ -175,7 +168,7 @@ export default function OwnerRegisterPage() {
                 />
               </div>
 
-              {/* 3. Added the Map Picker UI here */}
+              {/* Map Picker UI */}
               <div>
                 <label className="block text-sm font-medium text-[#1B2333] mb-1">
                   Pinpoint Location on Map
