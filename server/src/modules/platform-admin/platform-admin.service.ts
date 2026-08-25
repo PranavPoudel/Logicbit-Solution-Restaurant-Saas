@@ -1,7 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ActivityLogService } from '../activity-log/activity-log.service';
-
+import { CreateStaffDto } from './dto/create-staff.dto';
+import * as bcrypt from 'bcrypt';
+import { UpdateStaffDto } from './dto/update-staff.dto';
+import { CreateRoleDto } from './dto/create-role.dto';
+import { GenerateSettlementDto } from './dto/generate-settlement.dto';
+import { CreatePlanDto } from './dto/create-plan.dto';
 @Injectable()
 export class PlatformAdminService {
   constructor(
@@ -100,6 +105,45 @@ export class PlatformAdminService {
 
     return { success: true, message: suspend ? 'Restaurant suspended' : 'Restaurant reactivated', data: restaurant };
   }
+
+async listAllStaff() {
+    const staff = await this.prisma.platformStaff.findMany({
+      include: { role: { select: { id: true, name: true } } },
+      orderBy: { createdAt: 'desc' },
+    });
+    return { success: true, data: staff };
+  }
+
+  async createStaff(dto: CreateStaffDto) {
+    const passwordHash = await bcrypt.hash(dto.password, 10);
+    const staff = await this.prisma.platformStaff.create({
+      data: {
+        name: dto.name,
+        email: dto.email,
+        passwordHash,
+        roleId: dto.roleId,
+      },
+      include: { role: true },
+    });
+    return { success: true, message: 'Platform staff created', data: staff };
+  }
+
+  async updateStaff(id: string, dto: UpdateStaffDto) {
+    const data: any = { ...dto };
+    if (dto.password) {
+      data.passwordHash = await bcrypt.hash(dto.password, 10);
+      delete data.password;
+    }
+
+    const staff = await this.prisma.platformStaff.update({
+      where: { id },
+      data,
+      include: { role: true },
+    });
+    return { success: true, message: 'Platform staff updated', data: staff };
+  }
+
+
 
   /** सम्झौता अनुसार commission दर बदल्ने (owner ले आफैं आफ्नो commission बदल्न पाउँदैनन् — केवल platform ले) */
   async updateCommissionRate(restaurantId: string, percent: number) {
@@ -236,4 +280,124 @@ export class PlatformAdminService {
       })),
     };
   }
+
+  async listAllRoles() {
+    const roles = await this.prisma.platformRole.findMany({
+      include: { permissions: { include: { permission: true } } },
+    });
+    return { success: true, data: roles };
+  }
+
+  async createRole(dto: CreateRoleDto) {
+    const role = await this.prisma.platformRole.create({
+      data: {
+        name: dto.name,
+        permissions: {
+          create: dto.permissionIds.map((permissionId) => ({ permissionId })),
+        },
+      },
+      include: { permissions: { include: { permission: true } } },
+    });
+    return { success: true, data: role };
+  }
+
+
+  async listAllPermissions() {
+    const permissions = await this.prisma.platformPermission.findMany();
+    return { success: true, data: permissions };
+  }
+
+
+  async listPendingSettlements() {
+  const settlements = await this.prisma.settlement.findMany({
+    where: { status: 'PENDING' },
+    select: {
+      id: true,
+      amount: true,
+      status: true,
+      createdAt: true,
+      restaurant: {
+        select: { name: true },
+      },
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+  return { success: true, data: settlements };
 }
+
+
+async generateSettlement(restaurantId: string, dto: GenerateSettlementDto) {
+    const restaurant = await this.prisma.restaurant.findUnique({ where: { id: restaurantId } });
+    if (!restaurant) return { success: false, message: 'Restaurant not found' };
+
+    const orders = await this.prisma.order.aggregate({
+      where: {
+        restaurantId,
+        paymentMethod: 'COD',
+        status: 'COMPLETED',
+        createdAt: { gte: new Date(dto.periodStart), lte: new Date(dto.periodEnd) },
+      },
+      _sum: { total: true, platformCommissionAmount: true },
+      _count: { id: true },
+    });
+
+    const settlement = await this.prisma.settlement.create({
+      data: {
+        tenantId: restaurant.tenantId,
+        restaurantId,
+        periodStart: new Date(dto.periodStart),
+        periodEnd: new Date(dto.periodEnd),
+        totalOrders: orders._count.id || 0,
+        totalCodAmount: orders._sum.total || 0,
+        commissionDue: orders._sum.platformCommissionAmount || 0,
+        status: 'PENDING',
+      },
+    });
+
+    return { success: true, message: 'Settlement generated', data: settlement };
+  }
+
+  async markSettlementPaid(id: string) {
+    const settlement = await this.prisma.settlement.update({
+      where: { id },
+      data: { status: 'PAID', paidAt: new Date() },
+    });
+    return { success: true, message: 'Settlement marked as paid', data: settlement };
+  }
+
+  async listAllSubscriptions() {
+    const subscriptions = await this.prisma.restaurantSubscription.findMany({
+      include: { plan: true, restaurant: { select: { name: true } } },
+    });
+    return { success: true, data: subscriptions };
+  }
+
+  async getExpiringSubscriptions() {
+    const thirtyDaysFromNow = new Date();
+    thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+
+    const subscriptions = await this.prisma.restaurantSubscription.findMany({
+      where: {
+        expiryDate: { lte: thirtyDaysFromNow, gte: new Date() },
+        status: 'ACTIVE',
+      },
+      include: { plan: true, restaurant: { select: { name: true } } },
+    });
+    return { success: true, data: subscriptions };
+  }
+
+  async createPlan(dto: CreatePlanDto) {
+    const plan = await this.prisma.subscriptionPlan.create({ data: dto });
+    return { success: true, data: plan };
+  }
+
+  async listAllPlans() {
+    const plans = await this.prisma.subscriptionPlan.findMany();
+    return { success: true, data: plans };
+  }
+
+
+
+}
+
+
