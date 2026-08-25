@@ -17,6 +17,9 @@ export function RestaurantHeader({ restaurant }: { restaurant: RestaurantDetail 
             src={restaurant.coverImageUrl}
             alt={name}
             className="w-full h-full object-cover"
+            onError={(e) => {
+              (e.target as HTMLImageElement).style.display = 'none';
+            }}
           />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
@@ -38,14 +41,19 @@ export function RestaurantHeader({ restaurant }: { restaurant: RestaurantDetail 
           <h1 className="font-display font-semibold text-2xl text-[#17181C]">{name}</h1>
 
           <div className="flex flex-wrap items-center gap-2 mt-2">
-            {cuisines.map((c) => (
-              <span
-                key={c}
-                className="text-[11px] font-medium text-[#0F6B5C] bg-[#0F6B5C]/8 px-2 py-0.5 rounded-full"
-              >
-                {c}
-              </span>
-            ))}
+            {cuisines.length > 0 ? (
+              // ✅ FIX: Map over objects and extract .name and .id/.slug
+              cuisines.map((c: any) => (
+                <span
+                  key={c.id || c.slug}
+                  className="text-[11px] font-medium text-[#0F6B5C] bg-[#0F6B5C]/8 px-2 py-0.5 rounded-full"
+                >
+                  {c.name}
+                </span>
+              ))
+            ) : (
+              <span className="text-[11px] text-neutral-300">—</span>
+            )}
           </div>
 
           <div className="flex items-center gap-3 mt-3 font-mono text-xs text-neutral-500">
