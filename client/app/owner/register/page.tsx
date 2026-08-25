@@ -4,15 +4,30 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { registerOwner, type OwnerRegisterInput } from "@/lib/api/auth";
-import { useOwnerAuthStore } from "@/store/owner-auth-store"; // Adjust path to your Zustand store
+import { useOwnerAuthStore } from "@/store/owner-auth-store"; 
+import { DynamicMapPicker } from "@/components/map/dynamic-map-picker";
+
+// 1. Added latitude and longitude to the interface
+export interface OwnerRegisterInput {
+  name: string;
+  email: string;
+  phone: string;
+  password: string;
+  restaurantName: string;
+  restaurantAddress: string;
+  latitude?: number;
+  longitude?: number;
+  acceptTerms: boolean;
+}
 
 export default function OwnerRegisterPage() {
   const router = useRouter();
-  const setAuth = useOwnerAuthStore((state) => state.setAuth); // Adjust based on your store's actual method name
+  const setAuth = useOwnerAuthStore((state) => state.setAuth); 
   
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // 2. Added default Kathmandu coordinates to the initial state
   const [formData, setFormData] = useState<OwnerRegisterInput>({
     name: "",
     email: "",
@@ -20,6 +35,8 @@ export default function OwnerRegisterPage() {
     password: "",
     restaurantName: "",
     restaurantAddress: "",
+    latitude: 27.7172, 
+    longitude: 85.3240,
     acceptTerms: false,
   });
 
@@ -40,16 +57,12 @@ export default function OwnerRegisterPage() {
       const response = await registerOwner(formData);
         
       if (response.success && response.data?.tokens) {
-        // Save to Zustand store
         setAuth(response.data.tokens.accessToken, response.data.user);
-        
-        // Redirect to owner dashboard or restaurant setup
-        router.push("/owner/dashboard"); // Adjust route to your actual dashboard path
+        router.push("/owner/dashboard"); 
       } else {
         setError(response.message || "Registration failed. Please try again.");
       }
     } catch (err: any) {
-      // Extract error message from backend's { success, message, error } envelope
       const errorMsg = err.response?.data?.message 
         ? (Array.isArray(err.response.data.message) ? err.response.data.message.join(", ") : err.response.data.message)
         : "An unexpected error occurred. Please check your connection.";
@@ -60,7 +73,7 @@ export default function OwnerRegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#F8F9FA] px-4">
+    <div className="min-h-screen flex items-center justify-center bg-[#F8F9FA] px-4 py-8">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-sm border border-[#E8E7E2] p-8">
         <div className="text-center mb-8">
           <h1 className="font-display text-2xl font-semibold text-[#1B2333]">
@@ -160,6 +173,27 @@ export default function OwnerRegisterPage() {
                   className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-[#1B2333] focus:border-transparent outline-none transition"
                   placeholder="e.g. Thamel, Kathmandu"
                 />
+              </div>
+
+              {/* 3. Added the Map Picker UI here */}
+              <div>
+                <label className="block text-sm font-medium text-[#1B2333] mb-1">
+                  Pinpoint Location on Map
+                </label>
+                <p className="text-xs text-neutral-500 mb-2">
+                  Drag the marker or click on the map to set your exact delivery coordinates.
+                </p>
+                <DynamicMapPicker
+                  lat={formData.latitude || 27.7172}
+                  lng={formData.longitude || 85.3240}
+                  onChange={(lat, lng) => {
+                    setFormData((prev) => ({ ...prev, latitude: lat, longitude: lng }));
+                  }}
+                />
+                <div className="flex gap-4 mt-2 text-xs font-mono text-neutral-500">
+                  <span>Lat: {formData.latitude?.toFixed(5)}</span>
+                  <span>Lng: {formData.longitude?.toFixed(5)}</span>
+                </div>
               </div>
             </div>
           </div>

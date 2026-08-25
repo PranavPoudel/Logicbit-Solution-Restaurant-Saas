@@ -1,4 +1,5 @@
-import { IsString, IsEmail, IsNotEmpty, MinLength, IsBoolean, IsOptional, Equals } from 'class-validator';
+import { IsString, IsEmail, IsNotEmpty, MinLength, IsBoolean, IsOptional, Equals, IsNumber } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class RegisterDto {
   @IsString()
@@ -27,6 +28,16 @@ export class RegisterDto {
   @IsBoolean()
   @Equals(true, { message: 'You must accept the terms and conditions' })
   acceptTerms: boolean;
+
+  @ApiPropertyOptional({ description: 'Restaurant Latitude for Near-Me discovery' })
+  @IsOptional()
+  @IsNumber()
+  latitude?: number;
+
+  @ApiPropertyOptional({ description: 'Restaurant Longitude for Near-Me discovery' })
+  @IsOptional()
+  @IsNumber()
+  longitude?: number;
 }
 
 export class InviteStaffDto {
