@@ -18,3 +18,20 @@ export async function checkOrderReviewed(orderId: string) {
   const { data } = await apiClient.get(`/reviews/order/${orderId}`);
   return data; // Should return the review object if it exists, or null
 }
+
+// ... (keep your existing CreateReviewInput, createReview, and checkOrderReviewed code above)
+
+export interface Review {
+  id: string;
+  rating: number;
+  comment?: string;
+  customerName?: string;
+  orderNumber?: string;
+  createdAt: string;
+}
+
+// Fetch reviews for a specific restaurant (uses the public discovery endpoint)
+export async function getRestaurantReviews(restaurantId: string): Promise<Review[]> {
+  const { data } = await apiClient.get(`/discovery/restaurants/${restaurantId}/reviews`);
+  return data || [];
+}
