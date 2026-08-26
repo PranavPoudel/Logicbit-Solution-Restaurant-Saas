@@ -97,7 +97,7 @@ export class AuthService {
     }
 
     const roleNames = user.roles.map((r) => r.role.name);
-    const tokens = await this.generateTokens(user.id, user.email, user.name, roleNames, user.tenantId, user.isSuperAdmin, user.isPlatformAdmin);
+    const tokens = await this.generateTokens(user.id, user.email, user.name, roleNames, user.tenantId, user.isSuperAdmin);
 
     return {
       success: true,
@@ -129,7 +129,7 @@ export class AuthService {
     }
 
     const roleNames = user.roles.map((r) => r.role.name);
-    const tokens = await this.generateTokens(user.id, user.email, user.name, roleNames, user.tenantId, user.isSuperAdmin, user.isPlatformAdmin);
+    const tokens = await this.generateTokens(user.id, user.email, user.name, roleNames, user.tenantId, user.isSuperAdmin);
 
     return { success: true, data: { tokens } };
   }
@@ -141,9 +141,8 @@ export class AuthService {
     roles: string[],
     tenantId: string,
     isSuperAdmin: boolean,
-    isPlatformAdmin: boolean,
   ) {
-    const payload = { sub: userId, email, name, roles, tenantId, isSuperAdmin, isPlatformAdmin };
+    const payload = { sub: userId, email, name, roles, tenantId, isSuperAdmin };
 
     const accessToken = await this.jwt.signAsync(payload, {
       secret: this.config.get<string>('JWT_ACCESS_SECRET'),

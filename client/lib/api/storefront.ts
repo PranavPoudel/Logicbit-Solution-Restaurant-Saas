@@ -1,20 +1,25 @@
 // lib/api/storefront.ts — Module 14: Storefront Builder (Owner)
 import { ownerApiClient } from "@/lib/api/owner-client";
 
-// TODO: confirm exact DTO field names via Swagger for each body below.
-
+// Field names confirmed against server CreateBannerDto/UpdateBannerDto.
 export interface BannerInput {
   imageUrl: string;
   title?: string;
+  subtitle?: string;
   linkUrl?: string;
   displayOrder?: number;
-  [key: string]: unknown;
+  isActive?: boolean;
+}
+
+export interface Banner extends BannerInput {
+  id: string;
+  restaurantId: string;
 }
 
 export const storefrontBannersApi = {
   create: async (restaurantId: string, input: BannerInput) =>
     (await ownerApiClient.post(`/restaurants/${restaurantId}/storefront/banners`, input)).data,
-  list: async (restaurantId: string) =>
+  list: async (restaurantId: string): Promise<Banner[]> =>
     (await ownerApiClient.get(`/restaurants/${restaurantId}/storefront/banners`)).data,
   update: async (restaurantId: string, id: string, input: Partial<BannerInput>) =>
     (
@@ -25,26 +30,33 @@ export const storefrontBannersApi = {
     ).data,
   remove: async (restaurantId: string, id: string) =>
     (await ownerApiClient.delete(`/restaurants/${restaurantId}/storefront/banners/${id}`)).data,
-  // orderedIds = banner ids in the new drag-drop order
-  reorder: async (restaurantId: string, orderedIds: string[]) =>
+  // Server expects the key "orderedBannerIds" (see ReorderBannersDto), not "orderedIds".
+  reorder: async (restaurantId: string, orderedBannerIds: string[]) =>
     (
       await ownerApiClient.patch(
         `/restaurants/${restaurantId}/storefront/banners/reorder`,
-        { orderedIds }
+        { orderedBannerIds }
       )
     ).data,
 };
 
-// TODO: confirm config shape — likely { about, contact, sectionOrder: string[] }
+// Field names confirmed against server UpdateStorefrontConfigDto.
 export interface StorefrontConfigInput {
-  about?: string;
-  contact?: Record<string, unknown>;
+  aboutText?: string;
+  contactPhone?: string;
+  contactEmail?: string;
+  contactAddress?: string;
+  socialLinks?: Record<string, string>;
   sectionOrder?: string[];
-  [key: string]: unknown;
+}
+
+export interface StorefrontConfig extends StorefrontConfigInput {
+  id: string;
+  restaurantId: string;
 }
 
 export const storefrontConfigApi = {
-  get: async (restaurantId: string) =>
+  get: async (restaurantId: string): Promise<StorefrontConfig> =>
     (await ownerApiClient.get(`/restaurants/${restaurantId}/storefront/config`)).data,
   update: async (restaurantId: string, input: StorefrontConfigInput) =>
     (
@@ -52,18 +64,28 @@ export const storefrontConfigApi = {
     ).data,
 };
 
+// Field names confirmed against server CreatePopupDto/UpdatePopupDto.
+// The DTO uses "message", not "description".
 export interface StorefrontPopupInput {
   title: string;
-  description?: string;
+  message?: string;
   imageUrl?: string;
+  ctaText?: string;
+  ctaLink?: string;
+  startDate?: string;
+  endDate?: string;
   isActive?: boolean;
-  [key: string]: unknown;
+}
+
+export interface StorefrontPopup extends StorefrontPopupInput {
+  id: string;
+  restaurantId: string;
 }
 
 export const storefrontPopupsApi = {
   create: async (restaurantId: string, input: StorefrontPopupInput) =>
     (await ownerApiClient.post(`/restaurants/${restaurantId}/storefront/popups`, input)).data,
-  list: async (restaurantId: string) =>
+  list: async (restaurantId: string): Promise<StorefrontPopup[]> =>
     (await ownerApiClient.get(`/restaurants/${restaurantId}/storefront/popups`)).data,
   update: async (restaurantId: string, id: string, input: Partial<StorefrontPopupInput>) =>
     (
