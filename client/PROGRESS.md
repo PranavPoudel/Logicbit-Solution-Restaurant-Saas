@@ -1,6 +1,6 @@
 # LogicBit Frontend — Progress Tracker
 
-Last updated: Step "5-in-1 batch" (Modifier modal, Account page, Coupons, Settlements, Dashboard real data)
+Last updated: After Storefront Builder, Customer Reviews, and Owner Settings Map integration.
 
 Status legend: ✅ Done &nbsp;|&nbsp; ⚠️ Partial &nbsp;|&nbsp; ❌ Not started
 
@@ -16,24 +16,24 @@ Status legend: ✅ Done &nbsp;|&nbsp; ⚠️ Partial &nbsp;|&nbsp; ❌ Not start
 | 10. Order (customer) | ✅ | Cart, Checkout (address/order-type/COD), Order tracking | Delivery fee hardcoded (not distance-tiered yet) |
 | 11. Coupon (customer) | ✅ | Coupon input at checkout | Response shape unconfirmed — needs live test |
 | 18. Customer Self-Service | ✅ | Account page — Profile, Addresses, Order history, Favorites | — |
-| 12. Review (customer) | ❌ | — | "Rate your order" prompt after delivery, star input |
-| 14. Storefront (customer view) | ❌ | — | Per-restaurant banner/about/contact display |
+| 12. Review (customer) | ✅ | "Rate your order" modal integrated into order tracking | Owner reviews dashboard built |
+| 14. Storefront (customer view) | ✅ | Banner carousel, About/Contact section, Auto-popup modal | — |
 
 ## Portal 2 — Owner Dashboard
 
 | Module | Status | के छ | के बाँकी |
 |---|---|---|---|
-| 1. Owner Auth | ⚠️ | Login (+ auto-fetch restaurants) | Register form, Staff management page |
-| 6. Restaurant Settings | ✅ | General/Location/Delivery/Branding/Service tabs | Map picker (needs Mapbox/Google key) |
+| 1. Owner Auth | ✅ | Login, **Register form with Map Picker**, Staff management (API ready) | — |
+| 6. Restaurant Settings | ✅ | General/Location/Delivery/Branding/Service tabs, **Leaflet Map Picker integrated** | — |
 | 7. Menu (owner) | ✅ | Category + MenuItem CRUD, **ModifierGroup builder** (create groups, add/remove options, link/unlink to items) | — |
 | 10. Order (owner) | ✅ | Orders page — tabs, Accept/Reject, status progression | — |
 | 11. Coupon (owner) | ✅ | Coupon list + create | Edit, expiry date field |
 | 16. Settlement (owner) | ✅ | Outstanding + history | — |
 | 17. Subscription (owner) | ⚠️ | Dashboard banner wired to real data | Auto-renew toggle not wired |
-| 5. Roles & Permissions | ❌ | — | Role builder, permission checklist |
-| 14. Storefront Builder | ❌ | — | Banner manager (drag-drop), section order, popup scheduler |
+| 5. Roles & Permissions | ❌ | — | Role builder, permission checklist UI |
+| 14. Storefront Builder | ✅ | **Banner manager, Config page, Popup scheduler**, sidebar sub-nav | — |
 | 15. Advertisement (owner) | ❌ | — | "Advertise your restaurant" request form |
-| 19. Media | ❌ | — | Reusable image-upload component (needed by Menu, Restaurant, Banners) |
+| 19. Media | ✅ | Reusable ImageUpload component, wired into Menu, Settings, Storefront | — |
 | 8. Cuisine (owner) | ❌ | — | Multi-select checklist on Settings |
 
 ## Portal 3 — Delivery App
@@ -46,13 +46,14 @@ Status legend: ✅ Done &nbsp;|&nbsp; ⚠️ Partial &nbsp;|&nbsp; ❌ Not start
 
 ## Suggested order for what's left
 
-1. ~~Owner: **ModifierGroup builder**~~ ✅ done
-2. Owner: **Media/image upload** (small reusable piece, unblocks real photos everywhere)
-3. Customer: **Review** (small, closes the order loop)
-4. Owner: **Storefront Builder** (bigger — drag-drop)
-5. Owner: **Advertisement + Roles & Permissions**
-6. **Delivery App** (own portal)
-7. **Platform Admin** (own portal)
+1. ~~Owner: ModifierGroup builder~~ ✅ done
+2. ~~Owner: Media/image upload~~ ✅ done
+3. ~~Customer: Review~~ ✅ done
+4. ~~Owner: Storefront Builder~~ ✅ done
+5. Owner: **Cuisine checklist** (small, finishes Settings)
+6. Owner: **Advertisement + Roles & Permissions**
+7. **Delivery App** (own portal)
+8. **Platform Admin** (own portal)
 
 ---
 

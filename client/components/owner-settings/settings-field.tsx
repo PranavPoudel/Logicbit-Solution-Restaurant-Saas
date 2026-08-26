@@ -1,4 +1,3 @@
-// components/owner-settings/settings-field.tsx
 import type { InputHTMLAttributes } from "react";
 
 interface SettingsFieldProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -24,34 +23,42 @@ export function SettingsField({ label, hint, id, ...inputProps }: SettingsFieldP
 }
 
 export function SettingsToggle({
+  id,
   label,
   hint,
   checked,
   onChange,
 }: {
+  id?: string;
   label: string;
   hint?: string;
   checked: boolean;
   onChange: (checked: boolean) => void;
 }) {
+  // Auto-generate an ID based on the label if none is provided
+  const toggleId = id ?? `toggle-${label.replace(/\s+/g, "-").toLowerCase()}`;
+
   return (
     <div className="flex items-center justify-between py-2">
-      <div>
-        <p className="text-sm font-medium text-neutral-800">{label}</p>
+      <div className="flex-1 pr-4">
+        {/* Clicking the text now toggles the switch! */}
+        <label htmlFor={toggleId} className="text-sm font-medium text-neutral-800 cursor-pointer">
+          {label}
+        </label>
         {hint && <p className="text-xs text-neutral-400 mt-0.5">{hint}</p>}
       </div>
-      <button
-        onClick={() => onChange(!checked)}
-        className={`w-11 h-6 rounded-full transition-colors shrink-0 relative ${
-          checked ? "bg-[#0F6B5C]" : "bg-neutral-200"
-        }`}
-      >
-        <span
-          className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-transform ${
-            checked ? "translate-x-5" : "translate-x-0.5"
-          }`}
+      
+      {/* Standard Tailwind UI Toggle Switch */}
+      <label htmlFor={toggleId} className="relative inline-flex cursor-pointer">
+        <input
+          type="checkbox"
+          id={toggleId}
+          className="sr-only peer"
+          checked={checked}
+          onChange={(e) => onChange(e.target.checked)}
         />
-      </button>
+        <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#0F6B5C] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#0F6B5C]"></div>
+      </label>
     </div>
   );
 }
