@@ -40,7 +40,7 @@ const navGroups: NavGroup[] = [
     items: [
       { label: "Orders", href: "/orders", icon: Package },
       { label: "Menu", href: "/menu", icon: UtensilsCrossed },
-      { label: "Storefront", href: "/storefront", icon: LayoutTemplate },
+      { label: "Storefront", href: "/storefront/banners", icon: LayoutTemplate },
     ],
   },
   {
