@@ -21,10 +21,21 @@ export async function customerLogin(
 export async function customerSignup(
   input: Omit<CustomerSignupInput, "confirmPassword">
 ): Promise<CustomerAuthResponse> {
+  // Transforming the frontend payload to match the backend DTO exactly
+  const backendPayload = {
+    name: input.fullName, // Mapping 'fullName' to 'name'
+    email: input.email,
+    phone: input.phone,
+    password: input.password,
+    // any other fields the backend expects (e.g., address, etc.) if needed
+  };
+
+  // Sending the transformed payload
   const { data } = await apiClient.post<CustomerAuthResponse>(
     "/customer-auth/register",
-    input
+    backendPayload
   );
+  
   return data;
 }
 

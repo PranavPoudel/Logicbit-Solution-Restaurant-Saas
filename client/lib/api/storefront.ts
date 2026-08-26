@@ -6,11 +6,12 @@ import { ownerApiClient } from "@/lib/api/owner-client";
 export interface BannerInput {
   imageUrl: string;
   title?: string;
+  subtitle?: string; 
   linkUrl?: string;
   displayOrder?: number;
+  isActive?: boolean; 
   [key: string]: unknown;
 }
-
 export const storefrontBannersApi = {
   create: async (restaurantId: string, input: BannerInput) =>
     (await ownerApiClient.post(`/restaurants/${restaurantId}/storefront/banners`, input)).data,
@@ -26,21 +27,23 @@ export const storefrontBannersApi = {
   remove: async (restaurantId: string, id: string) =>
     (await ownerApiClient.delete(`/restaurants/${restaurantId}/storefront/banners/${id}`)).data,
   // orderedIds = banner ids in the new drag-drop order
-  reorder: async (restaurantId: string, orderedIds: string[]) =>
+  reorder: async (restaurantId: string, orderedBannerIds: string[]) =>
     (
       await ownerApiClient.patch(
         `/restaurants/${restaurantId}/storefront/banners/reorder`,
-        { orderedIds }
+        { orderedBannerIds } 
       )
     ).data,
 };
 
 // TODO: confirm config shape — likely { about, contact, sectionOrder: string[] }
 export interface StorefrontConfigInput {
-  about?: string;
-  contact?: Record<string, unknown>;
+  aboutText?: string;
+  contactPhone?: string;
+  contactEmail?: string;
+  contactAddress?: string;
+  socialLinks?: Record<string, string>;
   sectionOrder?: string[];
-  [key: string]: unknown;
 }
 
 export const storefrontConfigApi = {
@@ -54,10 +57,13 @@ export const storefrontConfigApi = {
 
 export interface StorefrontPopupInput {
   title: string;
-  description?: string;
+  message?: string;        
   imageUrl?: string;
+  ctaText?: string;
+  ctaLink?: string;
+  startDate?: string;
+  endDate?: string;
   isActive?: boolean;
-  [key: string]: unknown;
 }
 
 export const storefrontPopupsApi = {

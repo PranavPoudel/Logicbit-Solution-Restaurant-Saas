@@ -1,8 +1,7 @@
-// components/layout/customer-header.tsx
 "use client";
 
 import Link from "next/link";
-import { MapPin, ShoppingBag, ChevronDown, User } from "lucide-react";
+import { MapPin, ShoppingBag, ChevronDown, User, Store } from "lucide-react";
 import { useCartStore } from "@/store/cart-store";
 
 export function CustomerHeader() {
@@ -20,16 +19,25 @@ export function CustomerHeader() {
           </span>
         </Link>
 
-        <button className="hidden sm:flex items-center gap-1.5 text-sm text-[#17181C] hover:bg-black/5 px-3 py-1.5 rounded-full border border-[#E8E7E2]">
+        <button className="hidden sm:flex items-center gap-1.5 text-sm text-[#17181C] hover:bg-black/5 px-3 py-1.5 rounded-full border border-[#E8E7E2] transition-colors">
           <MapPin size={14} className="text-[#E3A008]" />
           Kirtipur, Kathmandu
           <ChevronDown size={13} className="text-neutral-400" />
         </button>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-3 shrink-0">
+          {/* ✅ NEW: For Restaurants Link */}
+          <Link
+            href="/owner/register"
+            className="hidden md:flex items-center gap-1.5 text-sm font-medium text-[#17181C] hover:text-[#0F6B5C] transition-colors"
+          >
+            <Store size={16} />
+            <span>For Restaurants</span>
+          </Link>
+
           <Link
             href="/account"
-            className="w-9 h-9 rounded-full border border-[#E8E7E2] flex items-center justify-center text-[#17181C] hover:bg-black/5"
+            className="w-9 h-9 rounded-full border border-[#E8E7E2] flex items-center justify-center text-[#17181C] hover:bg-black/5 transition-colors"
             aria-label="Account"
           >
             <User size={16} />
@@ -37,7 +45,7 @@ export function CustomerHeader() {
 
           <Link
             href="/cart"
-            className="relative flex items-center gap-2 bg-[#17181C] text-white text-sm font-medium px-4 py-2 rounded-full"
+            className="relative flex items-center gap-2 bg-[#17181C] text-white text-sm font-medium px-4 py-2 rounded-full hover:bg-[#2B2D33] transition-colors"
           >
             <ShoppingBag size={16} />
             <span className="hidden sm:inline">Cart</span>

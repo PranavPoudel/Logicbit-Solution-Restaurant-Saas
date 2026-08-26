@@ -1,4 +1,3 @@
-// app/(customer)/restaurants/[slug]/page.tsx
 "use client";
 
 import { use, useState } from "react";
@@ -11,6 +10,11 @@ import { FloatingCartBar } from "@/components/menu/floating-cart-bar";
 import { ModifierModal } from "@/components/menu-modal/modifier-modal";
 import { getRestaurantByIdOrSlug, getRestaurantMenu } from "@/lib/api/discovery";
 
+import { publicStorefrontApi } from "@/lib/api/public-storefront";
+import { StorefrontBannerCarousel } from "@/components/restaurant/storefront-banner-carousel";
+import { StorefrontAboutSection } from "@/components/restaurant/storefront-about-section";
+import { StorefrontPopupModal } from "@/components/restaurant/storefront-popup-modal";
+
 export default function RestaurantDetailPage({
   params,
 }: {
@@ -18,6 +22,7 @@ export default function RestaurantDetailPage({
 }) {
   const { slug } = use(params);
 
+  // 1. Fetch Restaurant Details
   const restaurantQuery = useQuery({
     queryKey: ["restaurant", slug],
     queryFn: () => getRestaurantByIdOrSlug(slug),
@@ -25,9 +30,28 @@ export default function RestaurantDetailPage({
 
   const restaurantId = restaurantQuery.data?.id;
 
+  // 2. Fetch Menu
   const menuQuery = useQuery({
     queryKey: ["restaurant-menu", restaurantId],
     queryFn: () => getRestaurantMenu(restaurantId as string),
+    enabled: !!restaurantId,
+  });
+
+  const bannersQuery = useQuery({
+    queryKey: ["public-banners", restaurantId],
+    queryFn: () => publicStorefrontApi.getBanners(restaurantId as string),
+    enabled: !!restaurantId,
+  });
+
+  const configQuery = useQuery({
+    queryKey: ["public-config", restaurantId],
+    queryFn: () => publicStorefrontApi.getConfig(restaurantId as string),
+    enabled: !!restaurantId,
+  });
+
+  const popupsQuery = useQuery({
+    queryKey: ["public-popups", restaurantId],
+    queryFn: () => publicStorefrontApi.getPopups(restaurantId as string),
     enabled: !!restaurantId,
   });
 
@@ -68,13 +92,18 @@ export default function RestaurantDetailPage({
     <div className="pb-24">
       <RestaurantHeader restaurant={restaurantQuery.data} />
 
+      <div className="max-w-4xl mx-auto px-4 py-6">
+        <StorefrontBannerCarousel banners={bannersQuery.data || []} />
+      </div>
+
       <CategoryNav
         categories={categories}
         activeId={activeCategoryId}
         onSelect={scrollToCategory}
       />
 
-      <div className="max-w-4xl mx-auto px-4">
+      <div className="max-w-4xl mx-auto px-4 space-y-8">
+        {/* Menu Items Section */}
         {menuQuery.isLoading ? (
           <p className="text-sm text-neutral-400 text-center py-12">Loading menu…</p>
         ) : categories.length === 0 ? (
@@ -103,6 +132,8 @@ export default function RestaurantDetailPage({
             </div>
           ))
         )}
+
+        <StorefrontAboutSection config={configQuery.data || {}} />
       </div>
 
       <FloatingCartBar />
@@ -114,6 +145,8 @@ export default function RestaurantDetailPage({
           onClose={() => setModifierItemId(null)}
         />
       )}
+
+      <StorefrontPopupModal popups={popupsQuery.data || []} />
     </div>
   );
 }

@@ -64,6 +64,8 @@ export class AuthService {
           name: dto.restaurantName,
           slug: `${slug}-${tenant.id.slice(0, 8)}`,
           address: dto.restaurantAddress,
+          latitude: dto.latitude, 
+          longitude: dto.longitude,
         },
       });
 

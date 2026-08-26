@@ -1,11 +1,11 @@
-// app/(customer)/orders/[id]/page.tsx
 "use client";
 
-import { use } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { AlertTriangle, Phone } from "lucide-react";
+import { use, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { AlertTriangle, Phone, Star } from "lucide-react";
 import { getMyOrder } from "@/lib/api/orders";
 import { StatusTimeline } from "@/components/order/status-timeline";
+import { ReviewModal } from "@/components/review/review-modal";
 
 export default function OrderTrackingPage({
   params,
@@ -13,6 +13,8 @@ export default function OrderTrackingPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
+  const queryClient = useQueryClient();
+  const [showReviewModal, setShowReviewModal] = useState(false);
 
   const { data: order, isLoading, isError } = useQuery({
     queryKey: ["order", id],
@@ -38,8 +40,11 @@ export default function OrderTrackingPage({
     );
   }
 
+  // Show review prompt ONLY if the order is delivered/completed
+  const canReview = order.status === "DELIVERED" || order.status === "COMPLETED";
+
   return (
-    <div className="max-w-lg mx-auto px-4 py-6">
+    <div className="max-w-lg mx-auto px-4 py-6 pb-24">
       <h1 className="font-display font-semibold text-xl text-[#17181C]">
         Order {order.restaurant?.name ? `from ${order.restaurant.name}` : ""}
       </h1>
@@ -48,6 +53,25 @@ export default function OrderTrackingPage({
       <div className="bg-white border border-[#E8E7E2] rounded-2xl p-5 mt-5">
         <StatusTimeline status={order.status} />
       </div>
+
+      {/* ✅ NEW: Review Prompt (Only shows for Delivered/Completed orders) */}
+      {canReview && (
+        <div className="bg-[#0F6B5C]/5 border border-[#0F6B5C]/20 rounded-2xl p-5 mt-4 text-center space-y-3">
+          <div className="flex items-center justify-center gap-2 text-[#0F6B5C]">
+            <Star size={18} className="fill-[#0F6B5C]" />
+            <span className="font-semibold text-sm">How was your food?</span>
+          </div>
+          <p className="text-xs text-neutral-600">
+            Let the restaurant know how we did! Your feedback helps us improve.
+          </p>
+          <button
+            onClick={() => setShowReviewModal(true)}
+            className="w-full sm:w-auto px-6 py-2.5 bg-[#E3A008] hover:bg-[#d49207] text-[#17181C] font-semibold text-sm rounded-xl transition-colors"
+          >
+            Rate this Order
+          </button>
+        </div>
+      )}
 
       {order.deliveryPerson && (
         <div className="bg-white border border-[#E8E7E2] rounded-2xl p-4 mt-4 flex items-center justify-between">
@@ -93,6 +117,19 @@ export default function OrderTrackingPage({
           <p className="text-sm text-[#17181C]">{order.deliveryAddress}</p>
         </div>
       )}
+
+  
+      <ReviewModal
+        orderId={order.id}
+        restaurantId={order.restaurant?.id ?? ""}        
+        isOpen={showReviewModal}
+        onClose={() => setShowReviewModal(false)}
+        onSuccess={() => {
+          setShowReviewModal(false);
+          // Invalidate the order query so the UI updates (e.g., hides the prompt if backend tracks "hasReview")
+          queryClient.invalidateQueries({ queryKey: ["order", id] });
+        }}
+      />
     </div>
   );
 }
