@@ -1,17 +1,20 @@
-// lib/api/reviews.ts — Module 12: Review
-import { apiClient } from "@/lib/api/client";
+// lib/api/reviews.ts
+import { apiClient } from "@/lib/api/client"; // Adjust path to your actual customer API client
 
-// TODO: confirm exact DTO via Swagger (orderId, rating, comment implied).
 export interface CreateReviewInput {
   orderId: string;
-  rating: number;
+  restaurantId: string;
+  rating: number; // 1 to 5
   comment?: string;
 }
 
-// Customer — order-verified only
 export async function createReview(input: CreateReviewInput) {
   const { data } = await apiClient.post("/reviews", input);
   return data;
 }
 
-// Public listing lives in discovery.ts as getRestaurantReviews()
+// Optional: Fetch if an order has already been reviewed
+export async function checkOrderReviewed(orderId: string) {
+  const { data } = await apiClient.get(`/reviews/order/${orderId}`);
+  return data; // Should return the review object if it exists, or null
+}

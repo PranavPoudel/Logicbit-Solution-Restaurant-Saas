@@ -7,6 +7,18 @@ import { useOwnerAuthStore } from "@/store/owner-auth-store";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { storefrontBannersApi, type BannerInput } from "@/lib/api/storefront";
 
+
+interface Banner {
+  id: string;
+  imageUrl: string;
+  title?: string;
+  subtitle?: string;
+  linkUrl?: string;
+  displayOrder?: number;
+  isActive?: boolean;
+  [key: string]: unknown;
+}
+
 export default function StorefrontBannersPage() {
   const queryClient = useQueryClient();
   const restaurantId = useOwnerAuthStore((s) => s.activeRestaurantId);
@@ -14,8 +26,8 @@ export default function StorefrontBannersPage() {
   const [isCreating, setIsCreating] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
-  // Fetch banners
-  const { data: banners = [], isLoading } = useQuery({
+  // ✅ Typed the useQuery hook with Banner[]
+  const { data: banners = [], isLoading } = useQuery<Banner[]>({
     queryKey: ["storefront-banners", restaurantId],
     queryFn: () => storefrontBannersApi.list(restaurantId as string),
     enabled: !!restaurantId,
@@ -45,7 +57,6 @@ export default function StorefrontBannersPage() {
   });
 
   const reorderMutation = useMutation({
-    // ✅ Uses your 'orderedIds' payload structure
     mutationFn: (orderedIds: string[]) => storefrontBannersApi.reorder(restaurantId as string, orderedIds),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["storefront-banners", restaurantId] }),
   });
@@ -95,7 +106,7 @@ export default function StorefrontBannersPage() {
       {(isCreating || editingId) && (
         <BannerForm 
           restaurantId={restaurantId!}
-          initialData={editingId ? banners.find(b => b.id === editingId) : undefined}
+          initialData={editingId ? banners.find((b: Banner) => b.id === editingId) : undefined}
           onSubmit={(data) => {
             if (editingId) {
               updateMutation.mutate({ id: editingId, data });
@@ -200,7 +211,7 @@ function BannerForm({
 }: { 
   onSubmit: (data: BannerInput) => void; 
   onCancel: () => void; 
-  initialData?: any;
+  initialData?: Banner;
   restaurantId: string;
 }) {
   const [formData, setFormData] = useState<BannerInput>({

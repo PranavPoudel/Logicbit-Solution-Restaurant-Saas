@@ -6,11 +6,12 @@ import { ownerApiClient } from "@/lib/api/owner-client";
 export interface BannerInput {
   imageUrl: string;
   title?: string;
+  subtitle?: string; 
   linkUrl?: string;
   displayOrder?: number;
+  isActive?: boolean; 
   [key: string]: unknown;
 }
-
 export const storefrontBannersApi = {
   create: async (restaurantId: string, input: BannerInput) =>
     (await ownerApiClient.post(`/restaurants/${restaurantId}/storefront/banners`, input)).data,

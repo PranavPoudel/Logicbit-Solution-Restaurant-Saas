@@ -10,6 +10,12 @@ import {
   type StorefrontPopupInput 
 } from "@/lib/api/storefront";
 
+// ✅ Added explicit type for the popup list response
+interface Popup extends StorefrontPopupInput {
+  id: string;
+  [key: string]: unknown;
+}
+
 // Helper to format date for datetime-local input (YYYY-MM-DDThh:mm)
 const formatDateForInput = (dateString?: string) => {
   if (!dateString) return "";
@@ -25,8 +31,8 @@ export default function StorefrontPopupsPage() {
   const [isCreating, setIsCreating] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
-  // Fetch popups
-  const { data: popups = [], isLoading } = useQuery({
+  // ✅ Typed the useQuery hook with Popup[]
+  const { data: popups = [], isLoading } = useQuery<Popup[]>({
     queryKey: ["storefront-popups", restaurantId],
     queryFn: () => storefrontPopupsApi.list(restaurantId as string),
     enabled: !!restaurantId,
@@ -80,7 +86,7 @@ export default function StorefrontPopupsPage() {
       {(isCreating || editingId) && (
         <PopupForm 
           restaurantId={restaurantId!}
-          initialData={editingId ? popups.find(p => p.id === editingId) : undefined}
+          initialData={editingId ? popups.find((p: Popup) => p.id === editingId) : undefined}
           onSubmit={(data) => {
             if (editingId) {
               updateMutation.mutate({ id: editingId, data });
@@ -205,7 +211,7 @@ function PopupForm({
 }: { 
   onSubmit: (data: StorefrontPopupInput) => void; 
   onCancel: () => void; 
-  initialData?: any;
+  initialData?: Popup; // ✅ Changed from any to Popup
   restaurantId: string;
 }) {
   const [formData, setFormData] = useState<StorefrontPopupInput>({
