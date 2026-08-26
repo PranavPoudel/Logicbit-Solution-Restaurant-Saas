@@ -1,4 +1,3 @@
-// components/layout/owner-sidebar.tsx
 "use client";
 
 import Link from "next/link";
@@ -15,6 +14,9 @@ import {
   Users,
   Bike,
   Settings,
+  Image as ImageIcon,
+  FileText,
+  Bell,
   type LucideIcon,
 } from "lucide-react";
 
@@ -28,6 +30,11 @@ interface NavItem {
 interface NavGroup {
   label: string | null;
   items: NavItem[];
+  subItems?: {
+    label: string;
+    href: string;
+    icon: LucideIcon;
+  }[];
 }
 
 const navGroups: NavGroup[] = [
@@ -40,7 +47,16 @@ const navGroups: NavGroup[] = [
     items: [
       { label: "Orders", href: "/orders", icon: Package },
       { label: "Menu", href: "/menu", icon: UtensilsCrossed },
-      { label: "Storefront", href: "/storefront", icon: LayoutTemplate },
+      { 
+        label: "Storefront", 
+        href: "/storefront/banners", 
+        icon: LayoutTemplate,
+      },
+    ],
+    subItems: [
+      { label: "Banners", href: "/storefront/banners", icon: ImageIcon },
+      { label: "Configuration", href: "/storefront/config", icon: FileText },
+      { label: "Popups", href: "/storefront/popups", icon: Bell },
     ],
   },
   {
@@ -67,6 +83,8 @@ const navGroups: NavGroup[] = [
 export function OwnerSidebar() {
   const pathname = usePathname();
 
+  const isStorefrontActive = pathname?.startsWith("/storefront");
+
   return (
     <aside className="w-64 shrink-0 bg-[#1B2333] text-slate-300 flex flex-col h-full">
       <div className="h-16 flex items-center gap-2 px-5 border-b border-white/10">
@@ -90,6 +108,10 @@ export function OwnerSidebar() {
               {group.items.map((item) => {
                 const isActive = pathname?.startsWith(item.href);
                 const Icon = item.icon;
+                
+                // Check if this is the Storefront item and should show sub-items
+                const showSubItems = item.label === "Storefront" && isStorefrontActive;
+                
                 return (
                   <li key={item.href}>
                     <Link
@@ -111,6 +133,31 @@ export function OwnerSidebar() {
                         </span>
                       ) : null}
                     </Link>
+                    
+                    {/* Sub-navigation for Storefront */}
+                    {showSubItems && group.subItems && (
+                      <ul className="ml-4 mt-1 space-y-0.5 border-l-2 border-white/10 pl-3">
+                        {group.subItems.map((subItem) => {
+                          const isSubActive = pathname === subItem.href;
+                          const SubIcon = subItem.icon;
+                          return (
+                            <li key={subItem.href}>
+                              <Link
+                                href={subItem.href}
+                                className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs transition-colors ${
+                                  isSubActive
+                                    ? "bg-white/10 text-white"
+                                    : "text-slate-400 hover:bg-white/5 hover:text-white"
+                                }`}
+                              >
+                                <SubIcon size={14} />
+                                <span>{subItem.label}</span>
+                              </Link>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )}
                   </li>
                 );
               })}
