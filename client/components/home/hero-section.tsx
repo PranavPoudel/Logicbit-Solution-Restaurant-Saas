@@ -5,7 +5,7 @@ import { Search, MapPin } from "lucide-react";
 
 export function HeroSection() {
   return (
-    <div className="relative overflow-hidden bg-[#17181C]">
+    <div className="relative overflow-hidden bg-[#17181C] rounded-b-[2.5rem]">
       {/* decorative gradient + soft shapes instead of a stock photo — keeps
           the hero from depending on an external image that could break */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#17181C] via-[#1F2128] to-[#0F6B5C]/40" />
@@ -42,11 +42,11 @@ export function HeroSection() {
               className="w-full text-sm text-[#17181C] placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#E3A008]/40 rounded-lg"
             />
           </div>
-          <div className="hidden sm:flex items-center gap-2 px-3 py-2.5 border-l border-neutral-100">
+          <div className="hidden sm:flex items-center gap-2 px-3 py-2 bg-neutral-50 rounded-xl">
             <MapPin size={15} className="text-[#E3A008] shrink-0" />
             <span className="text-sm text-neutral-500 whitespace-nowrap">Kirtipur</span>
           </div>
-          <button className="bg-[#17181C] text-white text-sm font-medium px-6 py-2.5 rounded-xl shrink-0 hover:bg-[#0F6B5C] transition-colors">
+          <button className="bg-[#17181C] text-white text-sm font-medium px-6 py-2.5 rounded-2xl shrink-0 hover:bg-[#0F6B5C] transition-colors">
             Search
           </button>
         </div>

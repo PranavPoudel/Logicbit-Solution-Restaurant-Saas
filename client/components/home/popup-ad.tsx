@@ -31,12 +31,12 @@ export function PopupAd() {
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-white rounded-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 fade-in duration-300 shadow-2xl"
+        className="bg-white rounded-[2rem] w-full max-w-sm overflow-hidden animate-in zoom-in-95 fade-in duration-300 shadow-2xl shadow-black/30"
       >
         <div className="h-40 bg-gradient-to-br from-[#E3A008] to-[#C6870A] flex flex-col items-center justify-center relative">
           <button
             onClick={dismiss}
-            className="absolute top-3 right-3 w-7 h-7 rounded-full bg-white/90 hover:bg-white flex items-center justify-center transition-colors"
+            className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 hover:bg-white flex items-center justify-center transition-colors"
             aria-label="Close"
           >
             <X size={14} className="text-[#17181C]" />
@@ -55,7 +55,7 @@ export function PopupAd() {
           </p>
           <button
             onClick={dismiss}
-            className="w-full bg-[#17181C] text-white text-sm font-medium py-2.5 rounded-xl hover:bg-[#0F6B5C] transition-colors"
+            className="w-full bg-[#17181C] text-white text-sm font-medium py-2.5 rounded-2xl hover:bg-[#0F6B5C] transition-colors"
           >
             Explore restaurants
           </button>
