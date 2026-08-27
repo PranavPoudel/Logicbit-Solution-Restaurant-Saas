@@ -13,6 +13,7 @@ import {
 import { OrderTabs } from "@/components/owner-orders/order-tabs";
 import { OrderCard, type OwnerOrderSummary } from "@/components/owner-orders/order-card";
 import { OrderDetailModal } from "@/components/owner-orders/order-detail-modal";
+import { SubscriptionUpgradeBanner } from "@/components/ui/subscription-upgrade-banner";
 
 const TAB_DEFS = [
   { key: "PENDING", label: "New" },

@@ -17,6 +17,7 @@ import {
   Image as ImageIcon,
   FileText,
   Bell,
+  CreditCard,
   type LucideIcon,
 } from "lucide-react";
 
@@ -69,7 +70,10 @@ const navGroups: NavGroup[] = [
   },
   {
     label: "Finance",
-    items: [{ label: "Settlements", href: "/settlements", icon: Wallet }],
+    items: [
+      { label: "Settlements", href: "/settlements", icon: Wallet },
+      { label: "Subscription", href: "/subscriptions", icon: CreditCard }, 
+    ],
   },
   {
     label: "Team",

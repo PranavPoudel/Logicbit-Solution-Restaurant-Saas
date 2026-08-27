@@ -17,6 +17,7 @@ import {
   type OwnerModifierGroup,
 } from "@/components/owner-menu/modifier-group-manager";
 import { ItemModifierLinkModal } from "@/components/owner-menu/item-modifier-link-modal";
+import { SubscriptionUpgradeBanner } from "@/components/ui/subscription-upgrade-banner";
 
 export default function MenuPage() {
   const restaurantId = useOwnerAuthStore((s) => s.activeRestaurantId);
