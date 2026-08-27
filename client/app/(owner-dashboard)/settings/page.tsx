@@ -99,14 +99,22 @@ export default function SettingsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [restaurantQuery.data]);
 
+  // Helper to safely parse numbers, returning undefined for empty/invalid strings
+  const parseNumber = (val: string) => {
+    if (!val || val.trim() === "") return undefined;
+    const num = Number(val);
+    return isNaN(num) ? undefined : num;
+  };
+
   const saveMutation = useMutation({
     mutationFn: () =>
       updateMyRestaurant(restaurantId as string, {
         name: form.name,
         address: form.address,
         city: form.city,
-        latitude: form.latitude ? Number(form.latitude) : undefined,   
-        longitude: form.longitude ? Number(form.longitude) : undefined,
+        //  Use safe parser
+        latitude: parseNumber(form.latitude),
+        longitude: parseNumber(form.longitude),
         primaryColor: form.primaryColor,
         secondaryColor: form.secondaryColor,
         heroHeading: form.heroHeading,
@@ -115,19 +123,15 @@ export default function SettingsPage() {
         supportsDelivery: form.supportsDelivery,
         supportsPickup: form.supportsPickup,
         supportsDineIn: form.supportsDineIn,
-        selfDeliveryRadiusKm: form.selfDeliveryRadiusKm
-          ? Number(form.selfDeliveryRadiusKm)
-          : undefined,
-        selfDeliveryFlatFee: form.selfDeliveryFlatFee
-          ? Number(form.selfDeliveryFlatFee)
-          : undefined,
-        maxDeliveryRadiusKm: form.maxDeliveryRadiusKm
-          ? Number(form.maxDeliveryRadiusKm)
-          : undefined,
+        selfDeliveryRadiusKm: parseNumber(form.selfDeliveryRadiusKm),
+        selfDeliveryFlatFee: parseNumber(form.selfDeliveryFlatFee),
+        maxDeliveryRadiusKm: parseNumber(form.maxDeliveryRadiusKm),
       }),
     onSuccess: () => {
       setSavedAt(Date.now());
       queryClient.invalidateQueries({ queryKey: ["owner-restaurant", restaurantId] });
+      // refresh cuisines in case they were updated
+      queryClient.invalidateQueries({ queryKey: ["restaurant-cuisines", restaurantId] });
     },
   });
 

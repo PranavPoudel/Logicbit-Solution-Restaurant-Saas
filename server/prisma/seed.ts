@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Starting database seed...');
 
-  // 1. Create Master Cuisines
+  // 1. Create Master Cuisines (Upsert to avoid duplicates)
   const cuisineNames = ['Nepali', 'Newari', 'Fast Food', 'Chinese', 'Desserts', 'Indian'];
   for (const name of cuisineNames) {
     await prisma.cuisine.upsert({
@@ -20,16 +20,16 @@ async function main() {
   const adminPassword = await bcrypt.hash('ChangeMe123!', 10);
   await prisma.platformStaff.upsert({
     where: { email: 'admin@logicbit.local' },
-    update: {},
+    update: { name: 'Super Admin', passwordHash: adminPassword },
     create: {
       name: 'Super Admin',
       email: 'admin@logicbit.local',
       passwordHash: adminPassword,
-      roleId: 'super_admin', // Adjust if your role ID is different
+      roleId: 'super_admin', // Adjust if your actual role ID is different
     },
   });
 
-  // Helper function to create a full restaurant scenario
+  // Helper function to create/update a full restaurant scenario
   async function createRestaurantScenario(
     tenantName: string,
     ownerEmail: string,
@@ -43,24 +43,56 @@ async function main() {
   ) {
     const password = await bcrypt.hash('password123', 10);
     
-    // Create Tenant
-    const tenant = await prisma.tenant.create({ data: { name: tenantName } });
+    // Find existing user to get tenantId, or create a new tenant
+    const existingUser = await prisma.user.findUnique({ where: { email: ownerEmail } });
+    let tenantId = existingUser?.tenantId;
 
-    // Create Owner User
-    const owner = await prisma.user.create({
-      data: {
-        tenantId: tenant.id,
+    if (!tenantId) {
+      const tenant = await prisma.tenant.create({ data: { name: tenantName } });
+      tenantId = tenant.id;
+    }
+
+    // Create or Update Owner User
+    await prisma.user.upsert({
+      where: { email: ownerEmail },
+      update: {
+        name: ownerName,
+        passwordHash: password,
+        isSuperAdmin: true,
+      },
+      create: {
+        tenantId,
         name: ownerName,
         email: ownerEmail,
         passwordHash: password,
-        isSuperAdmin: true, // Owner is the super admin of their own tenant
+        isSuperAdmin: true,
       },
     });
 
-    // Create Restaurant
-    const restaurant = await prisma.restaurant.create({
-      data: {
-        tenantId: tenant.id,
+    // Create or Update Restaurant
+    const restaurant = await prisma.restaurant.upsert({
+      where: { slug },
+      update: {
+        tenantId,
+        name: restaurantName,
+        latitude: lat,
+        longitude: lng,
+        address: `123 Main Street, ${city}`,
+        city,
+        country: 'Nepal',
+        isOpen: true,
+        supportsDelivery: true,
+        supportsPickup: true,
+        supportsDineIn: true,
+        selfDeliveryRadiusKm: 5,
+        maxDeliveryRadiusKm: 10,
+        selfDeliveryFlatFee: 60,
+        platformCommissionPercent: 10,
+        primaryColor: '#E3A008',
+        secondaryColor: '#17181C',
+      },
+      create: {
+        tenantId,
         name: restaurantName,
         slug,
         latitude: lat,
@@ -81,36 +113,52 @@ async function main() {
       },
     });
 
-    // Link Cuisines
+    // Refresh Cuisines (Delete old links, create new ones to avoid duplicates)
+    await prisma.restaurantCuisine.deleteMany({
+      where: { restaurantId: restaurant.id },
+    });
+    
     const cuisines = await prisma.cuisine.findMany({
       where: { name: { in: cuisineNamesToLink } },
     });
-    await prisma.restaurantCuisine.createMany({
-      data: cuisines.map((c) => ({
-        restaurantId: restaurant.id,
-        cuisineId: c.id,
-      })),
+    
+    if (cuisines.length > 0) {
+      await prisma.restaurantCuisine.createMany({
+        data: cuisines.map((c) => ({
+          restaurantId: restaurant.id,
+          cuisineId: c.id,
+        })),
+      });
+    }
+
+    // Refresh Menu (Delete old items in this category, create new ones)
+    let category = await prisma.category.findFirst({
+      where: { restaurantId: restaurant.id, name: 'Popular Items' },
     });
 
-    // Create a Category
-    const category = await prisma.category.create({
-      data: {
-        tenantId: tenant.id,
-        restaurantId: restaurant.id,
-        name: 'Popular Items',
-        displayOrder: 1,
-        isActive: true,
-      },
+    if (!category) {
+      category = await prisma.category.create({
+        data: {
+          tenantId,
+          restaurantId: restaurant.id,
+          name: 'Popular Items',
+          displayOrder: 1,
+          isActive: true,
+        },
+      });
+    }
+
+    await prisma.menuItem.deleteMany({
+      where: { categoryId: category.id },
     });
 
-    // Create Menu Items
     const itemName1 = restaurantName.includes('Momo') ? 'Buff Momo' : (restaurantName.includes('Newari') ? 'Choila' : 'Cheese Burger');
     const itemName2 = restaurantName.includes('Momo') ? 'Veg Momo' : (restaurantName.includes('Newari') ? 'Bara' : 'Veg Burger');
     
     await prisma.menuItem.createMany({
       data: [
         {
-          tenantId: tenant.id,
+          tenantId,
           restaurantId: restaurant.id,
           categoryId: category.id,
           name: itemName1,
@@ -120,7 +168,7 @@ async function main() {
           isVegetarian: false,
         },
         {
-          tenantId: tenant.id,
+          tenantId,
           restaurantId: restaurant.id,
           categoryId: category.id,
           name: itemName2,
@@ -132,7 +180,7 @@ async function main() {
       ],
     });
 
-    console.log(`✅ Created: ${restaurantName} (${ownerEmail})`);
+    console.log(`✅ Created/Updated: ${restaurantName} (${ownerEmail})`);
   }
 
   // 3. Create 3 Distinct Restaurant Scenarios
@@ -158,7 +206,7 @@ async function main() {
   const customerPassword = await bcrypt.hash('password123', 10);
   await prisma.customer.upsert({
     where: { email: 'customer@test.com' },
-    update: {},
+    update: { name: 'Test Customer', passwordHash: customerPassword },
     create: {
       name: 'Test Customer',
       email: 'customer@test.com',
@@ -168,12 +216,12 @@ async function main() {
   });
 
   console.log('🎉 Seed completed successfully!');
-  console.log('\n📝 Test Accounts:');
-  console.log('  Platform Admin: admin@logicbit.local / ChangeMe123!');
-  console.log('  Owner 1:        owner1@test.com / password123');
-  console.log('  Owner 2:        owner2@test.com / password123');
-  console.log('  Owner 3:        owner3@test.com / password123');
-  console.log('  Customer:       customer@test.com / password123');
+  console.log('\n📝 Test Accounts (Password for all is: password123):');
+  console.log('  Platform Admin: admin@logicbit.local');
+  console.log('  Owner 1:        owner1@test.com');
+  console.log('  Owner 2:        owner2@test.com');
+  console.log('  Owner 3:        owner3@test.com');
+  console.log('  Customer:       customer@test.com');
 }
 
 main()
