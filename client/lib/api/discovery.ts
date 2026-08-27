@@ -7,7 +7,7 @@ export interface NearbyRestaurantsParams {
   lat: number;
   lng: number;
   radiusKm?: number;
-  cuisineId?: string; 
+  cuisineType?: string; 
   minRating?: number;
   isOpenNow?: boolean;
   sortBy?: string;
@@ -33,8 +33,8 @@ export async function getNearbyRestaurants(
   };
 
   // Only add optional params if they exist
-  if (params.cuisineId) {
-    queryParams.cuisineId = params.cuisineId;
+  if (params.cuisineType) {
+    queryParams.cuisineType = params.cuisineType;
   }
   if (params.minRating) {
     queryParams.minRating = params.minRating;

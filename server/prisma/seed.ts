@@ -3,224 +3,177 @@ import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
-const SALT_ROUNDS = 10;
-
 async function main() {
   console.log('🌱 Starting database seed...');
 
-  // We wrap the entire seed in a transaction. 
-  // If ANY step fails, the whole database rolls back to its previous state.
-  await prisma.$transaction(async (tx) => {
-    
-    //  PLATFORM ADMIN SETUP
-    console.log('👑 Seeding Platform Admin...');
-    const adminPassword = await bcrypt.hash('Admin@123', SALT_ROUNDS);
-    
-    // Create a basic Platform Role
-    const adminRole = await tx.platformRole.upsert({
-      where: { name: 'Full Admin' },
+  // 1. Create Master Cuisines
+  const cuisineNames = ['Nepali', 'Newari', 'Fast Food', 'Chinese', 'Desserts', 'Indian'];
+  for (const name of cuisineNames) {
+    await prisma.cuisine.upsert({
+      where: { name },
       update: {},
-      create: { name: 'Full Admin' },
+      create: { name, slug: name.toLowerCase().replace(' ', '-'), isActive: true },
     });
+  }
 
-    await tx.platformStaff.upsert({
-      where: { email: 'admin@logicbit.local' },
-      update: {},
-      create: {
-        name: 'Platform Owner',
-        email: 'admin@logicbit.local',
-        passwordHash: adminPassword,
-        roleId: adminRole.id,
-      },
-    });
+  // 2. Create Platform Admin
+  const adminPassword = await bcrypt.hash('ChangeMe123!', 10);
+  await prisma.platformStaff.upsert({
+    where: { email: 'admin@logicbit.local' },
+    update: {},
+    create: {
+      name: 'Super Admin',
+      email: 'admin@logicbit.local',
+      passwordHash: adminPassword,
+      roleId: 'super_admin', // Adjust if your role ID is different
+    },
+  });
 
-    //  TENANT & RESTAURANT OWNER SETUP
-    console.log('🏪 Seeding Restaurant Tenant & Owner...');
-    const ownerPassword = await bcrypt.hash('owner123', SALT_ROUNDS);
-
+  // Helper function to create a full restaurant scenario
+  async function createRestaurantScenario(
+    tenantName: string,
+    ownerEmail: string,
+    ownerName: string,
+    restaurantName: string,
+    slug: string,
+    city: string,
+    lat: number,
+    lng: number,
+    cuisineNamesToLink: string[]
+  ) {
+    const password = await bcrypt.hash('password123', 10);
+    
     // Create Tenant
-    const tenant = await tx.tenant.upsert({
-      where: { id: 'seed-tenant-id' }, // Using a fixed ID for predictable seeding
-      update: {},
-      create: { id: 'seed-tenant-id', name: 'Kathmandu Eats Tenant' },
-    });
+    const tenant = await prisma.tenant.create({ data: { name: tenantName } });
 
     // Create Owner User
-    const owner = await tx.user.upsert({
-      where: { email: 'owner@restaurant.com' },
-      update: {},
-      create: {
+    const owner = await prisma.user.create({
+      data: {
         tenantId: tenant.id,
-        name: 'Restaurant Owner',
-        email: 'owner@restaurant.com',
-        phone: '9841000001',
-        passwordHash: ownerPassword,
-        isSuperAdmin: true,
+        name: ownerName,
+        email: ownerEmail,
+        passwordHash: password,
+        isSuperAdmin: true, // Owner is the super admin of their own tenant
       },
-    });
-
-    // Create Owner Role & Link
-    const ownerRole = await tx.role.upsert({
-      where: { tenantId_name: { tenantId: tenant.id, name: 'OWNER' } },
-      update: {},
-      create: { tenantId: tenant.id, name: 'OWNER' },
-    });
-
-    await tx.userRole.upsert({
-      where: { userId_roleId: { userId: owner.id, roleId: ownerRole.id } },
-      update: {},
-      create: { userId: owner.id, roleId: ownerRole.id },
     });
 
     // Create Restaurant
-    const restaurant = await tx.restaurant.upsert({
-      where: { slug: 'momos-and-more' },
-      update: {},
-      create: {
+    const restaurant = await prisma.restaurant.create({
+      data: {
         tenantId: tenant.id,
-        name: 'Momos & More',
-        slug: 'momos-and-more',
-        address: 'Thamel, Kathmandu',
-        city: 'Kathmandu',
-        latitude: 27.7172,
-        longitude: 85.3240,
+        name: restaurantName,
+        slug,
+        latitude: lat,
+        longitude: lng,
+        address: `123 Main Street, ${city}`,
+        city,
+        country: 'Nepal',
         isOpen: true,
         supportsDelivery: true,
         supportsPickup: true,
-        selfDeliveryRadiusKm: 3,
+        supportsDineIn: true,
+        selfDeliveryRadiusKm: 5,
         maxDeliveryRadiusKm: 10,
+        selfDeliveryFlatFee: 60,
         platformCommissionPercent: 10,
+        primaryColor: '#E3A008',
+        secondaryColor: '#17181C',
       },
     });
 
-    //  MENU SETUP (Cuisines, Categories, Items)
-    console.log('🍔 Seeding Menu Data...');
-    
-    // Cuisines
-    const cuisine = await tx.cuisine.upsert({
-      where: { slug: 'nepali' },
-      update: {},
-      create: { name: 'Nepali', slug: 'nepali' },
+    // Link Cuisines
+    const cuisines = await prisma.cuisine.findMany({
+      where: { name: { in: cuisineNamesToLink } },
     });
-    await tx.restaurantCuisine.upsert({
-      where: { restaurantId_cuisineId: { restaurantId: restaurant.id, cuisineId: cuisine.id } },
-      update: {},
-      create: { restaurantId: restaurant.id, cuisineId: cuisine.id },
-    });
-
-    // Categories
-    const category = await tx.category.upsert({
-      where: { id: 'seed-cat-1' },
-      update: {},
-      create: { 
-        tenantId: tenant.id, 
-        restaurantId: restaurant.id, 
-        name: 'Momos', 
-        displayOrder: 1 
-      },
-    });
-
-    // Menu Items
-    const item1 = await tx.menuItem.upsert({
-      where: { id: 'seed-item-1' },
-      update: {},
-      create: {
-        tenantId: tenant.id,
+    await prisma.restaurantCuisine.createMany({
+      data: cuisines.map((c) => ({
         restaurantId: restaurant.id,
-        categoryId: category.id,
-        name: 'Buff Momo (Steam)',
-        price: 120,
-        isAvailable: true,
-        isVegetarian: false,
-      },
-    });
-    
-    const item2 = await tx.menuItem.upsert({
-      where: { id: 'seed-item-2' },
-      update: {},
-      create: {
-        tenantId: tenant.id,
-        restaurantId: restaurant.id,
-        categoryId: category.id,
-        name: 'Veg Momo (Steam)',
-        price: 100,
-        isAvailable: true,
-        isVegetarian: true,
-      },
+        cuisineId: c.id,
+      })),
     });
 
-    // 4. CUSTOMER & ORDER SETUP
-    console.log('👤 Seeding Customer & Sample Order...');
-    const customerPassword = await bcrypt.hash('user1234', SALT_ROUNDS); // Must be 8+ chars!
-
-    const customer = await tx.customer.upsert({
-      where: { email: 'user@customer.com' },
-      update: {},
-      create: {
-        name: 'Customer User',
-        email: 'user@customer.com',
-        phone: '9841000002',
-        passwordHash: customerPassword,
-      },
-    });
-
-    // Create a Sample Order (Status: COMPLETED so we can test Reviews)
-    const order = await tx.order.create({
+    // Create a Category
+    const category = await prisma.category.create({
       data: {
         tenantId: tenant.id,
         restaurantId: restaurant.id,
-        customerId: customer.id,
-        orderNumber: 'ORD-0001',
-        status: 'COMPLETED', 
-        orderType: 'DELIVERY',
-        subtotal: 220,
-        deliveryFee: 50,
-        tax: 0,
-        total: 270,
-        paymentStatus: 'PAID',
-        paymentMethod: 'COD',
-        deliveryAddress: 'Durbar Marg, Kathmandu',
-        deliveryLatitude: 27.7000,
-        deliveryLongitude: 85.3200,
-        items: {
-          create: [
-            { menuItemId: item1.id, quantity: 1, unitPrice: 120, subtotal: 120 },
-            { menuItemId: item2.id, quantity: 1, unitPrice: 100, subtotal: 100 },
-          ],
-        },
-      },
-    });
-
-    // Create a Sample Review for that order
-    await tx.review.create({
-      data: {
-        restaurantId: restaurant.id,
-        customerId: customer.id,
-        orderId: order.id,
-        rating: 5,
-        comment: 'The buff momos were amazing! Fast delivery too.',
-      },
-    });
-
-    // Create a Sample Coupon
-    await tx.coupon.upsert({
-      where: { tenantId_code: { tenantId: tenant.id, code: 'WELCOME20' } },
-      update: {},
-      create: {
-        tenantId: tenant.id,
-        restaurantId: restaurant.id,
-        code: 'WELCOME20',
-        type: 'PERCENTAGE',
-        value: 20,
-        maxDiscount: 100,
-        minOrderAmount: 500,
-        usageLimit: 100,
+        name: 'Popular Items',
+        displayOrder: 1,
         isActive: true,
       },
     });
+
+    // Create Menu Items
+    const itemName1 = restaurantName.includes('Momo') ? 'Buff Momo' : (restaurantName.includes('Newari') ? 'Choila' : 'Cheese Burger');
+    const itemName2 = restaurantName.includes('Momo') ? 'Veg Momo' : (restaurantName.includes('Newari') ? 'Bara' : 'Veg Burger');
+    
+    await prisma.menuItem.createMany({
+      data: [
+        {
+          tenantId: tenant.id,
+          restaurantId: restaurant.id,
+          categoryId: category.id,
+          name: itemName1,
+          description: 'Freshly made and delicious',
+          price: itemName1.includes('Momo') ? 150 : (itemName1.includes('Choila') ? 250 : 350),
+          isAvailable: true,
+          isVegetarian: false,
+        },
+        {
+          tenantId: tenant.id,
+          restaurantId: restaurant.id,
+          categoryId: category.id,
+          name: itemName2,
+          description: 'A great vegetarian option',
+          price: itemName2.includes('Momo') ? 120 : (itemName2.includes('Bara') ? 150 : 250),
+          isAvailable: true,
+          isVegetarian: true,
+        },
+      ],
+    });
+
+    console.log(`✅ Created: ${restaurantName} (${ownerEmail})`);
+  }
+
+  // 3. Create 3 Distinct Restaurant Scenarios
+  await createRestaurantScenario(
+    'Momo Tenants', 'owner1@test.com', 'Ramesh Shrestha', 
+    'Momo\'s & More', 'momos-and-more', 'Kathmandu', 27.7172, 85.3240, 
+    ['Nepali', 'Fast Food']
+  );
+
+  await createRestaurantScenario(
+    'Newari Tenants', 'owner2@test.com', 'Sita Maharjan', 
+    'Newari Bhanchha Ghar', 'newari-bhanchha-ghar', 'Patan', 27.6766, 85.3253, 
+    ['Newari', 'Nepali']
+  );
+
+  await createRestaurantScenario(
+    'Burger Tenants', 'owner3@test.com', 'John Doe', 
+    'Burger Station', 'burger-station', 'Kathmandu', 27.7000, 85.3100, 
+    ['Fast Food', 'Chinese']
+  );
+
+  // 4. Create a Test Customer
+  const customerPassword = await bcrypt.hash('password123', 10);
+  await prisma.customer.upsert({
+    where: { email: 'customer@test.com' },
+    update: {},
+    create: {
+      name: 'Test Customer',
+      email: 'customer@test.com',
+      passwordHash: customerPassword,
+      isGuest: false,
+    },
   });
 
-  console.log('✅ Database seeding completed successfully!');
+  console.log('🎉 Seed completed successfully!');
+  console.log('\n📝 Test Accounts:');
+  console.log('  Platform Admin: admin@logicbit.local / ChangeMe123!');
+  console.log('  Owner 1:        owner1@test.com / password123');
+  console.log('  Owner 2:        owner2@test.com / password123');
+  console.log('  Owner 3:        owner3@test.com / password123');
+  console.log('  Customer:       customer@test.com / password123');
 }
 
 main()

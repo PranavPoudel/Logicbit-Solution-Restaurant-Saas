@@ -34,7 +34,7 @@ export default function HomePage() {
         lat, 
         lng, 
         radiusKm: 10,
-        cuisineId: activeCuisineId || undefined // Pass undefined if no cuisine is selected
+        cuisineType: activeCuisineId || undefined // Pass undefined if no cuisine is selected
       }),
     enabled: isResolved,
   });
