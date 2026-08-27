@@ -45,16 +45,22 @@ export function CategoryGrid() {
             <button
               key={label}
               onClick={() => setActive(isActive ? null : label)}
-              className={`flex flex-col items-center gap-2 py-4 rounded-2xl border transition-colors ${
+              className={`flex flex-col items-center gap-2 py-4 rounded-[1.75rem] border transition-all hover:shadow-md ${
                 isActive
                   ? "bg-[#17181C] border-[#17181C] text-white"
                   : "bg-white border-[#E8E7E2] text-[#17181C] hover:border-[#E3A008]"
               }`}
             >
-              <Icon
-                size={22}
-                className={isActive ? "text-[#E3A008]" : "text-[#0F6B5C]"}
-              />
+              <div
+                className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+                  isActive ? "bg-white/15" : "bg-[#0F6B5C]/8"
+                }`}
+              >
+                <Icon
+                  size={20}
+                  className={isActive ? "text-[#E3A008]" : "text-[#0F6B5C]"}
+                />
+              </div>
               <span className="text-xs font-medium">{label}</span>
             </button>
           );
