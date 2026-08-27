@@ -20,7 +20,11 @@ export interface RestaurantAnalytics {
   topSellingItems: TopSellingItem[];
 }
 
+/**
+ * Fetches analytics data for a specific restaurant.
+ * Endpoint: GET /api/v1/restaurants/:restaurantId/analytics
+ */
 export async function getRestaurantAnalytics(restaurantId: string): Promise<RestaurantAnalytics> {
-  const { data } = await ownerApiClient.get(`/analytics/${restaurantId}`);
+  const { data } = await ownerApiClient.get(`/restaurants/${restaurantId}/analytics`);
   return data;
 }

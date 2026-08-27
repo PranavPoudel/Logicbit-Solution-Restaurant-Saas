@@ -30,6 +30,8 @@ import { CuisineModule } from './modules/cuisine/cuisine.module';
 import { PlatformAuthModule } from './modules/platform-auth/platform-auth.module';
 import { PlatformStaffModule } from './modules/platform-staff/platform-staff.module';
 import { SubscriptionModule } from './modules/subscription/subscription.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
+
 
 @Module({
   imports: [
@@ -69,6 +71,7 @@ import { SubscriptionModule } from './modules/subscription/subscription.module';
     PlatformAuthModule,
     PlatformStaffModule,
     SubscriptionModule,
+    AnalyticsModule,
   ],
   providers: [
     {
