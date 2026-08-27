@@ -1,4 +1,3 @@
-// components/restaurant/restaurant-card.tsx
 "use client";
 
 import Link from "next/link";
@@ -9,16 +8,13 @@ import type { DiscoveryRestaurant } from "@/types/restaurant";
 export function RestaurantCard({ restaurant }: { restaurant: DiscoveryRestaurant }) {
   const [isFavorited, setIsFavorited] = useState(false);
 
-  // Defensive fallbacks — real API field names aren't confirmed for every
-  // field yet, so a missing one degrades gracefully instead of crashing
-  // the whole grid.
+  // Defensive fallbacks
   const name = restaurant.name ?? "Restaurant";
   const cuisines = restaurant.cuisines ?? [];
   const rating = typeof restaurant.avgRating === "number" ? restaurant.avgRating : null;
-  const distanceKm =
-    typeof restaurant.distanceKm === "number" ? restaurant.distanceKm : null;
+  const distanceKm = typeof restaurant.distanceKm === "number" ? restaurant.distanceKm : null;
   const slug = restaurant.slug ?? restaurant.id;
-  const isOpen = restaurant.isOpen !== false; // default to open unless explicitly false
+  const isOpen = restaurant.isOpen !== false;
 
   return (
     <Link
@@ -32,6 +28,10 @@ export function RestaurantCard({ restaurant }: { restaurant: DiscoveryRestaurant
             src={restaurant.coverImageUrl}
             alt={name}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            onError={(e) => {
+              // Fallback if image URL is broken
+              (e.target as HTMLImageElement).style.display = 'none';
+            }}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#17181C] to-[#2B2D33] text-white/20 font-display text-4xl">
@@ -39,10 +39,8 @@ export function RestaurantCard({ restaurant }: { restaurant: DiscoveryRestaurant
           </div>
         )}
 
-        {/* dark gradient for badge legibility, reference-style */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-transparent" />
 
-        {/* top row: OPEN/CLOSED status pill + favorite heart */}
         <div className="absolute top-2.5 left-2.5 right-2.5 flex items-start justify-between">
           <span
             className={`text-[10px] font-mono font-bold uppercase tracking-wide px-2 py-1 rounded-md ${
@@ -73,7 +71,6 @@ export function RestaurantCard({ restaurant }: { restaurant: DiscoveryRestaurant
           </span>
         )}
 
-        {/* floating rating chip, bottom-right — reference-style overlay badge */}
         {rating !== null && (
           <span className="absolute bottom-2.5 right-2.5 flex items-center gap-1 bg-white/95 backdrop-blur text-[#17181C] text-xs font-mono font-semibold px-2 py-1 rounded-md">
             <Star size={11} className="fill-[#E3A008] text-[#E3A008]" />
@@ -89,12 +86,13 @@ export function RestaurantCard({ restaurant }: { restaurant: DiscoveryRestaurant
 
         <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
           {cuisines.length > 0 ? (
-            cuisines.slice(0, 3).map((cuisine) => (
+            // ✅ FIX: Map over the objects and extract .name and .id/.slug
+            cuisines.slice(0, 3).map((cuisine: any) => (
               <span
-                key={cuisine}
+                key={cuisine.id || cuisine.slug}
                 className="text-[11px] font-medium text-[#0F6B5C] bg-[#0F6B5C]/8 px-2 py-0.5 rounded-full truncate"
               >
-                {cuisine}
+                {cuisine.name}
               </span>
             ))
           ) : (

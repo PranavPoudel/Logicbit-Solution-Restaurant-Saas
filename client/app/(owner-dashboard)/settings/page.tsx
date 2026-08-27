@@ -9,6 +9,7 @@ import { getMyRestaurant, updateMyRestaurant } from "@/lib/api/restaurants";
 import { SettingsTabs } from "@/components/owner-settings/settings-tabs";
 import { SettingsField, SettingsToggle } from "@/components/owner-settings/settings-field";
 import { useGeolocation } from "@/hooks/use-geolocation";
+import { DynamicMapPicker } from "@/components/map/dynamic-map-picker";
 
 const TABS = [
   { key: "general", label: "General" },
@@ -196,39 +197,67 @@ export default function SettingsPage() {
             </>
           )}
 
-          {activeTab === "location" && (
+                    {activeTab === "location" && (
             <>
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-medium text-neutral-700">Coordinates</p>
-                <button
-                  onClick={() => {
-                    set("latitude", String(lat));
-                    set("longitude", String(lng));
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium text-neutral-700">Restaurant Location</p>
+                  <button
+                    onClick={() => {
+                      set("latitude", String(lat));
+                      set("longitude", String(lng));
+                    }}
+                    className="text-xs font-medium text-[#0F6B5C] hover:underline"
+                  >
+                    Use browser's current location
+                  </button>
+                </div>
+
+                {/* Map Picker */}
+                <DynamicMapPicker
+                  lat={form.latitude ? Number(form.latitude) : 27.7172}
+                  lng={form.longitude ? Number(form.longitude) : 85.3240}
+                  onChange={(newLat, newLng) => {
+                    set("latitude", String(newLat));
+                    set("longitude", String(newLng));
                   }}
-                  className="text-xs font-medium text-[#0F6B5C]"
-                >
-                  Use my current location
-                </button>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <SettingsField
-                  label="Latitude"
-                  value={form.latitude}
-                  onChange={(e) => set("latitude", e.target.value)}
                 />
-                <SettingsField
-                  label="Longitude"
-                  value={form.longitude}
-                  onChange={(e) => set("longitude", e.target.value)}
-                />
+
+                {/* Coordinate Display */}
+                <div className="grid grid-cols-2 gap-3 pt-3 border-t border-neutral-200">
+                  <div>
+                    <label className="block text-xs font-medium text-neutral-600 mb-1">
+                      Latitude
+                    </label>
+                    <input
+                      type="text"
+                      value={form.latitude}
+                      onChange={(e) => set("latitude", e.target.value)}
+                      className="w-full px-3 py-2 text-sm border border-neutral-300 rounded-lg focus:ring-2 focus:ring-[#1B2333] focus:border-transparent outline-none font-mono"
+                      placeholder="27.7172"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-neutral-600 mb-1">
+                      Longitude
+                    </label>
+                    <input
+                      type="text"
+                      value={form.longitude}
+                      onChange={(e) => set("longitude", e.target.value)}
+                      className="w-full px-3 py-2 text-sm border border-neutral-300 rounded-lg focus:ring-2 focus:ring-[#1B2333] focus:border-transparent outline-none font-mono"
+                      placeholder="85.3240"
+                    />
+                  </div>
+                </div>
+
+                <p className="text-xs text-neutral-500">
+                  Drag the marker on the map or enter coordinates manually. 
+                  This determines your delivery radius and appears in "Near Me" searches.
+                </p>
               </div>
-              <p className="text-xs text-neutral-400">
-                A map picker (Mapbox/Google Maps) will replace this once an API key is
-                configured — coordinates work the same either way.
-              </p>
             </>
           )}
-
           {activeTab === "delivery" && (
             <>
               <SettingsField

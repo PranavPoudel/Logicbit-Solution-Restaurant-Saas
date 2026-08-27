@@ -1,37 +1,37 @@
-// lib/api/reviews.ts — Module 12: Review
-import { apiClient } from "@/lib/api/client";
-import { ownerApiClient } from "@/lib/api/owner-client";
+// lib/api/reviews.ts
+import { apiClient } from "@/lib/api/client"; // Adjust path to your actual customer API client
 
-// Confirmed against server CreateReviewDto: restaurantId is required,
-// orderId is optional (only present for verified-purchase reviews).
 export interface CreateReviewInput {
+  orderId: string;
   restaurantId: string;
-  orderId?: string;
-  rating: number;
+  rating: number; // 1 to 5
   comment?: string;
 }
 
-export interface OwnerReview {
-  id: string;
-  rating: number;
-  comment: string | null;
-  createdAt: string;
-  customer: { id: string; name: string } | null;
-}
-
-// Customer — order-verified only
 export async function createReview(input: CreateReviewInput) {
   const { data } = await apiClient.post("/reviews", input);
   return data;
 }
 
-// Public listing lives in discovery.ts as getRestaurantReviews()
+// Optional: Fetch if an order has already been reviewed
+export async function checkOrderReviewed(orderId: string) {
+  const { data } = await apiClient.get(`/reviews/order/${orderId}`);
+  return data; // Should return the review object if it exists, or null
+}
 
-// Owner — same public discovery route, called via the owner-authenticated
-// client so it's consistent with every other owner-dashboard API call.
-// There is no separate /owner reviews endpoint on the backend; the
-// controller only exposes POST /reviews and the public discovery GET.
-export const reviewsApi = {
-  list: async (restaurantId: string): Promise<OwnerReview[]> =>
-    (await ownerApiClient.get(`/discovery/restaurants/${restaurantId}/reviews`)).data,
-};
+// ... (keep your existing CreateReviewInput, createReview, and checkOrderReviewed code above)
+
+export interface Review {
+  id: string;
+  rating: number;
+  comment?: string;
+  customerName?: string;
+  orderNumber?: string;
+  createdAt: string;
+}
+
+// Fetch reviews for a specific restaurant (uses the public discovery endpoint)
+export async function getRestaurantReviews(restaurantId: string): Promise<Review[]> {
+  const { data } = await apiClient.get(`/discovery/restaurants/${restaurantId}/reviews`);
+  return data || [];
+}
