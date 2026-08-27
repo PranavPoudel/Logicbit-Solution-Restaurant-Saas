@@ -164,6 +164,7 @@ export default function MenuPage() {
       <p className="text-sm text-neutral-500 mb-6">
         Manage your categories, menu items, and modifiers.
       </p>
+         <SubscriptionUpgradeBanner />
 
       <div className="grid grid-cols-1 md:grid-cols-[240px_1fr] gap-4 items-start mb-6">
         {categoriesQuery.isLoading ? (

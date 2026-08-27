@@ -82,7 +82,8 @@ export default function OrdersPage() {
       <p className="text-sm text-neutral-500 mb-6">
         Incoming orders refresh automatically every 15 seconds.
       </p>
-
+       <SubscriptionUpgradeBanner />
+       
       <OrderTabs tabs={tabs} activeKey={activeTab} onSelect={setActiveTab} />
 
       {ordersQuery.isLoading ? (
