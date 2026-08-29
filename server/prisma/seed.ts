@@ -7,6 +7,7 @@ const SALT_ROUNDS = 10;
 async function main() {
   console.log('🌱 Starting database seed...');
 
+  
   // Wrap the entire seed in an interactive transaction
   await prisma.$transaction(async (tx) => {
     
@@ -33,6 +34,22 @@ async function main() {
         roleId: adminRole.id,
       },
     });
+    console.log('🛡️ Creating Platform Permissions...');
+    const requiredPermissions = [
+      'VIEW_REVENUE', 'VIEW_RESTAURANTS', 'OVERRIDE_RESTAURANT_SETTINGS',
+      'SUSPEND_RESTAURANT', 'MANAGE_COMMISSION', 'MODERATE_CONTENT',
+      'MANAGE_PLATFORM_STAFF', 'MANAGE_SETTLEMENTS', 'MANAGE_SUBSCRIPTIONS',
+      'MANAGE_ADVERTISEMENTS', 'MANAGE_CUISINES', 'VIEW_DELIVERIES',
+      'VIEW_ACTIVITY_LOGS', 'PROCESS_REFUNDS',
+    ];
+
+    for (const perm of requiredPermissions) {
+      await tx.platformPermission.upsert({
+        where: { name: perm },
+        update: {},
+        create: { name: perm, description: `Allows ${perm.toLowerCase().replace(/_/g, ' ')}` },
+      });
+    }
 
     // 2. ASSIGN ALL PERMISSIONS TO ADMIN ROLE
     console.log('🔑 Assigning Platform Permissions...');

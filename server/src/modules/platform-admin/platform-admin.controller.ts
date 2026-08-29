@@ -122,7 +122,7 @@ export class PlatformAdminController {
   }
 
   @Get('staff')
-  @RequirePlatformPermission('MANAGE_PLATFROM_STAFF')
+  @RequirePlatformPermission('MANAGE_PLATFORM_STAFF')
   listAllStaff(){
     return this.platformAdminService.listAllStaff();
   }

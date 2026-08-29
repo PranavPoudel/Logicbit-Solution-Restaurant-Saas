@@ -317,12 +317,10 @@ async listAllStaff() {
     where: { status: 'PENDING' },
     select: {
       id: true,
-      amount: true,
+      commissionDue: true,
       status: true,
       createdAt: true,
-      restaurant: {
-        select: { name: true },
-      },
+      restaurantId: true,
     },
     orderBy: { createdAt: 'desc' },
   });
@@ -371,7 +369,7 @@ async generateSettlement(restaurantId: string, dto: GenerateSettlementDto) {
 
   async listAllSubscriptions() {
     const subscriptions = await this.prisma.restaurantSubscription.findMany({
-      include: { plan: true, restaurant: { select: { name: true } } },
+      include: { plan: true },
     });
     return { success: true, data: subscriptions };
   }
@@ -385,7 +383,7 @@ async generateSettlement(restaurantId: string, dto: GenerateSettlementDto) {
         expiryDate: { lte: thirtyDaysFromNow, gte: new Date() },
         status: 'ACTIVE',
       },
-      include: { plan: true, restaurant: { select: { name: true } } },
+      include: { plan: true },
     });
     return { success: true, data: subscriptions };
   }
