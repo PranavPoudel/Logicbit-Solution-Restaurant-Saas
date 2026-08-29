@@ -7,6 +7,10 @@ import { UpdateStaffDto } from './dto/update-staff.dto';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { GenerateSettlementDto } from './dto/generate-settlement.dto';
 import { CreatePlanDto } from './dto/create-plan.dto';
+import { ApproveAdDto } from './dto/approve-ad.dto';
+import { RejectAdDto } from './dto/reject-ad.dto';
+import { CreateCuisineDto } from './dto/create-cuisine.dto';
+import { UpdateCuisineDto } from './dto/update-cuisine.dto';
 @Injectable()
 export class PlatformAdminService {
   constructor(
@@ -396,7 +400,80 @@ async generateSettlement(restaurantId: string, dto: GenerateSettlementDto) {
     return { success: true, data: plans };
   }
 
+async renewSubscription(restaurantId: string) {
+    const sub = await this.prisma.restaurantSubscription.findUnique({
+      where: { restaurantId },
+      include: { plan: true },
+    });
 
+    if (!sub) return { success: false, message: 'Subscription not found' };
+
+    const currentExpiry = sub.expiryDate && sub.expiryDate > new Date() ? sub.expiryDate : new Date();
+    const newExpiry = new Date(currentExpiry);
+    newExpiry.setMonth(newExpiry.getMonth() + sub.plan.durationMonths);
+
+    const updated = await this.prisma.restaurantSubscription.update({
+      where: { restaurantId },
+      data: { expiryDate: newExpiry, status: 'ACTIVE' },
+    });
+
+    return { success: true, message: 'Subscription renewed', data: updated };
+  }
+
+ async listPendingAds() {
+  const ads = await this.prisma.advertisement.findMany({
+    where: { status: 'PENDING' },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  const restaurantIds = [...new Set(ads.map((ad) => ad.restaurantId))];
+  const restaurants = await this.prisma.restaurant.findMany({
+    where: { id: { in: restaurantIds } },
+    select: { id: true, name: true },
+  });
+
+  const restaurantMap = new Map(restaurants.map((r) => [r.id, r]));
+
+  const data = ads.map((ad) => ({
+    ...ad,
+    restaurant: restaurantMap.get(ad.restaurantId) ?? null,
+  }));
+
+  return { success: true, data };
+}
+
+  async approveAd(id: string, dto: ApproveAdDto) {
+    const ad = await this.prisma.advertisement.update({
+      where: { id },
+      data: { status: 'ACTIVE', priority: dto.priority ?? 0 },
+    });
+    return { success: true, message: 'Advertisement approved', data: ad };
+  }
+
+  async rejectAd(id: string, dto: RejectAdDto) {
+    const ad = await this.prisma.advertisement.update({
+      where: { id },
+      data: { status: 'REJECTED', rejectionReason: dto.rejectionReason },
+    });
+    return { success: true, message: 'Advertisement rejected', data: ad };
+  }
+
+  async createCuisine(dto: CreateCuisineDto) {
+    const cuisine = await this.prisma.cuisine.create({ data: dto });
+    return { success: true, data: cuisine };
+  }
+
+  async updateCuisine(id: string, dto: UpdateCuisineDto) {
+    const cuisine = await this.prisma.cuisine.update({ where: { id }, data: dto });
+    return { success: true, data: cuisine };
+  }
+
+  async deleteCuisine(id: string) {
+    await this.prisma.cuisine.delete({ where: { id } });
+    return { success: true, message: 'Cuisine deleted successfully' };
+  }
+
+  
 
 }
 
