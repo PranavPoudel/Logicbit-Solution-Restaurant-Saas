@@ -2,14 +2,16 @@
 "use client";
 
 import { useState } from "react";
-import { Bell, ChevronDown, LogOut } from "lucide-react";
+import { Bell, ChevronDown, LogOut, Plus } from "lucide-react";
 import { useOwnerAuthStore } from "@/store/owner-auth-store";
+import { AddRestaurantModal } from "./add-restaurant-modal";
 
 export function OwnerTopbar() {
   const { user, restaurants, activeRestaurantId, setActiveRestaurant, logout } =
     useOwnerAuthStore();
   const [restaurantMenuOpen, setRestaurantMenuOpen] = useState(false);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   const activeRestaurant =
     restaurants.find((r) => r.id === activeRestaurantId) ?? restaurants[0];

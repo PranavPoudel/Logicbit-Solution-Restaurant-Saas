@@ -11,6 +11,7 @@ import { SettingsField, SettingsToggle } from "@/components/owner-settings/setti
 import { useGeolocation } from "@/hooks/use-geolocation";
 import { DynamicMapPicker } from "@/components/map/dynamic-map-picker";
 import { listCuisines, getRestaurantCuisines, setRestaurantCuisines } from "@/lib/api/cuisines";
+import { listMyRestaurants } from "@/lib/api/restaurants";
 
 const TABS = [
   { key: "general", label: "General" },
@@ -64,6 +65,7 @@ const EMPTY_FORM: SettingsForm = {
 
 export default function SettingsPage() {
   const restaurantId = useOwnerAuthStore((s) => s.activeRestaurantId);
+   const setRestaurants = useOwnerAuthStore((s) => s.setRestaurants);
   const queryClient = useQueryClient();
   const { lat, lng } = useGeolocation();
   const [activeTab, setActiveTab] = useState("general");
@@ -106,34 +108,39 @@ export default function SettingsPage() {
     return isNaN(num) ? undefined : num;
   };
 
-  const saveMutation = useMutation({
-    mutationFn: () =>
-      updateMyRestaurant(restaurantId as string, {
-        name: form.name,
-        address: form.address,
-        city: form.city,
-        //  Use safe parser
-        latitude: parseNumber(form.latitude),
-        longitude: parseNumber(form.longitude),
-        primaryColor: form.primaryColor,
-        secondaryColor: form.secondaryColor,
-        heroHeading: form.heroHeading,
-        heroSubheading: form.heroSubheading,
-        isOpen: form.isOpen,
-        supportsDelivery: form.supportsDelivery,
-        supportsPickup: form.supportsPickup,
-        supportsDineIn: form.supportsDineIn,
-        selfDeliveryRadiusKm: parseNumber(form.selfDeliveryRadiusKm),
-        selfDeliveryFlatFee: parseNumber(form.selfDeliveryFlatFee),
-        maxDeliveryRadiusKm: parseNumber(form.maxDeliveryRadiusKm),
-      }),
-    onSuccess: () => {
-      setSavedAt(Date.now());
-      queryClient.invalidateQueries({ queryKey: ["owner-restaurant", restaurantId] });
-      // refresh cuisines in case they were updated
-      queryClient.invalidateQueries({ queryKey: ["restaurant-cuisines", restaurantId] });
-    },
-  });
+const saveMutation = useMutation({
+  mutationFn: () =>
+    updateMyRestaurant(restaurantId as string, {
+      name: form.name,
+      address: form.address,
+      city: form.city,
+      latitude: parseNumber(form.latitude),
+      longitude: parseNumber(form.longitude),
+      primaryColor: form.primaryColor,
+      secondaryColor: form.secondaryColor,
+      heroHeading: form.heroHeading,
+      heroSubheading: form.heroSubheading,
+      isOpen: form.isOpen,
+      supportsDelivery: form.supportsDelivery,
+      supportsPickup: form.supportsPickup,
+      supportsDineIn: form.supportsDineIn,
+      selfDeliveryRadiusKm: parseNumber(form.selfDeliveryRadiusKm),
+      selfDeliveryFlatFee: parseNumber(form.selfDeliveryFlatFee),
+      maxDeliveryRadiusKm: parseNumber(form.maxDeliveryRadiusKm),
+    }),
+  onSuccess: async () => {
+    setSavedAt(Date.now());
+    queryClient.invalidateQueries({ queryKey: ["owner-restaurant", restaurantId] });
+    queryClient.invalidateQueries({ queryKey: ["restaurant-cuisines", restaurantId] });
+
+    try {
+        const freshRestaurants = await listMyRestaurants();
+        setRestaurants(freshRestaurants);
+      } catch (error) {
+        console.error("Failed to refresh restaurant list:", error);
+      }
+  },
+});
 
     // --- Cuisine Queries & State ---
   const allCuisinesQuery = useQuery({
