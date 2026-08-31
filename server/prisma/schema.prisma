@@ -35,7 +35,6 @@ model User {
   phone        String?
   passwordHash String
   isSuperAdmin Boolean  @default(false) // Tenant भित्रैको सर्वोच्च (Owner) — register गर्दा auto true हुन्छ
-  isPlatformAdmin Boolean @default(false) // DEPRECATED — अब PlatformStaff model ले यो जिम्मेवारी लिन्छ। यो field हटाइएको छैन (existing data/migration जोगाउन), तर कुनै guard ले अब यो check गर्दैन।
   isActive     Boolean  @default(true)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt

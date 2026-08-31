@@ -11,7 +11,6 @@ export interface JwtPayload {
   roles: string[];
   tenantId: string;
   isSuperAdmin: boolean;
-  isPlatformAdmin: boolean;
 }
 
 @Injectable()
@@ -49,7 +48,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       roles: payload.roles,
       tenantId: payload.tenantId,
       isSuperAdmin: payload.isSuperAdmin,
-      isPlatformAdmin: user.isPlatformAdmin, // DB बाटै ताजा — token भित्र भन्दा DB लाई प्राथमिकता (privilege escalation/revocation दुबैको लागि सुरक्षित)
     };
   }
 }
