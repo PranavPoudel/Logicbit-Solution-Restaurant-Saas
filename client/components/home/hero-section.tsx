@@ -9,22 +9,22 @@ export function HeroSection() {
       {/* decorative gradient + soft shapes instead of a stock photo — keeps
           the hero from depending on an external image that could break */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#17181C] via-[#1F2128] to-[#0F6B5C]/40" />
-      <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-[#E3A008]/20 blur-3xl" />
-      <div className="absolute -bottom-32 -left-16 w-80 h-80 rounded-full bg-[#0F6B5C]/25 blur-3xl" />
+      <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-[#E3A008]/20 blur-3xl animate-pulse [animation-duration:6s]" />
+      <div className="absolute -bottom-32 -left-16 w-80 h-80 rounded-full bg-[#0F6B5C]/25 blur-3xl animate-pulse [animation-duration:8s]" />
 
-      <div className="relative max-w-6xl mx-auto px-4 pt-14 pb-20 sm:pt-20 sm:pb-28 text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
-        <span className="inline-block font-mono text-[11px] uppercase tracking-[0.15em] text-[#E3A008] mb-5">
+      <div className="relative max-w-6xl mx-auto px-4 pt-14 pb-20 sm:pt-20 sm:pb-28 text-center">
+        <span className="inline-block font-mono text-[11px] uppercase tracking-[0.15em] text-[#E3A008] mb-5 animate-in fade-in slide-in-from-bottom-2 duration-500">
           Kirtipur, Kathmandu
         </span>
-        <h1 className="font-display font-semibold text-white text-3xl sm:text-5xl leading-tight max-w-2xl mx-auto">
+        <h1 className="font-display font-semibold text-white text-3xl sm:text-5xl leading-tight max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-3 duration-700 [animation-delay:100ms] [animation-fill-mode:backwards]">
           Find restaurants that deliver near you
         </h1>
-        <p className="text-white/60 text-sm sm:text-base mt-3 max-w-md mx-auto">
+        <p className="text-white/60 text-sm sm:text-base mt-3 max-w-md mx-auto animate-in fade-in slide-in-from-bottom-3 duration-700 [animation-delay:200ms] [animation-fill-mode:backwards]">
           Hundreds of restaurants, one order away — fast delivery across Kathmandu.
         </p>
 
         {/* trust stats row */}
-        <div className="flex items-center justify-center gap-3 sm:gap-5 mt-5 text-white/50 text-xs sm:text-sm">
+        <div className="flex items-center justify-center gap-3 sm:gap-5 mt-5 text-white/50 text-xs sm:text-sm animate-in fade-in slide-in-from-bottom-3 duration-700 [animation-delay:300ms] [animation-fill-mode:backwards]">
           <span>500+ Restaurants</span>
           <span className="w-1 h-1 rounded-full bg-white/30" />
           <span>30 Min Delivery</span>
@@ -33,7 +33,7 @@ export function HeroSection() {
         </div>
 
         {/* floating search card, reference-style */}
-        <div className="mt-8 max-w-xl mx-auto bg-white rounded-2xl p-2 flex flex-col sm:flex-row gap-2 shadow-2xl shadow-black/30">
+        <div className="mt-8 max-w-xl mx-auto bg-white rounded-2xl p-2 flex flex-col sm:flex-row gap-2 shadow-2xl shadow-black/30 animate-in fade-in slide-in-from-bottom-4 duration-700 [animation-delay:400ms] [animation-fill-mode:backwards]">
           <div className="flex items-center gap-2 flex-1 px-3 py-2.5">
             <Search size={17} className="text-neutral-400 shrink-0" />
             <input
@@ -46,7 +46,7 @@ export function HeroSection() {
             <MapPin size={15} className="text-[#E3A008] shrink-0" />
             <span className="text-sm text-neutral-500 whitespace-nowrap">Kirtipur</span>
           </div>
-          <button className="bg-[#17181C] text-white text-sm font-medium px-6 py-2.5 rounded-2xl shrink-0 hover:bg-[#0F6B5C] transition-colors">
+          <button className="bg-[#17181C] text-white text-sm font-medium px-6 py-2.5 rounded-2xl shrink-0 hover:bg-[#0F6B5C] hover:scale-105 hover:shadow-lg hover:shadow-[#0F6B5C]/30 active:scale-95 transition-all duration-200">
             Search
           </button>
         </div>
