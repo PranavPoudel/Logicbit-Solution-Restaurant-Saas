@@ -1,33 +1,23 @@
-// app/(customer)/cart/page.tsx
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { ShoppingBag } from "lucide-react";
+import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
 import { useCartStore } from "@/store/cart-store";
-import { CartItemRow } from "@/components/cart/cart-item-row";
-import { CouponInput } from "@/components/cart/coupon-input";
-
-const DELIVERY_FEE = 60; // TODO: replace with the distance-tiered fee from checkout preview
 
 export default function CartPage() {
-  const router = useRouter();
-  const { items, restaurantId, subtotal } = useCartStore();
-  const [discount, setDiscount] = useState(0);
-  const [appliedCode, setAppliedCode] = useState<string | null>(null);
+  const { items, restaurantId, subtotal, addItem, removeOneOrAll, removeItem } = useCartStore();
 
   const sub = subtotal();
-  const total = Math.max(sub + DELIVERY_FEE - discount, 0);
 
   if (items.length === 0) {
     return (
-      <div className="max-w-2xl mx-auto px-4 py-20 text-center">
-        <ShoppingBag className="mx-auto text-neutral-300" size={32} />
-        <p className="text-sm text-neutral-500 mt-3">Your cart is empty.</p>
+      <div className="max-w-lg mx-auto px-4 py-20 text-center">
+        <ShoppingBag className="mx-auto text-neutral-300 mb-4" size={48} />
+        <h1 className="font-display font-semibold text-xl text-[#17181C]">Your cart is empty</h1>
+        <p className="text-sm text-neutral-500 mt-1.5 mb-6">Add some delicious items to get started.</p>
         <Link
           href="/"
-          className="inline-block mt-5 text-sm font-medium bg-[#17181C] text-white px-5 py-2.5 rounded-full"
+          className="inline-block bg-[#17181C] text-white text-sm font-medium px-6 py-2.5 rounded-full hover:bg-[#2B2D33] transition-colors"
         >
           Browse restaurants
         </Link>
@@ -36,58 +26,82 @@ export default function CartPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6">
-      <h1 className="font-display font-semibold text-xl text-[#17181C] mb-4">Your cart</h1>
+    <div className="max-w-lg mx-auto px-4 py-6">
+      <h1 className="font-display font-semibold text-xl text-[#17181C] mb-5">Your cart</h1>
 
-      <div className="bg-white border border-[#E8E7E2] rounded-2xl px-4">
+      <div className="bg-white border border-[#E8E7E2] rounded-2xl divide-y divide-[#E8E7E2]">
         {items.map((item) => (
-          <CartItemRow key={item.menuItemId} item={item} />
+          <div key={`${item.menuItemId}-${item.variantKey}`} className="p-4 flex items-center justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-[#17181C] truncate">{item.name}</p>
+              <p className="text-xs text-neutral-500 mt-0.5 font-mono">Rs {item.price}</p>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="flex items-center border border-[#E8E7E2] rounded-full bg-[#FAFAF7]">
+                <button
+                  onClick={() => removeOneOrAll(item.menuItemId, item.variantKey)}
+                  className="p-1.5 text-neutral-600 hover:text-[#17181C] transition-colors"
+                >
+                  <Minus size={14} />
+                </button>
+                <span className="w-6 text-center text-sm font-medium text-[#17181C]">{item.quantity}</span>
+                <button
+                  onClick={() =>
+                    addItem({
+                      id: item.id, // ✅ Added missing 'id' field
+                      menuItemId: item.menuItemId,
+                      restaurantId: item.restaurantId,
+                      name: item.name,
+                      price: item.price,
+                      selectedModifiers: item.selectedModifiers,
+                      variantKey: item.variantKey,
+                      quantity: 1,
+                    })
+                  }
+                  className="p-1.5 text-neutral-600 hover:text-[#17181C] transition-colors"
+                >
+                  <Plus size={14} />
+                </button>
+              </div>
+
+              <p className="text-sm font-semibold text-[#17181C] font-mono w-16 text-right">
+                Rs {item.price * item.quantity}
+              </p>
+
+              <button
+                onClick={() => removeItem(item.menuItemId, item.variantKey)}
+                className="p-1.5 text-neutral-400 hover:text-red-600 transition-colors"
+              >
+                <Trash2 size={16} />
+              </button>
+            </div>
+          </div>
         ))}
       </div>
 
-      <div className="mt-4">
-        <CouponInput
-          restaurantId={restaurantId ?? ""}
-          subtotal={sub}
-          appliedCode={appliedCode}
-          onApplied={(d, code) => {
-            setDiscount(d);
-            setAppliedCode(code);
-          }}
-          onRemove={() => {
-            setDiscount(0);
-            setAppliedCode(null);
-          }}
-        />
-      </div>
-
-      <div className="mt-5 bg-white border border-[#E8E7E2] rounded-2xl p-4 space-y-2 text-sm">
+      {/* ✅ UPDATED: Removed Coupon Input, Updated Delivery Fee Text */}
+      <div className="bg-white border border-[#E8E7E2] rounded-2xl p-4 mt-4 space-y-2 text-sm">
         <div className="flex justify-between text-neutral-500">
           <span>Subtotal</span>
           <span className="font-mono">Rs {sub}</span>
         </div>
         <div className="flex justify-between text-neutral-500">
           <span>Delivery fee</span>
-          <span className="font-mono">Rs {DELIVERY_FEE}</span>
+          <span className="text-xs text-neutral-400 italic">Calculated at checkout</span>
         </div>
-        {discount > 0 && (
-          <div className="flex justify-between text-[#0F6B5C]">
-            <span>Discount</span>
-            <span className="font-mono">-Rs {discount}</span>
-          </div>
-        )}
         <div className="flex justify-between font-semibold text-[#17181C] pt-2 border-t border-[#E8E7E2]">
-          <span>Total</span>
-          <span className="font-mono">Rs {total}</span>
+          <span>Base Total</span>
+          <span className="font-mono">Rs {sub}</span>
         </div>
       </div>
 
-      <button
-        onClick={() => router.push("/checkout")}
-        className="w-full mt-5 bg-[#17181C] text-white text-sm font-medium py-3.5 rounded-2xl"
+      <Link
+        href="/checkout"
+        className="block w-full mt-5 bg-[#17181C] text-white text-sm font-medium py-3.5 rounded-2xl text-center hover:bg-[#2B2D33] transition-colors"
       >
-        Proceed to checkout — Rs {total}
-      </button>
+        Proceed to checkout — Rs {sub}
+      </Link>
     </div>
   );
 }
