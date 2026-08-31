@@ -34,15 +34,19 @@ const mockBanners: Banner[] = [
 export function BannerCarousel() {
   return (
     <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-      {mockBanners.map((banner) => (
+      {mockBanners.map((banner, index) => (
         <div
           key={banner.id}
-          className={`snap-start shrink-0 w-[280px] h-[120px] rounded-2xl bg-gradient-to-br ${banner.gradient} p-4 flex flex-col justify-end`}
+          style={{ animationDelay: `${index * 100}ms` }}
+          className={`snap-start shrink-0 w-[280px] h-[120px] rounded-[1.75rem] bg-gradient-to-br ${banner.gradient} p-4 flex flex-col justify-end relative overflow-hidden cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-xl active:scale-[0.98] animate-in fade-in slide-in-from-right-4 fill-mode-backwards`}
         >
-          <p className="text-white font-display font-semibold text-base leading-tight">
+          {/* soft glow blob for extra life, matches hero/popup treatment */}
+          <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full bg-white/10 blur-2xl" />
+
+          <p className="text-white font-display font-semibold text-base leading-tight relative">
             {banner.title}
           </p>
-          <p className="text-white/80 text-xs mt-1">{banner.subtitle}</p>
+          <p className="text-white/80 text-xs mt-1 relative">{banner.subtitle}</p>
         </div>
       ))}
     </div>
