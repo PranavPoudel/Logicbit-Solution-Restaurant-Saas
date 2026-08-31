@@ -124,14 +124,21 @@ export async function getRestaurantMenu(
   const { data } = await apiClient.get(`/discovery/restaurants/${restaurantId}/menu`, {
     params: lang ? { lang } : undefined,
   });
+
   if (process.env.NODE_ENV === "development") {
     // eslint-disable-next-line no-console
     console.log("[discovery/restaurants/:id/menu] unwrapped payload:", data);
   }
-  if (Array.isArray(data)) return data;
-  return data?.categories ?? [];
-}
 
+  // Extract the categories array
+  const rawCategories = Array.isArray(data) ? data : data?.categories ?? [];
+
+  // Normalize the data: rename 'menuItems' to 'items' so the UI works perfectly
+  return rawCategories.map((cat: any) => ({
+    ...cat,
+    items: cat.menuItems || cat.items || [], 
+  }));
+}
 export async function getMenuItemDetail(
   restaurantId: string,
   menuItemId: string

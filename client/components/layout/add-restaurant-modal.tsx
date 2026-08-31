@@ -35,20 +35,29 @@ export function AddRestaurantModal({ isOpen, onClose }: AddRestaurantModalProps)
       return data;
     },
     onSuccess: async (newRestaurant) => {
-      // 1. Fetch the updated list of restaurants
-      const freshRestaurants = await listMyRestaurants();
-      setRestaurants(freshRestaurants);
-      
-      // 2. Automatically switch to the new restaurant
-      setActiveRestaurant(newRestaurant.id);
-      
-      // 3. Close modal and reset form
-      onClose();
-      setName("");
-      setCity("");
-      
-      // 4. Redirect to settings to fill in the rest of the details
-      window.location.href = "/owner/settings";
+      try {
+        const freshRestaurants = await listMyRestaurants();
+        setRestaurants(freshRestaurants);
+        
+        if (newRestaurant?.id) {
+          setActiveRestaurant(newRestaurant.id);
+        }
+        
+        onClose();
+        setName("");
+        setCity("");
+        
+        // Redirect to settings
+        window.location.href = "/settings";
+      } catch (error) {
+        console.error("Error updating store:", error);
+        alert("Restaurant created, but there was an issue switching to it. Please refresh.");
+      }
+    },
+    onError: (error: any) => {
+      console.error("Failed to create restaurant:", error);
+      const message = error?.response?.data?.message || "Failed to create restaurant. Please try again.";
+      alert(message); // Shows the error instead of hanging
     },
   });
 

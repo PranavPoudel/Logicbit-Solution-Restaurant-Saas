@@ -39,7 +39,8 @@ async function main() {
     city: string,
     lat: number,
     lng: number,
-    cuisineNamesToLink: string[]
+    cuisineNamesToLink: string[],
+    hasSubscription: boolean = false // ✅ NEW: Flag to grant subscription
   ) {
     const password = await bcrypt.hash('password123', 10);
     
@@ -113,6 +114,42 @@ async function main() {
       },
     });
 
+    // ✅ NEW: Add Subscription if requested
+    if (hasSubscription) {
+      // Ensure a Pro Plan exists
+      let plan = await prisma.subscriptionPlan.findUnique({ where: { name: 'Pro Plan' } });
+      if (!plan) {
+        plan = await prisma.subscriptionPlan.create({
+          data: {
+            name: 'Pro Plan',
+            durationMonths: 12,
+            price: 2999,
+            isActive: true,
+          },
+        });
+      }
+
+      // Create or update the subscription for this restaurant
+      await prisma.restaurantSubscription.upsert({
+        where: { restaurantId: restaurant.id },
+        update: {
+          planId: plan.id,
+          status: 'ACTIVE',
+          expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year from now
+          autoRenew: true,
+        },
+        create: {
+          restaurantId: restaurant.id,
+          planId: plan.id,
+          status: 'ACTIVE',
+          startDate: new Date(),
+          expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+          autoRenew: true,
+        },
+      });
+      console.log(`   ↳ ✅ Added ACTIVE Pro Plan subscription`);
+    }
+
     // Refresh Cuisines (Delete old links, create new ones to avoid duplicates)
     await prisma.restaurantCuisine.deleteMany({
       where: { restaurantId: restaurant.id },
@@ -184,22 +221,26 @@ async function main() {
   }
 
   // 3. Create 3 Distinct Restaurant Scenarios
+  // ✅ We pass 'true' as the last argument to give owner1 a subscription!
   await createRestaurantScenario(
     'Momo Tenants', 'owner1@test.com', 'Ramesh Shrestha', 
     'Momo\'s & More', 'momos-and-more', 'Kathmandu', 27.7172, 85.3240, 
-    ['Nepali', 'Fast Food']
+    ['Nepali', 'Fast Food'],
+    true // <--- GRANTS SUBSCRIPTION
   );
 
   await createRestaurantScenario(
     'Newari Tenants', 'owner2@test.com', 'Sita Maharjan', 
     'Newari Bhanchha Ghar', 'newari-bhanchha-ghar', 'Patan', 27.6766, 85.3253, 
-    ['Newari', 'Nepali']
+    ['Newari', 'Nepali'],
+    false // No subscription
   );
 
   await createRestaurantScenario(
     'Burger Tenants', 'owner3@test.com', 'John Doe', 
     'Burger Station', 'burger-station', 'Kathmandu', 27.7000, 85.3100, 
-    ['Fast Food', 'Chinese']
+    ['Fast Food', 'Chinese'],
+    false // No subscription
   );
 
   // 4. Create a Test Customer
@@ -218,10 +259,10 @@ async function main() {
   console.log('🎉 Seed completed successfully!');
   console.log('\n📝 Test Accounts (Password for all is: password123):');
   console.log('  Platform Admin: admin@logicbit.local');
-  console.log('  Owner 1:        owner1@test.com');
-  console.log('  Owner 2:        owner2@test.com');
-  console.log('  Owner 3:        owner3@test.com');
-  console.log('  Customer:       customer@test.com');
+  console.log('  Owner 1 (WITH SUBSCRIPTION): owner1@test.com');
+  console.log('  Owner 2 (NO SUBSCRIPTION):   owner2@test.com');
+  console.log('  Owner 3 (NO SUBSCRIPTION):   owner3@test.com');
+  console.log('  Customer:                    customer@test.com');
 }
 
 main()
