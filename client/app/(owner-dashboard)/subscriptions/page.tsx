@@ -36,7 +36,13 @@ export default function SubscriptionPage() {
   const handleToggle = () => {
     const newValue = !autoRenewLocal;
     setAutoRenewLocal(newValue); // Optimistic update
-    toggleMutation.mutate(newValue);
+    
+    // ✅ Senior-level fix: Revert UI if the backend call fails
+    toggleMutation.mutate(newValue, {
+      onError: () => {
+        setAutoRenewLocal(!newValue); // Snap back to original state
+      }
+    });
   };
 
   if (!restaurantId) {
@@ -73,7 +79,7 @@ export default function SubscriptionPage() {
               {subscription?.message || "Your restaurant doesn't have an active subscription."}
             </p>
           </div>
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-4">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-4">
             <button
               onClick={() => alert("Upgrade flow (Payment Gateway) coming in Phase 4! For now, please contact support.")}
               className="w-full sm:w-auto px-6 py-2.5 bg-[#E3A008] text-[#17181C] font-bold rounded-lg hover:bg-[#d49207] transition-colors flex items-center justify-center gap-2"
@@ -184,7 +190,7 @@ export default function SubscriptionPage() {
           )}
         </div>
 
-        {/* Auto-Renew Toggle */}
+        {/* ✅ PERFECTED Auto-Renew Toggle */}
         <div className="flex items-center justify-between pt-4 border-t border-neutral-100">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-[#0F6B5C]/10 flex items-center justify-center">
@@ -199,16 +205,21 @@ export default function SubscriptionPage() {
               </p>
             </div>
           </div>
+          
           <button
+            type="button"
+            role="switch"
+            aria-checked={autoRenewLocal}
             onClick={handleToggle}
             disabled={toggleMutation.isPending}
-            className={`relative w-12 h-6 rounded-full transition-colors ${
-              autoRenewLocal ? "bg-[#0F6B5C]" : "bg-neutral-200"
-            } disabled:opacity-50`}
+            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#0F6B5C] focus:ring-offset-2 ${
+              autoRenewLocal ? 'bg-[#0F6B5C]' : 'bg-neutral-200'
+            } disabled:opacity-50 disabled:cursor-not-allowed`}
           >
             <span
-              className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-transform shadow-sm ${
-                autoRenewLocal ? "translate-x-6" : "translate-x-0.5"
+              aria-hidden="true"
+              className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                autoRenewLocal ? 'translate-x-5' : 'translate-x-0'
               }`}
             />
           </button>
@@ -248,7 +259,7 @@ export default function SubscriptionPage() {
         )}
       </div>
 
-      {/* Plan Features (Static for now, can be dynamic later) */}
+      {/* Plan Features */}
       <div className="bg-white rounded-xl border border-neutral-200 p-6">
         <h3 className="text-sm font-semibold text-neutral-900 mb-4">Your Plan Includes</h3>
         <ul className="space-y-3">
