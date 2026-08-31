@@ -53,9 +53,9 @@ Status legend: ✅ Done &nbsp;|&nbsp; ⚠️ Partial &nbsp;|&nbsp; ❌ Not start
 4. ~~Owner: Storefront Builder~~ ✅ done
 5. ~~Owner: Cuisine checklist~~ ✅ done
 6. ~~Owner: Subscription & Analytics~~ ✅ done
-7. Owner: **Advertisement + Roles & Permissions** (Delegated to interns)
+7. Owner: **Advertisement + Roles & Permissions** (Delegated)
 8. **Delivery App** (own portal)
-9. **Platform Admin** (own portal) (delegated to intern)
+9. **Platform Admin** (own portal) (delegated)
 
 ---
 
