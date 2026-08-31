@@ -37,21 +37,30 @@ export default function RestaurantDetailPage({
     enabled: !!restaurantId,
   });
 
-  const bannersQuery = useQuery({
+    const bannersQuery = useQuery({
     queryKey: ["public-banners", restaurantId],
-    queryFn: () => publicStorefrontApi.getBanners(restaurantId as string),
+    queryFn: async () => {
+      const data = await publicStorefrontApi.getStorefront(restaurantId as string);
+      return data.banners; 
+    },
     enabled: !!restaurantId,
   });
 
-  const configQuery = useQuery({
+    const configQuery = useQuery({
     queryKey: ["public-config", restaurantId],
-    queryFn: () => publicStorefrontApi.getConfig(restaurantId as string),
+    queryFn: async () => {
+      const data = await publicStorefrontApi.getStorefront(restaurantId as string);
+      return data.config;
+    },
     enabled: !!restaurantId,
   });
 
-  const popupsQuery = useQuery({
+    const popupsQuery = useQuery({
     queryKey: ["public-popups", restaurantId],
-    queryFn: () => publicStorefrontApi.getPopups(restaurantId as string),
+    queryFn: async () => {
+      const popup = await publicStorefrontApi.getPopup(restaurantId as string);
+      return popup ? [popup] : []; 
+    },
     enabled: !!restaurantId,
   });
 
