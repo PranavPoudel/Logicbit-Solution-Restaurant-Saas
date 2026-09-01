@@ -3,18 +3,11 @@ import { apiClient } from "@/lib/api/client";
 import type { DiscoveryRestaurant } from "@/types/restaurant";
 import type { RestaurantDetail, MenuCategory, MenuItemDetail } from "@/types/menu";
 
-// Paths confirmed from the API list:
-//   GET /discovery/restaurants/nearby?lat=&lng=&radiusKm=&cuisineType=&minRating=&priceRange=&isOpenNow=&sortBy=&page=&limit=
-//   GET /discovery/advertisements/homepage-banners
-//   GET /discovery/advertisements/popup
-// Response body shape (exact field names, pagination envelope) is still
-// assumed — adjust the types below once we see a real response.
-
 export interface NearbyRestaurantsParams {
   lat: number;
   lng: number;
   radiusKm?: number;
-  cuisineType?: string;
+  cuisineType?: string; 
   minRating?: number;
   isOpenNow?: boolean;
   sortBy?: string;
@@ -32,9 +25,36 @@ export interface NearbyRestaurantsResponse {
 export async function getNearbyRestaurants(
   params: NearbyRestaurantsParams
 ): Promise<NearbyRestaurantsResponse> {
-  // apiClient already unwraps {success, data} — this `data` is the inner
-  // payload: { restaurants: [...], pagination: { page, limit, total } }
-  const { data } = await apiClient.get("/discovery/restaurants/nearby", { params });
+  // Build query params object, filtering out undefined values
+  const queryParams: Record<string, string | number | boolean> = {
+    lat: params.lat,
+    lng: params.lng,
+    radiusKm: params.radiusKm ?? 10,
+  };
+
+  // Only add optional params if they exist
+  if (params.cuisineType) {
+    queryParams.cuisineType = params.cuisineType;
+  }
+  if (params.minRating) {
+    queryParams.minRating = params.minRating;
+  }
+  if (params.isOpenNow !== undefined) {
+    queryParams.isOpenNow = params.isOpenNow;
+  }
+  if (params.sortBy) {
+    queryParams.sortBy = params.sortBy;
+  }
+  if (params.page) {
+    queryParams.page = params.page;
+  }
+  if (params.limit) {
+    queryParams.limit = params.limit;
+  }
+
+  const { data } = await apiClient.get("/discovery/restaurants/nearby", { 
+    params: queryParams 
+  });
 
   if (process.env.NODE_ENV === "development") {
     // eslint-disable-next-line no-console
@@ -104,14 +124,21 @@ export async function getRestaurantMenu(
   const { data } = await apiClient.get(`/discovery/restaurants/${restaurantId}/menu`, {
     params: lang ? { lang } : undefined,
   });
+
   if (process.env.NODE_ENV === "development") {
     // eslint-disable-next-line no-console
     console.log("[discovery/restaurants/:id/menu] unwrapped payload:", data);
   }
-  if (Array.isArray(data)) return data;
-  return data?.categories ?? [];
-}
 
+  // Extract the categories array
+  const rawCategories = Array.isArray(data) ? data : data?.categories ?? [];
+
+  // Normalize the data: rename 'menuItems' to 'items' so the UI works perfectly
+  return rawCategories.map((cat: any) => ({
+    ...cat,
+    items: cat.menuItems || cat.items || [], 
+  }));
+}
 export async function getMenuItemDetail(
   restaurantId: string,
   menuItemId: string

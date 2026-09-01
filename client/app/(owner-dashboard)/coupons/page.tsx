@@ -1,15 +1,19 @@
-// app/(owner-dashboard)/coupons/page.tsx
 "use client";
 
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Plus, Edit2, Trash2 } from "lucide-react";
 import { useOwnerAuthStore } from "@/store/owner-auth-store";
 import { couponsApi } from "@/lib/api/coupons";
+import { CouponForm, type CouponFormData } from "@/components/owner-coupons/coupon-form";
 import { CouponTable, type OwnerCoupon } from "@/components/owner-coupons/coupon-table";
 
 export default function CouponsPage() {
   const restaurantId = useOwnerAuthStore((s) => s.activeRestaurantId);
   const queryClient = useQueryClient();
+  
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingCoupon, setEditingCoupon] = useState<OwnerCoupon | null>(null);
 
   const couponsQuery = useQuery({
     queryKey: ["owner-coupons", restaurantId],
@@ -17,11 +21,23 @@ export default function CouponsPage() {
     enabled: !!restaurantId,
   });
 
-  const addMutation = useMutation({
-    mutationFn: (input: { code: string; discountType: "PERCENTAGE" | "FLAT"; discountValue: number }) =>
+  const createMutation = useMutation({
+    mutationFn: (input: CouponFormData) =>
       couponsApi.create(restaurantId as string, input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["owner-coupons", restaurantId] });
+      setIsFormOpen(false);
+      setEditingCoupon(null);
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, input }: { id: string; input: Partial<CouponFormData> }) =>
+      couponsApi.update(restaurantId as string, id, input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["owner-coupons", restaurantId] });
+      setIsFormOpen(false);
+      setEditingCoupon(null);
     },
   });
 
@@ -31,6 +47,35 @@ export default function CouponsPage() {
       queryClient.invalidateQueries({ queryKey: ["owner-coupons", restaurantId] });
     },
   });
+
+  const handleAdd = () => {
+    setEditingCoupon(null);
+    setIsFormOpen(true);
+  };
+
+  const handleEdit = (coupon: OwnerCoupon) => {
+    setEditingCoupon(coupon);
+    setIsFormOpen(true);
+  };
+
+  const handleDelete = (id: string) => {
+    if (confirm("Are you sure you want to delete this coupon?")) {
+      deleteMutation.mutate(id);
+    }
+  };
+
+  const handleSubmit = (data: CouponFormData) => {
+    if (editingCoupon) {
+      updateMutation.mutate({ id: editingCoupon.id, input: data });
+    } else {
+      createMutation.mutate(data);
+    }
+  };
+
+  const handleCloseForm = () => {
+    setIsFormOpen(false);
+    setEditingCoupon(null);
+  };
 
   if (!restaurantId) {
     return (
@@ -44,20 +89,44 @@ export default function CouponsPage() {
   }
 
   return (
-    <div className="max-w-2xl">
-      <h1 className="text-xl font-semibold text-neutral-900 mb-1">Coupons</h1>
-      <p className="text-sm text-neutral-500 mb-6">
-        Discount codes customers can apply at checkout.
-      </p>
+    <div className="max-w-5xl">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-xl font-semibold text-neutral-900">Coupons</h1>
+          <p className="text-sm text-neutral-500 mt-1">
+            Discount codes customers can apply at checkout.
+          </p>
+        </div>
+        <button
+          onClick={handleAdd}
+          className="flex items-center gap-2 px-4 py-2 bg-[#1B2333] text-white text-sm font-medium rounded-lg hover:bg-[#2B2D33] transition-colors"
+        >
+          <Plus size={16} />
+          Add Coupon
+        </button>
+      </div>
 
       {couponsQuery.isLoading ? (
         <p className="text-sm text-neutral-400">Loading coupons…</p>
-      ) : (
+      ) : couponsQuery.data && couponsQuery.data.length > 0 ? (
         <CouponTable
-          coupons={couponsQuery.data ?? []}
-          onAdd={(input) => addMutation.mutate(input)}
-          onDelete={(id) => deleteMutation.mutate(id)}
-          isAdding={addMutation.isPending}
+          coupons={couponsQuery.data}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          isLoading={deleteMutation.isPending}
+        />
+      ) : (
+        <div className="bg-white border border-neutral-200 rounded-xl p-12 text-center">
+          <p className="text-sm text-neutral-500">No coupons yet. Create your first coupon to get started.</p>
+        </div>
+      )}
+
+      {isFormOpen && (
+        <CouponForm
+          coupon={editingCoupon}
+          onSubmit={handleSubmit}
+          onCancel={handleCloseForm}
+          isLoading={createMutation.isPending || updateMutation.isPending}
         />
       )}
     </div>

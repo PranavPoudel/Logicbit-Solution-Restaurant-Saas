@@ -1,6 +1,6 @@
-// app/(customer)/page.tsx
 "use client";
 
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle } from "lucide-react";
 import { HeroSection } from "@/components/home/hero-section";
@@ -11,40 +11,66 @@ import { RestaurantCard } from "@/components/restaurant/restaurant-card";
 import { RestaurantCardSkeleton } from "@/components/restaurant/restaurant-card-skeleton";
 import { PopupAd } from "@/components/home/popup-ad";
 import { getNearbyRestaurants } from "@/lib/api/discovery";
+import { listCuisines } from "@/lib/api/cuisines";
 import { useGeolocation } from "@/hooks/use-geolocation";
 
 export default function HomePage() {
   const { lat, lng, isResolved } = useGeolocation();
+  
+  // 1. State for the active cuisine filter
+  const [activeCuisineId, setActiveCuisineId] = useState<string | null>(null);
 
-  const { data, isLoading, isError, refetch } = useQuery({
-    queryKey: ["nearby-restaurants", lat, lng],
-    queryFn: () => getNearbyRestaurants({ lat, lng, radiusKm: 10 }),
+  // 2. Fetch dynamic cuisines from the backend
+  const cuisinesQuery = useQuery({
+    queryKey: ["cuisines"],
+    queryFn: listCuisines,
+  });
+
+  // 3. Fetch nearby restaurants, now reactive to the activeCuisineId
+  const restaurantsQuery = useQuery({
+    queryKey: ["nearby-restaurants", lat, lng, activeCuisineId],
+    queryFn: () => 
+      getNearbyRestaurants({ 
+        lat, 
+        lng, 
+        radiusKm: 10,
+        cuisineType: activeCuisineId || undefined // Pass undefined if no cuisine is selected
+      }),
     enabled: isResolved,
   });
 
-  const restaurants = data?.data ?? [];
+  const restaurants = restaurantsQuery.data?.data ?? [];
 
   return (
     <div>
       <HeroSection />
 
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
+        {/* Pass dynamic data and handlers to the filter component */}
+        <FilterBar 
+          cuisines={cuisinesQuery.data || []}
+          isLoadingCuisines={cuisinesQuery.isLoading}
+          activeCuisineId={activeCuisineId}
+          onCuisineChange={setActiveCuisineId}
+        />
+        
         <CategoryGrid />
         <BannerCarousel />
-        <FilterBar />
 
         <div>
           <h2 className="font-display font-semibold text-lg text-[#17181C] mb-4">
-            Restaurants near you
+            {activeCuisineId 
+              ? `Restaurants serving this cuisine` 
+              : "Restaurants near you"}
           </h2>
 
-          {isLoading || !isResolved ? (
+          {restaurantsQuery.isLoading || !isResolved ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
               {Array.from({ length: 8 }).map((_, i) => (
                 <RestaurantCardSkeleton key={i} />
               ))}
             </div>
-          ) : isError ? (
+          ) : restaurantsQuery.isError ? (
             <div className="flex flex-col items-center text-center py-16 gap-3">
               <AlertTriangle className="text-neutral-300" size={28} />
               <p className="text-sm text-neutral-500">
@@ -52,7 +78,7 @@ export default function HomePage() {
                 <span className="font-mono">localhost:3700</span>?
               </p>
               <button
-                onClick={() => refetch()}
+                onClick={() => restaurantsQuery.refetch()}
                 className="text-sm font-medium bg-[#17181C] text-white px-4 py-2 rounded-full"
               >
                 Retry
@@ -61,7 +87,7 @@ export default function HomePage() {
           ) : restaurants.length === 0 ? (
             <div className="text-center py-16">
               <p className="text-sm text-neutral-400">
-                No restaurants found near you yet.
+                No restaurants found {activeCuisineId ? "for this cuisine" : "near you yet"}.
               </p>
             </div>
           ) : (

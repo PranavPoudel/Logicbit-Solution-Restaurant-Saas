@@ -3,45 +3,39 @@ import { apiClient } from "@/lib/api/client";
 import type { CustomerAuthResponse } from "@/types/api";
 import type { CustomerLoginInput, CustomerSignupInput } from "@/lib/validation/auth-schemas";
 
-// Paths confirmed: POST /customer-auth/login, POST /customer-auth/register.
-// Response body shape (accessToken/refreshToken/customer fields) is still
-// assumed — adjust CustomerAuthResponse in types/api.ts if Swagger shows
-// different field names.
+// Helper to normalize the backend response, handling nested tokens
+function normalizeAuthResponse(data: any): CustomerAuthResponse {
+  return {
+    // Extract from top level OR nested 'tokens' object (common NestJS pattern)
+    accessToken: data.accessToken || data.tokens?.accessToken,
+    refreshToken: data.refreshToken || data.tokens?.refreshToken,
+    // Extract customer/user data
+    customer: data.customer || data.user,
+  } as CustomerAuthResponse;
+}
 
 export async function customerLogin(
   input: CustomerLoginInput
 ): Promise<CustomerAuthResponse> {
-  const { data } = await apiClient.post<CustomerAuthResponse>(
-    "/customer-auth/login",
-    input
-  );
-  return data;
+  const { data } = await apiClient.post<any>("/customer-auth/login", input);
+  return normalizeAuthResponse(data);
 }
 
 export async function customerSignup(
   input: Omit<CustomerSignupInput, "confirmPassword">
 ): Promise<CustomerAuthResponse> {
-  // Transforming the frontend payload to match the backend DTO exactly
   const backendPayload = {
     name: input.fullName, // Mapping 'fullName' to 'name'
     email: input.email,
     phone: input.phone,
     password: input.password,
-    // any other fields the backend expects (e.g., address, etc.) if needed
   };
 
-  // Sending the transformed payload
-  const { data } = await apiClient.post<CustomerAuthResponse>(
-    "/customer-auth/register",
-    backendPayload
-  );
-  
-  return data;
+  const { data } = await apiClient.post<any>("/customer-auth/register", backendPayload);
+  return normalizeAuthResponse(data);
 }
 
-// --- remaining Module 2 endpoint ---
-
-export async function customerGuestCheckout() {
-  const { data } = await apiClient.post<CustomerAuthResponse>("/customer-auth/guest");
-  return data;
+export async function customerGuestCheckout(): Promise<CustomerAuthResponse> {
+  const { data } = await apiClient.post<any>("/customer-auth/guest");
+  return normalizeAuthResponse(data);
 }

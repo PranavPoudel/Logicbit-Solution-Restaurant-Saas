@@ -13,6 +13,7 @@ import {
 import { OrderTabs } from "@/components/owner-orders/order-tabs";
 import { OrderCard, type OwnerOrderSummary } from "@/components/owner-orders/order-card";
 import { OrderDetailModal } from "@/components/owner-orders/order-detail-modal";
+import { SubscriptionUpgradeBanner } from "@/components/ui/subscription-upgrade-banner";
 
 const TAB_DEFS = [
   { key: "PENDING", label: "New" },
@@ -81,7 +82,8 @@ export default function OrdersPage() {
       <p className="text-sm text-neutral-500 mb-6">
         Incoming orders refresh automatically every 15 seconds.
       </p>
-
+       <SubscriptionUpgradeBanner />
+       
       <OrderTabs tabs={tabs} activeKey={activeTab} onSelect={setActiveTab} />
 
       {ordersQuery.isLoading ? (

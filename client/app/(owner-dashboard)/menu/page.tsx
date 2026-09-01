@@ -17,6 +17,7 @@ import {
   type OwnerModifierGroup,
 } from "@/components/owner-menu/modifier-group-manager";
 import { ItemModifierLinkModal } from "@/components/owner-menu/item-modifier-link-modal";
+import { SubscriptionUpgradeBanner } from "@/components/ui/subscription-upgrade-banner";
 
 export default function MenuPage() {
   const restaurantId = useOwnerAuthStore((s) => s.activeRestaurantId);
@@ -163,6 +164,7 @@ export default function MenuPage() {
       <p className="text-sm text-neutral-500 mb-6">
         Manage your categories, menu items, and modifiers.
       </p>
+         <SubscriptionUpgradeBanner />
 
       <div className="grid grid-cols-1 md:grid-cols-[240px_1fr] gap-4 items-start mb-6">
         {categoriesQuery.isLoading ? (
