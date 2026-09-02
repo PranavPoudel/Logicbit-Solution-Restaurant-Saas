@@ -28,7 +28,10 @@ export default function AdminLoginPage() {
 
       if (token) {
         setAccessToken(token);
-        router.push("/admin/dashboard");
+        localStorage.setItem('admin_token', token)
+        document.cookie = `admin_token=${token}; path=/; max-age=86400; SameSite=Lax`;
+        document.cookie = `accessToken=${token}; path=/; max-age=86400; SameSite=Lax`;
+        window.location.href = "/admin/dashboard";
       } else {
         setError(response?.message || "Invalid credentials");
       }
