@@ -28,11 +28,7 @@ export default function PlatformAdminLoginPage() {
     setSubmitting(true);
 
     try {
-      console.log("Sending platform admin login:", form);
-
       const response = await platformLogin(form);
-
-      console.log("Platform admin login response:", response);
 
       // Check that the backend returned the expected data
       if (!response?.success) {
@@ -59,13 +55,9 @@ export default function PlatformAdminLoginPage() {
         },
       });
 
-      console.log("Platform admin login successful.");
-
       // Go to platform admin dashboard
       router.push("/platform-admin/advertisements");
     } catch (error: any) {
-      console.error("Platform admin login error:", error);
-
       const message =
         error?.response?.data?.message ||
         error?.response?.data?.error ||
@@ -153,3 +145,4 @@ export default function PlatformAdminLoginPage() {
     </div>
   );
 }
+```
