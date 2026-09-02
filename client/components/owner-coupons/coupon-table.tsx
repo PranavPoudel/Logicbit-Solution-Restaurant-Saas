@@ -1,131 +1,164 @@
-// components/owner-coupons/coupon-table.tsx
 "use client";
 
-import { useState } from "react";
-import { Plus, Trash2, Tag } from "lucide-react";
+import { Edit2, Trash2, Tag, Percent } from "lucide-react";
 
 export interface OwnerCoupon {
   id: string;
-  code?: string;
-  discountType?: string;
-  discountValue?: number;
+  code: string;
+  discountType: "PERCENTAGE" | "FLAT";
+  discountValue: number;
   minSubtotal?: number;
+  maxDiscount?: number;
+  validFrom?: string;
   expiresAt?: string;
+  usageLimit?: number;
+  usageLimitPerCustomer?: number;
+  usedCount?: number;
+  isActive: boolean;
 }
 
 interface CouponTableProps {
   coupons: OwnerCoupon[];
-  onAdd: (input: {
-    code: string;
-    discountType: "PERCENTAGE" | "FLAT";
-    discountValue: number;
-  }) => void;
+  onEdit: (coupon: OwnerCoupon) => void;
   onDelete: (id: string) => void;
-  isAdding: boolean;
+  isLoading?: boolean;
 }
 
-export function CouponTable({ coupons, onAdd, onDelete, isAdding }: CouponTableProps) {
-  const [showForm, setShowForm] = useState(false);
-  const [code, setCode] = useState("");
-  const [discountType, setDiscountType] = useState<"PERCENTAGE" | "FLAT">("PERCENTAGE");
-  const [discountValue, setDiscountValue] = useState("");
+export function CouponTable({ coupons, onEdit, onDelete, isLoading }: CouponTableProps) {
+  const formatDiscount = (coupon: OwnerCoupon) => {
+    if (coupon.discountType === "PERCENTAGE") {
+      return `${coupon.discountValue}%`;
+    }
+    return `NPR ${coupon.discountValue}`;
+  };
 
-  function submit() {
-    const value = Number(discountValue);
-    if (!code.trim() || !value) return;
-    onAdd({ code: code.trim().toUpperCase(), discountType, discountValue: value });
-    setCode("");
-    setDiscountValue("");
-    setShowForm(false);
-  }
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return "—";
+    return new Date(dateStr).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
+  const isExpired = (coupon: OwnerCoupon) => {
+    if (!coupon.expiresAt) return false;
+    return new Date(coupon.expiresAt) < new Date();
+  };
 
   return (
-    <div className="bg-white border border-neutral-200 rounded-xl p-5">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-medium text-neutral-800">Coupons</h3>
-        <button
-          onClick={() => setShowForm((v) => !v)}
-          className="flex items-center gap-1.5 text-xs font-medium bg-[#1B2333] text-white px-3 py-1.5 rounded-md"
-        >
-          <Plus size={13} />
-          Add coupon
-        </button>
+    <div className="bg-white border border-neutral-200 rounded-xl overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead className="bg-neutral-50 border-b border-neutral-200">
+            <tr>
+              <th className="text-left text-xs font-semibold text-neutral-600 uppercase tracking-wider px-4 py-3">
+                Code
+              </th>
+              <th className="text-left text-xs font-semibold text-neutral-600 uppercase tracking-wider px-4 py-3">
+                Discount
+              </th>
+              <th className="text-left text-xs font-semibold text-neutral-600 uppercase tracking-wider px-4 py-3">
+                Min Order
+              </th>
+              <th className="text-left text-xs font-semibold text-neutral-600 uppercase tracking-wider px-4 py-3">
+                Validity
+              </th>
+              <th className="text-left text-xs font-semibold text-neutral-600 uppercase tracking-wider px-4 py-3">
+                Usage
+              </th>
+              <th className="text-right text-xs font-semibold text-neutral-600 uppercase tracking-wider px-4 py-3">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-neutral-200">
+            {coupons.map((coupon) => {
+              const expired = isExpired(coupon);
+              return (
+                <tr key={coupon.id} className="hover:bg-neutral-50">
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <Tag size={16} className="text-neutral-400" />
+                      <span className="font-mono text-sm font-medium text-neutral-900">
+                        {coupon.code}
+                      </span>
+                      {expired && (
+                        <span className="px-2 py-0.5 bg-red-100 text-red-700 text-xs font-medium rounded-full">
+                          Expired
+                        </span>
+                      )}
+                      {!coupon.isActive && !expired && (
+                        <span className="px-2 py-0.5 bg-neutral-100 text-neutral-600 text-xs font-medium rounded-full">
+                          Inactive
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      {coupon.discountType === "PERCENTAGE" ? (
+                        <Percent size={16} className="text-[#E3A008]" />
+                      ) : (
+                        <span className="text-xs text-neutral-400">NPR</span>
+                      )}
+                      <span className="text-sm font-medium text-neutral-900">
+                        {formatDiscount(coupon)}
+                      </span>
+                      {coupon.maxDiscount && (
+                        <span className="text-xs text-neutral-500">
+                          (max {formatDiscount({ ...coupon, discountValue: coupon.maxDiscount! })})
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className="text-sm text-neutral-600">
+                      {coupon.minSubtotal ? `NPR ${coupon.minSubtotal}` : "—"}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="text-sm">
+                      <div className="text-neutral-900">
+                        {formatDate(coupon.validFrom)} - {formatDate(coupon.expiresAt)}
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="text-sm text-neutral-600">
+                      {coupon.usedCount || 0} / {coupon.usageLimit || "∞"}
+                      {coupon.usageLimitPerCustomer && (
+                        <div className="text-xs text-neutral-400">
+                          ({coupon.usageLimitPerCustomer} per customer)
+                        </div>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        onClick={() => onEdit(coupon)}
+                        className="p-2 text-neutral-600 hover:text-[#E3A008] hover:bg-[#E3A008]/10 rounded-lg transition-colors"
+                        title="Edit coupon"
+                      >
+                        <Edit2 size={16} />
+                      </button>
+                      <button
+                        onClick={() => onDelete(coupon.id)}
+                        disabled={isLoading}
+                        className="p-2 text-neutral-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                        title="Delete coupon"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
-
-      {showForm && (
-        <div className="border border-neutral-200 rounded-lg p-3 mb-3 space-y-2">
-          <input
-            autoFocus
-            value={code}
-            onChange={(e) => setCode(e.target.value.toUpperCase())}
-            placeholder="CODE (e.g. WELCOME100)"
-            className="w-full text-sm border border-neutral-200 rounded-md px-2.5 py-1.5 font-mono focus:outline-none focus:ring-2 focus:ring-[#E3A008]/40"
-          />
-          <div className="flex gap-2">
-            <select
-              value={discountType}
-              onChange={(e) => setDiscountType(e.target.value as "PERCENTAGE" | "FLAT")}
-              className="text-sm border border-neutral-200 rounded-md px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#E3A008]/40"
-            >
-              <option value="PERCENTAGE">% off</option>
-              <option value="FLAT">Rs off</option>
-            </select>
-            <input
-              value={discountValue}
-              onChange={(e) => setDiscountValue(e.target.value)}
-              placeholder="Value"
-              type="number"
-              className="flex-1 text-sm border border-neutral-200 rounded-md px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#E3A008]/40"
-            />
-          </div>
-          <div className="flex gap-1.5">
-            <button
-              onClick={submit}
-              disabled={isAdding}
-              className="text-xs font-medium bg-[#1B2333] text-white px-3 py-1.5 rounded-md disabled:opacity-50"
-            >
-              {isAdding ? "Saving…" : "Save coupon"}
-            </button>
-            <button
-              onClick={() => setShowForm(false)}
-              className="text-xs text-neutral-500 px-3 py-1.5"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
-
-      {coupons.length === 0 ? (
-        <p className="text-sm text-neutral-400 text-center py-8">No coupons yet.</p>
-      ) : (
-        <ul className="divide-y divide-neutral-100">
-          {coupons.map((coupon) => (
-            <li key={coupon.id} className="group flex items-center justify-between py-3">
-              <span className="flex items-center gap-2">
-                <Tag size={14} className="text-[#E3A008]" />
-                <span className="text-sm font-mono font-medium text-neutral-800">
-                  {coupon.code}
-                </span>
-              </span>
-              <div className="flex items-center gap-3">
-                <span className="text-xs text-neutral-500">
-                  {coupon.discountType === "FLAT"
-                    ? `Rs ${coupon.discountValue} off`
-                    : `${coupon.discountValue}% off`}
-                </span>
-                <button
-                  onClick={() => onDelete(coupon.id)}
-                  className="opacity-0 group-hover:opacity-100 text-neutral-300 hover:text-red-500"
-                  aria-label="Delete coupon"
-                >
-                  <Trash2 size={14} />
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
     </div>
   );
 }

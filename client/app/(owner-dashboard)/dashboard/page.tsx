@@ -1,7 +1,8 @@
 // app/(owner-dashboard)/dashboard/page.tsx
 "use client";
 
-import { ShoppingBag, Wallet, Clock } from "lucide-react";
+import { ShoppingBag, Wallet, Clock, AlertCircle, Link as LinkIcon } from "lucide-react";
+import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { RevenueChart } from "@/components/dashboard/revenue-chart";
@@ -59,9 +60,10 @@ export default function DashboardPage() {
   }));
 
   const sub = subscriptionQuery.data as
-    | { status?: string; planName?: string; daysRemaining?: number; message?: string }
+    | { status?: string; planName?: string; daysRemaining?: number; message?: string; expiryDate?: string }
     | undefined;
   const hasNoSubscription = sub?.status === "NO_SUBSCRIPTION";
+  const isExpiring = sub?.status === "expiring";
 
   return (
     <div className="space-y-6 max-w-6xl">
@@ -70,11 +72,54 @@ export default function DashboardPage() {
         <p className="text-sm text-neutral-500">Today&apos;s overview for your restaurant.</p>
       </div>
 
+      {/* Enhanced Subscription Banners */}
       {hasNoSubscription ? (
-        <div className="flex items-center gap-3 rounded-xl px-4 py-3 border bg-neutral-50 border-neutral-200 text-neutral-600">
-          <p className="text-sm flex-1">
-            {sub?.message ?? "No active subscription."}
-          </p>
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 shrink-0" />
+            <div>
+              <p className="text-sm font-medium text-red-700">
+                No Active Subscription
+              </p>
+              <p className="text-xs text-red-600 mt-0.5">
+                Upgrade to unlock menu management, orders, and analytics.
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/subscriptions"
+            className="w-full sm:w-auto px-4 py-2 bg-[#E3A008] hover:bg-[#d49207] text-[#17181C] text-sm font-semibold rounded-lg transition-colors text-center whitespace-nowrap flex items-center justify-center gap-2"
+          >
+            <LinkIcon size={16} />
+            Upgrade Plan
+          </Link>
+        </div>
+      ) : isExpiring ? (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5 shrink-0" />
+            <div>
+              <p className="text-sm font-medium text-yellow-700">
+                Subscription Expiring Soon
+              </p>
+              <p className="text-xs text-yellow-600 mt-0.5">
+                Your plan expires on{" "}
+                {sub?.expiryDate &&
+                  new Date(sub.expiryDate).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  })}
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/subscriptions"
+            className="w-full sm:w-auto px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-semibold rounded-lg transition-colors text-center whitespace-nowrap flex items-center justify-center gap-2"
+          >
+            <LinkIcon size={16} />
+            Renew Now
+          </Link>
         </div>
       ) : (
         sub && (
@@ -82,7 +127,7 @@ export default function DashboardPage() {
             subscription={{
               planName: sub.planName ?? "Plan",
               status: (sub.status as "active" | "expiring" | "expired" | "trial") ?? "active",
-              expiresAt: "",
+              expiresAt: sub.expiryDate ?? "",
               daysRemaining: sub.daysRemaining ?? 0,
             }}
           />

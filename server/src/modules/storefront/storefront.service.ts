@@ -67,12 +67,17 @@ export class StorefrontService {
   // ---------- Config (About/Contact/Section order) ----------
 
   async getConfig(tenantId: string, restaurantId: string) {
-    let config = await this.prisma.storefrontConfig.findFirst({ where: { tenantId, restaurantId } });
-    if (!config) {
-      // पहिलो पटक हो भने default config auto-बनाइदिने, owner लाई manually "create" गर्नु नपरोस्
-      config = await this.prisma.storefrontConfig.create({ data: { tenantId, restaurantId } });
-    }
-    return config;
+    const config = await this.prisma.storefrontConfig.upsert({
+      where: { restaurantId }, // restaurantId is @unique in the schema
+      update: {}, // If it exists, do nothing and just return it
+      create: {
+      tenantId,
+      restaurantId,
+      sectionOrder: ["banner", "offers", "menu", "about", "contact"], // Default layout
+  },
+});
+
+return config;
   }
 
   async updateConfig(tenantId: string, restaurantId: string, dto: UpdateStorefrontConfigDto) {

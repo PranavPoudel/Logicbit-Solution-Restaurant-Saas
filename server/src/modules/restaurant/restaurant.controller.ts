@@ -1,8 +1,11 @@
-import { Controller, Get, Patch, Body, Param, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, Param, UseGuards, Req } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RestaurantService } from './restaurant.service';
 import { UpdateRestaurantDto } from './dto/update-restaurant.dto';
+import { CreateRestaurantDto } from './dto/create-restaurant.dto';
+import { create } from 'domain';
+
 
 @ApiTags('Restaurant (Owner)')
 @ApiBearerAuth()
@@ -25,4 +28,12 @@ export class RestaurantController {
   update(@Req() req, @Param('id') id: string, @Body() dto: UpdateRestaurantDto) {
     return this.restaurantService.update(req.user.tenantId, id, dto);
   }
+
+@Post()
+  async create(@Req() req, @Body() dto: CreateRestaurantDto) {
+    // req.user is populated by JwtAuthGuard
+    const tenantId = req.user.tenantId; 
+    return this.restaurantService.create(tenantId, dto);
+  }
+
 }

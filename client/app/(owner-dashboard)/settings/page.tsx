@@ -10,6 +10,8 @@ import { SettingsTabs } from "@/components/owner-settings/settings-tabs";
 import { SettingsField, SettingsToggle } from "@/components/owner-settings/settings-field";
 import { useGeolocation } from "@/hooks/use-geolocation";
 import { DynamicMapPicker } from "@/components/map/dynamic-map-picker";
+import { listCuisines, getRestaurantCuisines, setRestaurantCuisines } from "@/lib/api/cuisines";
+import { listMyRestaurants } from "@/lib/api/restaurants";
 
 const TABS = [
   { key: "general", label: "General" },
@@ -63,6 +65,7 @@ const EMPTY_FORM: SettingsForm = {
 
 export default function SettingsPage() {
   const restaurantId = useOwnerAuthStore((s) => s.activeRestaurantId);
+   const setRestaurants = useOwnerAuthStore((s) => s.setRestaurants);
   const queryClient = useQueryClient();
   const { lat, lng } = useGeolocation();
   const [activeTab, setActiveTab] = useState("general");
@@ -98,37 +101,85 @@ export default function SettingsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [restaurantQuery.data]);
 
-  const saveMutation = useMutation({
-    mutationFn: () =>
-      updateMyRestaurant(restaurantId as string, {
-        name: form.name,
-        address: form.address,
-        city: form.city,
-        lat: form.latitude ? Number(form.latitude) : undefined,
-        lng: form.longitude ? Number(form.longitude) : undefined,
-        primaryColor: form.primaryColor,
-        secondaryColor: form.secondaryColor,
-        heroHeading: form.heroHeading,
-        heroSubheading: form.heroSubheading,
-        isOpen: form.isOpen,
-        supportsDelivery: form.supportsDelivery,
-        supportsPickup: form.supportsPickup,
-        supportsDineIn: form.supportsDineIn,
-        selfDeliveryRadiusKm: form.selfDeliveryRadiusKm
-          ? Number(form.selfDeliveryRadiusKm)
-          : undefined,
-        selfDeliveryFlatFee: form.selfDeliveryFlatFee
-          ? Number(form.selfDeliveryFlatFee)
-          : undefined,
-        maxDeliveryRadiusKm: form.maxDeliveryRadiusKm
-          ? Number(form.maxDeliveryRadiusKm)
-          : undefined,
-      }),
+  // Helper to safely parse numbers, returning undefined for empty/invalid strings
+  const parseNumber = (val: string) => {
+    if (!val || val.trim() === "") return undefined;
+    const num = Number(val);
+    return isNaN(num) ? undefined : num;
+  };
+
+const saveMutation = useMutation({
+  mutationFn: () =>
+    updateMyRestaurant(restaurantId as string, {
+      name: form.name,
+      address: form.address,
+      city: form.city,
+      latitude: parseNumber(form.latitude),
+      longitude: parseNumber(form.longitude),
+      primaryColor: form.primaryColor,
+      secondaryColor: form.secondaryColor,
+      heroHeading: form.heroHeading,
+      heroSubheading: form.heroSubheading,
+      isOpen: form.isOpen,
+      supportsDelivery: form.supportsDelivery,
+      supportsPickup: form.supportsPickup,
+      supportsDineIn: form.supportsDineIn,
+      selfDeliveryRadiusKm: parseNumber(form.selfDeliveryRadiusKm),
+      selfDeliveryFlatFee: parseNumber(form.selfDeliveryFlatFee),
+      maxDeliveryRadiusKm: parseNumber(form.maxDeliveryRadiusKm),
+    }),
+  onSuccess: async () => {
+    setSavedAt(Date.now());
+    queryClient.invalidateQueries({ queryKey: ["owner-restaurant", restaurantId] });
+    queryClient.invalidateQueries({ queryKey: ["restaurant-cuisines", restaurantId] });
+
+    try {
+        const freshRestaurants = await listMyRestaurants();
+        setRestaurants(freshRestaurants);
+      } catch (error) {
+        console.error("Failed to refresh restaurant list:", error);
+      }
+  },
+});
+
+    // --- Cuisine Queries & State ---
+  const allCuisinesQuery = useQuery({
+    queryKey: ["all-cuisines"],
+    queryFn: listCuisines,
+  });
+
+  const restaurantCuisinesQuery = useQuery({
+    queryKey: ["restaurant-cuisines", restaurantId],
+    queryFn: () => getRestaurantCuisines(restaurantId as string),
+    enabled: !!restaurantId,
+  });
+
+  const [selectedCuisineIds, setSelectedCuisineIds] = useState<string[]>([]);
+
+  // Sync local state when restaurant cuisines are fetched
+  useEffect(() => {
+    if (restaurantCuisinesQuery.data) {
+      // Assuming the API returns an array of cuisine objects: [{ id: "1", name: "Nepali" }]
+      const ids = restaurantCuisinesQuery.data.map((c: any) => c.id);
+      setSelectedCuisineIds(ids);
+    }
+  }, [restaurantCuisinesQuery.data]);
+
+  const updateCuisinesMutation = useMutation({
+    mutationFn: (ids: string[]) => setRestaurantCuisines(restaurantId as string, ids),
     onSuccess: () => {
-      setSavedAt(Date.now());
-      queryClient.invalidateQueries({ queryKey: ["owner-restaurant", restaurantId] });
+      queryClient.invalidateQueries({ queryKey: ["restaurant-cuisines", restaurantId] });
     },
   });
+
+  const toggleCuisine = (cuisineId: string) => {
+    const nextIds = selectedCuisineIds.includes(cuisineId)
+      ? selectedCuisineIds.filter((id) => id !== cuisineId)
+      : [...selectedCuisineIds, cuisineId];
+    
+    setSelectedCuisineIds(nextIds); // Instant UI update
+    updateCuisinesMutation.mutate(nextIds); // Save to backend
+  };
 
   function set<K extends keyof SettingsForm>(key: K, value: SettingsForm[K]) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -177,7 +228,7 @@ export default function SettingsPage() {
         <SettingsTabs tabs={TABS} activeKey={activeTab} onSelect={setActiveTab} />
 
         <div className="bg-white border border-neutral-200 rounded-xl p-5 space-y-4">
-          {activeTab === "general" && (
+                    {activeTab === "general" && (
             <>
               <SettingsField
                 label="Restaurant name"
@@ -194,6 +245,40 @@ export default function SettingsPage() {
                 value={form.city}
                 onChange={(e) => set("city", e.target.value)}
               />
+
+              <div className="pt-4 border-t border-neutral-100">
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
+                  Cuisines
+                </label>
+                <p className="text-xs text-neutral-500 mb-3">
+                  Select the types of food your restaurant serves. This helps customers find you.
+                </p>
+                
+                {allCuisinesQuery.isLoading ? (
+                  <p className="text-xs text-neutral-400">Loading cuisines...</p>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {allCuisinesQuery.data?.map((cuisine) => {
+                      const isSelected = selectedCuisineIds.includes(cuisine.id);
+                      return (
+                        <button
+                          key={cuisine.id}
+                          type="button"
+                          onClick={() => toggleCuisine(cuisine.id)}
+                          disabled={updateCuisinesMutation.isPending}
+                          className={`px-3.5 py-1.5 rounded-full text-sm font-medium transition-all border ${
+                            isSelected
+                              ? "bg-[#E3A008] text-[#17181C] border-[#E3A008] shadow-sm"
+                              : "bg-white text-neutral-600 border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50"
+                          } disabled:opacity-50`}
+                        >
+                          {cuisine.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             </>
           )}
 

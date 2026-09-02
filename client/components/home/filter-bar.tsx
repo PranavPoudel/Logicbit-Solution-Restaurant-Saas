@@ -1,63 +1,61 @@
-// components/home/filter-bar.tsx
 "use client";
 
-import { useState } from "react";
+import { Cuisine } from "@/lib/api/cuisines";
 
-const distanceOptions = ["2km", "5km", "10km"];
-const cuisineOptions = ["Nepali", "Newari", "Indian", "Chinese", "Fast Food", "Momo"];
-
-export function FilterBar() {
-  const [activeDistance, setActiveDistance] = useState<string | null>(null);
-  const [ratingOnly, setRatingOnly] = useState(false);
-  const [activeCuisine, setActiveCuisine] = useState<string | null>(null);
-
-  return (
-    <div className="flex items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-      {distanceOptions.map((d) => (
-        <Chip
-          key={d}
-          label={d}
-          active={activeDistance === d}
-          onClick={() => setActiveDistance(activeDistance === d ? null : d)}
-        />
-      ))}
-      <Chip
-        label="4+ ★"
-        active={ratingOnly}
-        onClick={() => setRatingOnly((v) => !v)}
-      />
-      <span className="w-px h-5 bg-[#E8E7E2] mx-1 shrink-0" />
-      {cuisineOptions.map((c) => (
-        <Chip
-          key={c}
-          label={c}
-          active={activeCuisine === c}
-          onClick={() => setActiveCuisine(activeCuisine === c ? null : c)}
-        />
-      ))}
-    </div>
-  );
+interface FilterBarProps {
+  cuisines: Cuisine[];
+  isLoadingCuisines: boolean;
+  activeCuisineId: string | null;
+  onCuisineChange: (id: string | null) => void;
 }
 
-function Chip({
-  label,
-  active,
-  onClick,
-}: {
-  label: string;
-  active: boolean;
-  onClick: () => void;
-}) {
+export function FilterBar({ 
+  cuisines, 
+  isLoadingCuisines, 
+  activeCuisineId, 
+  onCuisineChange 
+}: FilterBarProps) {
   return (
-    <button
-      onClick={onClick}
-      className={`shrink-0 text-xs font-medium px-3.5 py-2 rounded-full border transition-colors ${
-        active
-          ? "bg-[#17181C] text-white border-[#17181C]"
-          : "bg-white text-[#17181C] border-[#E8E7E2] hover:border-[#E3A008]"
-      }`}
-    >
-      {label}
-    </button>
+    <div className="flex items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+      {/* "All" Chip */}
+      <button
+        onClick={() => onCuisineChange(null)}
+        className={`shrink-0 text-xs font-medium px-3.5 py-2 rounded-full border transition-all ${
+          activeCuisineId === null
+            ? "bg-[#17181C] text-white border-[#17181C] shadow-sm"
+            : "bg-white text-[#17181C] border-[#E8E7E2] hover:border-[#E3A008]"
+        }`}
+      >
+        All
+      </button>
+
+      {/* Dynamic Cuisine Chips */}
+      {isLoadingCuisines ? (
+        // Loading skeleton to prevent layout shift
+        Array.from({ length: 5 }).map((_, i) => (
+          <div
+            key={i}
+            className="shrink-0 w-20 h-8 rounded-full bg-neutral-100 animate-pulse"
+          />
+        ))
+      ) : (
+        cuisines.map((cuisine) => {
+          const isActive = activeCuisineId === cuisine.id;
+          return (
+            <button
+              key={cuisine.id}
+              onClick={() => onCuisineChange(isActive ? null : cuisine.id)}
+              className={`shrink-0 text-xs font-medium px-3.5 py-2 rounded-full border transition-all ${
+                isActive
+                  ? "bg-[#E3A008] text-[#17181C] border-[#E3A008] shadow-sm"
+                  : "bg-white text-[#17181C] border-[#E8E7E2] hover:border-[#E3A008]"
+              }`}
+            >
+              {cuisine.name}
+            </button>
+          );
+        })
+      )}
+    </div>
   );
 }

@@ -12,17 +12,23 @@ export async function getMyRestaurant(id: string): Promise<Restaurant> {
   return data;
 }
 
-// TODO: confirm exact patchable fields via Swagger (location, colors,
-// delivery settings, service type are all mentioned in the endpoint list).
 export interface UpdateRestaurantInput {
   name?: string;
+  address?: string;
+  city?: string;
+  latitude?: number;
+  longitude?: number;
   primaryColor?: string;
   secondaryColor?: string;
-  lat?: number;
-  lng?: number;
-  address?: string;
+  heroHeading?: string;
+  heroSubheading?: string;
   isOpen?: boolean;
-  [key: string]: unknown;
+  supportsDelivery?: boolean;
+  supportsPickup?: boolean;
+  supportsDineIn?: boolean;
+  selfDeliveryRadiusKm?: number;
+  selfDeliveryFlatFee?: number;
+  maxDeliveryRadiusKm?: number;
 }
 
 export async function updateMyRestaurant(id: string, input: UpdateRestaurantInput) {
