@@ -237,7 +237,7 @@ export default function CheckoutPage() {
           <span className="font-mono">Rs {sub}</span>
         </div>
         
-        {discountAmount > 0 && (
+        {appliedCoupon && discountAmount > 0 && (
           <div className="flex justify-between text-[#0F6B5C]">
             <span>Discount ({appliedCoupon.code})</span>
             <span className="font-mono">- Rs {discountAmount}</span>

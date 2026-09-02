@@ -1,11 +1,19 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { MapPin, ShoppingBag, ChevronDown, User, Store } from "lucide-react";
 import { useCartStore } from "@/store/cart-store";
 
 export function CustomerHeader() {
   const itemCount = useCartStore((s) => s.itemCount());
+  
+  // ✅ Track if the component has mounted on the client
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <header className="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-[#2B1410]/8 shadow-sm">
@@ -27,12 +35,12 @@ export function CustomerHeader() {
 
         <div className="flex items-center gap-3 shrink-0">
           <Link
-  href="/for-restaurants"
-  className="hidden md:flex items-center gap-1.5 text-sm font-medium text-[#2B1410] hover:text-[#C0392B] transition-colors"
->
-  <Store size={16} />
-  <span>For Restaurants</span>
-</Link>
+            href="/for-restaurants"
+            className="hidden md:flex items-center gap-1.5 text-sm font-medium text-[#2B1410] hover:text-[#C0392B] transition-colors"
+          >
+            <Store size={16} />
+            <span>For Restaurants</span>
+          </Link>
 
           <Link
             href="/account"
@@ -48,7 +56,9 @@ export function CustomerHeader() {
           >
             <ShoppingBag size={16} />
             <span className="hidden sm:inline">Cart</span>
-            {itemCount > 0 && (
+            
+            {/* ✅ BEST OF BOTH: Hydration fix from your branch + styling from main */}
+            {mounted && itemCount > 0 && (
               <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-[#C0392B] text-[#FDF6EC] text-[11px] font-mono font-bold flex items-center justify-center">
                 {itemCount}
               </span>
