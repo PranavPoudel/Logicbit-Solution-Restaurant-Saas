@@ -27,12 +27,12 @@ export function CustomerHeader() {
 
         <div className="flex items-center gap-3 shrink-0">
           <Link
-            href="/owner/register"
-            className="hidden md:flex items-center gap-1.5 text-sm font-medium text-[#2B1410] hover:text-[#C0392B] transition-colors"
-          >
-            <Store size={16} />
-            <span>For Restaurants</span>
-          </Link>
+  href="/for-restaurants"
+  className="hidden md:flex items-center gap-1.5 text-sm font-medium text-[#2B1410] hover:text-[#C0392B] transition-colors"
+>
+  <Store size={16} />
+  <span>For Restaurants</span>
+</Link>
 
           <Link
             href="/account"
