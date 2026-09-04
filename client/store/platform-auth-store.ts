@@ -4,11 +4,12 @@ import { persist } from "zustand/middleware";
 
 export interface PlatformStaffProfile {
   id: string;
-  fullName: string;
+  name: string;
   email: string;
-  roles?: string[];
+  role?: string;
   permissions?: string[];
 }
+
 
 interface PlatformAuthState {
   accessToken: string | null;
