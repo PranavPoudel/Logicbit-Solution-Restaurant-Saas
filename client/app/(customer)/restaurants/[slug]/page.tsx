@@ -7,6 +7,7 @@ import { RestaurantHeader } from "@/components/menu/restaurant-header";
 import { CategoryNav } from "@/components/menu/category-nav";
 import { MenuItemRow } from "@/components/menu/menu-item-row";
 import { FloatingCartBar } from "@/components/menu/floating-cart-bar";
+import { SignatureDishes } from "@/components/menu/signature-dishes";
 import { ModifierModal } from "@/components/menu-modal/modifier-modal";
 import { getRestaurantByIdOrSlug, getRestaurantMenu } from "@/lib/api/discovery";
 
@@ -79,7 +80,7 @@ export default function RestaurantDetailPage({
 
   if (restaurantQuery.isLoading) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-16 text-center text-sm text-neutral-400">
+      <div className="max-w-4xl mx-auto px-4 py-16 text-center text-sm text-[#2B1410]/40">
         Loading restaurant…
       </div>
     );
@@ -88,8 +89,8 @@ export default function RestaurantDetailPage({
   if (restaurantQuery.isError || !restaurantQuery.data) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-16 flex flex-col items-center text-center gap-3">
-        <AlertTriangle className="text-neutral-300" size={28} />
-        <p className="text-sm text-neutral-500">
+        <AlertTriangle className="text-[#2B1410]/25" size={28} />
+        <p className="text-sm text-[#2B1410]/55">
           Couldn&apos;t load this restaurant. It may not exist, or the backend
           isn&apos;t reachable.
         </p>
@@ -100,6 +101,10 @@ export default function RestaurantDetailPage({
   return (
     <div className="pb-24">
       <RestaurantHeader restaurant={restaurantQuery.data} />
+
+      <div className="max-w-4xl mx-auto px-4">
+        <SignatureDishes />
+      </div>
 
       <div className="max-w-4xl mx-auto px-4 py-6">
         <StorefrontBannerCarousel banners={bannersQuery.data || []} />
@@ -114,15 +119,15 @@ export default function RestaurantDetailPage({
       <div className="max-w-4xl mx-auto px-4 space-y-8">
         {/* Menu Items Section */}
         {menuQuery.isLoading ? (
-          <p className="text-sm text-neutral-400 text-center py-12">Loading menu…</p>
+          <p className="text-sm text-[#2B1410]/40 text-center py-12">Loading menu…</p>
         ) : categories.length === 0 ? (
-          <p className="text-sm text-neutral-400 text-center py-12">
+          <p className="text-sm text-[#2B1410]/40 text-center py-12">
             This restaurant hasn&apos;t added any menu items yet.
           </p>
         ) : (
           categories.map((category) => (
             <div key={category.id} id={`category-${category.id}`} className="scroll-mt-32 py-5">
-              <h3 className="font-display font-semibold text-base text-[#17181C] mb-1">
+              <h3 className="font-serif font-semibold text-base text-[#2B1410] mb-1">
                 {category.name ?? "Menu"}
               </h3>
               <div>
@@ -135,7 +140,7 @@ export default function RestaurantDetailPage({
                   />
                 ))}
                 {(category.items ?? []).length === 0 && (
-                  <p className="text-xs text-neutral-400 py-3">No items in this category.</p>
+                  <p className="text-xs text-[#2B1410]/40 py-3">No items in this category.</p>
                 )}
               </div>
             </div>

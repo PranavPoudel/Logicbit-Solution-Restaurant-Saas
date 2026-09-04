@@ -16,7 +16,7 @@ export function StorefrontBannerCarousel({ banners }: StorefrontBannerCarouselPr
         <Link
           key={banner.id}
           href={banner.linkUrl || "#"}
-          className="snap-center shrink-0 w-[85vw] sm:w-[600px] h-48 sm:h-64 rounded-2xl overflow-hidden relative bg-neutral-100 group"
+          className="snap-center shrink-0 w-[85vw] sm:w-[600px] h-48 sm:h-64 rounded-2xl overflow-hidden relative bg-[#2B1410]/5 group border border-[#2B1410]/8"
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img 
@@ -24,10 +24,10 @@ export function StorefrontBannerCarousel({ banners }: StorefrontBannerCarouselPr
             alt={banner.title || "Banner"} 
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-          <div className="absolute bottom-0 left-0 right-0 p-5 text-white">
-            {banner.title && <h3 className="font-display font-bold text-xl">{banner.title}</h3>}
-            {banner.subtitle && <p className="text-sm text-white/90 mt-1">{banner.subtitle}</p>}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#2B1410]/75 via-[#2B1410]/10 to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 p-5 text-[#FDF6EC]">
+            {banner.title && <h3 className="font-serif font-semibold text-xl">{banner.title}</h3>}
+            {banner.subtitle && <p className="text-sm text-[#FDF6EC]/85 mt-1">{banner.subtitle}</p>}
           </div>
         </Link>
       ))}
