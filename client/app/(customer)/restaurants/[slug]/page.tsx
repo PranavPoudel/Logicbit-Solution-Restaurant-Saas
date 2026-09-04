@@ -8,6 +8,7 @@ import { CategoryNav } from "@/components/menu/category-nav";
 import { MenuItemRow } from "@/components/menu/menu-item-row";
 import { FloatingCartBar } from "@/components/menu/floating-cart-bar";
 import { SignatureDishes } from "@/components/menu/signature-dishes";
+import { RestaurantFooter } from "@/components/menu/restaurant-footer";
 import { ModifierModal } from "@/components/menu-modal/modifier-modal";
 import { getRestaurantByIdOrSlug, getRestaurantMenu } from "@/lib/api/discovery";
 
@@ -149,6 +150,8 @@ export default function RestaurantDetailPage({
 
         <StorefrontAboutSection config={configQuery.data || {}} />
       </div>
+
+      <RestaurantFooter restaurant={restaurantQuery.data} />
 
       <FloatingCartBar />
 
