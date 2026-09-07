@@ -6,19 +6,20 @@ import AdminAuthGuard from './components/AdminAuthGuard';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isLoginPage = pathname === '/admin/login';
-
-  if (isLoginPage) {
+  
+  if (pathname === '/admin/login') {
     return <main>{children}</main>;
   }
 
   return (
     <AdminAuthGuard>
-      <div style={{ display: 'flex', minHeight: '100vh' }}>
+      <div className="flex min-h-screen bg-[#F7F7F5]">
         <AdminSidebar />
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div className="flex-1 flex flex-col h-screen overflow-hidden">
           <AdminTopbar />
-          <main style={{ padding: '1.5rem', flex: 1 }}>{children}</main>
+          <main className="flex-1 overflow-y-auto p-6">
+            {children}
+          </main>
         </div>
       </div>
     </AdminAuthGuard>
