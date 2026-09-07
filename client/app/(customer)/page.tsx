@@ -10,6 +10,7 @@ import { FilterBar } from "@/components/home/filter-bar";
 import { RestaurantCard } from "@/components/restaurant/restaurant-card";
 import { RestaurantCardSkeleton } from "@/components/restaurant/restaurant-card-skeleton";
 import { PopupAd } from "@/components/home/popup-ad";
+import { HomepageFooter } from "@/components/home/homepage-footer";
 import { getNearbyRestaurants } from "@/lib/api/discovery";
 import { listCuisines } from "@/lib/api/cuisines";
 import { useGeolocation } from "@/hooks/use-geolocation";
@@ -58,7 +59,7 @@ export default function HomePage() {
         <BannerCarousel />
 
         <div>
-          <h2 className="font-display font-semibold text-lg text-[#17181C] mb-4">
+          <h2 className="font-serif font-semibold text-lg text-[#2B1410] mb-4">
             {activeCuisineId 
               ? `Restaurants serving this cuisine` 
               : "Restaurants near you"}
@@ -72,21 +73,21 @@ export default function HomePage() {
             </div>
           ) : restaurantsQuery.isError ? (
             <div className="flex flex-col items-center text-center py-16 gap-3">
-              <AlertTriangle className="text-neutral-300" size={28} />
-              <p className="text-sm text-neutral-500">
+              <AlertTriangle className="text-[#2B1410]/25" size={28} />
+              <p className="text-sm text-[#2B1410]/55">
                 Couldn&apos;t load restaurants. Is the backend running on{" "}
                 <span className="font-mono">localhost:3700</span>?
               </p>
               <button
                 onClick={() => restaurantsQuery.refetch()}
-                className="text-sm font-medium bg-[#17181C] text-white px-4 py-2 rounded-full"
+                className="text-sm font-medium bg-[#2B1410] text-[#FDF6EC] px-4 py-2 rounded-full"
               >
                 Retry
               </button>
             </div>
           ) : restaurants.length === 0 ? (
             <div className="text-center py-16">
-              <p className="text-sm text-neutral-400">
+              <p className="text-sm text-[#2B1410]/40">
                 No restaurants found {activeCuisineId ? "for this cuisine" : "near you yet"}.
               </p>
             </div>
@@ -101,6 +102,8 @@ export default function HomePage() {
       </div>
 
       <PopupAd />
+
+      <HomepageFooter />
     </div>
   );
 }
