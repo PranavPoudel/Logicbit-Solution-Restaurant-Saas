@@ -1,46 +1,56 @@
 // components/home/hero-section.tsx
 "use client";
 
-import { Search, MapPin } from "lucide-react";
+import { Search } from "lucide-react";
 
 export function HeroSection() {
   return (
-    <div className="relative overflow-hidden bg-[#17181C]">
-      {/* decorative gradient + soft shapes instead of a stock photo — keeps
-          the hero from depending on an external image that could break */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#17181C] via-[#1F2128] to-[#0F6B5C]/40" />
-      <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-[#E3A008]/20 blur-3xl" />
-      <div className="absolute -bottom-32 -left-16 w-80 h-80 rounded-full bg-[#0F6B5C]/25 blur-3xl" />
+    <div className="relative overflow-hidden rounded-b-[2.5rem] min-h-[520px]">
+      {/* 3 vertical images filling the background */}
+      <div className="absolute inset-0 flex">
+        <div className="flex-1 relative">
+          <img src="/images/food-1.avif" alt="" className="w-full h-full object-cover" />
+        </div>
+        <div className="flex-1 relative">
+          <img src="/images/food-2.avif" alt="" className="w-full h-full object-cover" />
+        </div>
+        <div className="flex-1 relative">
+          <img src="/images/food-3.avif" alt="" className="w-full h-full object-cover" />
+        </div>
+      </div>
 
-      <div className="relative max-w-6xl mx-auto px-4 pt-14 pb-20 sm:pt-20 sm:pb-28 text-center">
-        <span className="inline-block font-mono text-[11px] uppercase tracking-[0.15em] text-[#E3A008] mb-4">
-          Kirtipur, Kathmandu
-        </span>
-        <h1 className="font-display font-semibold text-white text-3xl sm:text-5xl leading-tight max-w-2xl mx-auto">
-          Find restaurants that deliver near you
+      {/* translucent cream overlay so text stays readable on top of the photos */}
+      <div className="absolute inset-0 bg-[#FDF6EC]/65" />
+
+      <div className="relative max-w-6xl mx-auto px-5 pt-16 pb-20 sm:pt-24 sm:pb-28 text-center">
+        <h1 className="font-serif text-[#2B1410] text-5xl sm:text-7xl leading-[1.05] max-w-2xl mx-auto">
+          Order the{" "}
+          <span className="italic text-[#C0392B]">good stuff</span>,
+          delivered fast.
         </h1>
-        <p className="text-white/60 text-sm sm:text-base mt-3 max-w-md mx-auto">
-          Hundreds of restaurants, one order away — fast delivery across Kathmandu.
+
+        <p className="text-[#2B1410]/55 text-base sm:text-lg mt-6 max-w-md mx-auto font-light">
+          500+ restaurants across Kathmandu. Fresh, hot, and at your door in 30 minutes.
         </p>
 
-        {/* floating search card, reference-style */}
-        <div className="mt-8 max-w-xl mx-auto bg-white rounded-2xl p-2 flex flex-col sm:flex-row gap-2 shadow-2xl shadow-black/30">
-          <div className="flex items-center gap-2 flex-1 px-3 py-2.5">
-            <Search size={17} className="text-neutral-400 shrink-0" />
+        {/* search — clean, minimal, white on cream */}
+        <div className="mt-8 max-w-md mx-auto bg-white rounded-full p-1.5 flex items-center gap-2 shadow-lg shadow-[#2B1410]/5 border border-[#2B1410]/8">
+          <div className="flex items-center gap-2 flex-1 px-4 py-2">
+            <Search size={16} className="text-[#2B1410]/35 shrink-0" />
             <input
               type="text"
               placeholder="Search restaurants or dishes"
-              className="w-full text-sm text-[#17181C] placeholder:text-neutral-400 focus:outline-none"
+              className="w-full bg-transparent text-sm text-[#2B1410] placeholder:text-[#2B1410]/40 focus:outline-none"
             />
           </div>
-          <div className="hidden sm:flex items-center gap-2 px-3 py-2.5 border-l border-neutral-100">
-            <MapPin size={15} className="text-[#E3A008] shrink-0" />
-            <span className="text-sm text-neutral-500 whitespace-nowrap">Kirtipur</span>
-          </div>
-          <button className="bg-[#17181C] text-white text-sm font-medium px-6 py-2.5 rounded-xl shrink-0">
+          <button className="bg-[#2B1410] text-[#FDF6EC] text-sm font-medium px-6 py-2.5 rounded-full shrink-0 hover:bg-[#3D1E17] active:scale-95 transition-all duration-200">
             Search
           </button>
         </div>
+
+        <p className="text-[#2B1410]/40 text-xs mt-4">
+          Free delivery on orders over Rs. 999
+        </p>
       </div>
     </div>
   );
