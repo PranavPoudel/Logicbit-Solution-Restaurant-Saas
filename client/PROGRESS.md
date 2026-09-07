@@ -1,6 +1,6 @@
 # LogicBit Frontend — Progress Tracker
 
-Last updated: After Storefront Builder, Customer Reviews, and Owner Settings Map integration.
+Last updated: After Analytics Module, Subscription Management, and Cuisine Checklist integration.
 
 Status legend: ✅ Done &nbsp;|&nbsp; ⚠️ Partial &nbsp;|&nbsp; ❌ Not started
 
@@ -29,12 +29,13 @@ Status legend: ✅ Done &nbsp;|&nbsp; ⚠️ Partial &nbsp;|&nbsp; ❌ Not start
 | 10. Order (owner) | ✅ | Orders page — tabs, Accept/Reject, status progression | — |
 | 11. Coupon (owner) | ✅ | Coupon list + create | Edit, expiry date field |
 | 16. Settlement (owner) | ✅ | Outstanding + history | — |
-| 17. Subscription (owner) | ⚠️ | Dashboard banner wired to real data | Auto-renew toggle not wired |
+| 17. Subscription (owner) | ✅ | Dashboard banner, **dedicated management page, auto-renew toggle wired** | — |
+| 20. Analytics (owner) | ✅ | **Revenue stats, 7-day trend chart, top-selling items, real backend API** | — |
 | 5. Roles & Permissions | ❌ | — | Role builder, permission checklist UI |
 | 14. Storefront Builder | ✅ | **Banner manager, Config page, Popup scheduler**, sidebar sub-nav | — |
 | 15. Advertisement (owner) | ❌ | — | "Advertise your restaurant" request form |
 | 19. Media | ✅ | Reusable ImageUpload component, wired into Menu, Settings, Storefront | — |
-| 8. Cuisine (owner) | ❌ | — | Multi-select checklist on Settings |
+| 8. Cuisine (owner) | ✅ | **Multi-select cuisine checklist integrated into Settings (General tab)** | — |
 
 ## Portal 3 — Delivery App
 **Nothing built yet.** Auth + API layer exist (`lib/api/delivery.ts`, `lib/api/delivery-auth.ts`); no pages. Needs: register/login, availability toggle, available-orders list, active-delivery view, earnings.
@@ -50,10 +51,11 @@ Status legend: ✅ Done &nbsp;|&nbsp; ⚠️ Partial &nbsp;|&nbsp; ❌ Not start
 2. ~~Owner: Media/image upload~~ ✅ done
 3. ~~Customer: Review~~ ✅ done
 4. ~~Owner: Storefront Builder~~ ✅ done
-5. Owner: **Cuisine checklist** (small, finishes Settings)
-6. Owner: **Advertisement + Roles & Permissions**
-7. **Delivery App** (own portal)
-8. **Platform Admin** (own portal)
+5. ~~Owner: Cuisine checklist~~ ✅ done
+6. ~~Owner: Subscription & Analytics~~ ✅ done
+7. Owner: **Advertisement + Roles & Permissions** (Delegated)
+8. **Delivery App** (own portal)
+9. **Platform Admin** (own portal) (delegated)
 
 ---
 

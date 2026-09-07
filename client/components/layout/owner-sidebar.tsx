@@ -17,7 +17,9 @@ import {
   Image as ImageIcon,
   FileText,
   Bell,
+  CreditCard,
   type LucideIcon,
+  BarChart3,
 } from "lucide-react";
 
 interface NavItem {
@@ -47,6 +49,8 @@ const navGroups: NavGroup[] = [
     items: [
       { label: "Orders", href: "/orders", icon: Package },
       { label: "Menu", href: "/menu", icon: UtensilsCrossed },
+      { label: "Analytics", href: "/analytics", icon: BarChart3 }, 
+      
       { 
         label: "Storefront", 
         href: "/storefront/banners", 
@@ -69,7 +73,10 @@ const navGroups: NavGroup[] = [
   },
   {
     label: "Finance",
-    items: [{ label: "Settlements", href: "/settlements", icon: Wallet }],
+    items: [
+      { label: "Settlements", href: "/settlements", icon: Wallet },
+      { label: "Subscription", href: "/subscriptions", icon: CreditCard }, 
+    ],
   },
   {
     label: "Team",

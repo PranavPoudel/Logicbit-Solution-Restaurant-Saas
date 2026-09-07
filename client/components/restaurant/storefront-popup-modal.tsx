@@ -27,11 +27,11 @@ export function StorefrontPopupModal({ popups }: StorefrontPopupModalProps) {
   if (!isOpen || !currentPopup) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#2B1410]/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+      <div className="bg-[#FDF6EC] rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden relative border border-[#2B1410]/5">
         <button 
           onClick={() => setIsOpen(false)}
-          className="absolute top-3 right-3 z-10 p-1.5 bg-black/20 hover:bg-black/40 rounded-full text-white transition-colors"
+          className="absolute top-3 right-3 z-10 p-1.5 bg-[#2B1410]/20 hover:bg-[#2B1410]/40 rounded-full text-[#FDF6EC] transition-colors"
         >
           <X size={18} />
         </button>
@@ -42,16 +42,16 @@ export function StorefrontPopupModal({ popups }: StorefrontPopupModalProps) {
         )}
 
         <div className="p-6 text-center space-y-4">
-          <h3 className="font-display font-bold text-xl text-[#17181C]">{currentPopup.title}</h3>
+          <h3 className="font-serif font-semibold text-xl text-[#2B1410]">{currentPopup.title}</h3>
           {currentPopup.message && (
-            <p className="text-sm text-neutral-600">{currentPopup.message}</p>
+            <p className="text-sm text-[#2B1410]/65">{currentPopup.message}</p>
           )}
           
           {currentPopup.ctaText && (
             <Link
               href={currentPopup.ctaLink || "#"}
               onClick={() => setIsOpen(false)}
-              className="block w-full py-2.5 bg-[#E3A008] hover:bg-[#d49207] text-[#17181C] font-semibold rounded-xl transition-colors"
+              className="block w-full py-2.5 bg-[#C0392B] hover:bg-[#A8301F] text-[#FDF6EC] font-medium rounded-xl transition-colors"
             >
               {currentPopup.ctaText}
             </Link>
