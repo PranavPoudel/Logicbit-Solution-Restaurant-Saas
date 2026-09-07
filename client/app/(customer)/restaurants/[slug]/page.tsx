@@ -5,10 +5,11 @@ import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle } from "lucide-react";
 import { RestaurantHeader } from "@/components/menu/restaurant-header";
 import { CategoryNav } from "@/components/menu/category-nav";
-import { MenuItemRow } from "@/components/menu/menu-item-row";
+import { MenuItemCard } from "@/components/menu/menu-item-card";
 import { FloatingCartBar } from "@/components/menu/floating-cart-bar";
 import { SignatureDishes } from "@/components/menu/signature-dishes";
 import { RestaurantFooter } from "@/components/menu/restaurant-footer";
+import { DynamicRestaurantLocationMap } from "@/components/map/dynamic-restaurant-location-map";
 import { ModifierModal } from "@/components/menu-modal/modifier-modal";
 import { getRestaurantByIdOrSlug, getRestaurantMenu } from "@/lib/api/discovery";
 
@@ -128,27 +129,33 @@ export default function RestaurantDetailPage({
         ) : (
           categories.map((category) => (
             <div key={category.id} id={`category-${category.id}`} className="scroll-mt-32 py-5">
-              <h3 className="font-serif font-semibold text-base text-[#2B1410] mb-1">
+              <h3 className="font-serif font-semibold text-lg text-[#2B1410] mb-4">
                 {category.name ?? "Menu"}
               </h3>
-              <div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 {(category.items ?? []).map((item) => (
-                  <MenuItemRow
+                  <MenuItemCard
                     key={item.id}
                     item={item}
                     restaurantId={restaurantQuery.data.id}
                     onOpenModifiers={setModifierItemId}
                   />
                 ))}
-                {(category.items ?? []).length === 0 && (
-                  <p className="text-xs text-[#2B1410]/40 py-3">No items in this category.</p>
-                )}
               </div>
+              {(category.items ?? []).length === 0 && (
+                <p className="text-xs text-[#2B1410]/40 py-3">No items in this category.</p>
+              )}
             </div>
           ))
         )}
 
         <StorefrontAboutSection config={configQuery.data || {}} />
+
+        <DynamicRestaurantLocationMap
+          lat={(restaurantQuery.data as any).latitude}
+          lng={(restaurantQuery.data as any).longitude}
+          address={(restaurantQuery.data as any).address}
+        />
       </div>
 
       <RestaurantFooter restaurant={restaurantQuery.data} />
