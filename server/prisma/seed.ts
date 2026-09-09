@@ -23,7 +23,7 @@ async function main() {
   const adminRole = await prisma.platformRole.upsert({
     where: { name: 'Full Admin' },
     update: {},
-    create: { name: 'Full Admin', description: 'Full Platform Admin Role' },
+    create: { name: 'Full Admin'},
   });
 
   const bootstrapEmail = process.env.PLATFORM_ADMIN_EMAIL ?? 'admin@logicbit.local';
