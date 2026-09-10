@@ -2,11 +2,13 @@ import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
+const SALT_ROUNDS = 10;
 
 async function main() {
   console.log('🌱 Starting database seed...');
 
-  // 1. Create Master Cuisines (Upsert to avoid duplicates)
+  // 1. MASTER CUISINES
+  console.log('🍕 Seeding Master Cuisines...');
   const cuisineNames = ['Nepali', 'Newari', 'Fast Food', 'Chinese', 'Desserts', 'Indian'];
   for (const name of cuisineNames) {
     await prisma.cuisine.upsert({
@@ -16,18 +18,81 @@ async function main() {
     });
   }
 
-  // 2. Create Platform Admin
-  const adminPassword = await bcrypt.hash('ChangeMe123!', 10);
+  // 2. PLATFORM ADMIN & PERMISSIONS SETUP
+  console.log('👑 Seeding Platform Admin Role, Staff & Permissions...');
+  const adminRole = await prisma.platformRole.upsert({
+    where: { name: 'Full Admin' },
+    update: {},
+    create: { name: 'Full Admin'},
+  });
+
+  const bootstrapEmail = process.env.PLATFORM_ADMIN_EMAIL ?? 'admin@logicbit.local';
+  const bootstrapPassword = process.env.PLATFORM_ADMIN_PASSWORD ?? 'Admin@123';
+  const adminPassword = await bcrypt.hash(bootstrapPassword, SALT_ROUNDS);
+
   await prisma.platformStaff.upsert({
-    where: { email: 'admin@logicbit.local' },
-    update: { name: 'Super Admin', passwordHash: adminPassword },
+    where: { email: bootstrapEmail },
+    update: { name: 'Platform Owner', passwordHash: adminPassword, roleId: adminRole.id },
     create: {
-      name: 'Super Admin',
-      email: 'admin@logicbit.local',
+      name: 'Platform Owner',
+      email: bootstrapEmail,
       passwordHash: adminPassword,
-      roleId: 'super_admin', // Adjust if your actual role ID is different
+      roleId: adminRole.id,
     },
   });
+
+  console.log('🛡️ Seeding Platform Permissions...');
+  const requiredPermissions = [
+    'VIEW_REVENUE', 'VIEW_RESTAURANTS', 'OVERRIDE_RESTAURANT_SETTINGS',
+    'SUSPEND_RESTAURANT', 'MANAGE_COMMISSION', 'MODERATE_CONTENT',
+    'MANAGE_PLATFORM_STAFF', 'MANAGE_SETTLEMENTS', 'MANAGE_SUBSCRIPTIONS',
+    'MANAGE_ADVERTISEMENTS', 'MANAGE_CUISINES', 'VIEW_DELIVERIES',
+    'VIEW_ACTIVITY_LOGS', 'PROCESS_REFUNDS',
+  ];
+
+  for (const perm of requiredPermissions) {
+    await prisma.platformPermission.upsert({
+      where: { name: perm },
+      update: {},
+      create: { name: perm, description: `Allows ${perm.toLowerCase().replace(/_/g, ' ')}` },
+    });
+  }
+
+  const allPermissions = await prisma.platformPermission.findMany();
+  for (const permission of allPermissions) {
+    await prisma.platformRolePermission.upsert({
+      where: {
+        roleId_permissionId: {
+          roleId: adminRole.id,
+          permissionId: permission.id,
+        },
+      },
+      update: {},
+      create: {
+        roleId: adminRole.id,
+        permissionId: permission.id,
+      },
+    });
+  }
+
+  // 3. SUBSCRIPTION PLANS
+  console.log('💳 Seeding Subscription Plans...');
+  const plans = [
+    { name: 'Free Tier', durationMonths: 1, price: 0 },
+    { name: 'Basic Monthly', durationMonths: 1, price: 2999 },
+    { name: 'Pro Plan', durationMonths: 12, price: 5999 },
+    { name: 'Basic Annual', durationMonths: 12, price: 29990 },
+    { name: 'Pro Annual', durationMonths: 12, price: 59990 },
+    { name: 'Lifetime Access', durationMonths: 0, price: 150000 },
+  ];
+
+  for (const plan of plans) {
+    await prisma.subscriptionPlan.upsert({
+      where: { name: plan.name },
+      update: {},
+      create: plan,
+    });
+  }
 
   // Helper function to create/update a full restaurant scenario
   async function createRestaurantScenario(
@@ -40,11 +105,10 @@ async function main() {
     lat: number,
     lng: number,
     cuisineNamesToLink: string[],
-    hasSubscription: boolean = false // ✅ NEW: Flag to grant subscription
+    hasSubscription: boolean = false
   ) {
-    const password = await bcrypt.hash('password123', 10);
-    
-    // Find existing user to get tenantId, or create a new tenant
+    const password = await bcrypt.hash('password123', SALT_ROUNDS);
+
     const existingUser = await prisma.user.findUnique({ where: { email: ownerEmail } });
     let tenantId = existingUser?.tenantId;
 
@@ -53,7 +117,6 @@ async function main() {
       tenantId = tenant.id;
     }
 
-    // Create or Update Owner User
     await prisma.user.upsert({
       where: { email: ownerEmail },
       update: {
@@ -70,7 +133,6 @@ async function main() {
       },
     });
 
-    // Create or Update Restaurant
     const restaurant = await prisma.restaurant.upsert({
       where: { slug },
       update: {
@@ -114,28 +176,25 @@ async function main() {
       },
     });
 
-    // ✅ NEW: Add Subscription if requested
     if (hasSubscription) {
-      // Ensure a Pro Plan exists
       let plan = await prisma.subscriptionPlan.findUnique({ where: { name: 'Pro Plan' } });
       if (!plan) {
         plan = await prisma.subscriptionPlan.create({
           data: {
             name: 'Pro Plan',
             durationMonths: 12,
-            price: 2999,
+            price: 5999,
             isActive: true,
           },
         });
       }
 
-      // Create or update the subscription for this restaurant
       await prisma.restaurantSubscription.upsert({
         where: { restaurantId: restaurant.id },
         update: {
           planId: plan.id,
           status: 'ACTIVE',
-          expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year from now
+          expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
           autoRenew: true,
         },
         create: {
@@ -147,18 +206,17 @@ async function main() {
           autoRenew: true,
         },
       });
-      console.log(`   ↳ ✅ Added ACTIVE Pro Plan subscription`);
+      console.log(`   ↳ ✅ Added ACTIVE Pro Plan subscription for ${restaurantName}`);
     }
 
-    // Refresh Cuisines (Delete old links, create new ones to avoid duplicates)
     await prisma.restaurantCuisine.deleteMany({
       where: { restaurantId: restaurant.id },
     });
-    
+
     const cuisines = await prisma.cuisine.findMany({
       where: { name: { in: cuisineNamesToLink } },
     });
-    
+
     if (cuisines.length > 0) {
       await prisma.restaurantCuisine.createMany({
         data: cuisines.map((c) => ({
@@ -168,7 +226,6 @@ async function main() {
       });
     }
 
-    // Refresh Menu (Delete old items in this category, create new ones)
     let category = await prisma.category.findFirst({
       where: { restaurantId: restaurant.id, name: 'Popular Items' },
     });
@@ -191,7 +248,7 @@ async function main() {
 
     const itemName1 = restaurantName.includes('Momo') ? 'Buff Momo' : (restaurantName.includes('Newari') ? 'Choila' : 'Cheese Burger');
     const itemName2 = restaurantName.includes('Momo') ? 'Veg Momo' : (restaurantName.includes('Newari') ? 'Bara' : 'Veg Burger');
-    
+
     await prisma.menuItem.createMany({
       data: [
         {
@@ -220,31 +277,32 @@ async function main() {
     console.log(`✅ Created/Updated: ${restaurantName} (${ownerEmail})`);
   }
 
-  // 3. Create 3 Distinct Restaurant Scenarios
-  // ✅ We pass 'true' as the last argument to give owner1 a subscription!
+  // 4. RESTAURANT SCENARIOS
+  console.log('🏪 Seeding Restaurants...');
   await createRestaurantScenario(
-    'Momo Tenants', 'owner1@test.com', 'Ramesh Shrestha', 
-    'Momo\'s & More', 'momos-and-more', 'Kathmandu', 27.7172, 85.3240, 
+    'Momo Tenants', 'owner1@test.com', 'Ramesh Shrestha',
+    "Momo's & More", 'momos-and-more', 'Kathmandu', 27.7172, 85.3240,
     ['Nepali', 'Fast Food'],
-    true // <--- GRANTS SUBSCRIPTION
+    true
   );
 
   await createRestaurantScenario(
-    'Newari Tenants', 'owner2@test.com', 'Sita Maharjan', 
-    'Newari Bhanchha Ghar', 'newari-bhanchha-ghar', 'Patan', 27.6766, 85.3253, 
+    'Newari Tenants', 'owner2@test.com', 'Sita Maharjan',
+    'Newari Bhanchha Ghar', 'newari-bhanchha-ghar', 'Patan', 27.6766, 85.3253,
     ['Newari', 'Nepali'],
-    false // No subscription
+    false
   );
 
   await createRestaurantScenario(
-    'Burger Tenants', 'owner3@test.com', 'John Doe', 
-    'Burger Station', 'burger-station', 'Kathmandu', 27.7000, 85.3100, 
+    'Burger Tenants', 'owner3@test.com', 'John Doe',
+    'Burger Station', 'burger-station', 'Kathmandu', 27.7000, 85.3100,
     ['Fast Food', 'Chinese'],
-    false // No subscription
+    false
   );
 
-  // 4. Create a Test Customer
-  const customerPassword = await bcrypt.hash('password123', 10);
+  // 5. TEST CUSTOMER
+  console.log('👤 Seeding Test Customer...');
+  const customerPassword = await bcrypt.hash('password123', SALT_ROUNDS);
   await prisma.customer.upsert({
     where: { email: 'customer@test.com' },
     update: { name: 'Test Customer', passwordHash: customerPassword },
@@ -258,7 +316,7 @@ async function main() {
 
   console.log('🎉 Seed completed successfully!');
   console.log('\n📝 Test Accounts (Password for all is: password123):');
-  console.log('  Platform Admin: admin@logicbit.local');
+  console.log(`  Platform Admin: ${bootstrapEmail}`);
   console.log('  Owner 1 (WITH SUBSCRIPTION): owner1@test.com');
   console.log('  Owner 2 (NO SUBSCRIPTION):   owner2@test.com');
   console.log('  Owner 3 (NO SUBSCRIPTION):   owner3@test.com');
