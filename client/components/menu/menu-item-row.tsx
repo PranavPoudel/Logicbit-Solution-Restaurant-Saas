@@ -1,9 +1,10 @@
-// components/menu/menu-item-row.tsx
+ // components/menu/menu-item-row.tsx
 "use client";
 
 import { Plus, Minus } from "lucide-react";
 import type { MenuItem } from "@/types/menu";
 import { useCartStore } from "@/store/cart-store";
+import { theme } from "@/config/theme";
 
 export function MenuItemRow({
   item,
@@ -38,39 +39,61 @@ export function MenuItemRow({
   }
 
   return (
-    <div className="flex items-center gap-3 py-4 border-b border-[#2B1410]/8 last:border-0">
-      <div className="w-16 h-16 rounded-xl bg-[#2B1410]/5 overflow-hidden shrink-0">
+    <div
+      className="flex items-center gap-3 py-4 last:border-0"
+      style={{ borderBottom: `1px solid ${theme.colors.dark}14` }}
+    >
+      <div
+        className="w-16 h-16 rounded-xl overflow-hidden shrink-0"
+        style={{ backgroundColor: `${theme.colors.dark}0D` }}
+      >
         {item.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={item.imageUrl} alt={name} className="w-full h-full object-cover" />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-[#2B1410]/25 font-serif">
+          <div
+            className="w-full h-full flex items-center justify-center font-serif"
+            style={{ color: `${theme.colors.dark}40` }}
+          >
             {name.charAt(0)}
           </div>
         )}
       </div>
 
       <div className="flex-1 min-w-0">
-        <h4 className="text-sm font-medium text-[#2B1410] truncate">{name}</h4>
+        <h4 className="text-sm font-medium truncate" style={{ color: theme.colors.dark }}>
+          {name}
+        </h4>
         {item.description && (
-          <p className="text-xs text-[#2B1410]/45 mt-0.5 line-clamp-2">{item.description}</p>
+          <p className="text-xs mt-0.5 line-clamp-2" style={{ color: `${theme.colors.dark}73` }}>
+            {item.description}
+          </p>
         )}
-        <p className="text-sm font-mono text-[#2B1410] mt-1">
-          {item.hasModifiers ? "From " : ""}Rs {price}
+        <p className="text-sm font-mono mt-1" style={{ color: theme.colors.dark }}>
+          {item.hasModifiers ? theme.content.priceFromPrefix : ""}
+          {theme.content.currencyPrefix} {price}
         </p>
       </div>
 
       {!isAvailable ? (
-        <span className="text-[11px] text-[#2B1410]/40 shrink-0">Unavailable</span>
+        <span className="text-[11px] shrink-0" style={{ color: `${theme.colors.dark}66` }}>
+          {theme.content.unavailableLabel}
+        </span>
       ) : item.hasModifiers ? (
         <button
           onClick={handleAddClick}
-          className="shrink-0 text-xs font-medium border border-[#C0392B] text-[#2B1410] px-3.5 py-2 rounded-full hover:bg-[#C0392B]/10"
+          className="shrink-0 text-xs font-medium px-3.5 py-2 rounded-full"
+          style={{ border: `1px solid ${theme.colors.primary}`, color: theme.colors.dark }}
+          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `${theme.colors.primary}1A`)}
+          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
         >
-          Customize
+          {theme.content.customizeLabel}
         </button>
       ) : quantity > 0 ? (
-        <div className="flex items-center gap-2 shrink-0 bg-[#2B1410] text-[#FDF6EC] rounded-full px-1 py-1">
+        <div
+          className="flex items-center gap-2 shrink-0 rounded-full px-1 py-1"
+          style={{ backgroundColor: theme.colors.dark, color: theme.colors.background }}
+        >
           <button
             onClick={() => removeOneOrAll(item.id)}
             className="w-6 h-6 flex items-center justify-center"
@@ -90,9 +113,12 @@ export function MenuItemRow({
       ) : (
         <button
           onClick={handleAddClick}
-          className="shrink-0 text-xs font-medium border border-[#C0392B] text-[#2B1410] px-3.5 py-2 rounded-full hover:bg-[#C0392B]/10"
+          className="shrink-0 text-xs font-medium px-3.5 py-2 rounded-full"
+          style={{ border: `1px solid ${theme.colors.primary}`, color: theme.colors.dark }}
+          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `${theme.colors.primary}1A`)}
+          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
         >
-          Add
+          {theme.content.addLabel}
         </button>
       )}
     </div>

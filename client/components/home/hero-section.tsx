@@ -2,54 +2,74 @@
 "use client";
 
 import { Search } from "lucide-react";
+import { theme } from "@/config/theme";
 
 export function HeroSection() {
   return (
     <div className="relative overflow-hidden rounded-b-[2.5rem] min-h-[520px]">
-      {/* 3 vertical images filling the background */}
+      {/* background images now come from theme.brand.heroImages */}
       <div className="absolute inset-0 flex">
-        <div className="flex-1 relative">
-          <img src="/images/food-1.avif" alt="" className="w-full h-full object-cover" />
-        </div>
-        <div className="flex-1 relative">
-          <img src="/images/food-2.avif" alt="" className="w-full h-full object-cover" />
-        </div>
-        <div className="flex-1 relative">
-          <img src="/images/food-3.avif" alt="" className="w-full h-full object-cover" />
-        </div>
+        {theme.brand.heroImages.map((src, i) => (
+          <div key={i} className="flex-1 relative">
+            <img src={src} alt="" className="w-full h-full object-cover" />
+          </div>
+        ))}
       </div>
 
-      {/* translucent cream overlay so text stays readable on top of the photos */}
-      <div className="absolute inset-0 bg-[#FDF6EC]/65" />
+      {/* overlay uses theme.colors.background */}
+      <div
+        className="absolute inset-0"
+        style={{ backgroundColor: `${theme.colors.background}A6` /* ~65% opacity */ }}
+      />
 
       <div className="relative max-w-6xl mx-auto px-5 pt-16 pb-20 sm:pt-24 sm:pb-28 text-center">
-        <h1 className="font-serif text-[#2B1410] text-5xl sm:text-7xl leading-[1.05] max-w-2xl mx-auto">
-          Order the{" "}
-          <span className="italic text-[#C0392B]">good stuff</span>,
-          delivered fast.
+        <h1
+          className="font-serif text-5xl sm:text-7xl leading-[1.05] max-w-2xl mx-auto"
+          style={{ color: theme.colors.dark }}
+        >
+          {theme.content.heroHeadingPlain}{" "}
+          <span className="italic" style={{ color: theme.colors.primary }}>
+            {theme.content.heroHeadingEmphasis}
+          </span>
+          {theme.content.heroHeadingSuffix}
         </h1>
 
-        <p className="text-[#2B1410]/55 text-base sm:text-lg mt-6 max-w-md mx-auto font-light">
-          500+ restaurants across Kathmandu. Fresh, hot, and at your door in 30 minutes.
+        <p
+          className="text-base sm:text-lg mt-6 max-w-md mx-auto font-light"
+          style={{ color: `${theme.colors.dark}8C` /* ~55% opacity */ }}
+        >
+          {theme.content.heroSubtext}
         </p>
 
-        {/* search — clean, minimal, white on cream */}
-        <div className="mt-8 max-w-md mx-auto bg-white rounded-full p-1.5 flex items-center gap-2 shadow-lg shadow-[#2B1410]/5 border border-[#2B1410]/8">
+        {/* search bar */}
+        <div
+          className="mt-8 max-w-md mx-auto bg-white rounded-full p-1.5 flex items-center gap-2 shadow-lg"
+          style={{
+            boxShadow: `0 10px 25px -5px ${theme.colors.dark}0D`,
+            border: `1px solid ${theme.colors.dark}14`,
+          }}
+        >
           <div className="flex items-center gap-2 flex-1 px-4 py-2">
-            <Search size={16} className="text-[#2B1410]/35 shrink-0" />
+            <Search size={16} style={{ color: `${theme.colors.dark}59` }} className="shrink-0" />
             <input
               type="text"
-              placeholder="Search restaurants or dishes"
-              className="w-full bg-transparent text-sm text-[#2B1410] placeholder:text-[#2B1410]/40 focus:outline-none"
+              placeholder={theme.content.searchPlaceholder}
+              className="w-full bg-transparent text-sm focus:outline-none"
+              style={{ color: theme.colors.dark }}
             />
           </div>
-          <button className="bg-[#2B1410] text-[#FDF6EC] text-sm font-medium px-6 py-2.5 rounded-full shrink-0 hover:bg-[#3D1E17] active:scale-95 transition-all duration-200">
+          <button
+            className="text-sm font-medium px-6 py-2.5 rounded-full shrink-0 active:scale-95 transition-all duration-200"
+            style={{ backgroundColor: theme.colors.dark, color: theme.colors.background }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = theme.colors.darkHover)}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = theme.colors.dark)}
+          >
             Search
           </button>
         </div>
 
-        <p className="text-[#2B1410]/40 text-xs mt-4">
-          Free delivery on orders over Rs. 999
+        <p className="text-xs mt-4" style={{ color: `${theme.colors.dark}66` }}>
+          {theme.content.freeDeliveryNote}
         </p>
       </div>
     </div>

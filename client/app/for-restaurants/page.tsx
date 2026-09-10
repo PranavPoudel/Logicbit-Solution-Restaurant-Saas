@@ -1,74 +1,68 @@
+
 // app/for-restaurants/page.tsx
+"use client";
 import Link from "next/link";
 import { Store, TrendingUp, Clock, ChevronDown } from "lucide-react";
+import { theme } from "@/config/theme";
 
-const steps = [
-  {
-    title: "Register your restaurant",
-    description: "Sign up with your restaurant details and get set up in minutes.",
-  },
-  {
-    title: "Add your menu",
-    description: "Upload dishes, prices, and photos from anywhere, anytime.",
-  },
-  {
-    title: "Start receiving orders",
-    description: "Customers across Kathmandu can now find and order from you.",
-  },
-];
-
-const faqs = [
-  {
-    question: "How much does it cost to join?",
-    answer: "Free to register — see our pricing plans once you're set up.",
-  },
-  {
-    question: "How do I get paid?",
-    answer: "Payments are settled directly to your account on a regular schedule.",
-  },
-  {
-    question: "Can I manage my menu myself?",
-    answer: "Yes, you have full control to add, edit, or remove items anytime.",
-  },
-];
+const steps = theme.content.onboardingSteps;
+const faqs = theme.content.faqs;
 
 export default function ForRestaurantsPage() {
   return (
-    <div className="bg-[#FDF6EC]">
+    <div style={{ backgroundColor: theme.colors.background }}>
       {/* Hero */}
       <div className="max-w-5xl mx-auto px-5 pt-20 pb-16 text-center">
-        <div className="inline-flex items-center gap-1.5 bg-white border border-[#2B1410]/10 text-[#2B1410]/70 text-xs px-3.5 py-1.5 rounded-full mb-6">
-          <Store size={13} className="text-[#C0392B]" />
-          For Restaurant Owners
+        <div
+          className="inline-flex items-center gap-1.5 bg-white text-xs px-3.5 py-1.5 rounded-full mb-6"
+          style={{ border: `1px solid ${theme.colors.dark}1A`, color: `${theme.colors.dark}B3` }}
+        >
+          <Store size={13} style={{ color: theme.colors.primary }} />
+          {theme.content.forRestaurantsBadge}
         </div>
-        <h1 className="font-serif text-[#2B1410] text-4xl sm:text-6xl leading-[1.1] max-w-2xl mx-auto">
-          The online ordering system for{" "}
-          <span className="italic text-[#C0392B]">your restaurant</span>
+        <h1
+          className="font-serif text-4xl sm:text-6xl leading-[1.1] max-w-2xl mx-auto"
+          style={{ color: theme.colors.dark }}
+        >
+          {theme.content.forRestaurantsHeadingPlain}{" "}
+          <span className="italic" style={{ color: theme.colors.primary }}>
+            {theme.content.forRestaurantsHeadingEmphasis}
+          </span>
         </h1>
-        <p className="text-[#2B1410]/55 text-base sm:text-lg mt-6 max-w-md mx-auto font-light">
-          Reach more customers across Kathmandu and manage every order from one dashboard.
+        <p className="text-base sm:text-lg mt-6 max-w-md mx-auto font-light" style={{ color: `${theme.colors.dark}8C` }}>
+          {theme.content.forRestaurantsSubtext}
         </p>
         <Link
           href="/owner/register"
-          className="inline-block mt-8 bg-[#2B1410] text-[#FDF6EC] text-sm font-medium px-8 py-3 rounded-full hover:bg-[#3D1E17] transition-colors"
+          className="inline-block mt-8 text-sm font-medium px-8 py-3 rounded-full transition-colors"
+          style={{ backgroundColor: theme.colors.dark, color: theme.colors.background }}
+          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = theme.colors.darkHover)}
+          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = theme.colors.dark)}
         >
-          Register your restaurant
+          {theme.content.registerCtaLabel}
         </Link>
       </div>
 
       {/* How It Works */}
       <div className="max-w-5xl mx-auto px-5 py-16">
-        <h2 className="font-serif text-[#2B1410] text-3xl text-center mb-12">
-          How it works
+        <h2 className="font-serif text-3xl text-center mb-12" style={{ color: theme.colors.dark }}>
+          {theme.content.howItWorksHeading}
         </h2>
         <div className="grid sm:grid-cols-3 gap-8">
           {steps.map((step, i) => (
             <div key={step.title} className="text-center">
-              <div className="w-12 h-12 rounded-full bg-[#C0392B]/10 text-[#C0392B] font-serif text-xl flex items-center justify-center mx-auto mb-4">
+              <div
+                className="w-12 h-12 rounded-full font-serif text-xl flex items-center justify-center mx-auto mb-4"
+                style={{ backgroundColor: `${theme.colors.primary}1A`, color: theme.colors.primary }}
+              >
                 {i + 1}
               </div>
-              <h3 className="font-serif text-lg text-[#2B1410] mb-2">{step.title}</h3>
-              <p className="text-[#2B1410]/55 text-sm">{step.description}</p>
+              <h3 className="font-serif text-lg mb-2" style={{ color: theme.colors.dark }}>
+                {step.title}
+              </h3>
+              <p className="text-sm" style={{ color: `${theme.colors.dark}8C` }}>
+                {step.description}
+              </p>
             </div>
           ))}
         </div>
@@ -77,18 +71,22 @@ export default function ForRestaurantsPage() {
       {/* Why join */}
       <div className="max-w-5xl mx-auto px-5 py-16">
         <div className="grid sm:grid-cols-2 gap-6">
-          <div className="bg-white rounded-2xl p-6 border border-[#2B1410]/8">
-            <TrendingUp size={22} className="text-[#C0392B] mb-3" />
-            <h3 className="font-serif text-lg text-[#2B1410] mb-1">Grow your reach</h3>
-            <p className="text-[#2B1410]/55 text-sm">
-              Get discovered by hundreds of hungry customers across the city.
+          <div className="bg-white rounded-2xl p-6" style={{ border: `1px solid ${theme.colors.dark}14` }}>
+            <TrendingUp size={22} style={{ color: theme.colors.primary }} className="mb-3" />
+            <h3 className="font-serif text-lg mb-1" style={{ color: theme.colors.dark }}>
+              {theme.content.growReachTitle}
+            </h3>
+            <p className="text-sm" style={{ color: `${theme.colors.dark}8C` }}>
+              {theme.content.growReachDescription}
             </p>
           </div>
-          <div className="bg-white rounded-2xl p-6 border border-[#2B1410]/8">
-            <Clock size={22} className="text-[#C0392B] mb-3" />
-            <h3 className="font-serif text-lg text-[#2B1410] mb-1">Manage in real time</h3>
-            <p className="text-[#2B1410]/55 text-sm">
-              Track and fulfill orders instantly from your own dashboard.
+          <div className="bg-white rounded-2xl p-6" style={{ border: `1px solid ${theme.colors.dark}14` }}>
+            <Clock size={22} style={{ color: theme.colors.primary }} className="mb-3" />
+            <h3 className="font-serif text-lg mb-1" style={{ color: theme.colors.dark }}>
+              {theme.content.manageRealTimeTitle}
+            </h3>
+            <p className="text-sm" style={{ color: `${theme.colors.dark}8C` }}>
+              {theme.content.manageRealTimeDescription}
             </p>
           </div>
         </div>
@@ -96,23 +94,30 @@ export default function ForRestaurantsPage() {
 
       {/* FAQ */}
       <div className="max-w-3xl mx-auto px-5 py-16">
-        <h2 className="font-serif text-[#2B1410] text-3xl text-center mb-10">
-          Frequently asked questions
+        <h2 className="font-serif text-3xl text-center mb-10" style={{ color: theme.colors.dark }}>
+          {theme.content.faqHeading}
         </h2>
         <div className="space-y-3">
           {faqs.map((faq) => (
             <details
               key={faq.question}
-              className="bg-white rounded-2xl border border-[#2B1410]/8 px-5 py-4 group"
+              className="bg-white rounded-2xl px-5 py-4 group"
+              style={{ border: `1px solid ${theme.colors.dark}14` }}
             >
-              <summary className="flex items-center justify-between cursor-pointer text-[#2B1410] font-medium text-sm list-none">
+              <summary
+                className="flex items-center justify-between cursor-pointer font-medium text-sm list-none"
+                style={{ color: theme.colors.dark }}
+              >
                 {faq.question}
                 <ChevronDown
                   size={16}
-                  className="text-[#2B1410]/40 group-open:rotate-180 transition-transform"
+                  className="group-open:rotate-180 transition-transform"
+                  style={{ color: `${theme.colors.dark}66` }}
                 />
               </summary>
-              <p className="text-[#2B1410]/55 text-sm mt-3">{faq.answer}</p>
+              <p className="text-sm mt-3" style={{ color: `${theme.colors.dark}8C` }}>
+                {faq.answer}
+              </p>
             </details>
           ))}
         </div>
@@ -120,12 +125,17 @@ export default function ForRestaurantsPage() {
 
       {/* CTA */}
       <div className="max-w-3xl mx-auto px-5 py-16 text-center">
-        <h2 className="font-serif text-[#2B1410] text-3xl mb-4">Ready to get started?</h2>
+        <h2 className="font-serif text-3xl mb-4" style={{ color: theme.colors.dark }}>
+          {theme.content.readyToStartHeading}
+        </h2>
         <Link
           href="/owner/register"
-          className="inline-block bg-[#C0392B] text-[#FDF6EC] text-sm font-medium px-8 py-3 rounded-full hover:bg-[#A8301F] transition-colors"
+          className="inline-block text-sm font-medium px-8 py-3 rounded-full transition-colors"
+          style={{ backgroundColor: theme.colors.primary, color: theme.colors.background }}
+          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = theme.colors.primaryHover)}
+          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = theme.colors.primary)}
         >
-          Register your restaurant
+          {theme.content.registerCtaLabel}
         </Link>
       </div>
     </div>
