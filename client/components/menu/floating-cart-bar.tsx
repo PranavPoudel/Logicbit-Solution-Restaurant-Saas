@@ -14,7 +14,7 @@ export function FloatingCartBar() {
     <div className="fixed bottom-4 left-0 right-0 z-30 px-4">
       <Link
         href="/cart"
-        className="max-w-4xl mx-auto flex items-center justify-between bg-[#17181C] text-white rounded-2xl px-5 py-4 shadow-xl shadow-black/20"
+        className="max-w-4xl mx-auto flex items-center justify-between bg-[#2B1410] text-[#FDF6EC] rounded-2xl px-5 py-4 shadow-xl shadow-[#2B1410]/30"
       >
         <span className="text-sm font-medium">
           {itemCount} {itemCount === 1 ? "item" : "items"}

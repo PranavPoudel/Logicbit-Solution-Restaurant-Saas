@@ -12,44 +12,44 @@ export function StorefrontAboutSection({ config }: StorefrontAboutSectionProps) 
   if (!hasContent) return null;
 
   return (
-    <div className="bg-white rounded-2xl border border-[#E8E7E2] p-6 space-y-6">
-      <h2 className="font-display font-semibold text-lg text-[#17181C]">About & Contact</h2>
+    <div className="bg-white rounded-2xl border border-[#2B1410]/8 p-6 space-y-6">
+      <h2 className="font-serif font-semibold text-lg text-[#2B1410]">About & Contact</h2>
       
       {config.aboutText && (
-        <p className="text-sm text-neutral-600 leading-relaxed whitespace-pre-line">
+        <p className="text-sm text-[#2B1410]/65 leading-relaxed whitespace-pre-line">
           {config.aboutText}
         </p>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-neutral-100">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-[#2B1410]/8">
         {config.contactPhone && (
-          <div className="flex items-center gap-3 text-sm text-neutral-600">
-            <Phone size={16} className="text-[#0F6B5C]" />
+          <div className="flex items-center gap-3 text-sm text-[#2B1410]/65">
+            <Phone size={16} className="text-[#C0392B]" />
             <span>{config.contactPhone}</span>
           </div>
         )}
         {config.contactEmail && (
-          <div className="flex items-center gap-3 text-sm text-neutral-600">
-            <Mail size={16} className="text-[#0F6B5C]" />
+          <div className="flex items-center gap-3 text-sm text-[#2B1410]/65">
+            <Mail size={16} className="text-[#C0392B]" />
             <span>{config.contactEmail}</span>
           </div>
         )}
         {config.contactAddress && (
-          <div className="flex items-center gap-3 text-sm text-neutral-600">
-            <MapPin size={16} className="text-[#0F6B5C]" />
+          <div className="flex items-center gap-3 text-sm text-[#2B1410]/65">
+            <MapPin size={16} className="text-[#C0392B]" />
             <span>{config.contactAddress}</span>
           </div>
         )}
       </div>
 
       {(config.socialLinks?.facebook || config.socialLinks?.instagram) && (
-        <div className="flex items-center gap-3 pt-4 border-t border-neutral-100">
+        <div className="flex items-center gap-3 pt-4 border-t border-[#2B1410]/8">
           {config.socialLinks.facebook && (
             <a 
               href={config.socialLinks.facebook} 
               target="_blank" 
               rel="noopener noreferrer" 
-              className="text-neutral-400 hover:text-[#1877F2] transition-colors" 
+              className="text-[#2B1410]/35 hover:text-[#1877F2] transition-colors" 
               title="Facebook"
             >
               <Globe size={20} />
@@ -60,7 +60,7 @@ export function StorefrontAboutSection({ config }: StorefrontAboutSectionProps) 
               href={config.socialLinks.instagram} 
               target="_blank" 
               rel="noopener noreferrer" 
-              className="text-neutral-400 hover:text-[#E1306C] transition-colors" 
+              className="text-[#2B1410]/35 hover:text-[#E1306C] transition-colors" 
               title="Instagram"
             >
               <Camera size={20} />

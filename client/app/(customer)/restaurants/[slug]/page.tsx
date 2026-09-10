@@ -5,8 +5,11 @@ import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle } from "lucide-react";
 import { RestaurantHeader } from "@/components/menu/restaurant-header";
 import { CategoryNav } from "@/components/menu/category-nav";
-import { MenuItemRow } from "@/components/menu/menu-item-row";
+import { MenuItemCard } from "@/components/menu/menu-item-card";
 import { FloatingCartBar } from "@/components/menu/floating-cart-bar";
+import { SignatureDishes } from "@/components/menu/signature-dishes";
+import { RestaurantFooter } from "@/components/menu/restaurant-footer";
+import { DynamicRestaurantLocationMap } from "@/components/map/dynamic-restaurant-location-map";
 import { ModifierModal } from "@/components/menu-modal/modifier-modal";
 import { getRestaurantByIdOrSlug, getRestaurantMenu } from "@/lib/api/discovery";
 
@@ -79,7 +82,7 @@ export default function RestaurantDetailPage({
 
   if (restaurantQuery.isLoading) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-16 text-center text-sm text-neutral-400">
+      <div className="max-w-4xl mx-auto px-4 py-16 text-center text-sm text-[#2B1410]/40">
         Loading restaurant…
       </div>
     );
@@ -88,8 +91,8 @@ export default function RestaurantDetailPage({
   if (restaurantQuery.isError || !restaurantQuery.data) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-16 flex flex-col items-center text-center gap-3">
-        <AlertTriangle className="text-neutral-300" size={28} />
-        <p className="text-sm text-neutral-500">
+        <AlertTriangle className="text-[#2B1410]/25" size={28} />
+        <p className="text-sm text-[#2B1410]/55">
           Couldn&apos;t load this restaurant. It may not exist, or the backend
           isn&apos;t reachable.
         </p>
@@ -100,6 +103,10 @@ export default function RestaurantDetailPage({
   return (
     <div className="pb-24">
       <RestaurantHeader restaurant={restaurantQuery.data} />
+
+      <div className="max-w-4xl mx-auto px-4">
+        <SignatureDishes />
+      </div>
 
       <div className="max-w-4xl mx-auto px-4 py-6">
         <StorefrontBannerCarousel banners={bannersQuery.data || []} />
@@ -114,36 +121,44 @@ export default function RestaurantDetailPage({
       <div className="max-w-4xl mx-auto px-4 space-y-8">
         {/* Menu Items Section */}
         {menuQuery.isLoading ? (
-          <p className="text-sm text-neutral-400 text-center py-12">Loading menu…</p>
+          <p className="text-sm text-[#2B1410]/40 text-center py-12">Loading menu…</p>
         ) : categories.length === 0 ? (
-          <p className="text-sm text-neutral-400 text-center py-12">
+          <p className="text-sm text-[#2B1410]/40 text-center py-12">
             This restaurant hasn&apos;t added any menu items yet.
           </p>
         ) : (
           categories.map((category) => (
             <div key={category.id} id={`category-${category.id}`} className="scroll-mt-32 py-5">
-              <h3 className="font-display font-semibold text-base text-[#17181C] mb-1">
+              <h3 className="font-serif font-semibold text-lg text-[#2B1410] mb-4">
                 {category.name ?? "Menu"}
               </h3>
-              <div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 {(category.items ?? []).map((item) => (
-                  <MenuItemRow
+                  <MenuItemCard
                     key={item.id}
                     item={item}
                     restaurantId={restaurantQuery.data.id}
                     onOpenModifiers={setModifierItemId}
                   />
                 ))}
-                {(category.items ?? []).length === 0 && (
-                  <p className="text-xs text-neutral-400 py-3">No items in this category.</p>
-                )}
               </div>
+              {(category.items ?? []).length === 0 && (
+                <p className="text-xs text-[#2B1410]/40 py-3">No items in this category.</p>
+              )}
             </div>
           ))
         )}
 
         <StorefrontAboutSection config={configQuery.data || {}} />
+
+        <DynamicRestaurantLocationMap
+          lat={(restaurantQuery.data as any).latitude}
+          lng={(restaurantQuery.data as any).longitude}
+          address={(restaurantQuery.data as any).address}
+        />
       </div>
+
+      <RestaurantFooter restaurant={restaurantQuery.data} />
 
       <FloatingCartBar />
 
