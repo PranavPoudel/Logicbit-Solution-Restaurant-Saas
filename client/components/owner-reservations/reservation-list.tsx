@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { useQuery, useMutation, type QueryClient } from "@tanstack/react-query";
-import { Plus, Pencil, Trash2, Users, Clock, Calendar, X, Phone, MessageSquare } from "lucide-react";
+import { Plus, Pencil, Trash2, Users, Clock, Calendar, X, Phone, MessageSquare, AlertCircle } from "lucide-react";
 import { reservationsApi, type Reservation, type CreateReservationDto } from "@/lib/api/reservations";
 import { tablesApi } from "@/lib/api/tables";
 
@@ -25,6 +25,7 @@ const STATUS_COLORS: Record<string, string> = {
 export function ReservationList({ reservations, restaurantId, queryClient }: ReservationListProps) {
   const [showModal, setShowModal] = useState(false);
   const [editingRes, setEditingRes] = useState<Reservation | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
 
   // Fetch active tables for the dropdown
   const tablesQuery = useQuery({
@@ -53,6 +54,11 @@ export function ReservationList({ reservations, restaurantId, queryClient }: Res
       queryClient.invalidateQueries({ queryKey: ["owner-reservations", restaurantId] });
       closeModal();
     },
+    onError: (err: any) => {
+      // Extract the exact error message from the backend response
+      const message = err?.response?.data?.message || "Failed to save reservation. Please check your inputs and try again.";
+      setFormError(Array.isArray(message) ? message.join(", ") : message);
+    },
   });
 
   const deleteMutation = useMutation({
@@ -62,6 +68,7 @@ export function ReservationList({ reservations, restaurantId, queryClient }: Res
 
   function openAdd() {
     setEditingRes(null);
+    setFormError(null);
     setCustomerName(""); setCustomerPhone(""); setPartySize("2");
     setReservationDate(new Date().toISOString().split("T")[0]);
     setReservationTime("12:00"); setDurationMinutes("60");
@@ -71,6 +78,7 @@ export function ReservationList({ reservations, restaurantId, queryClient }: Res
 
   function openEdit(res: Reservation) {
     setEditingRes(res);
+    setFormError(null);
     setCustomerName(res.customerName || "");
     setCustomerPhone(res.customerPhone || "");
     setPartySize(String(res.partySize));
@@ -86,9 +94,20 @@ export function ReservationList({ reservations, restaurantId, queryClient }: Res
   function closeModal() {
     setShowModal(false);
     setEditingRes(null);
+    setFormError(null);
   }
 
   function handleSave() {
+    // 1. Client-side validation for required fields
+    if (!reservationDate || !reservationTime || !partySize) {
+      setFormError("Please fill in all required fields: Date, Time, and Party Size.");
+      return;
+    }
+
+    // 2. Clear any previous errors before attempting save
+    setFormError(null);
+
+    // 3. Construct DTO and send to API
     const dto: CreateReservationDto = {
       customerName: customerName || undefined,
       customerPhone: customerPhone || undefined,
@@ -100,11 +119,12 @@ export function ReservationList({ reservations, restaurantId, queryClient }: Res
       status,
       notes: notes || undefined,
     };
+    
     saveMutation.mutate(dto);
   }
 
   function handleStatusChange(res: Reservation, newStatus: string) {
-    // Include all required fields when updating status
+    setFormError(null);
     const dto: CreateReservationDto = {
       customerName: res.customerName || undefined,
       customerPhone: res.customerPhone || undefined,
@@ -196,14 +216,22 @@ export function ReservationList({ reservations, restaurantId, queryClient }: Res
       {showModal && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={closeModal}>
           <div onClick={(e) => e.stopPropagation()} className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
-            <div className="flex items-center justify-between p-6 border-b border-neutral-100 sticky top-0 bg-white">
+            <div className="flex items-center justify-between p-6 border-b border-neutral-100 sticky top-0 bg-white z-10">
               <h3 className="text-lg font-semibold text-neutral-900">
                 {editingRes ? "Edit Reservation" : "New Reservation"}
               </h3>
-              <button onClick={closeModal}><X size={20} className="text-neutral-400" /></button>
+              <button onClick={closeModal}><X size={20} className="text-neutral-400 hover:text-neutral-600" /></button>
             </div>
             
             <div className="p-6 space-y-4">
+              {/* 🚨 ERROR BANNER 🚨 */}
+              {formError && (
+                <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-sm text-red-700 flex items-start gap-2">
+                  <AlertCircle size={16} className="mt-0.5 shrink-0" />
+                  <span>{formError}</span>
+                </div>
+              )}
+
               {/* Customer Info */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -243,7 +271,6 @@ export function ReservationList({ reservations, restaurantId, queryClient }: Res
                       value={reservationDate}
                       onChange={(e) => setReservationDate(e.target.value)}
                       className="w-full border border-neutral-200 rounded-lg pl-10 pr-3 py-2 text-sm focus:ring-2 focus:ring-[#E3A008]/20 focus:border-[#E3A008] outline-none"
-                      required
                     />
                   </div>
                 </div>
@@ -256,7 +283,6 @@ export function ReservationList({ reservations, restaurantId, queryClient }: Res
                       value={reservationTime}
                       onChange={(e) => setReservationTime(e.target.value)}
                       className="w-full border border-neutral-200 rounded-lg pl-10 pr-3 py-2 text-sm focus:ring-2 focus:ring-[#E3A008]/20 focus:border-[#E3A008] outline-none"
-                      required
                     />
                   </div>
                 </div>
@@ -270,7 +296,6 @@ export function ReservationList({ reservations, restaurantId, queryClient }: Res
                       value={partySize}
                       onChange={(e) => setPartySize(e.target.value)}
                       className="w-full border border-neutral-200 rounded-lg pl-10 pr-3 py-2 text-sm focus:ring-2 focus:ring-[#E3A008]/20 focus:border-[#E3A008] outline-none"
-                      required
                     />
                   </div>
                 </div>
@@ -281,6 +306,7 @@ export function ReservationList({ reservations, restaurantId, queryClient }: Res
                   <label className="block text-xs font-medium text-neutral-600 mb-1">Duration (minutes)</label>
                   <input
                     type="number"
+                    min="15"
                     value={durationMinutes}
                     onChange={(e) => setDurationMinutes(e.target.value)}
                     className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#E3A008]/20 focus:border-[#E3A008] outline-none"
@@ -334,15 +360,19 @@ export function ReservationList({ reservations, restaurantId, queryClient }: Res
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 p-6 border-t border-neutral-100 bg-neutral-50 sticky bottom-0">
-              <button onClick={closeModal} className="px-4 py-2 text-sm font-medium text-neutral-600 hover:bg-neutral-200 rounded-lg">
+            <div className="flex justify-end gap-2 p-6 border-t border-neutral-100 bg-neutral-50 sticky bottom-0 z-10">
+              <button 
+                onClick={closeModal} 
+                className="px-4 py-2 text-sm font-medium text-neutral-600 hover:bg-neutral-200 rounded-lg transition-colors"
+              >
                 Cancel
               </button>
               <button
                 onClick={handleSave}
-                disabled={saveMutation.isPending || !reservationDate || !reservationTime || !partySize}
-                className="px-4 py-2 text-sm font-medium bg-[#1B2333] text-white rounded-lg hover:bg-[#1B2333]/90 disabled:opacity-50"
+                disabled={saveMutation.isPending}
+                className="px-6 py-2 text-sm font-medium bg-[#1B2333] text-white rounded-lg hover:bg-[#1B2333]/90 disabled:opacity-50 transition-colors flex items-center gap-2"
               >
+                {saveMutation.isPending && <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
                 {saveMutation.isPending ? "Saving..." : editingRes ? "Update Reservation" : "Create Reservation"}
               </button>
             </div>

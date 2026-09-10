@@ -529,23 +529,25 @@ enum CouponType {
 }
 
 model Coupon {
-  id             String     @id @default(uuid())
-  tenantId       String
-  restaurantId   String?
-  code           String
-  type           CouponType
-  value          Float
-  maxDiscount    Float?
-  minOrderAmount Float?     @default(0)
-  usageLimit     Int?
-  usageLimitPerCustomer Int? @default(1)
-  usedCount      Int        @default(0)
-  validFrom      DateTime   @default(now())
-  validUntil     DateTime?
-  isActive       Boolean    @default(true)
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
+  id                  String     @id @default(uuid())
+  tenantId            String
+  restaurantId        String?
+  code                String?
+  type                CouponType
+  value               Float
+  maxDiscount         Float?
+  minOrderAmount      Float?     @default(0)
+  usageLimit          Int?
+  usageLimitPerCustomer Int?     @default(1)
+  usedCount           Int        @default(0)
+  validFrom           DateTime   @default(now())
+  validUntil          DateTime?
+  isActive            Boolean    @default(true)
+  isAutoApply         Boolean    @default(false)
 
+  deletedAt           DateTime?  // 🆕 Added for Trash functionality
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
   usages CouponUsage[]
 
   @@unique([tenantId, code])

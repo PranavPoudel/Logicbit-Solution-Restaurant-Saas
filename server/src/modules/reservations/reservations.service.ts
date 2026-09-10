@@ -1,3 +1,4 @@
+// modules/reservations/reservations.service.ts
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
@@ -7,21 +8,40 @@ import { UpdateReservationDto } from './dto/update-reservation.dto';
 export class ReservationsService {
   constructor(private readonly prisma: PrismaService) {}
 
+  // Helper: Combine date + time into a proper ISO-8601 DateTime
+  private buildReservationDateTime(date: string, time: string): Date {
+    // date = "2026-09-10", time = "15:00"
+    // Result: "2026-09-10T15:00:00.000Z"
+    return new Date(`${date}T${time}:00.000Z`);
+  }
+
   async create(tenantId: string, restaurantId: string, dto: CreateReservationDto) {
-    const restaurant = await this.prisma.restaurant.findFirst({ where: { id: restaurantId, tenantId } });
+    const restaurant = await this.prisma.restaurant.findFirst({ 
+      where: { id: restaurantId, tenantId } 
+    });
     if (!restaurant) throw new NotFoundException('Restaurant not found for this tenant');
 
-    // Optional: Check if table exists and belongs to this restaurant
+    // Validate table if provided
     if (dto.tableId) {
-      const table = await this.prisma.restaurantTable.findFirst({ where: { id: dto.tableId, restaurantId, deletedAt: null } });
+      const table = await this.prisma.restaurantTable.findFirst({ 
+        where: { id: dto.tableId, restaurantId, tenantId, deletedAt: null } 
+      });
       if (!table) throw new NotFoundException('Table not found or inactive');
     }
 
+    // Convert date + time strings into a proper DateTime for Prisma
+    const reservationDateTime = this.buildReservationDateTime(dto.reservationDate, dto.reservationTime);
+
     return this.prisma.reservation.create({
-      data: { ...dto, tenantId, restaurantId },
+      data: {
+        ...dto,
+        tenantId,
+        restaurantId,
+        reservationDate: reservationDateTime, // ✅ Now a proper Date object
+      },
       include: { table: { select: { name: true } } },
     });
-    }
+  }
 
   async findAll(tenantId: string, restaurantId: string, includeDeleted = false, status?: string, date?: string) {
     const whereClause: any = {
@@ -35,9 +55,8 @@ export class ReservationsService {
     }
     if (date) {
       // Filter by specific date (ignoring time)
-      const startOfDay = new Date(date);
-      const endOfDay = new Date(date);
-      endOfDay.setHours(23, 59, 59, 999);
+      const startOfDay = new Date(`${date}T00:00:00.000Z`);
+      const endOfDay = new Date(`${date}T23:59:59.999Z`);
       whereClause.reservationDate = { gte: startOfDay, lte: endOfDay };
     }
 
@@ -60,14 +79,26 @@ export class ReservationsService {
   async update(tenantId: string, restaurantId: string, id: string, dto: UpdateReservationDto) {
     await this.findOne(tenantId, restaurantId, id);
 
+    // Validate table if being updated
     if (dto.tableId) {
-      const table = await this.prisma.restaurantTable.findFirst({ where: { id: dto.tableId, restaurantId, deletedAt: null } });
+      const table = await this.prisma.restaurantTable.findFirst({ 
+        where: { id: dto.tableId, restaurantId, tenantId, deletedAt: null } 
+      });
       if (!table) throw new NotFoundException('Table not found or inactive');
+    }
+
+    // Convert date + time if both are provided in the update
+    let reservationDateTime: Date | undefined;
+    if (dto.reservationDate && dto.reservationTime) {
+      reservationDateTime = this.buildReservationDateTime(dto.reservationDate, dto.reservationTime);
     }
 
     return this.prisma.reservation.update({
       where: { id, tenantId, restaurantId },
-      data: dto,
+      data: {
+        ...dto,
+        ...(reservationDateTime && { reservationDate: reservationDateTime }),
+      },
       include: { table: { select: { name: true } } },
     });
   }
@@ -88,7 +119,7 @@ export class ReservationsService {
 
     return this.prisma.reservation.update({
       where: { id, tenantId, restaurantId },
-      data: { deletedAt: null, status: 'PENDING' }, // Reset to pending on restore
+      data: { deletedAt: null, status: 'PENDING' },
     });
   }
 
