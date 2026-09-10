@@ -12,19 +12,21 @@ datasource db {
 // =========================================================
 
 model Tenant {
-  id        String   @id @default(uuid())
-  name      String
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id               String    @id @default(uuid())
+  name             String
+  isActive         Boolean   @default(true)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
-  users       User[]
-  restaurants Restaurant[]
-  roles       Role[]
-  categories      Category[]
-  menuItems       MenuItem[]
-  modifierGroups  ModifierGroup[]
-  orders          Order[]
+  users            User[]
+  restaurants      Restaurant[]
+  roles            Role[]
+  categories       Category[]
+  menuItems        MenuItem[]
+  modifierGroups   ModifierGroup[]
+  orders           Order[]
+  restaurantTables RestaurantTable[]  // 🆕 Added
+  reservations     Reservation[]      // 🆕 Added
 }
 
 model User {
@@ -208,6 +210,9 @@ model Restaurant {
   favoritedBy    CustomerFavorite[]
   cuisines       RestaurantCuisine[]
 
+  tables         RestaurantTable[]
+  reservations   Reservation[]
+
   @@index([tenantId])
   @@index([latitude, longitude])
   @@index([city])
@@ -218,17 +223,21 @@ model Restaurant {
 // =========================================================
 
 model Category {
-  id           String   @id @default(uuid())
-  tenantId     String
-  restaurantId String
-  name         String
-  description  String?
-  image        String?
-  displayOrder Int      @default(0)
-  isFeatured   Boolean  @default(false)
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id              String    @id @default(uuid())
+  tenantId        String
+  restaurantId    String
+  name            String
+  nameJa          String?   // 🆕 Japanese Name
+  description     String?
+  descriptionJa   String?   // 🆕 Japanese Description
+  image           String?
+  displayOrder    Int       @default(0)
+  isFeatured      Boolean   @default(false)
+  isOnHomepage    Boolean   @default(false) // 🆕 Show on homepage
+  isActive        Boolean   @default(true)
+  deletedAt       DateTime? // 🆕 Soft delete for Trash
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   tenant     Tenant     @relation(fields: [tenantId], references: [id])
   restaurant Restaurant @relation(fields: [restaurantId], references: [id])
@@ -243,22 +252,26 @@ model MenuItem {
   restaurantId           String
   categoryId             String
   name                   String
+  nameJa                 String?   // 🆕 Japanese Name
   description            String?
+  descriptionJa          String?   // 🆕 Japanese Description
   price                  Float
   costPrice              Float?
   image                  String?
+  galleryImages          Json?     // 🆕 Array of image URLs
   isAvailable            Boolean   @default(true)
   isFeatured             Boolean   @default(false)
   isVegetarian           Boolean   @default(false)
   isVegan                Boolean   @default(false)
-  spiceLevel             String?
+  spiceLevel             String?   // e.g., "MILD", "MEDIUM", "HOT"
   allergenInfo           String?
   calories               Int?
   displayOrder           Int       @default(0)
   preparationTimeMinutes Int?
+  homepageSections       Json?     // 🆕 e.g., ["TODAYS_SPECIAL", "BEST_SELLER"]
   createdAt              DateTime  @default(now())
   updatedAt              DateTime  @updatedAt
-  deletedAt              DateTime?
+  deletedAt              DateTime? // 🆕 Soft delete for Trash
 
   tenant         Tenant                   @relation(fields: [tenantId], references: [id])
   restaurant     Restaurant               @relation(fields: [restaurantId], references: [id])
@@ -935,4 +948,65 @@ model Notification {
 
   @@index([tenantId])
   @@index([customerId])
+}
+
+// =========================================================
+// TABLES & RESERVATIONS
+// =========================================================
+
+model RestaurantTable {
+  id           String   @id @default(uuid())
+  tenantId     String
+  restaurantId String
+  name         String              // e.g., "Table 01", "T-01", "Bar Seat 3"
+  capacity     Int                 // max guests
+  zone         String?             // e.g., "Indoor", "Outdoor", "Patio"
+  isActive     Boolean  @default(true)
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  deletedAt    DateTime?           // soft delete
+
+  tenant       Tenant       @relation(fields: [tenantId], references: [id])
+  restaurant   Restaurant   @relation(fields: [restaurantId], references: [id])
+  reservations Reservation[]
+
+  @@index([restaurantId])
+}
+
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  SEATED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+model Reservation {
+  id              String            @id @default(uuid())
+  tenantId        String
+  restaurantId    String
+  tableId         String?           // nullable — can be unassigned initially
+  customerName    String?
+  customerPhone   String?
+  customerEmail   String?
+  partySize       Int
+  reservationDate DateTime          // the date of the reservation
+  reservationTime String            // e.g., "13:00"
+  durationMinutes Int      @default(60)
+  status          ReservationStatus @default(PENDING)
+  notes           String?           // customer message / special request
+  cancelledAt     DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  deletedAt       DateTime?         // soft delete (Trash)
+
+  tenant     Tenant          @relation(fields: [tenantId], references: [id])
+  restaurant Restaurant      @relation(fields: [restaurantId], references: [id])
+  table      RestaurantTable? @relation(fields: [tableId], references: [id])
+
+  @@index([restaurantId])
+  @@index([reservationDate])
+  @@index([status])
 }

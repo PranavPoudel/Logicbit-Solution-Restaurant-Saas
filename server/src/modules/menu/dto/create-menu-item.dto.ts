@@ -1,3 +1,4 @@
+// modules/menu/dto/create-menu-item.dto.ts
 import {
   IsString,
   IsNotEmpty,
@@ -8,6 +9,7 @@ import {
   Min,
   MaxLength,
   IsUUID,
+  IsArray, // 🆕 Added
 } from 'class-validator';
 
 export class CreateMenuItemDto {
@@ -22,8 +24,18 @@ export class CreateMenuItemDto {
 
   @IsString()
   @IsOptional()
+  @MaxLength(150)
+  nameJa?: string; // 🆕 Japanese Name
+
+  @IsString()
+  @IsOptional()
   @MaxLength(1000)
   description?: string;
+
+  @IsString()
+  @IsOptional()
+  @MaxLength(1000)
+  descriptionJa?: string; // 🆕 Japanese Description
 
   @IsNumber()
   @Min(0)
@@ -37,6 +49,11 @@ export class CreateMenuItemDto {
   @IsString()
   @IsOptional()
   image?: string;
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  galleryImages?: string[]; // 🆕 Array of image URLs (Prisma will store as JSON)
 
   @IsBoolean()
   @IsOptional()
@@ -77,4 +94,9 @@ export class CreateMenuItemDto {
   @Min(0)
   @IsOptional()
   preparationTimeMinutes?: number;
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  homepageSections?: string[]; // 🆕 e.g., ["TODAYS_SPECIAL", "BEST_SELLER"] (Prisma stores as JSON)
 }
