@@ -1,15 +1,15 @@
 // app/(owner-dashboard)/dashboard/page.tsx
 "use client";
 
-import { ShoppingBag, Wallet, Clock, AlertCircle, Link as LinkIcon } from "lucide-react";
+import { ShoppingBag, Wallet, Clock, CheckCircle2, AlertCircle, Link as LinkIcon, Users } from "lucide-react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { RevenueChart } from "@/components/dashboard/revenue-chart";
 import { PendingOrdersWidget } from "@/components/dashboard/pending-orders-widget";
-import { SubscriptionBanner } from "@/components/dashboard/subscription-banner";
 import { useOwnerAuthStore } from "@/store/owner-auth-store";
 import { getRestaurantSubscription } from "@/lib/api/subscriptions";
+import { getRestaurantAnalytics } from "@/lib/api/analytics";
 import { listRestaurantOrders } from "@/lib/api/orders";
 
 const mockRevenueTrend = [
@@ -29,23 +29,34 @@ interface OwnerOrderRow {
   items?: Array<{ quantity?: number }>;
   total?: number;
   createdAt?: string;
+  status?: string;
 }
 
 export default function DashboardPage() {
   const restaurantId = useOwnerAuthStore((s) => s.activeRestaurantId);
 
+  // 1. Subscription Query
   const subscriptionQuery = useQuery({
     queryKey: ["restaurant-subscription", restaurantId],
     queryFn: () => getRestaurantSubscription(restaurantId as string),
     enabled: !!restaurantId,
   });
 
+  // 2. Pending Orders Query
   const ordersQuery = useQuery({
     queryKey: ["dashboard-pending-orders", restaurantId],
-    queryFn: () =>
-      listRestaurantOrders(restaurantId as string, "PENDING") as Promise<OwnerOrderRow[]>,
+    queryFn: () => listRestaurantOrders(restaurantId as string, "PENDING") as Promise<OwnerOrderRow[]>,
     enabled: !!restaurantId,
   });
+
+  // 3. Analytics Query (REAL DATA)
+  const analyticsQuery = useQuery({
+    queryKey: ["dashboard-analytics", restaurantId],
+    queryFn: () => getRestaurantAnalytics(restaurantId as string),
+    enabled: !!restaurantId,
+  });
+
+  const analytics = analyticsQuery.data;
 
   const pendingOrders = (ordersQuery.data ?? []).map((o) => ({
     id: o.id,
@@ -54,100 +65,98 @@ export default function DashboardPage() {
     itemCount: (o.items ?? []).reduce((sum, i) => sum + (i.quantity ?? 1), 0),
     total: o.total ?? 0,
     placedMinutesAgo: o.createdAt
-      ? // eslint-disable-next-line react-hooks/purity
-        Math.max(0, Math.round((Date.now() - new Date(o.createdAt).getTime()) / 60000))
+      ? Math.max(0, Math.round((Date.now() - new Date(o.createdAt).getTime()) / 60000))
       : 0,
   }));
 
-  const sub = subscriptionQuery.data as
-    | { status?: string; planName?: string; daysRemaining?: number; message?: string; expiryDate?: string }
-    | undefined;
+  const sub = subscriptionQuery.data as any;
   const hasNoSubscription = sub?.status === "NO_SUBSCRIPTION";
   const isExpiring = sub?.status === "expiring";
 
   return (
-    <div className="space-y-6 max-w-6xl">
+    <div className="space-y-6 max-w-7xl mx-auto p-1">
+      {/* Header */}
       <div>
-        <h1 className="text-xl font-semibold text-neutral-900">Dashboard</h1>
-        <p className="text-sm text-neutral-500">Today&apos;s overview for your restaurant.</p>
+        <h1 className="text-2xl font-bold text-neutral-900">Dashboard</h1>
+        <p className="text-sm text-neutral-500 mt-1">Here&apos;s what&apos;s happening at your restaurant today.</p>
       </div>
 
-      {/* Enhanced Subscription Banners */}
+      {/* Subscription Banners */}
       {hasNoSubscription ? (
         <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 shrink-0" />
             <div>
-              <p className="text-sm font-medium text-red-700">
-                No Active Subscription
-              </p>
-              <p className="text-xs text-red-600 mt-0.5">
-                Upgrade to unlock menu management, orders, and analytics.
-              </p>
+              <p className="text-sm font-semibold text-red-700">No Active Subscription</p>
+              <p className="text-xs text-red-600 mt-0.5">Upgrade to unlock menu management, orders, and analytics.</p>
             </div>
           </div>
-          <Link
-            href="/subscriptions"
-            className="w-full sm:w-auto px-4 py-2 bg-[#E3A008] hover:bg-[#d49207] text-[#17181C] text-sm font-semibold rounded-lg transition-colors text-center whitespace-nowrap flex items-center justify-center gap-2"
-          >
-            <LinkIcon size={16} />
-            Upgrade Plan
+          <Link href="/subscriptions" className="w-full sm:w-auto px-4 py-2 bg-[#E3A008] hover:bg-amber-600 text-white text-sm font-semibold rounded-lg transition-colors text-center whitespace-nowrap flex items-center justify-center gap-2">
+            <LinkIcon size={16} /> Upgrade Plan
           </Link>
         </div>
       ) : isExpiring ? (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5 shrink-0" />
+            <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
             <div>
-              <p className="text-sm font-medium text-yellow-700">
-                Subscription Expiring Soon
-              </p>
-              <p className="text-xs text-yellow-600 mt-0.5">
-                Your plan expires on{" "}
-                {sub?.expiryDate &&
-                  new Date(sub.expiryDate).toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric",
-                  })}
+              <p className="text-sm font-semibold text-amber-700">Subscription Expiring Soon</p>
+              <p className="text-xs text-amber-600 mt-0.5">
+                Your plan expires on {sub?.expiryDate && new Date(sub.expiryDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
               </p>
             </div>
           </div>
-          <Link
-            href="/subscriptions"
-            className="w-full sm:w-auto px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-semibold rounded-lg transition-colors text-center whitespace-nowrap flex items-center justify-center gap-2"
-          >
-            <LinkIcon size={16} />
-            Renew Now
+          <Link href="/subscriptions" className="w-full sm:w-auto px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold rounded-lg transition-colors text-center whitespace-nowrap flex items-center justify-center gap-2">
+            <LinkIcon size={16} /> Renew Now
           </Link>
         </div>
-      ) : (
-        sub && (
-          <SubscriptionBanner
-            subscription={{
-              planName: sub.planName ?? "Plan",
-              status: (sub.status as "active" | "expiring" | "expired" | "trial") ?? "active",
-              expiresAt: sub.expiryDate ?? "",
-              daysRemaining: sub.daysRemaining ?? 0,
-            }}
-          />
-        )
-      )}
+      ) : sub ? (
+        <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-center gap-3">
+          <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+          <p className="text-sm font-medium text-emerald-800">
+            Active Plan: <span className="font-semibold">{sub.planName ?? "Standard"}</span>
+            {sub.daysRemaining && ` · ${sub.daysRemaining} days remaining`}
+          </p>
+        </div>
+      ) : null}
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <StatCard label="Today's Orders" value="—" icon={ShoppingBag} />
-        <StatCard label="Today's Revenue" value="—" icon={Wallet} />
+      {/* Stat Cards Grid (Sakura Style with Color Variants & Real Data) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard
+          label="Today's Orders"
+          value={analyticsQuery.isLoading ? "…" : (analytics?.totalOrders ?? 0).toString()}
+          icon={ShoppingBag}
+          colorVariant="amber"
+        />
+        <StatCard
+          label="Today's Revenue"
+          value={analyticsQuery.isLoading ? "…" : `Rs. ${(analytics?.totalRevenue ?? 0).toLocaleString()}`}
+          icon={Wallet}
+          colorVariant="teal"
+        />
         <StatCard
           label="Pending Action"
           value={ordersQuery.isLoading ? "…" : String(pendingOrders.length)}
           icon={Clock}
+          colorVariant="blue"
+        />
+        <StatCard
+          label="New Customers"
+          value={analyticsQuery.isLoading ? "…" : (analytics?.newCustomers ?? 0).toString()}
+          icon={Users}
+          colorVariant="purple"
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-        <div className="lg:col-span-3">
-          <RevenueChart data={mockRevenueTrend} />
+      {/* Main Content Grid: Chart + Recent Orders */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        {/* Revenue Chart */}
+        <div className="lg:col-span-3 bg-white border border-neutral-200 rounded-xl p-5 shadow-sm">
+          <h3 className="text-sm font-semibold text-neutral-800 mb-4">Revenue Overview (Last 7 Days)</h3>
+          <RevenueChart data={analytics?.revenueTrend ?? mockRevenueTrend} />
         </div>
+
+        {/* Recent / Pending Orders Widget */}
         <div className="lg:col-span-2">
           <PendingOrdersWidget orders={pendingOrders} />
         </div>
