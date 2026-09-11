@@ -1,7 +1,9 @@
+// components/storefront/storefront-banner-carousel.tsx
 "use client";
 
 import Link from "next/link";
 import type { PublicBanner } from "@/lib/api/public-storefront";
+import { theme } from "@/config/theme";
 
 interface StorefrontBannerCarouselProps {
   banners: PublicBanner[];
@@ -16,18 +18,31 @@ export function StorefrontBannerCarousel({ banners }: StorefrontBannerCarouselPr
         <Link
           key={banner.id}
           href={banner.linkUrl || "#"}
-          className="snap-center shrink-0 w-[85vw] sm:w-[600px] h-48 sm:h-64 rounded-2xl overflow-hidden relative bg-[#2B1410]/5 group border border-[#2B1410]/8"
+          className="snap-center shrink-0 w-[85vw] sm:w-[600px] h-48 sm:h-64 rounded-2xl overflow-hidden relative group"
+          style={{
+            backgroundColor: `${theme.colors.dark}0D`,
+            border: `1px solid ${theme.colors.dark}14`,
+          }}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img 
-            src={banner.imageUrl} 
-            alt={banner.title || "Banner"} 
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
+          <img
+            src={banner.imageUrl}
+            alt={banner.title || "Banner"}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#2B1410]/75 via-[#2B1410]/10 to-transparent" />
-          <div className="absolute bottom-0 left-0 right-0 p-5 text-[#FDF6EC]">
+          <div
+            className="absolute inset-0"
+            style={{
+              background: `linear-gradient(to top, ${theme.colors.dark}BF, ${theme.colors.dark}1A, transparent)`,
+            }}
+          />
+          <div className="absolute bottom-0 left-0 right-0 p-5" style={{ color: theme.colors.background }}>
             {banner.title && <h3 className="font-serif font-semibold text-xl">{banner.title}</h3>}
-            {banner.subtitle && <p className="text-sm text-[#FDF6EC]/85 mt-1">{banner.subtitle}</p>}
+            {banner.subtitle && (
+              <p className="text-sm mt-1" style={{ color: `${theme.colors.background}D9` }}>
+                {banner.subtitle}
+              </p>
+            )}
           </div>
         </Link>
       ))}

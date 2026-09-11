@@ -1,3 +1,4 @@
+// app/(customer)/page.tsx
 "use client";
 
 import { useState } from "react";
@@ -10,13 +11,15 @@ import { FilterBar } from "@/components/home/filter-bar";
 import { RestaurantCard } from "@/components/restaurant/restaurant-card";
 import { RestaurantCardSkeleton } from "@/components/restaurant/restaurant-card-skeleton";
 import { PopupAd } from "@/components/home/popup-ad";
+import { HomepageFooter } from "@/components/home/homepage-footer";
 import { getNearbyRestaurants } from "@/lib/api/discovery";
 import { listCuisines } from "@/lib/api/cuisines";
 import { useGeolocation } from "@/hooks/use-geolocation";
+import { theme } from "@/config/theme";
 
 export default function HomePage() {
   const { lat, lng, isResolved } = useGeolocation();
-  
+
   // 1. State for the active cuisine filter
   const [activeCuisineId, setActiveCuisineId] = useState<string | null>(null);
 
@@ -29,10 +32,10 @@ export default function HomePage() {
   // 3. Fetch nearby restaurants, now reactive to the activeCuisineId
   const restaurantsQuery = useQuery({
     queryKey: ["nearby-restaurants", lat, lng, activeCuisineId],
-    queryFn: () => 
-      getNearbyRestaurants({ 
-        lat, 
-        lng, 
+    queryFn: () =>
+      getNearbyRestaurants({
+        lat,
+        lng,
         radiusKm: 10,
         cuisineType: activeCuisineId || undefined // Pass undefined if no cuisine is selected
       }),
@@ -47,21 +50,21 @@ export default function HomePage() {
 
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
         {/* Pass dynamic data and handlers to the filter component */}
-        <FilterBar 
+        <FilterBar
           cuisines={cuisinesQuery.data || []}
           isLoadingCuisines={cuisinesQuery.isLoading}
           activeCuisineId={activeCuisineId}
           onCuisineChange={setActiveCuisineId}
         />
-        
+
         <CategoryGrid />
         <BannerCarousel />
 
         <div>
-          <h2 className="font-display font-semibold text-lg text-[#17181C] mb-4">
-            {activeCuisineId 
-              ? `Restaurants serving this cuisine` 
-              : "Restaurants near you"}
+          <h2 className="font-serif font-semibold text-lg mb-4" style={{ color: theme.colors.dark }}>
+            {activeCuisineId
+              ? theme.content.restaurantsForCuisineHeading
+              : theme.content.restaurantsNearYouHeading}
           </h2>
 
           {restaurantsQuery.isLoading || !isResolved ? (
@@ -72,22 +75,25 @@ export default function HomePage() {
             </div>
           ) : restaurantsQuery.isError ? (
             <div className="flex flex-col items-center text-center py-16 gap-3">
-              <AlertTriangle className="text-neutral-300" size={28} />
-              <p className="text-sm text-neutral-500">
-                Couldn&apos;t load restaurants. Is the backend running on{" "}
+              <AlertTriangle style={{ color: `${theme.colors.dark}40` }} size={28} />
+              <p className="text-sm" style={{ color: `${theme.colors.dark}8C` }}>
+                {theme.content.backendErrorMessage}{" "}
                 <span className="font-mono">localhost:3700</span>?
               </p>
               <button
                 onClick={() => restaurantsQuery.refetch()}
-                className="text-sm font-medium bg-[#17181C] text-white px-4 py-2 rounded-full"
+                className="text-sm font-medium px-4 py-2 rounded-full"
+                style={{ backgroundColor: theme.colors.dark, color: theme.colors.background }}
               >
-                Retry
+                {theme.content.retryLabel}
               </button>
             </div>
           ) : restaurants.length === 0 ? (
             <div className="text-center py-16">
-              <p className="text-sm text-neutral-400">
-                No restaurants found {activeCuisineId ? "for this cuisine" : "near you yet"}.
+              <p className="text-sm" style={{ color: `${theme.colors.dark}66` }}>
+                {activeCuisineId
+                  ? theme.content.noRestaurantsCuisineMessage
+                  : theme.content.noRestaurantsNearbyMessage}
               </p>
             </div>
           ) : (
@@ -101,6 +107,8 @@ export default function HomePage() {
       </div>
 
       <PopupAd />
+
+      <HomepageFooter />
     </div>
   );
 }
