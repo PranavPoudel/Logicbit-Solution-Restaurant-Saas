@@ -1,9 +1,7 @@
-// components/menu/restaurant-footer.tsx
 "use client";
 
 import { Phone, Clock, MapPin } from "lucide-react";
 import type { DiscoveryRestaurant } from "@/types/restaurant";
-import { theme } from "@/config/theme";
 
 export function RestaurantFooter({ restaurant }: { restaurant: DiscoveryRestaurant }) {
   const name = restaurant.name ?? "Restaurant";
@@ -11,35 +9,30 @@ export function RestaurantFooter({ restaurant }: { restaurant: DiscoveryRestaura
   const phone = (restaurant as any).phone ?? null;
 
   return (
-    <footer
-      className="w-full mt-12"
-      style={{ backgroundColor: theme.colors.dark, color: theme.colors.background }}
-    >
-      <div className="w-full max-w-6xl mx-auto px-4 py-10 grid sm:grid-cols-3 gap-8">
+    // 🆕 Added mt-auto to push it to the bottom of a flex-col parent
+    <footer className="bg-[#2B1410] text-[#FDF6EC] mt-auto">
+      <div className="max-w-4xl mx-auto px-4 py-10 grid sm:grid-cols-3 gap-8">
         <div>
           <h3 className="font-serif text-lg mb-2">{name}</h3>
-          <p className="text-sm" style={{ color: `${theme.colors.background}8C` }}>
-            {theme.content.footerTagline}
+          <p className="text-sm text-[#FDF6EC]/80">
+            Delicious food, delivered to your door.
           </p>
         </div>
 
         <div>
-          <h4
-            className="text-xs uppercase tracking-wide mb-3"
-            style={{ color: `${theme.colors.background}66` }}
-          >
+          <h4 className="text-xs uppercase tracking-wide mb-3 text-[#FDF6EC]/60">
             Contact
           </h4>
-          <div className="space-y-2 text-sm" style={{ color: `${theme.colors.background}B3` }}>
+          <div className="space-y-2 text-sm text-[#FDF6EC]/90">
             {phone && (
               <div className="flex items-center gap-2">
-                <Phone size={14} style={{ color: theme.colors.primary }} />
+                <Phone size={14} className="text-[#E3A008]" />
                 <span>{phone}</span>
               </div>
             )}
             {address && (
               <div className="flex items-center gap-2">
-                <MapPin size={14} style={{ color: theme.colors.primary }} />
+                <MapPin size={14} className="text-[#E3A008]" />
                 <span>{address}</span>
               </div>
             )}
@@ -47,28 +40,22 @@ export function RestaurantFooter({ restaurant }: { restaurant: DiscoveryRestaura
         </div>
 
         <div>
-          <h4
-            className="text-xs uppercase tracking-wide mb-3"
-            style={{ color: `${theme.colors.background}66` }}
-          >
+          <h4 className="text-xs uppercase tracking-wide mb-3 text-[#FDF6EC]/60">
             Hours
           </h4>
-          <div className="flex items-center gap-2 text-sm" style={{ color: `${theme.colors.background}B3` }}>
-            <Clock size={14} style={{ color: theme.colors.primary }} />
-            <span>{theme.content.footerHours}</span>
+          <div className="flex items-center gap-2 text-sm text-[#FDF6EC]/90">
+            <Clock size={14} className="text-[#E3A008]" />
+            <span>Open Daily: 10:00 AM - 10:00 PM</span>
           </div>
         </div>
       </div>
 
-      <div
-        className="w-full py-4 text-center text-xs"
-        style={{
-          borderTop: `1px solid ${theme.colors.background}1A`,
-          color: `${theme.colors.background}66`,
-        }}
-      >
-        {theme.content.footerCredit} {theme.brand.name}
+      <div className="border-t border-[#FDF6EC]/10 py-4 text-center text-xs text-[#FDF6EC]/40">
+        Powered by LogicBit
       </div>
+      
+      {/* Note: LanguageSwitcherButton is intentionally omitted here because 
+          it is already rendered globally in app/[locale]/(customer)/layout.tsx */}
     </footer>
   );
 }

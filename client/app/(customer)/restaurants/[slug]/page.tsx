@@ -1,24 +1,21 @@
-// app/(customer)/restaurants/[slug]/page.tsx
 "use client";
 
 import { use, useState } from "react";
+import { useLocale } from "next-intl"; // ✅ Kept for i18n
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle } from "lucide-react";
 import { RestaurantHeader } from "@/components/menu/restaurant-header";
-import { CategoryNav } from "@/components/menu/category-nav";
-import { MenuItemCard } from "@/components/menu/menu-item-card";
 import { FloatingCartBar } from "@/components/menu/floating-cart-bar";
-import { SignatureDishes } from "@/components/menu/signature-dishes";
-import { RestaurantFooter } from "@/components/menu/restaurant-footer";
-import { DynamicRestaurantLocationMap } from "@/components/map/dynamic-restaurant-location-map";
 import { ModifierModal } from "@/components/menu-modal/modifier-modal";
-import { getRestaurantByIdOrSlug, getRestaurantMenu } from "@/lib/api/discovery";
-
-import { publicStorefrontApi } from "@/lib/api/public-storefront";
-import { StorefrontBannerCarousel } from "@/components/restaurant/storefront-banner-carousel";
-import { StorefrontAboutSection } from "@/components/restaurant/storefront-about-section";
+import {
+  getRestaurantByIdOrSlug,
+  getRestaurantMenu,
+  getRestaurantStorefront,
+  getRestaurantStorefrontPopup,
+} from "@/lib/api/discovery";
+import { StorefrontSectionRenderer } from "@/components/restaurant/storefront-section-renderer";
 import { StorefrontPopupModal } from "@/components/restaurant/storefront-popup-modal";
-import { theme } from "@/config/theme";
+import { RestaurantFooter } from "@/components/menu/restaurant-footer"; // ✅ Kept from main
 
 export default function RestaurantDetailPage({
   params,
@@ -26,6 +23,7 @@ export default function RestaurantDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = use(params);
+  const currentLocale = useLocale(); // ✅ Get the actual URL locale ('en', 'ja', etc.)
 
   // 1. Fetch Restaurant Details
   const restaurantQuery = useQuery({
@@ -42,50 +40,34 @@ export default function RestaurantDetailPage({
     enabled: !!restaurantId,
   });
 
-    const bannersQuery = useQuery({
-    queryKey: ["public-banners", restaurantId],
-    queryFn: async () => {
-      const data = await publicStorefrontApi.getStorefront(restaurantId as string);
-      return data.banners; 
-    },
+  // 3. Fetch Storefront Data (banners, config, sectionSettings)
+  const storefrontQuery = useQuery({
+    queryKey: ["storefront", restaurantId],
+    queryFn: () => getRestaurantStorefront(restaurantId as string),
     enabled: !!restaurantId,
   });
 
-    const configQuery = useQuery({
-    queryKey: ["public-config", restaurantId],
-    queryFn: async () => {
-      const data = await publicStorefrontApi.getStorefront(restaurantId as string);
-      return data.config;
-    },
-    enabled: !!restaurantId,
-  });
-
-    const popupsQuery = useQuery({
-    queryKey: ["public-popups", restaurantId],
-    queryFn: async () => {
-      const popup = await publicStorefrontApi.getPopup(restaurantId as string);
-      return popup ? [popup] : []; 
-    },
+  // 4. Fetch Active Popup
+  const popupQuery = useQuery({
+    queryKey: ["storefront-popup", restaurantId],
+    queryFn: () => getRestaurantStorefrontPopup(restaurantId as string),
     enabled: !!restaurantId,
   });
 
   const categories = menuQuery.data ?? [];
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [modifierItemId, setModifierItemId] = useState<string | null>(null);
-  const activeCategoryId = selectedCategoryId ?? categories[0]?.id ?? null;
 
-  function scrollToCategory(id: string) {
-    setSelectedCategoryId(id);
-    document.getElementById(`category-${id}`)?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
-  }
+  const storefrontData = storefrontQuery.data;
+  const sectionSettings = storefrontData?.sectionSettings ?? [];
+  const banners = storefrontData?.banners ?? [];
+  const aboutText = storefrontData?.about;
+  const contact = storefrontData?.contact;
+  const socialLinks = storefrontData?.socialLinks;
 
   if (restaurantQuery.isLoading) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-16 text-center text-sm" style={{ color: `${theme.colors.dark}66` }}>
-        {theme.content.loadingRestaurantMessage}
+      <div className="max-w-4xl mx-auto px-4 py-16 text-center text-sm text-neutral-400">
+        Loading restaurant…
       </div>
     );
   }
@@ -93,80 +75,39 @@ export default function RestaurantDetailPage({
   if (restaurantQuery.isError || !restaurantQuery.data) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-16 flex flex-col items-center text-center gap-3">
-        <AlertTriangle style={{ color: `${theme.colors.dark}40` }} size={28} />
-        <p className="text-sm" style={{ color: `${theme.colors.dark}8C` }}>
-          {theme.content.restaurantLoadErrorMessage}
+        <AlertTriangle className="text-neutral-300" size={28} />
+        <p className="text-sm text-neutral-500">
+          Couldn&apos;t load this restaurant. It may not exist, or the backend
+          isn&apos;t reachable.
         </p>
       </div>
     );
   }
 
   return (
-    <div className="pb-24">
+    <div className="min-h-screen flex flex-col pb-24">
       <RestaurantHeader restaurant={restaurantQuery.data} />
 
-      <div className="max-w-4xl mx-auto px-4">
-        <SignatureDishes />
-      </div>
-
-      <div className="max-w-4xl mx-auto px-4 py-6">
-        <StorefrontBannerCarousel banners={bannersQuery.data || []} />
-      </div>
-
-      <CategoryNav
+      {/* ✅ Dynamic Storefront Sections (Uses currentLocale for proper i18n) */}
+      <StorefrontSectionRenderer
+        sectionSettings={sectionSettings}
+        restaurantId={restaurantId!}
+        locale={currentLocale} // ✅ This is the magic fix for Japanese titles
         categories={categories}
-        activeId={activeCategoryId}
-        onSelect={scrollToCategory}
+        onOpenModifiers={setModifierItemId}
+        aboutText={aboutText}
+        contact={contact}
+        socialLinks={socialLinks}
+        banners={banners}
+        latitude={(restaurantQuery.data as any).latitude}
+        longitude={(restaurantQuery.data as any).longitude}
       />
 
-      <div className="max-w-4xl mx-auto px-4 space-y-8">
-        {/* Menu Items Section */}
-        {menuQuery.isLoading ? (
-          <p className="text-sm text-center py-12" style={{ color: `${theme.colors.dark}66` }}>
-            {theme.content.loadingMenuMessage}
-          </p>
-        ) : categories.length === 0 ? (
-          <p className="text-sm text-center py-12" style={{ color: `${theme.colors.dark}66` }}>
-            {theme.content.noMenuItemsMessage}
-          </p>
-        ) : (
-          categories.map((category) => (
-            <div key={category.id} id={`category-${category.id}`} className="scroll-mt-32 py-5">
-              <h3 className="font-serif font-semibold text-lg mb-4" style={{ color: theme.colors.dark }}>
-                {category.name ?? theme.content.defaultMenuHeading}
-              </h3>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                {(category.items ?? []).map((item) => (
-                  <MenuItemCard
-                    key={item.id}
-                    item={item}
-                    restaurantId={restaurantQuery.data.id}
-                    onOpenModifiers={setModifierItemId}
-                  />
-                ))}
-              </div>
-              {(category.items ?? []).length === 0 && (
-                <p className="text-xs py-3" style={{ color: `${theme.colors.dark}66` }}>
-                  {theme.content.noCategoryItemsMessage}
-                </p>
-              )}
-            </div>
-          ))
-        )}
-
-        <StorefrontAboutSection config={configQuery.data || {}} />
-
-        <DynamicRestaurantLocationMap
-          lat={(restaurantQuery.data as any).latitude}
-          lng={(restaurantQuery.data as any).longitude}
-          address={(restaurantQuery.data as any).address}
-        />
-      </div>
-
+      {/* Footer & Floating Cart */}
       <RestaurantFooter restaurant={restaurantQuery.data} />
-
       <FloatingCartBar />
 
+      {/* Modifier Modal */}
       {modifierItemId && (
         <ModifierModal
           restaurantId={restaurantQuery.data.id}
@@ -175,7 +116,8 @@ export default function RestaurantDetailPage({
         />
       )}
 
-      <StorefrontPopupModal popups={popupsQuery.data || []} />
+      {/* Popup Modal */}
+      <StorefrontPopupModal popups={popupQuery.data ? [popupQuery.data] : []} />
     </div>
   );
 }

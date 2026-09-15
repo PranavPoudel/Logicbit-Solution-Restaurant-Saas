@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsOptional, IsBoolean, IsInt, IsArray, IsUUID, Min, MaxLength } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsBoolean, IsInt, IsArray, IsUUID, Min, MaxLength, IsObject } from 'class-validator';
 
 export class CreateBannerDto {
   @IsString()
@@ -71,7 +71,7 @@ export class UpdateStorefrontConfigDto {
   @IsString()
   @IsOptional()
   contactPhone?: string;
-
+  
   @IsString()
   @IsOptional()
   contactEmail?: string;
@@ -80,13 +80,13 @@ export class UpdateStorefrontConfigDto {
   @IsOptional()
   contactAddress?: string;
 
+  @IsObject()
   @IsOptional()
   socialLinks?: Record<string, string>;
 
   @IsArray()
-  @IsString({ each: true })
   @IsOptional()
-  sectionOrder?: string[];
+  sectionSettings?: any[]; // 🆕 Allow array of section setting objects
 }
 
 export class CreatePopupDto {

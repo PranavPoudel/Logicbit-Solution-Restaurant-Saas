@@ -862,11 +862,13 @@ model StorefrontConfig {
   contactPhone   String?
   contactEmail   String?
   contactAddress String?
-  socialLinks    Json?    // { facebook, instagram, tiktok... }
-  sectionOrder   Json     @default("[\"banner\",\"offers\",\"menu\",\"about\",\"contact\"]")
+  socialLinks    Json?
+  
+  // Example: [{ "id": "menu", "isVisible": true, "titleEn": "Our Menu", "titleJa": "メニュー" }]
+  sectionSettings Json @default("[]") 
+  
   updatedAt      DateTime @updatedAt
 }
-
 // StorefrontPopup — Website खोल्ने बित्तिकै देखिने offer/notification popup।
 // Schedule (startDate/endDate) राखिएको छ ताकि owner ले "यो weekend मात्र
 // यो offer देखाऊ" जस्तो time-bound campaign चलाउन सकून्।

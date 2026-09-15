@@ -191,7 +191,7 @@ export async function getRestaurantReviews(restaurantId: string) {
   const { data } = await apiClient.get(`/discovery/restaurants/${restaurantId}/reviews`);
   return data;
 }
-
+/*
 export async function getRestaurantStorefront(restaurantId: string) {
   const { data } = await apiClient.get(`/discovery/restaurants/${restaurantId}/storefront`);
   return data;
@@ -202,4 +202,66 @@ export async function getRestaurantStorefrontPopup(restaurantId: string) {
     `/discovery/restaurants/${restaurantId}/storefront/popup`
   );
   return data;
+}*/
+
+export interface SectionSetting {
+  id: string;
+  isVisible: boolean;
+  titleEn: string;
+  titleJa: string;
+}
+
+export interface StorefrontConfig {
+  aboutText?: string;
+  contactPhone?: string;
+  contactEmail?: string;
+  contactAddress?: string;
+  socialLinks?: Record<string, string>;
+  sectionSettings?: SectionSetting[];
+}
+
+export interface StorefrontBanner {
+  id: string;
+  imageUrl: string;
+  title?: string;
+  subtitle?: string;
+  linkUrl?: string;
+  displayOrder?: number;
+}
+
+export interface StorefrontPopup {
+  id: string;
+  title: string;
+  message?: string;
+  imageUrl?: string;
+  ctaText?: string;
+  ctaLink?: string;
+}
+
+export interface StorefrontData {
+  banners: StorefrontBanner[];
+  about?: string;
+  contact?: {
+    phone?: string;
+    email?: string;
+    address?: string;
+  };
+  socialLinks?: Record<string, string>;
+  sectionSettings?: SectionSetting[];
+}
+
+export async function getRestaurantStorefront(restaurantId: string): Promise<StorefrontData> {
+  const { data } = await apiClient.get(`/discovery/restaurants/${restaurantId}/storefront`);
+  if (process.env.NODE_ENV === "development") {
+    console.log("[storefront] unwrapped payload:", data);
+  }
+  return data?.data ?? data;
+}
+
+export async function getRestaurantStorefrontPopup(restaurantId: string): Promise<StorefrontPopup | null> {
+  const { data } = await apiClient.get(`/discovery/restaurants/${restaurantId}/storefront/popup`);
+  if (process.env.NODE_ENV === "development") {
+    console.log("[storefront/popup] unwrapped payload:", data);
+  }
+  return data?.data ?? data;
 }

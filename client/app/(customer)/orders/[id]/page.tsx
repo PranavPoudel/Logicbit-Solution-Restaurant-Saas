@@ -1,3 +1,4 @@
+// app/%28customer%29/orders/%5Bid%5D/page.tsx
 "use client";
 
 import { use, useState } from "react";

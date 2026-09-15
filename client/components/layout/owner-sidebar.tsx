@@ -56,15 +56,10 @@ const navGroups: NavGroup[] = [
       { label: "Reservations", href: "/reservations", icon: Calendar }, 
       { label: "Analytics", href: "/analytics", icon: BarChart3 },
       {
-        label: "Storefront",
-        href: "/storefront/banners",
+        label: "Storefront Builder",
+        href: "/storefront/builder",
         icon: LayoutTemplate,
       },
-    ],
-    subItems: [
-      { label: "Banners", href: "/storefront/banners", icon: ImageIcon },
-      { label: "Configuration", href: "/storefront/config", icon: FileText },
-      { label: "Popups", href: "/storefront/popups", icon: Bell },
     ],
   },
   {
@@ -120,7 +115,7 @@ export function OwnerSidebar() {
               {group.items.map((item) => {
                 const isActive = pathname?.startsWith(item.href);
                 const Icon = item.icon;
-                const showSubItems = item.label === "Storefront" && isStorefrontActive;
+                const showSubItems = item.label === "Storefront Builder" && isStorefrontActive;
 
                 return (
                   <li key={item.href}>

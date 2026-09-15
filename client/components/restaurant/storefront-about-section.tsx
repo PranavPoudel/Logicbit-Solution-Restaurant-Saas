@@ -1,64 +1,93 @@
- "use client";
+"use client";
 
 import { Phone, Mail, MapPin, Globe, Camera } from "lucide-react";
-import type { PublicConfig } from "@/lib/api/public-storefront";
-import { theme } from "@/config/theme";
 
 interface StorefrontAboutSectionProps {
-  config: PublicConfig;
+  title: string;
+  aboutText?: string;
+  contact?: {
+    phone?: string;
+    email?: string;
+    address?: string;
+  };
+  socialLinks?: Record<string, string>;
 }
 
-export function StorefrontAboutSection({ config }: StorefrontAboutSectionProps) {
-  const hasContent = config.aboutText || config.contactPhone || config.contactEmail || config.contactAddress;
-  if (!hasContent) return null;
+export function StorefrontAboutSection({
+  title,
+  aboutText,
+  contact,
+  socialLinks,
+}: StorefrontAboutSectionProps) {
+  // Only render if there is actual content to show
+  if (!aboutText && !contact && !socialLinks) return null;
 
   return (
-    <div className="bg-white rounded-2xl p-6 space-y-6" style={{ border: `1px solid ${theme.colors.dark}14` }}>
-      <h2 className="font-serif font-semibold text-lg" style={{ color: theme.colors.dark }}>
-        {theme.content.aboutContactHeading}
+    <div className="max-w-4xl mx-auto px-4">
+      <h2 className="font-display text-2xl font-bold text-[#2B1410] mb-6">
+        {title}
       </h2>
+      
+      <div className="bg-white border border-[#E8E7E2] rounded-2xl p-6 sm:p-8 space-y-6">
+        {/* About Text */}
+        {aboutText && (
+          <p className="text-[#2B1410]/80 leading-relaxed whitespace-pre-wrap">
+            {aboutText}
+          </p>
+        )}
 
-      {config.aboutText && (
-        <p className="text-sm leading-relaxed whitespace-pre-line" style={{ color: `${theme.colors.dark}A6` }}>
-          {config.aboutText}
-        </p>
-      )}
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4" style={{ borderTop: `1px solid ${theme.colors.dark}14` }}>
-        {config.contactPhone && (
-          <div className="flex items-center gap-3 text-sm" style={{ color: `${theme.colors.dark}A6` }}>
-            <Phone size={16} style={{ color: theme.colors.primary }} />
-            <span>{config.contactPhone}</span>
+        {/* Contact Info */}
+        {(contact?.phone || contact?.email || contact?.address) && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-[#E8E7E2]">
+            {contact.phone && (
+              <div className="flex items-center gap-3 text-sm text-[#2B1410]/70">
+                <Phone size={16} className="text-[#E3A008]" />
+                <span>{contact.phone}</span>
+              </div>
+            )}
+            {contact.email && (
+              <div className="flex items-center gap-3 text-sm text-[#2B1410]/70">
+                <Mail size={16} className="text-[#E3A008]" />
+                <span>{contact.email}</span>
+              </div>
+            )}
+            {contact.address && (
+              <div className="flex items-center gap-3 text-sm text-[#2B1410]/70">
+                <MapPin size={16} className="text-[#E3A008]" />
+                <span>{contact.address}</span>
+              </div>
+            )}
           </div>
         )}
-        {config.contactEmail && (
-          <div className="flex items-center gap-3 text-sm" style={{ color: `${theme.colors.dark}A6` }}>
-            <Mail size={16} style={{ color: theme.colors.primary }} />
-            <span>{config.contactEmail}</span>
-          </div>
-        )}
-        {config.contactAddress && (
-          <div className="flex items-center gap-3 text-sm" style={{ color: `${theme.colors.dark}A6` }}>
-            <MapPin size={16} style={{ color: theme.colors.primary }} />
-            <span>{config.contactAddress}</span>
+
+        {/* Social Links */}
+        {(socialLinks?.facebook || socialLinks?.instagram) && (
+          <div className="flex items-center gap-4 pt-4 border-t border-[#E8E7E2]">
+            {socialLinks.facebook && (
+              <a
+                href={socialLinks.facebook}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#2B1410]/50 hover:text-[#1877F2] transition-colors"
+                title="Facebook"
+              >
+                <Globe size={20} />
+              </a>
+            )}
+            {socialLinks.instagram && (
+              <a
+                href={socialLinks.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#2B1410]/50 hover:text-[#E1306C] transition-colors"
+                title="Instagram"
+              >
+                <Camera size={20} />
+              </a>
+            )}
           </div>
         )}
       </div>
-
-      {(config.socialLinks?.facebook || config.socialLinks?.instagram) && (
-        <div className="flex items-center gap-3 pt-4" style={{ borderTop: `1px solid ${theme.colors.dark}14` }}>
-          {config.socialLinks.facebook && (
-            <a href={config.socialLinks.facebook} target="_blank" rel="noopener noreferrer" className="hover:text-[#1877F2] transition-colors" style={{ color: `${theme.colors.dark}59` }} title="Facebook">
-              <Globe size={20} />
-            </a>
-          )}
-          {config.socialLinks.instagram && (
-            <a href={config.socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="hover:text-[#E1306C] transition-colors" style={{ color: `${theme.colors.dark}59` }} title="Instagram">
-              <Camera size={20} />
-            </a>
-          )}
-        </div>
-      )}
     </div>
   );
 }
