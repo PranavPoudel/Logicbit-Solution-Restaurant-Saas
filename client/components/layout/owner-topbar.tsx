@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Bell, ChevronDown, LogOut, Plus } from "lucide-react";
 import { useOwnerAuthStore } from "@/store/owner-auth-store";
 import { AddRestaurantModal } from "./add-restaurant-modal";
 
 export function OwnerTopbar() {
+  const router = useRouter();
   const { user, restaurants, activeRestaurantId, setActiveRestaurant, logout } =
     useOwnerAuthStore();
   const [restaurantMenuOpen, setRestaurantMenuOpen] = useState(false);
@@ -56,7 +58,6 @@ export function OwnerTopbar() {
                 </div>
               )}
               
-              {/* Divider and Add New Restaurant Button */}
               <div className="border-t border-neutral-100 my-1" />
               <button
                 onClick={() => {
@@ -100,7 +101,10 @@ export function OwnerTopbar() {
                   </p>
                 </div>
                 <button
-                  onClick={logout}
+                  onClick={() => {
+                    logout();
+                    router.push("/owner/login"); // ✅ Redirect to namespaced login
+                  }}
                   className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors"
                 >
                   <LogOut size={15} />
@@ -112,7 +116,6 @@ export function OwnerTopbar() {
         </div>
       </header>
 
-      {/* Add Restaurant Modal */}
       <AddRestaurantModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
@@ -121,5 +124,4 @@ export function OwnerTopbar() {
   );
 }
 
-// Fallback default export to prevent "undefined" errors if layout.tsx uses default import
 export default OwnerTopbar;

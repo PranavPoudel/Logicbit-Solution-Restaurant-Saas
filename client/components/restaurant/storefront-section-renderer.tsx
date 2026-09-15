@@ -1,4 +1,3 @@
-// components/restaurant/storefront-section-renderer.tsx
 "use client";
 
 import { SectionSetting } from "@/lib/api/discovery";
@@ -12,7 +11,7 @@ import { StorefrontReviewsSection } from "./storefront-reviews-section";
 interface StorefrontSectionRendererProps {
   sectionSettings: SectionSetting[];
   restaurantId: string;
-  restaurantLocale?: string; // "en" or "ja"
+  locale?: string; // ✅ Renamed to 'locale' to cleanly match the URL locale
   categories?: any[];
   menuItems?: any[];
   onOpenModifiers?: (itemId: string) => void;
@@ -27,7 +26,7 @@ interface StorefrontSectionRendererProps {
 export function StorefrontSectionRenderer({
   sectionSettings,
   restaurantId,
-  restaurantLocale = "en",
+  locale = "en", // ✅ Defaults to 'en'
   categories = [],
   onOpenModifiers,
   aboutText,
@@ -39,10 +38,17 @@ export function StorefrontSectionRenderer({
 }: StorefrontSectionRendererProps) {
   const visibleSections = sectionSettings.filter((s) => s.isVisible);
 
+  // ✅ Debug log: Check if the backend is actually sending titleJa
+  if (process.env.NODE_ENV === "development") {
+    console.log("[StorefrontSectionRenderer] Active locale:", locale);
+    console.log("[StorefrontSectionRenderer] sectionSettings payload:", sectionSettings);
+  }
+
   return (
     <div className="space-y-0">
       {visibleSections.map((section) => {
-        const title = restaurantLocale === "ja" ? section.titleJa : section.titleEn;
+        // ✅ Safely fallback to titleEn if titleJa is missing or empty
+        const title = locale === "ja" ? (section.titleJa || section.titleEn) : section.titleEn;
 
         switch (section.id) {
           case "banner":

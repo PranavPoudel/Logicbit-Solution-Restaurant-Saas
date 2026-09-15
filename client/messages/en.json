@@ -1,0 +1,20 @@
+{
+  "metadata": {
+    "title": "LogicBit",
+    "description": "Order food from restaurants near you."
+  },
+  "header": {
+    "brandName": "LogicBit",
+    "location": "Kirtipur, Kathmandu",
+    "forRestaurants": "For Restaurants",
+    "account": "Account",
+    "cart": "Cart"
+  },
+  "home": {
+    "restaurantsNearYou": "Restaurants near you",
+    "restaurantsServingCuisine": "Restaurants serving this cuisine",
+    "noRestaurantsFound": "No restaurants found {cuisine, select, true {for this cuisine} other {near you yet}}.",
+    "retry": "Retry",
+    "couldntLoad": "Couldn't load restaurants. Is the backend running on localhost:3700?"
+  }
+}

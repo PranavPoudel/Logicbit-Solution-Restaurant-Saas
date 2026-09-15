@@ -1,0 +1,20 @@
+{
+  "metadata": {
+    "title": "LogicBit",
+    "description": "अपने आस-पास के रेस्तरां से भोजन ऑर्डर करें।"
+  },
+  "header": {
+    "brandName": "LogicBit",
+    "location": "कीर्तिपुर, काठमांडू",
+    "forRestaurants": "रेस्तरां के लिए",
+    "account": "खाता",
+    "cart": "कार्ट"
+  },
+  "home": {
+    "restaurantsNearYou": "आपके आस-पास के रेस्तरां",
+    "restaurantsServingCuisine": "यह व्यंजन परोसने वाले रेस्तरां",
+    "noRestaurantsFound": "कोई रेस्तरां नहीं मिला {cuisine, select, true {इस व्यंजन के लिए} other {आपके आस-पास अभी तक}}।",
+    "retry": "पुनः प्रयास करें",
+    "couldntLoad": "रेस्तरां लोड नहीं किए जा सके। क्या बैकएंड localhost:3700 पर चल रहा है?"
+  }
+}

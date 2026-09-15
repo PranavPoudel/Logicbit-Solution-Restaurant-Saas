@@ -15,14 +15,10 @@ import {
   Users,
   Bike,
   Settings,
-  Image as ImageIcon,
-  FileText,
-  Bell,
-  CreditCard,
-  type LucideIcon,
   BarChart3,
   LayoutGrid,
-  Calendar, // 🆕 Added for Tables
+  Calendar,
+  type LucideIcon,
 } from "lucide-react";
 
 interface NavItem {
@@ -45,19 +41,19 @@ interface NavGroup {
 const navGroups: NavGroup[] = [
   {
     label: null,
-    items: [{ label: "Dashboard", href: "/dashboard", icon: LayoutDashboard }],
+    items: [{ label: "Dashboard", href: "/owner/dashboard", icon: LayoutDashboard }],
   },
   {
     label: "Operations",
     items: [
-      { label: "Orders", href: "/orders", icon: Package },
-      { label: "Menu", href: "/menu", icon: UtensilsCrossed },
-      { label: "Tables", href: "/tables", icon: LayoutGrid }, 
-      { label: "Reservations", href: "/reservations", icon: Calendar }, 
-      { label: "Analytics", href: "/analytics", icon: BarChart3 },
+      { label: "Orders", href: "/owner/orders", icon: Package },
+      { label: "Menu", href: "/owner/menu", icon: UtensilsCrossed },
+      { label: "Tables", href: "/owner/tables", icon: LayoutGrid }, 
+      { label: "Reservations", href: "/owner/reservations", icon: Calendar }, 
+      { label: "Analytics", href: "/owner/analytics", icon: BarChart3 },
       {
         label: "Storefront Builder",
-        href: "/storefront/builder",
+        href: "/owner/storefront/builder",
         icon: LayoutTemplate,
       },
     ],
@@ -65,30 +61,30 @@ const navGroups: NavGroup[] = [
   {
     label: "Growth",
     items: [
-      { label: "Coupons", href: "/coupons", icon: TicketPercent },
-      { label: "Advertising", href: "/advertising", icon: Megaphone },
-      { label: "Reviews", href: "/reviews", icon: Star },
+      { label: "Coupons", href: "/owner/coupons", icon: TicketPercent },
+      { label: "Advertising", href: "/owner/advertising", icon: Megaphone },
+      { label: "Reviews", href: "/owner/reviews", icon: Star },
     ],
   },
   {
     label: "Finance",
     items: [
-      { label: "Settlements", href: "/settlements", icon: Wallet },
-      { label: "Subscription", href: "/subscriptions", icon: CreditCard },
+      { label: "Settlements", href: "/owner/settlements", icon: Wallet },
+      { label: "Subscription", href: "/owner/subscriptions", icon: Wallet }, // Changed icon to Wallet or CreditCard as preferred
     ],
   },
   {
     label: "Team",
     items: [
-      { label: "Staff", href: "/staff", icon: Users },
-      { label: "Delivery Persons", href: "/delivery-persons", icon: Bike },
+      { label: "Staff", href: "/owner/staff", icon: Users },
+      { label: "Delivery Persons", href: "/owner/delivery-persons", icon: Bike },
     ],
   },
 ];
 
 export function OwnerSidebar() {
   const pathname = usePathname();
-  const isStorefrontActive = pathname?.startsWith("/storefront");
+  const isStorefrontActive = pathname?.startsWith("/owner/storefront");
 
   return (
     <aside className="w-64 shrink-0 bg-[#111827] text-slate-300 flex flex-col h-full border-r border-white/5">
@@ -174,14 +170,14 @@ export function OwnerSidebar() {
       {/* Settings Footer */}
       <div className="border-t border-white/5 p-3 bg-[#0F172A]/50">
         <Link
-          href="/settings"
+          href="/owner/settings"
           className={`flex items-center gap-3 px-3 py-2 rounded-r-md text-sm font-medium transition-all duration-200 border-l-2 ${
-            pathname?.startsWith("/settings")
+            pathname?.startsWith("/owner/settings")
               ? "bg-white/5 text-white border-[#E3A008]"
               : "text-slate-400 hover:bg-white/5 hover:text-white border-transparent"
           }`}
         >
-          <Settings size={18} className={pathname?.startsWith("/settings") ? "text-[#E3A008]" : "text-slate-500"} />
+          <Settings size={18} className={pathname?.startsWith("/owner/settings") ? "text-[#E3A008]" : "text-slate-500"} />
           Settings
         </Link>
       </div>

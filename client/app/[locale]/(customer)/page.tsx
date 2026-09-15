@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useLocale, useTranslations } from "next-intl"; // ✅ Kept for i18n
+import { useLocale, useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle } from "lucide-react";
 import { HeroSection } from "@/components/home/hero-section";
@@ -11,13 +11,13 @@ import { FilterBar } from "@/components/home/filter-bar";
 import { RestaurantCard } from "@/components/restaurant/restaurant-card";
 import { RestaurantCardSkeleton } from "@/components/restaurant/restaurant-card-skeleton";
 import { PopupAd } from "@/components/home/popup-ad";
-import { HomepageFooter } from "@/components/home/homepage-footer"; // ✅ Kept new component from main
+import { HomepageFooter } from "@/components/home/homepage-footer";
 import { getNearbyRestaurants } from "@/lib/api/discovery";
 import { listCuisines } from "@/lib/api/cuisines";
 import { useGeolocation } from "@/hooks/use-geolocation";
 
 export default function HomePage() {
-  const t = useTranslations("home"); // ✅ i18n hook
+  const t = useTranslations("home");
   const { lat, lng, isResolved } = useGeolocation();
   const [activeCuisineId, setActiveCuisineId] = useState<string | null>(null);
 
@@ -45,7 +45,6 @@ export default function HomePage() {
       <HeroSection />
 
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
-        {/* Pass dynamic data and handlers to the filter component */}
         <FilterBar
           cuisines={cuisinesQuery.data || []}
           isLoadingCuisines={cuisinesQuery.isLoading}
@@ -102,7 +101,7 @@ export default function HomePage() {
       </div>
 
       <PopupAd />
-      <HomepageFooter /> {/* ✅ Rendered at the bottom */}
+      <HomepageFooter />
     </div>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { use, useState } from "react";
-import { useLocale } from "next-intl"; // ✅ Kept for i18n
+import { useLocale } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle } from "lucide-react";
 import { RestaurantHeader } from "@/components/menu/restaurant-header";
@@ -15,7 +15,7 @@ import {
 } from "@/lib/api/discovery";
 import { StorefrontSectionRenderer } from "@/components/restaurant/storefront-section-renderer";
 import { StorefrontPopupModal } from "@/components/restaurant/storefront-popup-modal";
-import { RestaurantFooter } from "@/components/menu/restaurant-footer"; // ✅ Kept from main
+import { RestaurantFooter } from "@/components/menu/restaurant-footer";
 
 export default function RestaurantDetailPage({
   params,
@@ -23,7 +23,7 @@ export default function RestaurantDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = use(params);
-  const currentLocale = useLocale(); // ✅ Get the actual URL locale ('en', 'ja', etc.)
+  const currentLocale = useLocale();
 
   // 1. Fetch Restaurant Details
   const restaurantQuery = useQuery({
@@ -40,7 +40,7 @@ export default function RestaurantDetailPage({
     enabled: !!restaurantId,
   });
 
-  // 3. Fetch Storefront Data (banners, config, sectionSettings)
+  // 3. Fetch Storefront Data
   const storefrontQuery = useQuery({
     queryKey: ["storefront", restaurantId],
     queryFn: () => getRestaurantStorefront(restaurantId as string),
@@ -88,11 +88,11 @@ export default function RestaurantDetailPage({
     <div className="min-h-screen flex flex-col pb-24">
       <RestaurantHeader restaurant={restaurantQuery.data} />
 
-      {/* ✅ Dynamic Storefront Sections (Uses currentLocale for proper i18n) */}
+      {/* Dynamic Storefront Sections (Uses currentLocale for proper i18n) */}
       <StorefrontSectionRenderer
         sectionSettings={sectionSettings}
         restaurantId={restaurantId!}
-        locale={currentLocale} // ✅ This is the magic fix for Japanese titles
+        locale={currentLocale}
         categories={categories}
         onOpenModifiers={setModifierItemId}
         aboutText={aboutText}
@@ -107,7 +107,6 @@ export default function RestaurantDetailPage({
       <RestaurantFooter restaurant={restaurantQuery.data} />
       <FloatingCartBar />
 
-      {/* Modifier Modal */}
       {modifierItemId && (
         <ModifierModal
           restaurantId={restaurantQuery.data.id}
@@ -116,7 +115,6 @@ export default function RestaurantDetailPage({
         />
       )}
 
-      {/* Popup Modal */}
       <StorefrontPopupModal popups={popupQuery.data ? [popupQuery.data] : []} />
     </div>
   );

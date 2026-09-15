@@ -1,0 +1,20 @@
+{
+  "metadata": {
+    "title": "LogicBit",
+    "description": "近くのレストランから 음식을 주문하세요."
+  },
+  "header": {
+    "brandName": "LogicBit",
+    "location": "キルティプル, カトマンズ",
+    "forRestaurants": "店舗様向け",
+    "account": "アカウント",
+    "cart": "カート"
+  },
+  "home": {
+    "restaurantsNearYou": "近くのレストラン",
+    "restaurantsServingCuisine": "この料理を提供するレストラン",
+    "noRestaurantsFound": "レストランが見つかりません {cuisine, select, true {この料理の} other {近くにはまだ}}。",
+    "retry": "再試行",
+    "couldntLoad": "レストランを読み込めませんでした。バックエンドは localhost:3700 で実行されていますか？"
+  }
+}

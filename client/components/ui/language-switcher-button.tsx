@@ -1,9 +1,9 @@
-// components/ui/language-switcher-button.tsx
 "use client";
 
 import { useState } from "react";
-import { useLanguageStore, type Language } from "@/store/language-store";
-import { Globe, ChevronUp, ChevronDown } from "lucide-react";
+import { useLocale } from "next-intl";
+import { useRouter, usePathname } from "next/navigation";
+import { ChevronUp, ChevronDown } from "lucide-react";
 
 const languages = {
   en: { label: "English", flag: "🇬🇧" },
@@ -13,10 +13,20 @@ const languages = {
 };
 
 export function LanguageSwitcherButton() {
-  const { language, setLanguage } = useLanguageStore();
+  const locale = useLocale();
+  const router = useRouter();
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
 
-  const currentLang = languages[language];
+  const currentLang = languages[locale as keyof typeof languages] || languages.en;
+
+  const handleLanguageChange = (newLocale: string) => {
+    // ✅ Manually replace the locale prefix in the pathname
+    // e.g., changes "/en/menu" to "/ja/menu"
+    const newPathname = pathname.replace(`/${locale}`, `/${newLocale}`);
+    router.replace(newPathname);
+    setIsOpen(false);
+  };
 
   return (
     <div className="relative">
@@ -25,7 +35,7 @@ export function LanguageSwitcherButton() {
         className="flex items-center gap-2 bg-white border-2 border-[#8B0000] px-3 py-1.5 rounded shadow hover:shadow-md transition-shadow"
       >
         <span className="text-lg">{currentLang.flag}</span>
-        <span className="font-semibold text-[#8B0000] text-sm uppercase">{language}</span>
+        <span className="font-semibold text-[#8B0000] text-sm uppercase">{locale}</span>
         {isOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
       </button>
 
@@ -36,12 +46,9 @@ export function LanguageSwitcherButton() {
             {Object.entries(languages).map(([code, { label, flag }]) => (
               <button
                 key={code}
-                onClick={() => {
-                  setLanguage(code as Language);
-                  setIsOpen(false);
-                }}
+                onClick={() => handleLanguageChange(code)}
                 className={`w-full flex items-center gap-2 px-3 py-2 hover:bg-[#8B0000]/10 transition-colors ${
-                  language === code ? "bg-[#8B0000]/20" : ""
+                  locale === code ? "bg-[#8B0000]/20" : ""
                 }`}
               >
                 <span className="text-lg">{flag}</span>
