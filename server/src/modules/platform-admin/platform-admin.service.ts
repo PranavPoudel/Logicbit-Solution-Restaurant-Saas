@@ -455,7 +455,9 @@ async renewSubscription(restaurantId: string) {
     });
     return { success: true, message: 'Advertisement rejected', data: ad };
   }
-
+  async getCuisines() {
+    return this.prisma.cuisine.findMany();
+  }
   async createCuisine(dto: CreateCuisineDto) {
     const cuisine = await this.prisma.cuisine.create({ data: dto });
     return { success: true, data: cuisine };

@@ -223,6 +223,12 @@ export class PlatformAdminController {
     return this.platformAdminService.rejectAd(id, dto);
   }
 
+  @Get('cuisines')
+  @RequirePlatformPermission('MANAGE_CUISINES')
+  getCuisines() {
+    return this.platformAdminService.getCuisines();
+  }
+  
   @Post('cuisines')
   @RequirePlatformPermission('MANAGE_CUISINES')
   createCuisine(@Body() dto: CreateCuisineDto) {
