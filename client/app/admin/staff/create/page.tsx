@@ -5,7 +5,7 @@ import { addPlatformStaff, listPlatformRoles } from "@/lib/api/platform-admin";
 
 export default function CreateStaffPage() {
   const router = useRouter();
-  const [roles, setRoles] = useState<any[]>([]);
+  const [roles, setRoles] = useState<any[]>([{id:2, name:"test1"}]);
   const [form, setForm] = useState({ fullName: "", email: "", password: "", roleId: "" });
 
   useEffect(() => {
