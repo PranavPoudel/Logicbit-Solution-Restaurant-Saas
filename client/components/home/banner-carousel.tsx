@@ -9,6 +9,7 @@ interface Banner {
   subtitle: string;
   cta: string;
   image: string;
+  imagePosition?: string;
 }
 
 // PLACEHOLDER — wired to GET /discovery/advertisements/homepage-banners
@@ -19,21 +20,22 @@ const mockBanners: Banner[] = [
     title: "20% Off First Order",
     subtitle: "Use code WELCOME100",
     cta: "Order now",
-    image: theme.brand.heroImages[0],
+    image: "/images/promo-discount.jpg",
   },
   {
     id: "2",
     title: "Free Delivery Above Rs 500",
     subtitle: "This weekend only",
     cta: "Explore",
-    image: theme.brand.heroImages[1],
+    image: "/images/promo-delivery.jpg",
+    imagePosition: "center 20%",
   },
   {
     id: "3",
     title: "Momo Fest is Here",
     subtitle: "Top-rated momo spots near you",
     cta: "Order now",
-    image: theme.brand.heroImages[2],
+    image: "/images/promo-momo.jpg",
   },
 ];
 
@@ -50,6 +52,7 @@ export function BannerCarousel() {
             src={banner.image}
             alt=""
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            style={{ objectPosition: banner.imagePosition ?? "center" }}
           />
           <div
             className="absolute inset-0"
