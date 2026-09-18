@@ -18,7 +18,7 @@ export default function CreateSubscriptionPlanPage() {
     setLoading(true);
 
     try {
-      await platformApiClient.post("/platform-admin/plans", {
+      await platformApiClient.post("/platform-admin/subscriptions/plans", {
         name: form.name.trim(),
         price: Number(form.price),
         durationMonths: Number(form.durationMonths),
