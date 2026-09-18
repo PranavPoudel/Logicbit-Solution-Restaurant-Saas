@@ -1,23 +1,26 @@
-// lib/api/orders.ts — Module 10: Order
+// lib/api/orders.ts
 import { apiClient } from "@/lib/api/client";
 import { ownerApiClient } from "@/lib/api/owner-client";
 import type { OrderDetail } from "@/types/order";
 
-// --- Customer side ---
-// TODO: confirm exact checkout DTO via Swagger (items, addressId, couponCode,
-// orderType, paymentMethod are the fields implied by the blueprint).
+// ✅ STRICTLY MATCHES BACKEND CreateOrderDto & OrderItemInputDto
+// Removed 'name' and 'extraPrice' to prevent forbidNonWhitelisted 400 errors.
 export interface CheckoutInput {
   restaurantId: string;
+  orderType: "DELIVERY" | "PICKUP" | "DINE_IN";
+  paymentMethod: "COD" | "CREDIT_CARD" | "ESEWA" | "KHALTI" | "IPS" | "PHONEPAY";
+  couponCode?: string;
+  deliveryAddress?: string;
+  deliveryLatitude?: number;
+  deliveryLongitude?: number;
   items: Array<{
     menuItemId: string;
     quantity: number;
-    selectedModifierOptionIds?: string[];
+    selectedModifiers?: Array<{
+      modifierGroupId: string;
+      modifierOptionId: string;
+    }>;
   }>;
-  addressId?: string;
-  couponCode?: string;
-  orderType: "DELIVERY" | "PICKUP" | "DINE_IN";
-  paymentMethod: "CASH_ON_DELIVERY";
-  [key: string]: unknown;
 }
 
 export async function checkout(input: CheckoutInput) {

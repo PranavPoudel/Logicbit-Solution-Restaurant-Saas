@@ -16,5 +16,42 @@
     "noRestaurantsFound": "No restaurants found {cuisine, select, true {for this cuisine} other {near you yet}}.",
     "retry": "Retry",
     "couldntLoad": "Couldn't load restaurants. Is the backend running on localhost:3700?"
+  },
+    "cart": {
+    "emptyTitle": "Your cart is empty",
+    "emptyDesc": "Add some delicious items to get started.",
+    "browseRestaurants": "Browse restaurants",
+    "title": "Your cart",
+    "subtotal": "Subtotal",
+    "deliveryFee": "Delivery fee",
+    "calculatedAtCheckout": "Calculated at checkout",
+    "baseTotal": "Base Total",
+    "proceedToCheckout": "Proceed to checkout"
+  },
+ "checkout": {
+    "title": "Checkout",
+    "emptyTitle": "Your cart is empty",
+    "emptyDesc": "Add some delicious items to your cart before checking out.",
+    "browseRestaurants": "Browse Restaurants",
+    "delivery": "Delivery",
+    "pickup": "Pickup",
+    "deliveryAddress": "Delivery Address",
+    "placeholders": {
+      "address": "Enter your full delivery address...",
+      "coupon": "Enter coupon code"
+    },
+    "couponCode": "Coupon Code",
+    "apply": "Apply",
+    "orderSummary": "Order Summary",
+    "subtotal": "Subtotal",
+    "deliveryFee": "Delivery Fee",
+    "total": "Total",
+    "placeOrder": "Place Order",
+    "processing": "Processing...",
+    "genericError": "An error occurred while placing your order. Please try again.",
+    "errors": {
+      "addressRequired": "Delivery address is required.",
+      "emptyCart": "Your cart is empty."
+    }
   }
 }

@@ -5,6 +5,7 @@ import {
   addDeliveryPerson,
   listDeliveryPersons,
 } from "@/lib/api/delivery-persons";
+import { useOwnerAuthStore } from "@/store/owner-auth-store";
 
 interface DeliveryPerson {
   id: string;
@@ -48,10 +49,17 @@ export default function DeliveryPersonsPage() {
     }
   }
 
-  useEffect(() => {
+ useEffect(() => {
+    // Safety check: Wait for Zustand to hydrate and ensure we have a restaurant ID
+    const store = useOwnerAuthStore.getState();
+    if (!store.accessToken || !store.activeRestaurantId) {
+      console.warn("Auth or Restaurant ID not ready yet. Skipping load.");
+      setLoading(false);
+      return;
+    }
+    
     loadDeliveryPersons();
   }, []);
-
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 

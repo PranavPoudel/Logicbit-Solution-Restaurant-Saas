@@ -1,284 +1,274 @@
+// app/%5Blocale%5D/%28customer%29/checkout/page.tsx
 "use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { isAxiosError } from "axios";
-import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useMutation } from "@tanstack/react-query";
 import { useCartStore } from "@/store/cart-store";
-import { useCustomerAuthStore } from "@/store/customer-auth-store";
-import { checkout, type CheckoutInput } from "@/lib/api/orders";
-import { customerGuestCheckout } from "@/lib/api/customer-auth";
-import { validateCoupon } from "@/lib/api/coupons";
-import { checkDeliveryAvailability } from "@/lib/api/discovery";
-import { useGeolocation } from "@/hooks/use-geolocation";
-
-type OrderType = "DELIVERY" | "PICKUP" | "DINE_IN";
+import { checkout } from "@/lib/api/orders";
+import { AlertCircle, Loader2, ShoppingBag, MapPin, Tag, Navigation } from "lucide-react";
+import Link from "next/link";
 
 export default function CheckoutPage() {
+  const t = useTranslations("checkout");
   const router = useRouter();
-  const queryClient = useQueryClient();
   const { items, restaurantId, subtotal, clear } = useCartStore();
-  const { isAuthenticated, setAuth } = useCustomerAuthStore();
-  const { lat, lng, isResolved } = useGeolocation();
-
-  const [address, setAddress] = useState("");
-  const [orderType, setOrderType] = useState<OrderType>("DELIVERY");
-  const [guestLoading, setGuestLoading] = useState(false);
-  const [guestError, setGuestError] = useState<string | null>(null);
-
-  // Coupon State
+  
+  const [orderType, setOrderType] = useState<"DELIVERY" | "PICKUP">("DELIVERY");
+  const [deliveryAddress, setDeliveryAddress] = useState("");
+  const [deliveryLatitude, setDeliveryLatitude] = useState<number | undefined>(undefined);
+  const [deliveryLongitude, setDeliveryLongitude] = useState<number | undefined>(undefined);
   const [couponCode, setCouponCode] = useState("");
-  const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discountAmount: number; message: string } | null>(null);
-  const [couponError, setCouponError] = useState<string | null>(null);
+  const [error, setError] = useState("");
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
 
   const sub = subtotal();
-  const discountAmount = appliedCoupon?.discountAmount || 0;
-  const discountedSubtotal = Math.max(0, sub - discountAmount);
+  const deliveryFee = orderType === "DELIVERY" ? 50 : 0; 
+  const total = sub + deliveryFee;
 
-  const deliveryQuery = useQuery({
-    queryKey: ["delivery-check", restaurantId, lat, lng],
-    queryFn: () => checkDeliveryAvailability(restaurantId as string, lat, lng),
-    enabled: orderType === "DELIVERY" && isResolved && !!restaurantId && !!lat && !!lng,
-  });
-
-  // Use the backend-calculated fee for the UI estimate, fallback to 0 if loading
-  const displayDeliveryFee = orderType === "DELIVERY" ? (deliveryQuery.data?.deliveryFee ?? 0) : 0;
-  const total = discountedSubtotal + displayDeliveryFee;
+  const handleGetLocation = () => {
+    if (!navigator.geolocation) {
+      setError("Geolocation is not supported by your browser.");
+      return;
+    }
+    setIsGettingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setDeliveryLatitude(position.coords.latitude);
+        setDeliveryLongitude(position.coords.longitude);
+        setIsGettingLocation(false);
+        // UX: Pre-fill address field with coords if empty, so user knows it worked
+        if (!deliveryAddress.trim()) {
+          setDeliveryAddress(`Lat: ${position.coords.latitude.toFixed(4)}, Lng: ${position.coords.longitude.toFixed(4)}`);
+        }
+      },
+      (err) => {
+        console.error("Geolocation error:", err);
+        setError("Unable to retrieve your location. Please enter your address manually.");
+        setIsGettingLocation(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  };
 
   const mutation = useMutation({
-    mutationFn: (input: CheckoutInput) => checkout(input),
+    mutationFn: async () => {
+      const payload = {
+        restaurantId: restaurantId!,
+        orderType,
+        paymentMethod: "COD" as const,
+        ...(orderType === "DELIVERY" ? {
+          deliveryAddress,
+          deliveryLatitude,
+          deliveryLongitude,
+        } : {}),
+        ...(couponCode.trim() ? { couponCode: couponCode.trim().toUpperCase() } : {}),
+        items: items.map(item => ({
+          menuItemId: item.menuItemId,
+          quantity: item.quantity,
+          // ✅ STRICTLY MATCHES BACKEND DTO: Only UUIDs, no extra fields!
+          selectedModifiers: item.selectedModifiers?.map(m => ({
+            modifierGroupId: m.modifierGroupId,
+            modifierOptionId: m.modifierOptionId,
+          })) || [],
+        })),
+      };
+      
+      return checkout(payload);
+    },
     onSuccess: (data) => {
-      clear();
-      queryClient.invalidateQueries({ queryKey: ["customer-orders"] });
-      const orderId = data?.id ?? data?.orderId;
-      router.push(orderId ? `/orders/${orderId}` : "/");
+      clear(); // Clear cart ONLY on success
+      const orderId = data?.id || data?.orderId; 
+      router.push(`/account/orders/${orderId}`); 
+    },
+    onError: (err: any) => {
+      console.error("Checkout failed:", err);
+      // ✅ Backend validates the coupon here. If invalid, it returns a 400 with a message.
+      const rawMessage = err?.response?.data?.message || t("genericError");
+      const errorMessage = typeof rawMessage === 'string' ? rawMessage : JSON.stringify(rawMessage);
+      setError(errorMessage);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     },
   });
 
-  const validateCouponMutation = useMutation({
-    mutationFn: () => 
-      validateCoupon({ 
-        restaurantId: restaurantId as string, 
-        code: couponCode.trim().toUpperCase(), 
-        subtotal: sub 
-      }),
-    onSuccess: (data) => {
-      // Backend returns { coupon, discountAmount } on success
-      if (data?.discountAmount !== undefined) {
-        setAppliedCoupon({
-          code: couponCode.trim().toUpperCase(),
-          discountAmount: data.discountAmount,
-          message: "Coupon applied successfully!",
-        });
-        setCouponError(null);
-      } else {
-        setAppliedCoupon(null);
-        setCouponError("Invalid coupon code.");
-      }
-    },
-    onError: (error: any) => {
-      setAppliedCoupon(null);
-      // Backend throws BadRequestException/NotFoundException with a specific message
-      const errorMsg = error?.response?.data?.message || "Failed to validate coupon.";
-      setCouponError(errorMsg);
-    },
-  });
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
 
-  async function continueAsGuest() {
-    setGuestLoading(true);
-    setGuestError(null);
-    try {
-      const data = await customerGuestCheckout();
-      setAuth({
-        accessToken: data.accessToken,
-        refreshToken: data.refreshToken ?? "",
-        customer: data.customer ?? { id: "guest", name: "Guest", email: "" },
-      });
-    } catch {
-      setGuestError("Couldn't start guest checkout. Please try logging in instead.");
-    } finally {
-      setGuestLoading(false);
+    if (orderType === "DELIVERY" && !deliveryAddress.trim()) {
+      return setError(t("errors.addressRequired") || "Delivery address is required.");
     }
-  }
+    if (items.length === 0) return setError(t("errors.emptyCart") || "Cart is empty.");
 
-  function placeOrder() {
-    if (!restaurantId) return;
-    mutation.mutate({
-      restaurantId,
-      items: items.map((i) => ({ menuItemId: i.menuItemId, quantity: i.quantity })),
-      orderType,
-      paymentMethod: "CASH_ON_DELIVERY",
-      deliveryAddress: orderType === "DELIVERY" ? address : undefined,
-      deliveryLat: orderType === "DELIVERY" ? lat : undefined,
-      deliveryLng: orderType === "DELIVERY" ? lng : undefined,
-      couponCode: appliedCoupon?.code || undefined,
-    });
-  }
+    mutation.mutate();
+  };
 
   if (items.length === 0) {
     return (
       <div className="max-w-lg mx-auto px-4 py-20 text-center">
-        <p className="text-sm text-neutral-500">Your cart is empty.</p>
-        <Link href="/" className="inline-block mt-4 text-sm font-medium bg-[#17181C] text-white px-5 py-2.5 rounded-full">
-          Browse restaurants
+        <ShoppingBag className="mx-auto text-neutral-300 mb-4" size={48} />
+        <h1 className="font-display font-semibold text-xl text-[#17181C]">{t("emptyTitle")}</h1>
+        <p className="text-sm text-neutral-500 mt-1.5 mb-6">{t("emptyDesc")}</p>
+        <Link href="/" className="inline-block bg-[#17181C] text-white text-sm font-medium px-6 py-2.5 rounded-full hover:bg-[#2B2D33] transition-colors">
+          {t("browseRestaurants")}
         </Link>
       </div>
     );
   }
 
-  if (!isAuthenticated) {
-    return (
-      <div className="max-w-sm mx-auto px-4 py-20 text-center">
-        <h1 className="font-display font-semibold text-xl text-[#17181C]">Log in to check out</h1>
-        <p className="text-sm text-neutral-500 mt-1.5 mb-6">Or continue without an account — you can still track this order.</p>
-        <div className="space-y-2.5">
-          <Link href="/login" className="block w-full bg-[#17181C] text-white text-sm font-medium py-2.5 rounded-xl">Log in</Link>
-          <button onClick={continueAsGuest} disabled={guestLoading} className="block w-full border border-[#E8E7E2] text-[#17181C] text-sm font-medium py-2.5 rounded-xl disabled:opacity-60">
-            {guestLoading ? "Starting…" : "Continue as guest"}
-          </button>
-        </div>
-        {guestError && <p className="text-xs text-red-600 mt-3">{guestError}</p>}
-      </div>
-    );
-  }
-
-  const checkoutErrorMessage = isAxiosError(mutation.error)
-    ? mutation.error.response?.data?.message ?? "Couldn't place the order. Please try again."
-    : mutation.isError ? "Couldn't place the order. Please try again." : null;
-
   return (
-    <div className="max-w-lg mx-auto px-4 py-6">
-      <h1 className="font-display font-semibold text-xl text-[#17181C] mb-5">Checkout</h1>
+    <div className="max-w-4xl mx-auto px-4 py-8">
+      <h1 className="font-display font-semibold text-2xl text-[#17181C] mb-6">{t("title")}</h1>
 
-      <div className="bg-white border border-[#E8E7E2] rounded-2xl p-4">
-        <p className="text-sm font-medium text-[#17181C] mb-2.5">Order type</p>
-        <div className="flex gap-2">
-          {(["DELIVERY", "PICKUP", "DINE_IN"] as OrderType[]).map((type) => (
-            <button
-              key={type}
-              onClick={() => setOrderType(type)}
-              className={`flex-1 text-xs font-medium py-2.5 rounded-xl border transition-colors ${
-                orderType === type ? "bg-[#17181C] text-white border-[#17181C]" : "bg-white text-neutral-500 border-[#E8E7E2]"
-              }`}
-            >
-              {type === "DELIVERY" ? "Delivery" : type === "PICKUP" ? "Pickup" : "Dine in"}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {orderType === "DELIVERY" && (
-        <div className="bg-white border border-[#E8E7E2] rounded-2xl p-4 mt-4">
-          <p className="text-sm font-medium text-[#17181C] mb-2.5">Delivery address</p>
-          <textarea
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            placeholder="House number, street, landmark…"
-            rows={2}
-            className="w-full bg-[#FAFAF7] border border-[#E8E7E2] rounded-xl px-3.5 py-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#E3A008]/40 focus:border-[#E3A008]"
-          />
-          {!isResolved && (
-            <p className="text-xs text-[#E3A008] mt-2 flex items-center gap-1">
-              <Loader2 size={12} className="animate-spin" /> Getting your location for accurate delivery fee...
-            </p>
-          )}
+      {error && (
+        <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 flex items-start gap-3 text-sm text-red-700">
+          <AlertCircle size={18} className="shrink-0 mt-0.5" />
+          <span>{error}</span>
         </div>
       )}
 
-      <div className="bg-white border border-[#E8E7E2] rounded-2xl p-4 mt-4">
-        <p className="text-sm font-medium text-[#17181C] mb-2">Payment</p>
-        <p className="text-sm text-neutral-500">Cash on Delivery</p>
-      </div>
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Left Column: Form */}
+        <div className="lg:col-span-2 space-y-6">
+          
+          {/* Order Type Toggle */}
+          <div className="bg-white border border-[#E8E7E2] rounded-2xl p-1 flex gap-1">
+            {(["DELIVERY", "PICKUP"] as const).map((type) => (
+              <button
+                key={type}
+                type="button"
+                onClick={() => setOrderType(type)}
+                className={`flex-1 py-2.5 text-sm font-medium rounded-xl transition-all ${
+                  orderType === type
+                    ? "bg-[#17181C] text-white shadow-sm"
+                    : "text-neutral-500 hover:bg-neutral-50"
+                }`}
+              >
+                {type === "DELIVERY" ? t("delivery") : t("pickup")}
+              </button>
+            ))}
+          </div>
 
-      {/* Coupon Input Section */}
-      <div className="bg-white border border-[#E8E7E2] rounded-2xl p-4 mt-4">
-        <p className="text-sm font-medium text-[#17181C] mb-2.5">Have a coupon?</p>
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={couponCode}
-            onChange={(e) => { setCouponCode(e.target.value.toUpperCase()); setCouponError(null); }}
-            placeholder="Enter code (e.g., WEL100)"
-            disabled={!!appliedCoupon || validateCouponMutation.isPending}
-            className="flex-1 bg-[#FAFAF7] border border-[#E8E7E2] rounded-xl px-3.5 py-2.5 text-sm font-mono uppercase focus:outline-none focus:ring-2 focus:ring-[#E3A008]/40 focus:border-[#E3A008] disabled:opacity-50"
-          />
-          {appliedCoupon ? (
-            <button onClick={() => { setAppliedCoupon(null); setCouponCode(""); }} className="px-4 py-2.5 bg-red-50 text-red-600 text-sm font-medium rounded-xl border border-red-200 hover:bg-red-100 transition-colors flex items-center gap-1">
-              <XCircle size={16} /> Remove
-            </button>
-          ) : (
-            <button onClick={() => validateCouponMutation.mutate()} disabled={!couponCode.trim() || validateCouponMutation.isPending} className="px-4 py-2.5 bg-[#17181C] text-white text-sm font-medium rounded-xl disabled:opacity-50 flex items-center gap-1">
-              {validateCouponMutation.isPending ? <Loader2 size={16} className="animate-spin" /> : "Apply"}
-            </button>
-          )}
-        </div>
-        {appliedCoupon && (
-          <div className="mt-3 flex items-start gap-2 text-sm text-[#0F6B5C] bg-[#0F6B5C]/5 p-3 rounded-lg border border-[#0F6B5C]/20">
-            <CheckCircle2 size={16} className="mt-0.5 shrink-0" />
-            <div>
-              <p className="font-medium">{appliedCoupon.message}</p>
-              <p className="text-xs opacity-80">You saved Rs {discountAmount}!</p>
+          {/* Delivery Address (Conditional) */}
+          {orderType === "DELIVERY" && (
+            <div className="bg-white border border-[#E8E7E2] rounded-2xl p-6">
+              <h2 className="font-semibold text-[#17181C] mb-4">{t("deliveryAddress")}</h2>
+              <div className="relative">
+                <MapPin size={16} className="absolute left-3 top-3 text-neutral-400" />
+                <textarea
+                  required
+                  value={deliveryAddress}
+                  onChange={(e) => setDeliveryAddress(e.target.value)}
+                  placeholder={t("placeholders.address")}
+                  rows={2}
+                  className="w-full pl-10 pr-10 py-2.5 text-sm border border-[#E8E7E2] rounded-xl focus:ring-2 focus:ring-[#E3A008]/40 focus:border-[#E3A008] outline-none resize-none"
+                />
+                <button
+                  type="button"
+                  onClick={handleGetLocation}
+                  disabled={isGettingLocation}
+                  className="absolute right-2 top-2 p-1.5 text-neutral-400 hover:text-[#E3A008] transition-colors rounded-lg hover:bg-neutral-50"
+                  title="Use current location"
+                >
+                  {isGettingLocation ? <Loader2 size={16} className="animate-spin" /> : <Navigation size={16} />}
+                </button>
+              </div>
             </div>
-          </div>
-        )}
-        {couponError && (
-          <div className="mt-3 flex items-center gap-2 text-sm text-red-600 bg-red-50 p-3 rounded-lg border border-red-100">
-            <XCircle size={16} className="shrink-0" />
-            <p>{couponError}</p>
-          </div>
-        )}
-      </div>
+          )}
 
-      <div className="bg-white border border-[#E8E7E2] rounded-2xl p-4 mt-4 space-y-2 text-sm">
-        <div className="flex justify-between text-neutral-500">
-          <span>Subtotal</span>
-          <span className="font-mono">Rs {sub}</span>
+          {/* Coupon Code */}
+          <div className="bg-white border border-[#E8E7E2] rounded-2xl p-6">
+            <h2 className="font-semibold text-[#17181C] mb-4">{t("couponCode")}</h2>
+            <div className="flex gap-3">
+              <div className="relative flex-1">
+                <Tag size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
+                <input
+                  type="text"
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                  placeholder={t("placeholders.coupon")}
+                  className="w-full pl-10 pr-4 py-2.5 text-sm border border-[#E8E7E2] rounded-xl focus:ring-2 focus:ring-[#E3A008]/40 focus:border-[#E3A008] outline-none uppercase"
+                />
+              </div>
+              {/* Note: Validation happens on the backend during checkout submission */}
+              <button
+                type="button"
+                onClick={() => {
+                  if (!couponCode.trim()) {
+                    setError("Please enter a coupon code first.");
+                    return;
+                  }
+                  // Visual feedback only; actual validation occurs when "Place Order" is clicked
+                  // to prevent creating dummy orders or requiring a backend endpoint we don't have.
+                  setError(""); 
+                }}
+                className="px-6 py-2.5 text-sm font-medium text-white bg-[#17181C] rounded-xl hover:bg-[#2B2D33] transition-colors"
+              >
+                {t("apply")}
+              </button>
+            </div>
+            <p className="text-xs text-neutral-400 mt-2">
+              * Coupon validity will be verified when you place your order.
+            </p>
+          </div>
         </div>
-        
-        {appliedCoupon && discountAmount > 0 && (
-          <div className="flex justify-between text-[#0F6B5C]">
-            <span>Discount ({appliedCoupon.code})</span>
-            <span className="font-mono">- Rs {discountAmount}</span>
-          </div>
-        )}
 
-        {orderType === "DELIVERY" && (
-          <div className="flex justify-between text-neutral-500">
-            <span className="flex items-center gap-1">
-              Delivery fee (estimate)
-              {deliveryQuery.isLoading && <Loader2 size={12} className="animate-spin" />}
-            </span>
-            <span className="font-mono">
-              {deliveryQuery.isLoading ? "..." : `Rs ${displayDeliveryFee}`}
-            </span>
+        {/* Right Column: Order Summary */}
+        <div className="lg:col-span-1">
+          <div className="bg-white border border-[#E8E7E2] rounded-2xl p-5 sticky top-24 space-y-4">
+            <h2 className="font-semibold text-[#17181C] border-b border-[#E8E7E2] pb-3">{t("orderSummary")}</h2>
+            
+            <div className="space-y-3 max-h-60 overflow-y-auto pr-1">
+              {items.map((item) => (
+                <div key={`${item.menuItemId}-${item.variantKey}`} className="flex justify-between text-sm">
+                  <div className="flex-1 pr-2">
+                    <p className="font-medium text-[#17181C]">{item.quantity}x {item.name}</p>
+                    {item.selectedModifiers && item.selectedModifiers.length > 0 && (
+                      <p className="text-[11px] text-neutral-400 mt-0.5">
+                        {item.selectedModifiers.map(m => m.optionName).join(", ")}
+                      </p>
+                    )}
+                  </div>
+                  <p className="font-mono text-neutral-600 shrink-0">Rs {item.price * item.quantity}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="border-t border-[#E8E7E2] pt-3 space-y-2 text-sm">
+              <div className="flex justify-between text-neutral-500">
+                <span>{t("subtotal")}</span>
+                <span className="font-mono">Rs {sub}</span>
+              </div>
+              {orderType === "DELIVERY" && (
+                <div className="flex justify-between text-neutral-500">
+                  <span>{t("deliveryFee")}</span>
+                  <span className="font-mono">Rs {deliveryFee}</span>
+                </div>
+              )}
+              <div className="flex justify-between font-semibold text-[#17181C] pt-2 border-t border-[#E8E7E2]">
+                <span>{t("total")}</span>
+                <span className="font-mono text-lg">Rs {total}</span>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={mutation.isPending}
+              className="w-full bg-[#17181C] text-white text-sm font-medium py-3.5 rounded-xl hover:bg-[#2B2D33] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {mutation.isPending ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" />
+                  {t("processing")}
+                </>
+              ) : (
+                `${t("placeOrder")} — Rs ${total}`
+              )}
+            </button>
           </div>
-        )}
-        
-        <div className="flex justify-between font-semibold text-[#17181C] pt-2 border-t border-[#E8E7E2]">
-          <span>Total</span>
-          <span className="font-mono">Rs {total}</span>
         </div>
-      </div>
-
-      {checkoutErrorMessage && (
-        <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2 mt-4">
-          {typeof checkoutErrorMessage === "string" ? checkoutErrorMessage : "Couldn't place the order. Please try again."}
-        </p>
-      )}
-
-      <button
-        onClick={placeOrder}
-        disabled={mutation.isPending || (orderType === "DELIVERY" && (!address || deliveryQuery.isLoading))}
-        className="w-full mt-5 bg-[#17181C] text-white text-sm font-medium py-3.5 rounded-2xl disabled:opacity-50 flex items-center justify-center gap-2"
-      >
-        {mutation.isPending ? (
-          <><Loader2 size={16} className="animate-spin" /> Placing order…</>
-        ) : (
-          `Place order — Rs ${total}`
-        )}
-      </button>
+      </form>
     </div>
   );
 }

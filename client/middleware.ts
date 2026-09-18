@@ -2,7 +2,7 @@ import createMiddleware from 'next-intl/middleware';
 import { NextRequest } from 'next/server'; 
 
 const intlMiddleware = createMiddleware({
-  locales: ['en', 'ja', 'ne', 'hi'],
+  locales: ['en', 'ja'],
   defaultLocale: 'en',
   localePrefix: 'always'
 });
@@ -11,6 +11,7 @@ export default function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname; 
 
   const excludedPrefixes = [
+    '/for-restaurants',
     '/owner',
     '/admin',
     '/delivery',

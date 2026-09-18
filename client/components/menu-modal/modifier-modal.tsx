@@ -1,4 +1,3 @@
-// components/menu-modal/modifier-modal.tsx
 "use client";
 
 import { useMemo, useState } from "react";
@@ -52,6 +51,8 @@ export function ModifierModal({ restaurantId, menuItemId, onClose }: ModifierMod
         const option = group.options?.find((o) => o.id === optionId);
         if (!option) continue;
         mods.push({
+          modifierGroupId: group.id,       // ✅ CRITICAL FIX: Added required UUID
+          modifierOptionId: option.id,     // ✅ CRITICAL FIX: Added required UUID
           groupName: group.name ?? "",
           optionName: option.name ?? "",
           priceDelta: option.extraPrice ?? 0,

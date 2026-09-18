@@ -5,11 +5,10 @@ import { useLocale } from "next-intl";
 import { useRouter, usePathname } from "next/navigation";
 import { ChevronUp, ChevronDown } from "lucide-react";
 
+// ✅ Only English and Japanese
 const languages = {
   en: { label: "English", flag: "🇬🇧" },
   ja: { label: "日本語", flag: "🇯🇵" },
-  ne: { label: "नेपाली", flag: "🇳🇵" },
-  hi: { label: "हिन्दी", flag: "🇮🇳" },
 };
 
 export function LanguageSwitcherButton() {
@@ -21,8 +20,6 @@ export function LanguageSwitcherButton() {
   const currentLang = languages[locale as keyof typeof languages] || languages.en;
 
   const handleLanguageChange = (newLocale: string) => {
-    // ✅ Manually replace the locale prefix in the pathname
-    // e.g., changes "/en/menu" to "/ja/menu"
     const newPathname = pathname.replace(`/${locale}`, `/${newLocale}`);
     router.replace(newPathname);
     setIsOpen(false);
@@ -55,6 +52,12 @@ export function LanguageSwitcherButton() {
                 <span className="text-sm font-medium text-[#8B0000]">{label}</span>
               </button>
             ))}
+            
+            {/* ✅ Optional: A helpful hint for other languages */}
+            <div className="border-t border-neutral-100 my-1" />
+            <div className="px-3 py-2 text-[10px] text-neutral-400 text-center">
+              Use your browser to translate to other languages
+            </div>
           </div>
         </>
       )}
