@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { MapPin, ShoppingBag, ChevronDown, User, Store } from "lucide-react";
+import { MapPin, ShoppingBag, ChevronDown, User, Store, Search } from "lucide-react";
 import { useCartStore } from "@/store/cart-store";
 
 export function CustomerHeader() {
@@ -33,7 +33,15 @@ export function CustomerHeader() {
           <ChevronDown size={13} className="text-[#2B1410]/40" />
         </button>
 
-        <div className="flex items-center gap-3 shrink-0">
+                <div className="flex items-center gap-3 shrink-0">
+          <Link
+            href="/search"
+            className="w-9 h-9 rounded-full border border-[#2B1410]/10 flex items-center justify-center text-[#2B1410] hover:bg-[#2B1410]/5 transition-colors"
+            aria-label="Search"
+          >
+            <Search size={16} />
+          </Link>
+
           <Link
             href="/for-restaurants"
             className="hidden md:flex items-center gap-1.5 text-sm font-medium text-[#2B1410] hover:text-[#C0392B] transition-colors"
