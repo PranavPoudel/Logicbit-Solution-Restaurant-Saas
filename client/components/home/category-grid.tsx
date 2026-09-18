@@ -2,72 +2,78 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Soup,
-  Beef,
-  Pizza,
-  Sandwich,
-  Fish,
-  IceCream,
-  type LucideIcon,
-} from "lucide-react";
 import { theme } from "@/config/theme";
 
 interface Category {
   label: string;
-  icon: LucideIcon;
+  image: string;
 }
 
 // PLACEHOLDER — wired to GET /discovery/cuisines once we confirm the
-// response shape; icons are assigned client-side by matching cuisine name.
+// response shape; swap these image URLs for real per-cuisine photos.
 const categories: Category[] = [
-  { label: "Nepali", icon: Soup },
-  { label: "Newari", icon: Beef },
-  { label: "Momo", icon: Sandwich },
-  { label: "Fast Food", icon: Pizza },
-  { label: "Chinese", icon: Fish },
-  { label: "Desserts", icon: IceCream },
+  { label: "Nepali", image: "/images/cuisine-nepali.jpg.avif" },
+  { label: "Newari", image: "/images/cuisine-newari.jpg.avif" },
+  { label: "Fast Food", image: "/images/cuisine-fastfood.jpg.avif" },
+  { label: "Chinese", image: "/images/cuisine-chinese.jpg.avif" },
+  { label: "Indian", image: "/images/cuisine-indian.jpg.avif" },
+  { label: "Desserts", image: "/images/cuisine-desserts.jpg.avif" },
 ];
+
+const bounceStyle = `
+@keyframes cuisine-pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(0.9); }
+  70% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+`;
 
 export function CategoryGrid() {
   const [active, setActive] = useState<string | null>(null);
 
   return (
     <div>
-      <div className="flex items-baseline justify-between mb-4">
-        <h2 className="font-serif font-semibold text-xl" style={{ color: theme.colors.dark }}>
-          {theme.content.browseByCuisineHeading}
-        </h2>
-      </div>
-      <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
-        {categories.map(({ label, icon: Icon }, index) => {
+      <style>{bounceStyle}</style>
+      <h2 className="font-serif font-semibold text-lg mb-3" style={{ color: theme.colors.dark }}>
+        {theme.content.browseByCuisineHeading}
+      </h2>
+      <div className="flex gap-4 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        {categories.map(({ label, image }) => {
           const isActive = active === label;
           return (
             <button
               key={label}
               onClick={() => setActive(isActive ? null : label)}
-              style={{
-                animationDelay: `${index * 60}ms`,
-                backgroundColor: isActive ? theme.colors.dark : "#ffffff",
-                borderColor: isActive ? theme.colors.dark : `${theme.colors.dark}14`,
-                color: isActive ? theme.colors.background : theme.colors.dark,
-              }}
-              className="flex flex-col items-center gap-2 py-4 rounded-[1.75rem] border transition-all duration-200 hover:shadow-md hover:-translate-y-1 active:scale-95 animate-in fade-in slide-in-from-bottom-2 fill-mode-backwards"
+              className="shrink-0 flex flex-col items-center gap-1.5 relative"
             >
-              <div
-                className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200"
+              <span
+                className="w-16 h-16 rounded-full overflow-hidden block transition-all duration-150"
                 style={{
-                  backgroundColor: isActive ? "rgba(255,255,255,0.15)" : `${theme.colors.primary}14`,
-                  transform: isActive ? "scale(1.1)" : "scale(1)",
+                  boxShadow: isActive
+                    ? `0 0 0 2.5px ${theme.colors.primary}`
+                    : `0 1px 4px ${theme.colors.dark}1A`,
+                  animation: isActive ? "cuisine-pop 0.4s ease" : "none",
                 }}
               >
-                <Icon
-                  size={20}
-                  style={{ color: isActive ? theme.colors.background : theme.colors.primary }}
-                  className="transition-transform duration-200"
+                <img src={image} alt={label} className="w-full h-full object-cover" />
+              </span>
+              <span
+                className="text-xs font-medium"
+                style={{ color: isActive ? theme.colors.primary : theme.colors.dark }}
+              >
+                {label}
+              </span>
+              {isActive && (
+                <span
+                  className="w-0 h-0 -mt-0.5"
+                  style={{
+                    borderLeft: "5px solid transparent",
+                    borderRight: "5px solid transparent",
+                    borderTop: `6px solid ${theme.colors.primary}`,
+                  }}
                 />
-              </div>
-              <span className="text-xs font-medium">{label}</span>
+              )}
             </button>
           );
         })}
