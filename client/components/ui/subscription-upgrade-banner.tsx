@@ -1,3 +1,4 @@
+// componets/ui/subscription-upgrade-banner.tsx
 "use client";
 
 import Link from "next/link";

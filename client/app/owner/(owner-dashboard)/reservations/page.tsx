@@ -1,0 +1,104 @@
+// app/(owner-dashboard)/reservations/page.tsx
+"use client";
+
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { AlertTriangle, Trash2, Calendar } from "lucide-react";
+import { useOwnerAuthStore } from "@/store/owner-auth-store";
+import { reservationsApi } from "@/lib/api/reservations";
+import { ReservationList } from "@/components/owner-reservations/reservation-list";
+import { ReservationTrashBin } from "@/components/owner-reservations/reservation-trash-bin";
+import { SubscriptionUpgradeBanner } from "@/components/ui/subscription-upgrade-banner";
+
+const TABS = [
+  { key: "ALL", label: "All Reservations" },
+  { key: "PENDING", label: "Pending" },
+  { key: "CONFIRMED", label: "Confirmed" },
+  { key: "TRASH", label: "Trash", icon: Trash2 },
+];
+
+export default function ReservationsPage() {
+  const restaurantId = useOwnerAuthStore((s) => s.activeRestaurantId);
+  const queryClient = useQueryClient();
+  const [activeTab, setActiveTab] = useState("ALL");
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
+
+  const reservationsQuery = useQuery({
+    queryKey: ["owner-reservations", restaurantId, activeTab, selectedDate],
+    queryFn: () =>
+      reservationsApi.list(restaurantId as string, {
+        includeDeleted: activeTab === "TRASH",
+        status: activeTab === "TRASH" ? undefined : activeTab,
+        date: activeTab === "ALL" || activeTab === "TRASH" ? undefined : selectedDate,
+      }),
+    enabled: !!restaurantId,
+  });
+
+  if (!restaurantId) {
+    return (
+      <div className="max-w-6xl mx-auto flex flex-col items-center text-center gap-3 py-16">
+        <AlertTriangle className="text-neutral-300" size={28} />
+        <p className="text-sm text-neutral-500">No restaurant selected.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-7xl">
+      <div className="flex items-center justify-between mb-1">
+        <h1 className="text-xl font-semibold text-neutral-900">Reservations</h1>
+        {activeTab !== "TRASH" && (
+          <div className="flex items-center gap-2 bg-white border border-neutral-200 rounded-lg px-3 py-1.5">
+            <Calendar size={16} className="text-neutral-400" />
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="text-sm text-neutral-700 outline-none bg-transparent"
+            />
+          </div>
+        )}
+      </div>
+      <p className="text-sm text-neutral-500 mb-6">Manage your restaurant's table bookings and guest requests.</p>
+      <SubscriptionUpgradeBanner />
+
+      {/* Tabs */}
+      <div className="flex gap-1 border-b border-neutral-200 mb-6 overflow-x-auto">
+        {TABS.map((tab) => {
+          const Icon = tab.icon;
+          return (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`shrink-0 flex items-center gap-2 text-sm font-medium px-4 py-2.5 border-b-2 transition-all ${
+                activeTab === tab.key
+                  ? "border-[#E3A008] text-neutral-900"
+                  : "border-transparent text-neutral-500 hover:text-neutral-700"
+              }`}
+            >
+              {Icon && <Icon size={16} className={tab.key === "TRASH" ? "text-red-500" : ""} />}
+              {tab.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Content */}
+      {reservationsQuery.isLoading ? (
+        <p className="text-sm text-neutral-400 py-8 text-center">Loading reservations...</p>
+      ) : activeTab === "TRASH" ? (
+        <ReservationTrashBin
+          reservations={reservationsQuery.data ?? []}
+          restaurantId={restaurantId}
+          queryClient={queryClient}
+        />
+      ) : (
+        <ReservationList
+          reservations={reservationsQuery.data ?? []}
+          restaurantId={restaurantId}
+          queryClient={queryClient}
+        />
+      )}
+    </div>
+  );
+}

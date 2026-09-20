@@ -1,10 +1,12 @@
-// store/cart-store.ts
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+// ✅ Updated to match backend SelectedModifierDto
 export interface SelectedModifier {
-  groupName: string;
-  optionName: string;
+  modifierGroupId: string;   // UUID from backend
+  modifierOptionId: string;  // UUID from backend
+  groupName?: string;        // Optional: kept for UI display
+  optionName?: string;       // Optional: kept for UI display
   priceDelta: number;
 }
 

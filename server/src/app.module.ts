@@ -31,6 +31,9 @@ import { PlatformAuthModule } from './modules/platform-auth/platform-auth.module
 import { PlatformStaffModule } from './modules/platform-staff/platform-staff.module';
 import { SubscriptionModule } from './modules/subscription/subscription.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
+import { TablesModule } from './modules/tables/tables.module';
+import { ReservationsModule } from './modules/reservations/reservations.module';
+
 
 
 @Module({
@@ -72,6 +75,8 @@ import { AnalyticsModule } from './modules/analytics/analytics.module';
     PlatformStaffModule,
     SubscriptionModule,
     AnalyticsModule,
+    TablesModule,
+    ReservationsModule,
   ],
   providers: [
     {

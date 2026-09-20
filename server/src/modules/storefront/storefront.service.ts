@@ -1,3 +1,4 @@
+// src/modules/storefront/storefront.service.ts
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateBannerDto, UpdateBannerDto, ReorderBannersDto, UpdateStorefrontConfigDto, CreatePopupDto, UpdatePopupDto } from './dto/storefront.dto';
@@ -37,14 +38,6 @@ export class StorefrontService {
     return { message: 'Banner deleted successfully' };
   }
 
-  /**
-   * reorderBanners()
-   * ------------------
-   * Drag-and-drop UI ले नयाँ क्रममा भएका banner ID हरूको array पठाउँछ।
-   * यहाँ हरेक ID लाई त्यही array भित्रको index लाई displayOrder बनाइदिन्छौं।
-   * Transaction प्रयोग गरिएको छ ताकि आधा मात्र update भएर क्रम बिग्रिने
-   * अवस्था नआओस्।
-   */
   async reorderBanners(tenantId: string, restaurantId: string, dto: ReorderBannersDto) {
     const existingBanners = await this.prisma.storefrontBanner.findMany({ where: { tenantId, restaurantId } });
     const existingIds = new Set(existingBanners.map((b) => b.id));
@@ -64,28 +57,30 @@ export class StorefrontService {
     return this.findAllBanners(tenantId, restaurantId);
   }
 
-  // ---------- Config (About/Contact/Section order) ----------
+  // ---------- Config (About/Contact/Section Settings) ----------
 
   async getConfig(tenantId: string, restaurantId: string) {
     const config = await this.prisma.storefrontConfig.upsert({
-      where: { restaurantId }, // restaurantId is @unique in the schema
-      update: {}, // If it exists, do nothing and just return it
+      where: { restaurantId },
+      update: {},
       create: {
-      tenantId,
-      restaurantId,
-      sectionOrder: ["banner", "offers", "menu", "about", "contact"], // Default layout
-  },
-});
-
-return config;
+        tenantId,
+        restaurantId,
+        sectionSettings: [], // 🆕 Default empty array, frontend will populate with defaults
+      },
+    });
+    return config;
   }
 
   async updateConfig(tenantId: string, restaurantId: string, dto: UpdateStorefrontConfigDto) {
-    await this.getConfig(tenantId, restaurantId); // existence ensure गर्ने (auto-create भइहाल्छ)
+    await this.getConfig(tenantId, restaurantId);
 
     return this.prisma.storefrontConfig.update({
       where: { restaurantId },
-      data: { ...dto, sectionOrder: dto.sectionOrder ?? undefined },
+      data: { 
+        ...dto, 
+        sectionSettings: dto.sectionSettings ?? undefined // 🆕 Updated to sectionSettings
+      },
     });
   }
 
@@ -113,7 +108,11 @@ return config;
 
     return this.prisma.storefrontPopup.update({
       where: { id },
-      data: { ...dto, startDate: dto.startDate ? new Date(dto.startDate) : undefined, endDate: dto.endDate ? new Date(dto.endDate) : undefined },
+      data: { 
+        ...dto, 
+        startDate: dto.startDate ? new Date(dto.startDate) : undefined, 
+        endDate: dto.endDate ? new Date(dto.endDate) : undefined 
+      },
     });
   }
 
@@ -125,7 +124,6 @@ return config;
     return { message: 'Popup deleted successfully' };
   }
 
-  /** PUBLIC — website खोल्ने बित्तिकै देखाउने active+schedule-भित्रको popup */
   async getActivePopup(restaurantId: string) {
     const now = new Date();
     const popup = await this.prisma.storefrontPopup.findFirst({
@@ -142,13 +140,6 @@ return config;
 
   // ---------- Public (Customer-facing website) ----------
 
-  /**
-   * getPublicStorefront()
-   * -----------------------
-   * Customer-facing homepage ले यही एउटा call बाट banner, about/contact,
-   * र section order — सबै एकैचोटि पाउँछ। Menu छुट्टै (Discovery module को
-   * findPublicMenu) बाट आउँछ, किनभने त्यो ठूलो/अलग data हो।
-   */
   async getPublicStorefront(restaurantId: string) {
     const restaurant = await this.prisma.restaurant.findFirst({ where: { id: restaurantId, isActive: true } });
     if (!restaurant) throw new NotFoundException('Restaurant not found');
@@ -172,7 +163,7 @@ return config;
           address: config?.contactAddress ?? restaurant.address,
         },
         socialLinks: config?.socialLinks ?? {},
-        sectionOrder: config?.sectionOrder ?? ['banner', 'offers', 'menu', 'about', 'contact'],
+        sectionSettings: config?.sectionSettings ?? [], // 🆕 Updated to sectionSettings
       },
     };
   }

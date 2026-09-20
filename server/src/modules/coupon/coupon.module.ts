@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { CouponService } from './coupon.service';
-import { CouponController, CouponApplyController } from './coupon.controller';
+import { CouponController } from './coupon.controller';
 
 @Module({
-  controllers: [CouponController, CouponApplyController],
+  controllers: [CouponController],
   providers: [CouponService],
   exports: [CouponService],
 })

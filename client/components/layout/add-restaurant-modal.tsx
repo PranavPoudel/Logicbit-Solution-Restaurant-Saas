@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { X, Loader2 } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useOwnerAuthStore } from "@/store/owner-auth-store";
@@ -13,6 +14,7 @@ interface AddRestaurantModalProps {
 }
 
 export function AddRestaurantModal({ isOpen, onClose }: AddRestaurantModalProps) {
+  const router = useRouter();
   const queryClient = useQueryClient();
   const setRestaurants = useOwnerAuthStore((s) => s.setRestaurants);
   const setActiveRestaurant = useOwnerAuthStore((s) => s.setActiveRestaurant);
@@ -47,8 +49,8 @@ export function AddRestaurantModal({ isOpen, onClose }: AddRestaurantModalProps)
         setName("");
         setCity("");
         
-        // Redirect to settings
-        window.location.href = "/settings";
+        // ✅ Smooth client-side transition to the new namespace
+        router.push("/owner/settings");
       } catch (error) {
         console.error("Error updating store:", error);
         alert("Restaurant created, but there was an issue switching to it. Please refresh.");
@@ -57,7 +59,7 @@ export function AddRestaurantModal({ isOpen, onClose }: AddRestaurantModalProps)
     onError: (error: any) => {
       console.error("Failed to create restaurant:", error);
       const message = error?.response?.data?.message || "Failed to create restaurant. Please try again.";
-      alert(message); // Shows the error instead of hanging
+      alert(message);
     },
   });
 

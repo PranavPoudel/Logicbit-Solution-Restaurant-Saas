@@ -1,3 +1,5 @@
+// modules/menu/dto/create-modifier-group.dto.ts
+
 import { IsString, IsNotEmpty, IsOptional, IsInt, IsBoolean, Min, MaxLength } from 'class-validator';
 
 export class CreateModifierGroupDto {

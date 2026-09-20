@@ -36,6 +36,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-sans">
+        {/* QueryProvider now wraps EVERYTHING, including Owner Dashboard */}
         <QueryProvider>{children}</QueryProvider>
       </body>
     </html>
