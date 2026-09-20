@@ -1,16 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ActivityLogService } from '../activity-log/activity-log.service';
-import { CreateStaffDto } from './dto/create-staff.dto';
+import { CreateStaffDto } from './ dto/create-staff.dto';
 import * as bcrypt from 'bcrypt';
 import { UpdateStaffDto } from './dto/update-staff.dto';
 import { CreateRoleDto } from './dto/create-role.dto';
-import { GenerateSettlementDto } from './dto/generate-settlement.dto';
 import { CreatePlanDto } from './dto/create-plan.dto';
 import { ApproveAdDto } from './dto/approve-ad.dto';
 import { RejectAdDto } from './dto/reject-ad.dto';
 import { CreateCuisineDto } from './dto/create-cuisine.dto';
 import { UpdateCuisineDto } from './dto/update-cuisine.dto';
+
 @Injectable()
 export class PlatformAdminService {
   constructor(
@@ -18,24 +18,13 @@ export class PlatformAdminService {
     private readonly activityLog: ActivityLogService,
   ) {}
 
-  /**
-   * getRevenueSummary()
-   * ---------------------
-   * तपाईं (platform owner) को लागि सबैभन्दा महत्वपूर्ण number — कुल कति
-   * commission कमाइयो, कति tenant/restaurant active छन्, कति order भए।
-   * यो PlatformAdminGuard ले protect गरेको छ — कुनै पनि restaurant owner
-   * (जो आफ्नो tenant भित्र isSuperAdmin भए पनि) यो हेर्न पाउँदैनन्।
-   */
   async getRevenueSummary(startDate?: string, endDate?: string) {
-    const dateFilter =
-      startDate || endDate
-        ? {
-            createdAt: {
-              ...(startDate ? { gte: new Date(startDate) } : {}),
-              ...(endDate ? { lte: new Date(endDate) } : {}),
-            },
-          }
-        : {};
+    const dateFilter = startDate || endDate ? {
+      createdAt: {
+        ...(startDate ? { gte: new Date(startDate) } : {}),
+        ...(endDate ? { lte: new Date(endDate) } : {}),
+      },
+    } : {};
 
     const [orderStats, tenantCount, restaurantCount, activeRestaurantCount, adRevenue] = await Promise.all([
       this.prisma.order.aggregate({
@@ -63,7 +52,7 @@ export class PlatformAdminService {
         totalGMV: orderStats._sum.total ?? 0,
         commissionRevenue,
         advertisingRevenue,
-        totalPlatformRevenue: commissionRevenue + advertisingRevenue, // तपाईंको (platform owner) कुल आम्दानी — दुबै स्रोत जोडेर
+        totalPlatformRevenue: commissionRevenue + advertisingRevenue,
         activeAdvertisements: adRevenue._count.id,
         totalTenants: tenantCount,
         totalRestaurants: restaurantCount,
@@ -72,13 +61,6 @@ export class PlatformAdminService {
     };
   }
 
-  /**
-   * listAllRestaurants()
-   * ----------------------
-   * GAP FIX: पहिले Platform Admin ले केवल aggregate number मात्र हेर्न
-   * पाउँथे — कुनै specific restaurant लाई access गर्ने/नियन्त्रण गर्ने
-   * बाटो नै थिएन। यसले सबै tenant भरिका restaurant list दिन्छ।
-   */
   async listAllRestaurants(page = 1, limit = 20) {
     const [restaurants, total] = await Promise.all([
       this.prisma.restaurant.findMany({
@@ -92,7 +74,6 @@ export class PlatformAdminService {
     return { success: true, data: { restaurants, pagination: { page, limit, total } } };
   }
 
-  /** Problematic/fraudulent restaurant लाई platform बाट पूर्ण रूपमा suspend गर्ने (owner ले आफैं यो गर्न सक्दैनन्) */
   async suspendRestaurant(restaurantId: string, suspend: boolean) {
     const restaurant = await this.prisma.restaurant.update({
       where: { id: restaurantId },
@@ -110,7 +91,7 @@ export class PlatformAdminService {
     return { success: true, message: suspend ? 'Restaurant suspended' : 'Restaurant reactivated', data: restaurant };
   }
 
-async listAllStaff() {
+  async listAllStaff() {
     const staff = await this.prisma.platformStaff.findMany({
       include: { role: { select: { id: true, name: true } } },
       orderBy: { createdAt: 'desc' },
@@ -147,9 +128,6 @@ async listAllStaff() {
     return { success: true, message: 'Platform staff updated', data: staff };
   }
 
-
-
-  /** सम्झौता अनुसार commission दर बदल्ने (owner ले आफैं आफ्नो commission बदल्न पाउँदैनन् — केवल platform ले) */
   async updateCommissionRate(restaurantId: string, percent: number) {
     const existing = await this.prisma.restaurant.findUnique({ where: { id: restaurantId } });
     const restaurant = await this.prisma.restaurant.update({
@@ -169,13 +147,11 @@ async listAllStaff() {
     return { success: true, data: restaurant };
   }
 
-  /** अनुचित/inappropriate banner वा popup content moderate गर्ने (customer complaint आएमा) */
   async removeStorefrontBanner(bannerId: string) {
     await this.prisma.storefrontBanner.delete({ where: { id: bannerId } });
     return { success: true, message: 'Banner removed by platform moderation' };
   }
 
-  /** GAP FIX: Platform Admin (Super Admin) ले पनि सबै delivery को status हेर्न पाउने — oversight/support को लागि */
   async listAllDeliveries(status?: string) {
     return this.prisma.delivery.findMany({
       where: status ? { status: status as any } : {},
@@ -188,16 +164,6 @@ async listAllStaff() {
     });
   }
 
-  /**
-   * overrideRestaurantSetting()
-   * -----------------------------
-   * GAP FIX: "Super Admin ले चाह्यो भने सबै control गर्न सक्नुपर्छ" — यसअघि
-   * Restaurant Owner ले आफ्नो restaurant मात्र (आफ्नो JWT tenantId भित्र)
-   * edit गर्न सक्थे, Platform Admin ले कुनै restaurant को setting सिधै
-   * बदल्न पाउँदैनथे (किनभने ती endpoint tenant-scoped थिए)। अब Platform
-   * Admin ले जुनसुकै restaurant को कुनै पनि field (support/emergency को
-   * लागि) सिधै बदल्न सक्छन् — full override authority।
-   */
   async overrideRestaurantSetting(restaurantId: string, data: Record<string, any>) {
     const restaurant = await this.prisma.restaurant.update({ where: { id: restaurantId }, data });
 
@@ -213,7 +179,6 @@ async listAllStaff() {
     return { success: true, data: restaurant };
   }
 
-  /** Restaurant को पूरा detail (menu, category, storefront, ad, settlement सबै) एकैचोटि support/review को लागि */
   async getRestaurantFullDetail(restaurantId: string) {
     const restaurant = await this.prisma.restaurant.findUnique({
       where: { id: restaurantId },
@@ -234,29 +199,6 @@ async listAllStaff() {
     return { success: true, data: { ...restaurant, totalOrders: orders, recentSettlements: settlements, recentAds: ads } };
   }
 
-  /** GAP FIX: Refund "PENDING" बाट "PROCESSED" मा मार्क गर्ने endpoint नै थिएन */
-  async listPendingRefunds() {
-    return this.prisma.refund.findMany({
-      where: { status: 'PENDING' },
-      include: { order: { select: { orderNumber: true, restaurantId: true } } },
-    });
-  }
-
-  async processRefund(refundId: string) {
-    const refund = await this.prisma.refund.update({
-      where: { id: refundId },
-      data: { status: 'PROCESSED', processedAt: new Date() },
-    });
-
-    await this.activityLog.log({
-      actorType: 'PLATFORM_ADMIN',
-      action: 'REFUND_PROCESSED',
-      description: `Refund of ${refund.amount} processed for order ${refund.orderId}`,
-      metadata: { refundId, orderId: refund.orderId, amount: refund.amount },
-    });
-
-    return { success: true, data: refund };
-  }
   async getTopRestaurantsByRevenue(limit = 10) {
     const restaurants = await this.prisma.order.groupBy({
       by: ['restaurantId'],
@@ -305,66 +247,9 @@ async listAllStaff() {
     return { success: true, data: role };
   }
 
-
   async listAllPermissions() {
     const permissions = await this.prisma.platformPermission.findMany();
     return { success: true, data: permissions };
-  }
-
-
-  async listPendingSettlements() {
-  const settlements = await this.prisma.settlement.findMany({
-    where: { status: 'PENDING' },
-    select: {
-      id: true,
-      commissionDue: true,
-      status: true,
-      createdAt: true,
-      restaurantId: true,
-    },
-    orderBy: { createdAt: 'desc' },
-  });
-  return { success: true, data: settlements };
-}
-
-
-async generateSettlement(restaurantId: string, dto: GenerateSettlementDto) {
-    const restaurant = await this.prisma.restaurant.findUnique({ where: { id: restaurantId } });
-    if (!restaurant) return { success: false, message: 'Restaurant not found' };
-
-    const orders = await this.prisma.order.aggregate({
-      where: {
-        restaurantId,
-        paymentMethod: 'COD',
-        status: 'COMPLETED',
-        createdAt: { gte: new Date(dto.periodStart), lte: new Date(dto.periodEnd) },
-      },
-      _sum: { total: true, platformCommissionAmount: true },
-      _count: { id: true },
-    });
-
-    const settlement = await this.prisma.settlement.create({
-      data: {
-        tenantId: restaurant.tenantId,
-        restaurantId,
-        periodStart: new Date(dto.periodStart),
-        periodEnd: new Date(dto.periodEnd),
-        totalOrders: orders._count.id || 0,
-        totalCodAmount: orders._sum.total || 0,
-        commissionDue: orders._sum.platformCommissionAmount || 0,
-        status: 'PENDING',
-      },
-    });
-
-    return { success: true, message: 'Settlement generated', data: settlement };
-  }
-
-  async markSettlementPaid(id: string) {
-    const settlement = await this.prisma.settlement.update({
-      where: { id },
-      data: { status: 'PAID', paidAt: new Date() },
-    });
-    return { success: true, message: 'Settlement marked as paid', data: settlement };
   }
 
   async listAllSubscriptions() {
@@ -398,7 +283,7 @@ async generateSettlement(restaurantId: string, dto: GenerateSettlementDto) {
     return { success: true, data: plans };
   }
 
-async renewSubscription(restaurantId: string) {
+  async renewSubscription(restaurantId: string) {
     const sub = await this.prisma.restaurantSubscription.findUnique({
       where: { restaurantId },
       include: { plan: true },
@@ -418,27 +303,27 @@ async renewSubscription(restaurantId: string) {
     return { success: true, message: 'Subscription renewed', data: updated };
   }
 
- async listPendingAds() {
-  const ads = await this.prisma.advertisement.findMany({
-    where: { status: 'PENDING' },
-    orderBy: { createdAt: 'desc' },
-  });
+  async listPendingAds() {
+    const ads = await this.prisma.advertisement.findMany({
+      where: { status: 'PENDING' },
+      orderBy: { createdAt: 'desc' },
+    });
 
-  const restaurantIds = [...new Set(ads.map((ad) => ad.restaurantId))];
-  const restaurants = await this.prisma.restaurant.findMany({
-    where: { id: { in: restaurantIds } },
-    select: { id: true, name: true },
-  });
+    const restaurantIds = [...new Set(ads.map((ad) => ad.restaurantId))];
+    const restaurants = await this.prisma.restaurant.findMany({
+      where: { id: { in: restaurantIds } },
+      select: { id: true, name: true },
+    });
 
-  const restaurantMap = new Map(restaurants.map((r) => [r.id, r]));
+    const restaurantMap = new Map(restaurants.map((r) => [r.id, r]));
 
-  const data = ads.map((ad) => ({
-    ...ad,
-    restaurant: restaurantMap.get(ad.restaurantId) ?? null,
-  }));
+    const data = ads.map((ad) => ({
+      ...ad,
+      restaurant: restaurantMap.get(ad.restaurantId) ?? null,
+    }));
 
-  return { success: true, data };
-}
+    return { success: true, data };
+  }
 
   async approveAd(id: string, dto: ApproveAdDto) {
     const ad = await this.prisma.advertisement.update({
@@ -455,9 +340,11 @@ async renewSubscription(restaurantId: string) {
     });
     return { success: true, message: 'Advertisement rejected', data: ad };
   }
+
   async getCuisines() {
     return this.prisma.cuisine.findMany();
   }
+
   async createCuisine(dto: CreateCuisineDto) {
     const cuisine = await this.prisma.cuisine.create({ data: dto });
     return { success: true, data: cuisine };
@@ -472,9 +359,4 @@ async renewSubscription(restaurantId: string) {
     await this.prisma.cuisine.delete({ where: { id } });
     return { success: true, message: 'Cuisine deleted successfully' };
   }
-
-  
-
 }
-
-

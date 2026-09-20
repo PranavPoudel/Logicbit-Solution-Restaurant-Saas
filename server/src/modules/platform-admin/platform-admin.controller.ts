@@ -1,34 +1,38 @@
 import { Controller, Get, Patch, Delete, Post, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { IsNumber, Min, Max, IsBoolean } from 'class-validator';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+
+// Guards & Decorators
 import { PlatformStaffJwtAuthGuard } from '../platform-auth/guards/platform-staff-jwt-auth.guard';
 import { PlatformPermissionGuard } from '../platform-auth/guards/platform-permission.guard';
 import { RequirePlatformPermission } from '../platform-auth/decorators/require-permission.decorator';
+
 import { PlatformAdminService } from './platform-admin.service';
 import { ActivityLogService } from '../activity-log/activity-log.service';
-import { CreateRoleDto } from './dto/create-role.dto';
-import { UpdateStaffDto } from './dto/update-staff.dto';
-import { CreateStaffDto } from './dto/create-staff.dto';
-import { GenerateSettlementDto } from './dto/generate-settlement.dto';
-import { CreatePlanDto } from './dto/create-plan.dto';
-import { ApproveAdDto } from './dto/approve-ad.dto';
-import { RejectAdDto } from './dto/reject-ad.dto';
-import { UpdateCuisineDto } from './dto/update-cuisine.dto';
-import { CreateCuisineDto } from './dto/create-cuisine.dto';
 
-class UpdateCommissionDto {
+import { CreateRoleDto } from '../roles/dto/create-role.dto';
+import { CreateStaffDto } from '../platform-staff/dto/create-staff.dto';
+import { UpdateStaffDto } from '../platform-staff/dto/update-staff.dto';
+import { GenerateSettlementDto } from '../settlement/dto/settlement.dto';
+import { CreatePlanDto } from '../subscription/dto/create-plan.dto';
+import { ApproveAdDto } from '../advertisement/dto/approve-ad.dto';
+import { RejectAdDto } from '../advertisement/dto/reject-ad.dto';
+import { CreateCuisineDto } from '../cuisine/dto/create-cuisine.dto';
+import { UpdateCuisineDto } from '../cuisine/dto/update-cuisine.dto';
+
+export class UpdateCommissionDto {
   @IsNumber()
   @Min(0)
   @Max(100)
   percent: number;
 }
 
-class SuspendRestaurantDto {
+export class SuspendRestaurantDto {
   @IsBoolean()
   suspend: boolean;
 }
 
-@ApiTags('Platform Admin (LogicBit Staff)')
+@ApiTags('Platform Admin (Super Admin)')
 @ApiBearerAuth()
 @UseGuards(PlatformStaffJwtAuthGuard, PlatformPermissionGuard)
 @Controller('api/v1/platform-admin')
@@ -37,6 +41,8 @@ export class PlatformAdminController {
     private readonly platformAdminService: PlatformAdminService,
     private readonly activityLogService: ActivityLogService,
   ) {}
+
+  // ... (All your endpoints remain exactly the same, they will now use the correctly imported DTOs)
 
   @Get('revenue-summary')
   @RequirePlatformPermission('VIEW_REVENUE')
@@ -246,6 +252,4 @@ export class PlatformAdminController {
   deleteCuisine(@Param('id') id: string) {
     return this.platformAdminService.deleteCuisine(id);
   }
-
-  
 }
