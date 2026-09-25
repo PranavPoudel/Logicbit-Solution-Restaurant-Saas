@@ -1,0 +1,107 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useDeliveryAuthStore } from "@/store/delivery-auth-store";
+
+export default function DeliveryDashboardPage() {
+  const router = useRouter();
+
+  const deliveryPerson = useDeliveryAuthStore(
+    (state) => state.deliveryPerson
+  );
+
+  const isAvailable = useDeliveryAuthStore(
+    (state) => state.isAvailable
+  );
+
+  const setAvailable = useDeliveryAuthStore(
+    (state) => state.setAvailable
+  );
+
+  const logout = useDeliveryAuthStore(
+    (state) => state.logout
+  );
+
+  function handleLogout() {
+    logout();
+    router.push("/delivery/login");
+  }
+
+  return (
+    <main className="min-h-screen bg-gray-50 px-4 py-8">
+      <div className="mx-auto max-w-4xl">
+
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Rider Dashboard
+            </h1>
+
+            <p className="mt-1 text-gray-500">
+              Welcome, {deliveryPerson?.name || "Rider"}
+            </p>
+          </div>
+
+          <button
+            onClick={handleLogout}
+            className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
+          >
+            Logout
+          </button>
+        </div>
+
+        <div className="rounded-2xl bg-white p-6 shadow-sm">
+
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900">
+                Availability
+              </h2>
+
+              <p className="mt-1 text-sm text-gray-500">
+                Turn this on when you are ready to receive deliveries.
+              </p>
+            </div>
+
+            <button
+              onClick={() => setAvailable(!isAvailable)}
+              className={`rounded-full px-5 py-2 font-medium ${
+                isAvailable
+                  ? "bg-green-600 text-white"
+                  : "bg-gray-300 text-gray-700"
+              }`}
+            >
+              {isAvailable ? "Online" : "Offline"}
+            </button>
+          </div>
+
+        </div>
+
+        <div className="mt-6 grid gap-6 md:grid-cols-2">
+
+          <div className="rounded-2xl bg-white p-6 shadow-sm">
+            <h2 className="text-xl font-semibold">
+              Available Deliveries
+            </h2>
+
+            <p className="mt-2 text-sm text-gray-500">
+              Available delivery orders will appear here.
+            </p>
+          </div>
+
+          <div className="rounded-2xl bg-white p-6 shadow-sm">
+            <h2 className="text-xl font-semibold">
+              Active Delivery
+            </h2>
+
+            <p className="mt-2 text-sm text-gray-500">
+              Your active delivery and map will appear here.
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+    </main>
+  );
+}

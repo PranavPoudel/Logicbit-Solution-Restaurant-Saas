@@ -36,7 +36,22 @@ export async function updateDeliveryOrderStatus(
   return data;
 }
 
-export async function updateMyLocation(lat: number, lng: number) {
-  const { data } = await deliveryApiClient.patch("/delivery/location", { lat, lng });
+export async function updateMyLocation(
+  latitude: number,
+  longitude: number
+) {
+  const { data } = await deliveryApiClient.patch("/delivery/location", {
+    latitude,
+    longitude,
+  });
+
+  return data;
+}
+
+export async function toggleAvailability(isAvailable: boolean) {
+  const { data } = await deliveryApiClient.patch("/delivery/availability", {
+    isAvailable,
+  });
+
   return data;
 }

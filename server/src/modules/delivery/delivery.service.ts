@@ -176,6 +176,21 @@ export class DeliveryService {
     return { success: true, message: 'Location updated' };
   }
 
+  async updateAvailability(deliveryPersonId: string, isAvailable: boolean) {
+    return this.prisma.deliveryPerson.update({
+      where: { id: deliveryPersonId },
+      data: { isAvailable },
+      select: {
+        id: true,
+        name: true,
+        phone: true,
+        vehicleType: true,
+        isAvailable: true,
+        isActive: true,
+      },
+    });
+  }
+
   async findMyDeliveries(deliveryPersonId: string) {
     return this.prisma.delivery.findMany({ where: { deliveryPersonId }, include: { order: true }, orderBy: { createdAt: 'desc' } });
   }

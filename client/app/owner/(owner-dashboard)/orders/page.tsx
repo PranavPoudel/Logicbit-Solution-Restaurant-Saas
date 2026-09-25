@@ -99,9 +99,10 @@ export default function OrdersPage() {
     return (
       <div className="max-w-6xl mx-auto flex flex-col items-center text-center gap-3 py-16">
         <AlertTriangle className="text-neutral-300" size={28} />
-        <p className="text-sm text-neutral-500">
-          No restaurant selected. Use the restaurant switcher in the top bar.
-        </p>
+        <p className="text-sm text-red-500">
+  Couldn&apos;t load orders:{" "}
+  {String((ordersQuery.error as any)?.response?.data?.message || ordersQuery.error)}
+</p>
       </div>
     );
   }
