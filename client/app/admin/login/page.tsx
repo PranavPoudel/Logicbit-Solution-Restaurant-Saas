@@ -28,16 +28,13 @@ export default function AdminLoginPage() {
       const token = response?.data?.accessToken || response?.accessToken;
 
       if (token) {
-        // 1. Update global state
         setAccessToken(token);
         
-        // 2. Persist for client and server
         localStorage.setItem("admin_token", token);
         document.cookie = `admin_token=${token}; path=/; max-age=86400; SameSite=Lax`;
         
-        // 3. Navigate cleanly without a full page reload
         router.push("/admin/dashboard");
-        router.refresh(); // Forces Next.js to re-evaluate layouts/middleware with the new cookie
+        router.refresh(); 
       } else {
         setError(response?.message || "Invalid credentials received from server.");
       }
