@@ -1,4 +1,5 @@
 "use client";
+
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { platformLogin } from "@/lib/api/platform-auth";
@@ -9,8 +10,8 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  
   const router = useRouter();
-
   const setAccessToken = usePlatformAuthStore((state) => state.setAccessToken);
 
   const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
@@ -27,17 +28,22 @@ export default function AdminLoginPage() {
       const token = response?.data?.accessToken || response?.accessToken;
 
       if (token) {
+        // 1. Update global state
         setAccessToken(token);
-        localStorage.setItem('admin_token', token)
+        
+        // 2. Persist for client and server
+        localStorage.setItem("admin_token", token);
         document.cookie = `admin_token=${token}; path=/; max-age=86400; SameSite=Lax`;
-        document.cookie = `accessToken=${token}; path=/; max-age=86400; SameSite=Lax`;
-        window.location.href = "/admin/dashboard";
+        
+        // 3. Navigate cleanly without a full page reload
+        router.push("/admin/dashboard");
+        router.refresh(); // Forces Next.js to re-evaluate layouts/middleware with the new cookie
       } else {
-        setError(response?.message || "Invalid credentials");
+        setError(response?.message || "Invalid credentials received from server.");
       }
     } catch (err: any) {
       setError(
-        err?.response?.data?.message || err?.message || "Login failed. Please check credentials."
+        err?.response?.data?.message || err?.message || "Login failed. Please check your credentials."
       );
     } finally {
       setLoading(false);
