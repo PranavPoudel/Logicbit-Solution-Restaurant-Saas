@@ -8,10 +8,8 @@ export default function AdminAuthGuard({ children }: { children: React.ReactNode
   const router = useRouter();
   const [isAuthorizing, setIsAuthorizing] = useState(true);
   
-  const { accessToken, setAccessToken } = usePlatformAuthStore((state) => ({
-    accessToken: state.accessToken,
-    setAccessToken: state.setAccessToken
-  }));
+  const accessToken = usePlatformAuthStore((state) => state.accessToken);
+  const setAccessToken = usePlatformAuthStore((state) => state.setAccessToken);
 
   useEffect(() => {
     const storedToken = localStorage.getItem("admin_token");
