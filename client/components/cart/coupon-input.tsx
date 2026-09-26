@@ -3,76 +3,78 @@
 
 import { useState } from "react";
 import { Tag, X } from "lucide-react";
-import { useMutation } from "@tanstack/react-query";
-import { validateCoupon } from "@/lib/api/coupons";
 
 interface CouponInputProps {
   restaurantId: string;
   subtotal: number;
-  onApplied: (discount: number, code: string) => void;
+  // Simplified: We just pass the code up. Actual validation & discount calculation 
+  // happens securely on the backend during the final checkout submission.
+  onApplied: (code: string) => void;
   appliedCode: string | null;
   onRemove: () => void;
 }
 
 export function CouponInput({
-  restaurantId,
-  subtotal,
   onApplied,
   appliedCode,
   onRemove,
 }: CouponInputProps) {
   const [code, setCode] = useState("");
+  const [error, setError] = useState("");
 
-  const mutation = useMutation({
-    mutationFn: () => validateCoupon({ restaurantId, code, subtotal }),
-    onSuccess: (data) => {
-      // TODO: confirm exact response shape via Swagger — assumed
-      // { valid, discountAmount, message }.
-      if (data?.valid !== false) {
-        onApplied(data?.discountAmount ?? 0, code);
-      }
-    },
-  });
-
+  // State when a coupon is successfully "applied" (locally)
   if (appliedCode) {
     return (
-      <div className="flex items-center justify-between bg-[#0F6B5C]/8 text-[#0F6B5C] text-sm px-3.5 py-2.5 rounded-xl">
+      <div className="flex items-center justify-between bg-[#0F6B5C]/10 text-[#0F6B5C] text-sm px-3.5 py-2.5 rounded-xl">
         <span className="flex items-center gap-2 font-medium">
           <Tag size={14} />
           {appliedCode} applied
         </span>
-        <button onClick={onRemove} aria-label="Remove coupon">
+        <button 
+          onClick={onRemove} 
+          aria-label="Remove coupon" 
+          className="hover:text-red-500 transition-colors"
+        >
           <X size={15} />
         </button>
       </div>
     );
   }
 
+  // State when entering a coupon
   return (
     <div>
       <div className="flex gap-2">
         <input
           value={code}
-          onChange={(e) => setCode(e.target.value.toUpperCase())}
+          onChange={(e) => {
+            setCode(e.target.value.toUpperCase());
+            setError("");
+          }}
           placeholder="Coupon code"
           className="flex-1 bg-white border border-[#E8E7E2] rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#E3A008]/40 focus:border-[#E3A008]"
         />
         <button
-          onClick={() => code && mutation.mutate()}
-          disabled={!code || mutation.isPending}
-          className="text-sm font-medium bg-[#17181C] text-white px-4 py-2.5 rounded-xl disabled:opacity-50"
+          onClick={() => {
+            if (!code.trim()) {
+              setError("Please enter a code");
+              return;
+            }
+            // No API call here. We trust the code for now and let the backend 
+            // validate it during the actual order creation to prevent abuse.
+            onApplied(code);
+          }}
+          className="text-sm font-medium bg-[#17181C] text-white px-4 py-2.5 rounded-xl hover:bg-[#2B2D33] transition-colors"
         >
-          {mutation.isPending ? "Checking…" : "Apply"}
+          Apply
         </button>
       </div>
-      {mutation.isError && (
-        <p className="text-xs text-red-600 mt-1.5">Couldn&apos;t validate this code.</p>
+      {error && (
+        <p className="text-xs text-red-600 mt-1.5">{error}</p>
       )}
-      {mutation.isSuccess && mutation.data?.valid === false && (
-        <p className="text-xs text-red-600 mt-1.5">
-          {mutation.data?.message ?? "This coupon isn't valid."}
-        </p>
-      )}
+      <p className="text-[11px] text-neutral-400 mt-1.5">
+        * Validity and discount will be verified when you place your order.
+      </p>
     </div>
   );
 }

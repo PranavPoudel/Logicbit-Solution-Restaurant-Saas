@@ -24,13 +24,18 @@ export class MenuItemService {
     return this.prisma.menuItem.create({ data: { ...dto, tenantId, restaurantId } });
   }
 
-  async findAll(tenantId: string, restaurantId: string, categoryId?: string) {
-    return this.prisma.menuItem.findMany({
-      where: { tenantId, restaurantId, deletedAt: null, ...(categoryId ? { categoryId } : {}) },
-      orderBy: { displayOrder: 'asc' },
-      include: { category: { select: { id: true, name: true } } },
-    });
-  }
+async findAll(tenantId: string, restaurantId: string, categoryId?: string, includeDeleted = false) {
+  return this.prisma.menuItem.findMany({
+    where: {
+      tenantId,
+      restaurantId,
+      categoryId: categoryId || undefined,
+      deletedAt: includeDeleted ? { not: null } : null, // Filters out soft-deleted unless requested
+    },
+    include: { category: true }, // or whatever relations you currently have
+    orderBy: { displayOrder: 'asc' },
+  });
+}
 
   async findOne(tenantId: string, restaurantId: string, id: string) {
     const item = await this.prisma.menuItem.findFirst({
@@ -60,9 +65,48 @@ export class MenuItemService {
   }
 
   /** Soft delete — order history integrity को लागि row मेटिँदैन */
-  async remove(tenantId: string, restaurantId: string, id: string) {
-    await this.findOne(tenantId, restaurantId, id);
-    await this.prisma.menuItem.updateMany({ where: { id, tenantId, restaurantId }, data: { deletedAt: new Date() } });
-    return { message: 'Menu item deleted successfully' };
+ async remove(tenantId: string, restaurantId: string, id: string) {
+  return this.prisma.menuItem.update({
+    where: { id, tenantId, restaurantId },
+    data: { deletedAt: new Date() },
+  });
+}
+async restore(tenantId: string, restaurantId: string, id: string) {
+  return this.prisma.menuItem.update({
+    where: { id, tenantId, restaurantId, deletedAt: { not: null } },
+    data: { deletedAt: null },
+  });
+}
+
+async permanentDelete(tenantId: string, restaurantId: string, id: string) {
+  return this.prisma.menuItem.delete({
+    where: { id, tenantId, restaurantId },
+  });
+}
+
+  async findDuplicates(tenantId: string, restaurantId: string) {
+    // 1. Fetch all active (non-deleted) menu items for this restaurant
+    const items = await this.prisma.menuItem.findMany({
+      where: { tenantId, restaurantId, deletedAt: null },
+      select: { 
+        id: true, 
+        name: true, 
+        price: true, 
+        image: true, 
+        createdAt: true, 
+        category: { select: { name: true } } 
+      },
+    });
+
+    // 2. Group them by name (case-insensitive)
+    const grouped = items.reduce((acc, item) => {
+      const key = item.name.trim().toLowerCase();
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(item);
+      return acc;
+    }, {} as Record<string, typeof items>);
+
+    // 3. Return only the groups that have more than 1 item (the actual duplicates)
+    return Object.values(grouped).filter((group) => group.length > 1);
   }
 }

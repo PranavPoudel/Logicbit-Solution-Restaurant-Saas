@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "title": "LogicBit",
+    "description": "近くのレストランから 음식을 주문하세요."
+  },
+  "header": {
+    "brandName": "LogicBit",
+    "location": "キルティプル, カトマンズ",
+    "forRestaurants": "店舗様向け",
+    "account": "アカウント",
+    "cart": "カート"
+  },
+  "home": {
+    "restaurantsNearYou": "近くのレストラン",
+    "restaurantsServingCuisine": "この料理を提供するレストラン",
+    "noRestaurantsFound": "レストランが見つかりません {cuisine, select, true {この料理の} other {近くにはまだ}}。",
+    "retry": "再試行",
+    "couldntLoad": "レストランを読み込めませんでした。バックエンドは localhost:3700 で実行されていますか？"
+  },
+    "cart": {
+    "emptyTitle": "カートは空です",
+    "emptyDesc": "美味しい料理をカートに追加してください。",
+    "browseRestaurants": "レストランを探す",
+    "title": "カート",
+    "subtotal": "小計",
+    "deliveryFee": "配達料",
+    "calculatedAtCheckout": "チェックアウト時に計算",
+    "baseTotal": "基本合計",
+    "proceedToCheckout": "チェックアウトへ進む"
+  },
+  "checkout": {
+    "title": "チェックアウト",
+    "emptyTitle": "カートは空です",
+    "emptyDesc": "チェックアウトする前に、カートにお好きなアイテムを追加してください。",
+    "browseRestaurants": "レストランを探す",
+    "delivery": "配達",
+    "pickup": "受け取り",
+    "deliveryAddress": "配達先住所",
+    "placeholders": {
+      "address": "配達先住所を詳しく入力してください...",
+      "coupon": "クーポンコードを入力"
+    },
+    "couponCode": "クーポンコード",
+    "apply": "適用",
+    "orderSummary": "注文概要",
+    "subtotal": "小計",
+    "deliveryFee": "配達料",
+    "total": "合計",
+    "placeOrder": "注文を確定する",
+    "processing": "処理中...",
+    "genericError": "注文の処理中にエラーが発生しました。もう一度お試しください。",
+    "errors": {
+      "addressRequired": "配達先住所は必須です。",
+      "emptyCart": "カートが空です。"
+    }
+  }
+}
+

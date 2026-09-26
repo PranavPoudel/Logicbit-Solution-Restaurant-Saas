@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsEnum, IsNumber, IsOptional, Min, IsDateString, IsInt, MaxLength } from 'class-validator';
+import { IsString, IsNotEmpty, IsEnum, IsNumber, IsOptional, Min, IsDateString, IsInt, MaxLength, IsBoolean } from 'class-validator';
 
 export enum CouponTypeDto {
   PERCENTAGE = 'PERCENTAGE',
@@ -7,9 +7,9 @@ export enum CouponTypeDto {
 
 export class CreateCouponDto {
   @IsString()
-  @IsNotEmpty()
+  @IsOptional() // 🆕 Made optional for Spend & Save
   @MaxLength(30)
-  code: string;
+  code?: string;
 
   @IsEnum(CouponTypeDto)
   type: CouponTypeDto;
@@ -45,4 +45,8 @@ export class CreateCouponDto {
   @IsDateString()
   @IsOptional()
   validUntil?: string;
+
+  @IsBoolean() // 🆕 Added
+  @IsOptional()
+  isAutoApply?: boolean;
 }

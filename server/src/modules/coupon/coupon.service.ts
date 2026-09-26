@@ -1,3 +1,4 @@
+// modules/coupon/coupons.service.ts
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateCouponDto } from './dto/create-coupon.dto';
@@ -10,8 +11,7 @@ export class CouponService {
 
   async create(tenantId: string, restaurantId: string, dto: CreateCouponDto) {
     const code = (dto.code || generateCouponCode()).toUpperCase();
-
-    const existing = await this.prisma.coupon.findFirst({ where: { tenantId, code } });
+    const existing = await this.prisma.coupon.findFirst({ where: { tenantId, code, deletedAt: null } });
     if (existing) throw new ConflictException(`Coupon code "${code}" already exists`);
 
     return this.prisma.coupon.create({
@@ -31,19 +31,26 @@ export class CouponService {
     });
   }
 
-  async findAll(tenantId: string, restaurantId: string) {
-    return this.prisma.coupon.findMany({ where: { tenantId, restaurantId }, orderBy: { createdAt: 'desc' } });
+  async findAll(tenantId: string, restaurantId: string, includeDeleted = false) {
+    return this.prisma.coupon.findMany({ 
+      where: { 
+        tenantId, 
+        restaurantId,
+        deletedAt: includeDeleted ? { not: null } : null,
+      }, 
+      orderBy: { createdAt: 'desc' } 
+    });
   }
 
   async findOne(tenantId: string, restaurantId: string, id: string) {
-    const coupon = await this.prisma.coupon.findFirst({ where: { id, tenantId, restaurantId } });
+    const coupon = await this.prisma.coupon.findFirst({ where: { id, tenantId, restaurantId, deletedAt: null } });
     if (!coupon) throw new NotFoundException('Coupon not found');
     return coupon;
   }
 
   async update(tenantId: string, restaurantId: string, id: string, dto: UpdateCouponDto) {
     await this.findOne(tenantId, restaurantId, id);
-    await this.prisma.coupon.updateMany({
+    await this.prisma.coupon.update({
       where: { id, tenantId, restaurantId },
       data: {
         ...dto,
@@ -57,61 +64,52 @@ export class CouponService {
 
   async remove(tenantId: string, restaurantId: string, id: string) {
     await this.findOne(tenantId, restaurantId, id);
-    await this.prisma.coupon.updateMany({ where: { id, tenantId, restaurantId }, data: { isActive: false } });
-    return { message: 'Coupon deactivated' };
+    return this.prisma.coupon.update({ 
+      where: { id, tenantId, restaurantId }, 
+      data: { deletedAt: new Date(), isActive: false } 
+    });
   }
 
-  /**
-   * validateAndCalculate()
-   * ------------------------
-   * Checkout को बेला customer ले coupon code apply गर्दा प्रयोग हुने core
-   * function। यसले coupon validity को हरेक rule जाँच्छ र discount amount
-   * फर्काउँछ। Order module ले यही function लाई call गर्छ — coupon logic
-   * यहीँ केन्द्रित छ, दोहोर्याइएको छैन।
-   */
+  async restore(tenantId: string, restaurantId: string, id: string) {
+    return this.prisma.coupon.update({
+      where: { id, tenantId, restaurantId, deletedAt: { not: null } },
+      data: { deletedAt: null, isActive: true },
+    });
+  }
+
+  async permanentDelete(tenantId: string, restaurantId: string, id: string) {
+    return this.prisma.coupon.delete({ where: { id, tenantId, restaurantId } });
+  }
+
   async validateAndCalculate(restaurantId: string, customerId: string, code: string, orderSubtotal: number) {
     const coupon = await this.prisma.coupon.findFirst({
-      where: {
-        code: code.toUpperCase(),
-        isActive: true,
-        OR: [{ restaurantId }, { restaurantId: null }],
-      },
+      where: { code: code.toUpperCase(), isActive: true, deletedAt: null, OR: [{ restaurantId }, { restaurantId: null }] },
     });
-
     if (!coupon) throw new NotFoundException('Invalid or expired coupon code');
 
     const now = new Date();
     if (coupon.validFrom > now) throw new BadRequestException('This coupon is not active yet');
     if (coupon.validUntil && coupon.validUntil < now) throw new BadRequestException('This coupon has expired');
-
     if (coupon.minOrderAmount && orderSubtotal < coupon.minOrderAmount) {
       throw new BadRequestException(`Minimum order amount for this coupon is ${coupon.minOrderAmount}`);
     }
-
     if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) {
       throw new BadRequestException('This coupon has reached its usage limit');
     }
-
     if (coupon.usageLimitPerCustomer) {
-      const customerUsageCount = await this.prisma.couponUsage.count({
-        where: { couponId: coupon.id, customerId },
-      });
+      const customerUsageCount = await this.prisma.couponUsage.count({ where: { couponId: coupon.id, customerId } });
       if (customerUsageCount >= coupon.usageLimitPerCustomer) {
         throw new BadRequestException('You have already used this coupon the maximum allowed times');
       }
     }
 
     let discount = coupon.type === 'PERCENTAGE' ? (orderSubtotal * coupon.value) / 100 : coupon.value;
-
-    if (coupon.maxDiscount && discount > coupon.maxDiscount) {
-      discount = coupon.maxDiscount;
-    }
+    if (coupon.maxDiscount && discount > coupon.maxDiscount) discount = coupon.maxDiscount;
     discount = Math.min(discount, orderSubtotal);
 
     return { coupon, discountAmount: Number(discount.toFixed(2)) };
   }
 
-  /** Order confirm भएपछि usage count बढाउने र CouponUsage log गर्ने */
   async recordUsage(couponId: string, customerId: string, orderId: string, discountAmount: number) {
     await this.prisma.$transaction([
       this.prisma.coupon.update({ where: { id: couponId }, data: { usedCount: { increment: 1 } } }),

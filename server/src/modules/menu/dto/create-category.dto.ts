@@ -1,3 +1,4 @@
+// modules/menu/dto/create-category.dto.ts
 import { IsString, IsNotEmpty, IsOptional, IsBoolean, IsInt, Min, MaxLength } from 'class-validator';
 
 export class CreateCategoryDto {
@@ -8,8 +9,18 @@ export class CreateCategoryDto {
 
   @IsString()
   @IsOptional()
+  @MaxLength(100)
+  nameJa?: string; // 🆕 Japanese Name
+
+  @IsString()
+  @IsOptional()
   @MaxLength(500)
   description?: string;
+
+  @IsString()
+  @IsOptional()
+  @MaxLength(500)
+  descriptionJa?: string; // 🆕 Japanese Description
 
   @IsString()
   @IsOptional()
@@ -18,6 +29,10 @@ export class CreateCategoryDto {
   @IsBoolean()
   @IsOptional()
   isFeatured?: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  isOnHomepage?: boolean; // 🆕 Show on homepage
 
   @IsBoolean()
   @IsOptional()

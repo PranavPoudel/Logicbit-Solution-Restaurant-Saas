@@ -1,3 +1,4 @@
+// components/layout/owner-sidebar.tsx
 "use client";
 
 import Link from "next/link";
@@ -14,12 +15,10 @@ import {
   Users,
   Bike,
   Settings,
-  Image as ImageIcon,
-  FileText,
-  Bell,
-  CreditCard,
-  type LucideIcon,
   BarChart3,
+  LayoutGrid,
+  Calendar,
+  type LucideIcon,
 } from "lucide-react";
 
 interface NavItem {
@@ -42,108 +41,103 @@ interface NavGroup {
 const navGroups: NavGroup[] = [
   {
     label: null,
-    items: [{ label: "Dashboard", href: "/dashboard", icon: LayoutDashboard }],
+    items: [{ label: "Dashboard", href: "/owner/dashboard", icon: LayoutDashboard }],
   },
   {
     label: "Operations",
     items: [
-      { label: "Orders", href: "/orders", icon: Package },
-      { label: "Menu", href: "/menu", icon: UtensilsCrossed },
-      { label: "Analytics", href: "/analytics", icon: BarChart3 }, 
-      
-      { 
-        label: "Storefront", 
-        href: "/storefront/banners", 
+      { label: "Orders", href: "/owner/orders", icon: Package },
+      { label: "Menu", href: "/owner/menu", icon: UtensilsCrossed },
+      { label: "Tables", href: "/owner/tables", icon: LayoutGrid }, 
+      { label: "Reservations", href: "/owner/reservations", icon: Calendar }, 
+      { label: "Analytics", href: "/owner/analytics", icon: BarChart3 },
+      {
+        label: "Storefront Builder",
+        href: "/owner/storefront/builder",
         icon: LayoutTemplate,
       },
-    ],
-    subItems: [
-      { label: "Banners", href: "/storefront/banners", icon: ImageIcon },
-      { label: "Configuration", href: "/storefront/config", icon: FileText },
-      { label: "Popups", href: "/storefront/popups", icon: Bell },
     ],
   },
   {
     label: "Growth",
     items: [
-      { label: "Coupons", href: "/coupons", icon: TicketPercent },
-      { label: "Advertising", href: "/advertising", icon: Megaphone },
-      { label: "Reviews", href: "/reviews", icon: Star },
+      { label: "Coupons", href: "/owner/coupons", icon: TicketPercent },
+      { label: "Advertising", href: "/owner/advertising", icon: Megaphone },
+      { label: "Reviews", href: "/owner/reviews", icon: Star },
     ],
   },
   {
     label: "Finance",
     items: [
-      { label: "Settlements", href: "/settlements", icon: Wallet },
-      { label: "Subscription", href: "/subscriptions", icon: CreditCard }, 
+      { label: "Settlements", href: "/owner/settlements", icon: Wallet },
+      { label: "Subscription", href: "/owner/subscriptions", icon: Wallet }, // Changed icon to Wallet or CreditCard as preferred
     ],
   },
   {
     label: "Team",
     items: [
-      { label: "Staff", href: "/staff", icon: Users },
-      { label: "Delivery Persons", href: "/delivery-persons", icon: Bike },
+      { label: "Staff", href: "/owner/staff", icon: Users },
+      { label: "Delivery Persons", href: "/owner/delivery-persons", icon: Bike },
     ],
   },
 ];
 
 export function OwnerSidebar() {
   const pathname = usePathname();
-
-  const isStorefrontActive = pathname?.startsWith("/storefront");
+  const isStorefrontActive = pathname?.startsWith("/owner/storefront");
 
   return (
-    <aside className="w-64 shrink-0 bg-[#1B2333] text-slate-300 flex flex-col h-full">
-      <div className="h-16 flex items-center gap-2 px-5 border-b border-white/10">
-        <div className="w-7 h-7 rounded-md bg-[#E3A008] flex items-center justify-center text-[#1B2333] font-bold text-sm">
+    <aside className="w-64 shrink-0 bg-[#111827] text-slate-300 flex flex-col h-full border-r border-white/5">
+      {/* Logo Area */}
+      <div className="h-16 flex items-center gap-2.5 px-5 border-b border-white/5">
+        <div className="w-8 h-8 rounded-lg bg-[#E3A008] flex items-center justify-center text-[#111827] font-bold text-base shadow-sm">
           L
         </div>
-        <span className="text-white font-semibold tracking-tight">
+        <span className="text-white font-semibold tracking-tight text-lg">
           LogicBit
         </span>
       </div>
 
-      <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-6">
+      {/* Navigation */}
+      <nav className="flex-1 overflow-y-auto py-5 px-3 space-y-6">
         {navGroups.map((group, i) => (
           <div key={i}>
             {group.label && (
-              <p className="px-3 mb-1.5 text-[11px] font-medium uppercase tracking-wider text-slate-500">
+              <p className="px-3 mb-2 text-[10px] font-bold uppercase tracking-widest text-slate-500">
                 {group.label}
               </p>
             )}
-            <ul className="space-y-0.5">
+            <ul className="space-y-1">
               {group.items.map((item) => {
                 const isActive = pathname?.startsWith(item.href);
                 const Icon = item.icon;
-                
-                // Check if this is the Storefront item and should show sub-items
-                const showSubItems = item.label === "Storefront" && isStorefrontActive;
-                
+                const showSubItems = item.label === "Storefront Builder" && isStorefrontActive;
+
                 return (
                   <li key={item.href}>
                     <Link
                       href={item.href}
-                      className={`flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors ${
+                      className={`flex items-center gap-3 px-3 py-2 rounded-r-md text-sm font-medium transition-all duration-200 border-l-2 ${
                         isActive
-                          ? "bg-white/10 text-white"
-                          : "text-slate-300 hover:bg-white/5 hover:text-white"
+                          ? "bg-white/5 text-white border-[#E3A008]"
+                          : "text-slate-400 hover:bg-white/5 hover:text-white border-transparent"
                       }`}
                     >
                       <Icon
-                        size={17}
-                        className={isActive ? "text-[#E3A008]" : ""}
+                        size={18}
+                        className={isActive ? "text-[#E3A008]" : "text-slate-500"}
                       />
                       <span className="flex-1">{item.label}</span>
                       {item.badge ? (
-                        <span className="text-[11px] font-semibold bg-[#E3A008] text-[#1B2333] rounded-full px-1.5 py-0.5 min-w-[18px] text-center">
+                        <span className="text-[10px] font-bold bg-[#E3A008] text-[#111827] rounded-full px-1.5 py-0.5 min-w-[18px] text-center">
                           {item.badge}
                         </span>
                       ) : null}
                     </Link>
-                    
+
                     {/* Sub-navigation for Storefront */}
                     {showSubItems && group.subItems && (
-                      <ul className="ml-4 mt-1 space-y-0.5 border-l-2 border-white/10 pl-3">
+                      <ul className="ml-4 mt-1 space-y-0.5 border-l border-white/10 pl-3">
                         {group.subItems.map((subItem) => {
                           const isSubActive = pathname === subItem.href;
                           const SubIcon = subItem.icon;
@@ -151,10 +145,10 @@ export function OwnerSidebar() {
                             <li key={subItem.href}>
                               <Link
                                 href={subItem.href}
-                                className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs transition-colors ${
+                                className={`flex items-center gap-2.5 px-3 py-1.5 rounded-md text-xs transition-colors ${
                                   isSubActive
-                                    ? "bg-white/10 text-white"
-                                    : "text-slate-400 hover:bg-white/5 hover:text-white"
+                                    ? "bg-white/5 text-white"
+                                    : "text-slate-500 hover:bg-white/5 hover:text-slate-300"
                                 }`}
                               >
                                 <SubIcon size={14} />
@@ -173,16 +167,17 @@ export function OwnerSidebar() {
         ))}
       </nav>
 
-      <div className="border-t border-white/10 p-3">
+      {/* Settings Footer */}
+      <div className="border-t border-white/5 p-3 bg-[#0F172A]/50">
         <Link
-          href="/settings"
-          className={`flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors ${
-            pathname?.startsWith("/settings")
-              ? "bg-white/10 text-white"
-              : "text-slate-300 hover:bg-white/5 hover:text-white"
+          href="/owner/settings"
+          className={`flex items-center gap-3 px-3 py-2 rounded-r-md text-sm font-medium transition-all duration-200 border-l-2 ${
+            pathname?.startsWith("/owner/settings")
+              ? "bg-white/5 text-white border-[#E3A008]"
+              : "text-slate-400 hover:bg-white/5 hover:text-white border-transparent"
           }`}
         >
-          <Settings size={17} />
+          <Settings size={18} className={pathname?.startsWith("/owner/settings") ? "text-[#E3A008]" : "text-slate-500"} />
           Settings
         </Link>
       </div>
