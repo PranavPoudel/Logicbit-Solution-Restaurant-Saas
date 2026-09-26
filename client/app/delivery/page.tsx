@@ -1,362 +1,239 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import { useDeliveryAuthStore } from "@/store/delivery-auth-store";
 import {
-  toggleAvailability,
-  getAvailableDeliveries,
-  acceptDeliveryOrder,
-  updateMyLocation,
+  updateDeliveryLocation,
+  updateAvailability,
+  getAvailableOrders,
+  getMyDeliveries,
+  acceptOrder,
 } from "@/lib/api/delivery";
-interface DeliveryOrder {
-  id: string;
-  orderNumber?: string;
-  status: string;
-  totalAmount?: number;
-  createdAt?: string;
-  restaurant?: {
-    name?: string;
-    address?: string;
-    latitude?: number;
-    longitude?: number;
-  };
+
+const DeliveryMap = dynamic(() => import("@/components/delivery/DeliveryMap"), {
+  ssr: false,
+});
+
+const ACTIVE_STATUSES = ["accepted", "picked_up", "in_transit", "on_the_way"];
+
+function extractLatLng(obj: any): { latitude: number; longitude: number } | null {
+  if (!obj) return null;
+  const lat =
+    obj.latitude ?? obj.lat ?? obj?.restaurant?.latitude ?? obj?.restaurantLatitude;
+  const lng =
+    obj.longitude ?? obj.lng ?? obj?.restaurant?.longitude ?? obj?.restaurantLongitude;
+  if (typeof lat === "number" && typeof lng === "number") {
+    return { latitude: lat, longitude: lng };
+  }
+  return null;
 }
 
 export default function DeliveryDashboardPage() {
   const router = useRouter();
+  const accessToken = useDeliveryAuthStore((s) => s.accessToken);
+  const deliveryPerson = useDeliveryAuthStore((s) => s.deliveryPerson);
+  const logout = useDeliveryAuthStore((s) => s.logout);
 
-  const deliveryPerson = useDeliveryAuthStore(
-    (state) => state.deliveryPerson
-  );
-
-  const isAvailable = useDeliveryAuthStore(
-    (state) => state.isAvailable
-  );
-
-  const setAvailable = useDeliveryAuthStore(
-    (state) => state.setAvailable
-  );
-
-  const logout = useDeliveryAuthStore(
-    (state) => state.logout
-  );
-
-  const [deliveries, setDeliveries] = useState<DeliveryOrder[]>([]);
-  const [loadingDeliveries, setLoadingDeliveries] = useState(false);
-  const [acceptingOrderId, setAcceptingOrderId] = useState<string | null>(null);
+  const [isOnline, setIsOnline] = useState(false);
+  const [toggling, setToggling] = useState(false);
+  const [orders, setOrders] = useState<any[]>([]);
+  const [activeOrder, setActiveOrder] = useState<any | null>(null);
+  const [riderLocation, setRiderLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [accepting, setAccepting] = useState<string | null>(null);
   const [error, setError] = useState("");
 
-  async function loadAvailableDeliveries() {
-    try {
-      setLoadingDeliveries(true);
-      setError("");
-
-      const response = await getAvailableDeliveries();
-
-      const data = response?.data ?? response;
-
-      setDeliveries(Array.isArray(data) ? data : []);
-    } catch (err: any) {
-      console.error("Failed to load available deliveries:", err);
-
-      setError(
-        err?.response?.data?.message ||
-          "Failed to load available deliveries."
-      );
-    } finally {
-      setLoadingDeliveries(false);
-    }
-  }
+  const watchIdRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (isAvailable) {
-      loadAvailableDeliveries();
-    } else {
-      setDeliveries([]);
-    }
-  }, [isAvailable]);
+    if (!accessToken) router.push("/delivery/login");
+  }, [accessToken, router]);
 
-  async function updateRiderLocation() {
-  if (!navigator.geolocation) {
-    setError("Location is not supported by this browser.");
-    return false;
+  function startWatch() {
+    if (!navigator.geolocation) {
+      setError("Location not supported on this device/browser.");
+      return;
+    }
+    watchIdRef.current = navigator.geolocation.watchPosition(
+      (pos) => {
+        const loc = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
+        setRiderLocation(loc);
+        updateDeliveryLocation(loc).catch(() => {});
+      },
+      (err) => setError("Location error: " + err.message),
+      { enableHighAccuracy: true, maximumAge: 10000, timeout: 15000 }
+    );
   }
 
-  return new Promise<boolean>((resolve) => {
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        try {
-          await updateMyLocation(
-            position.coords.latitude,
-            position.coords.longitude
-          );
+  function stopWatch() {
+    if (watchIdRef.current !== null) {
+      navigator.geolocation.clearWatch(watchIdRef.current);
+      watchIdRef.current = null;
+    }
+  }
 
-          resolve(true);
-        } catch (err: any) {
-          console.error("Failed to update rider location:", err);
+  useEffect(() => stopWatch, []);
 
-          setError(
-            err?.response?.data?.message ||
-              "Failed to update your location."
-          );
-
-          resolve(false);
-        }
-      },
-      (error) => {
-        console.error("Location error:", error);
-
-        setError(
-          "Please allow location access to receive nearby deliveries."
+  // Restore active delivery + resume GPS on refresh
+  useEffect(() => {
+    if (!accessToken) return;
+    getMyDeliveries()
+      .then((data) => {
+        const list = Array.isArray(data) ? data : data?.orders ?? [];
+        const active = list.find((o: any) =>
+          ACTIVE_STATUSES.includes((o.status || "").toLowerCase())
         );
+        if (active) {
+          setActiveOrder(active);
+          setIsOnline(true);
+          startWatch();
+        }
+      })
+      .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accessToken]);
 
-        resolve(false);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 30000,
+  // Poll available deliveries while online and idle
+  useEffect(() => {
+    if (!isOnline || activeOrder) return;
+    let cancelled = false;
+
+    async function poll() {
+      try {
+        const data = await getAvailableOrders();
+        const list = Array.isArray(data) ? data : data?.orders ?? [];
+        if (!cancelled) setOrders(list);
+      } catch {
+        /* ignore transient poll errors */
       }
-    );
-  });
-}
-  async function handleToggleAvailability() {
-  const next = !isAvailable;
+    }
 
-  try {
+    poll();
+    const interval = setInterval(poll, 8000);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [isOnline, activeOrder]);
+
+  async function toggleOnline() {
+    setToggling(true);
     setError("");
-
-    if (next) {
-      const locationUpdated = await updateRiderLocation();
-
-      if (!locationUpdated) {
-        return;
-      }
-    }
-
-    await toggleAvailability(next);
-    setAvailable(next);
-
-    if (next) {
-      await loadAvailableDeliveries();
-    } else {
-      setDeliveries([]);
-    }
-  } catch (err: any) {
-    console.error("Failed to update availability:", err);
-
-    setError(
-      err?.response?.data?.message ||
-        "Failed to update availability."
-    );
-  }
-}
-
-  async function handleAcceptDelivery(orderId: string) {
     try {
-      setAcceptingOrderId(orderId);
-      setError("");
-
-      await acceptDeliveryOrder(orderId);
-
-      // Remove the accepted order from the available list
-      setDeliveries((current) =>
-        current.filter((delivery) => delivery.id !== orderId)
-      );
-
-      alert("Delivery accepted successfully!");
+      const next = !isOnline;
+      await updateAvailability(next);
+      setIsOnline(next);
+      if (next) {
+        startWatch();
+      } else {
+        stopWatch();
+        setRiderLocation(null);
+        setOrders([]);
+      }
     } catch (err: any) {
-      console.error("Failed to accept delivery:", err);
-
-      setError(
-        err?.response?.data?.message ||
-          "Failed to accept delivery."
-      );
+      setError(err?.response?.data?.message || "Could not update availability.");
     } finally {
-      setAcceptingOrderId(null);
+      setToggling(false);
     }
   }
 
-  function handleLogout() {
-    logout();
-    router.push("/delivery/login");
+  async function handleAccept(orderId: string) {
+    setAccepting(orderId);
+    setError("");
+    try {
+      const updated = await acceptOrder(orderId);
+      setActiveOrder(updated);
+      setOrders((prev) => prev.filter((o) => o.id !== orderId));
+      if (watchIdRef.current === null) startWatch();
+    } catch (err: any) {
+      setError(err?.response?.data?.message || "Could not accept this delivery.");
+    } finally {
+      setAccepting(null);
+    }
   }
+
+  const restaurantLocation = extractLatLng(activeOrder?.restaurant ?? activeOrder);
 
   return (
     <main className="min-h-screen bg-gray-50 px-4 py-8">
-      <div className="mx-auto max-w-4xl">
-
-        {/* Header */}
-        <div className="mb-8 flex items-center justify-between">
+      <div className="mx-auto max-w-2xl space-y-6">
+        <div className="flex items-center justify-between rounded-2xl bg-white p-5 shadow">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
-              Rider Dashboard
+            <h1 className="text-xl font-bold text-gray-900">
+              {deliveryPerson?.name ? `Hi, ${deliveryPerson.name}` : "Rider Dashboard"}
             </h1>
-
-            <p className="mt-1 text-gray-500">
-              Welcome, {deliveryPerson?.name || "Rider"}
+            <p className="text-sm text-gray-500">
+              {isOnline ? "You're online" : "You're offline"}
             </p>
           </div>
-
           <button
-            onClick={handleLogout}
-            className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
+            onClick={toggleOnline}
+            disabled={toggling}
+            className={`rounded-full px-5 py-2 font-medium text-white transition disabled:opacity-60 ${
+              isOnline ? "bg-red-500 hover:bg-red-600" : "bg-green-600 hover:bg-green-700"
+            }`}
           >
-            Logout
+            {toggling ? "..." : isOnline ? "Go Offline" : "Go Online"}
           </button>
         </div>
 
-        {/* Availability */}
-        <div className="rounded-2xl bg-white p-6 shadow-sm">
-
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900">
-                Availability
-              </h2>
-
-              <p className="mt-1 text-sm text-gray-500">
-                Turn this on when you are ready to receive deliveries.
-              </p>
-            </div>
-
-            <button
-              onClick={handleToggleAvailability}
-              className={`rounded-full px-5 py-2 font-medium ${
-                isAvailable
-                  ? "bg-green-600 text-white"
-                  : "bg-gray-300 text-gray-700"
-              }`}
-            >
-              {isAvailable ? "Online" : "Offline"}
-            </button>
-          </div>
-
-        </div>
-
-        {/* Error */}
         {error && (
-          <div className="mt-6 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
-            {error}
+          <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">{error}</div>
+        )}
+
+        {activeOrder ? (
+          <div className="space-y-4 rounded-2xl bg-white p-5 shadow">
+            <h2 className="text-lg font-semibold text-gray-900">Active Delivery</h2>
+            <div className="text-sm text-gray-600">
+              <p>Order: {activeOrder.orderNumber || activeOrder.id}</p>
+              {activeOrder.restaurant?.name && <p>Pickup: {activeOrder.restaurant.name}</p>}
+              {activeOrder.deliveryAddress && <p>Deliver to: {activeOrder.deliveryAddress}</p>}
+            </div>
+            <DeliveryMap riderLocation={riderLocation} restaurantLocation={restaurantLocation} />
+          </div>
+        ) : (
+          <div className="rounded-2xl bg-white p-5 shadow">
+            <h2 className="mb-4 text-lg font-semibold text-gray-900">Available Deliveries</h2>
+            {!isOnline ? (
+              <p className="text-sm text-gray-500">Go online to see available deliveries.</p>
+            ) : orders.length === 0 ? (
+              <p className="text-sm text-gray-500">No deliveries available right now.</p>
+            ) : (
+              <ul className="space-y-3">
+                {orders.map((order) => (
+                  <li
+                    key={order.id}
+                    className="flex items-center justify-between rounded-lg border border-gray-200 p-3"
+                  >
+                    <div className="text-sm">
+                      <p className="font-medium text-gray-900">
+                        {order.orderNumber || order.id}
+                      </p>
+                      {order.restaurant?.name && (
+                        <p className="text-gray-500">{order.restaurant.name}</p>
+                      )}
+                      {order.deliveryAddress && (
+                        <p className="text-gray-500">{order.deliveryAddress}</p>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => handleAccept(order.id)}
+                      disabled={accepting === order.id}
+                      className="rounded-lg bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-60"
+                    >
+                      {accepting === order.id ? "..." : "Accept"}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         )}
 
-        {/* Available Deliveries */}
-        <div className="mt-6 rounded-2xl bg-white p-6 shadow-sm">
-
-          <div className="mb-5 flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900">
-                Available Deliveries
-              </h2>
-
-              <p className="mt-1 text-sm text-gray-500">
-                {isAvailable
-                  ? "Orders available for you to accept."
-                  : "Go online to see available deliveries."}
-              </p>
-            </div>
-
-            {isAvailable && (
-              <button
-                onClick={loadAvailableDeliveries}
-                className="rounded-lg border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50"
-              >
-                Refresh
-              </button>
-            )}
-          </div>
-
-          {!isAvailable ? (
-            <div className="rounded-lg bg-gray-50 p-6 text-center text-sm text-gray-500">
-              You are currently offline.
-              <br />
-              Turn your availability to <strong>Online</strong> to receive
-              deliveries.
-            </div>
-          ) : loadingDeliveries ? (
-            <div className="py-8 text-center text-sm text-gray-500">
-              Loading available deliveries...
-            </div>
-          ) : deliveries.length === 0 ? (
-            <div className="rounded-lg bg-gray-50 p-6 text-center text-sm text-gray-500">
-              No available deliveries right now.
-            </div>
-          ) : (
-            <div className="space-y-4">
-
-              {deliveries.map((delivery) => (
-                <div
-                  key={delivery.id}
-                  className="rounded-xl border border-gray-200 p-5"
-                >
-
-                  <div className="flex items-start justify-between gap-4">
-
-                    <div>
-                      <h3 className="font-semibold text-gray-900">
-                        {delivery.orderNumber
-                          ? `Order #${delivery.orderNumber}`
-                          : `Order ${delivery.id.slice(0, 8)}`}
-                      </h3>
-
-                      <p className="mt-1 text-sm text-gray-500">
-                        Status: {delivery.status}
-                      </p>
-                    </div>
-
-                    <button
-                      onClick={() =>
-                        handleAcceptDelivery(delivery.id)
-                      }
-                      disabled={acceptingOrderId === delivery.id}
-                      className="rounded-lg bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      {acceptingOrderId === delivery.id
-                        ? "Accepting..."
-                        : "Accept"}
-                    </button>
-
-                  </div>
-
-                  {delivery.restaurant && (
-                    <div className="mt-4 rounded-lg bg-gray-50 p-4">
-
-                      <p className="font-medium text-gray-900">
-                        {delivery.restaurant.name || "Restaurant"}
-                      </p>
-
-                      {delivery.restaurant.address && (
-                        <p className="mt-1 text-sm text-gray-500">
-                          📍 {delivery.restaurant.address}
-                        </p>
-                      )}
-
-                    </div>
-                  )}
-
-                </div>
-              ))}
-
-            </div>
-          )}
-
-        </div>
-
-        {/* Active Delivery */}
-        <div className="mt-6 rounded-2xl bg-white p-6 shadow-sm">
-
-          <h2 className="text-xl font-semibold text-gray-900">
-            Active Delivery
-          </h2>
-
-          <p className="mt-2 text-sm text-gray-500">
-            Your accepted delivery and map will appear here.
-          </p>
-
-        </div>
-
+        <button onClick={logout} className="text-sm text-gray-400 hover:underline">
+          Log out
+        </button>
       </div>
     </main>
   );
