@@ -85,4 +85,10 @@ export class DeliveryController {
   updateLocation(@Req() req, @Body() dto: UpdateLocationDto) {
     return this.deliveryService.updateLocation(req.user.id, dto);
   }
+
+  @Patch('availability')
+  updateAvailability(@Req() req, @Body() dto: { isAvailable: boolean }) {
+    return this.deliveryService.updateAvailability(req.user.id, dto.isAvailable);
+  }
 }
+

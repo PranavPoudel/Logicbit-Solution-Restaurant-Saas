@@ -1,12 +1,13 @@
-// store/delivery-auth-store.ts
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 export interface DeliveryPersonProfile {
   id: string;
-  fullName: string;
-  email: string;
-  phone?: string;
+  name: string;
+  phone: string;
+  vehicleType?: string;
+  isAvailable?: boolean;
+  isActive?: boolean;
 }
 
 interface DeliveryAuthState {
@@ -21,6 +22,7 @@ interface DeliveryAuthState {
     refreshToken?: string;
     deliveryPerson: DeliveryPersonProfile;
   }) => void;
+
   setAccessToken: (accessToken: string) => void;
   setAvailable: (isAvailable: boolean) => void;
   logout: () => void;
@@ -35,10 +37,23 @@ export const useDeliveryAuthStore = create<DeliveryAuthState>()(
       isAuthenticated: false,
       isAvailable: false,
 
-      setAuth: ({ accessToken, refreshToken = null, deliveryPerson }) =>
-        set({ accessToken, refreshToken, deliveryPerson, isAuthenticated: true }),
+      setAuth: ({
+        accessToken,
+        refreshToken = null,
+        deliveryPerson,
+      }) =>
+        set({
+          accessToken,
+          refreshToken,
+          deliveryPerson,
+          isAuthenticated: true,
+          isAvailable: deliveryPerson.isAvailable ?? false,
+        }),
+
       setAccessToken: (accessToken) => set({ accessToken }),
+
       setAvailable: (isAvailable) => set({ isAvailable }),
+
       logout: () =>
         set({
           accessToken: null,
@@ -48,6 +63,8 @@ export const useDeliveryAuthStore = create<DeliveryAuthState>()(
           isAvailable: false,
         }),
     }),
-    { name: "logicbit-delivery-auth" }
+    {
+      name: "logicbit-delivery-auth",
+    }
   )
 );

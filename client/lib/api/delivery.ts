@@ -1,9 +1,49 @@
-// lib/api/delivery.ts — Module 13: Delivery (rider portal actions)
+// lib/api/delivery.ts — Rider delivery operations
 import { deliveryApiClient } from "@/lib/api/delivery-client";
 
-export async function getAvailableDeliveries() {
+export interface UpdateLocationInput {
+  latitude: number;
+  longitude: number;
+}
+
+export async function updateDeliveryLocation(input: UpdateLocationInput) {
+  const { data } = await deliveryApiClient.patch("/delivery/location", input);
+  return data;
+}
+
+export async function updateMyLocation(
+  latitude: number,
+  longitude: number
+) {
+  const { data } = await deliveryApiClient.patch("/delivery/location", {
+    latitude,
+    longitude,
+  });
+
+  return data;
+}
+
+export async function updateAvailability(isAvailable: boolean) {
+  const { data } = await deliveryApiClient.patch("/delivery/availability", {
+    isAvailable,
+  });
+  return data;
+}
+
+export async function toggleAvailability(isAvailable: boolean) {
+  const { data } = await deliveryApiClient.patch("/delivery/availability", {
+    isAvailable,
+  });
+  return data;
+}
+
+export async function getAvailableOrders() {
   const { data } = await deliveryApiClient.get("/delivery/orders/available");
   return data;
+}
+
+export async function getAvailableDeliveries() {
+  return getAvailableOrders();
 }
 
 export async function getMyDeliveries() {
@@ -11,32 +51,20 @@ export async function getMyDeliveries() {
   return data;
 }
 
-export async function getMyEarnings() {
-  const { data } = await deliveryApiClient.get("/delivery/earnings");
+export async function acceptOrder(orderId: string) {
+  const { data } = await deliveryApiClient.patch(
+    `/delivery/orders/${orderId}/accept`
+  );
   return data;
 }
 
 export async function acceptDeliveryOrder(orderId: string) {
-  const { data } = await deliveryApiClient.patch(`/delivery/orders/${orderId}/accept`);
-  return data;
+  return acceptOrder(orderId);
 }
 
-export async function rejectDeliveryOrder(orderId: string) {
-  const { data } = await deliveryApiClient.patch(`/delivery/orders/${orderId}/reject`);
-  return data;
-}
-
-export async function updateDeliveryOrderStatus(
-  orderId: string,
-  status: "PICKED_UP" | "ON_THE_WAY" | "DELIVERED"
-) {
-  const { data } = await deliveryApiClient.patch(`/delivery/orders/${orderId}/status`, {
-    status,
-  });
-  return data;
-}
-
-export async function updateMyLocation(lat: number, lng: number) {
-  const { data } = await deliveryApiClient.patch("/delivery/location", { lat, lng });
+export async function rejectOrder(orderId: string) {
+  const { data } = await deliveryApiClient.patch(
+    `/delivery/orders/${orderId}/reject`
+  );
   return data;
 }

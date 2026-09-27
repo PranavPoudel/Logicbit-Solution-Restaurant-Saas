@@ -34,15 +34,17 @@ export const useOwnerAuthStore = create<OwnerAuthState>()(
       isAuthenticated: false,
 
       setAuth: ({ accessToken, refreshToken, user, restaurants = [] }) =>
-        set({
-          accessToken,
-          refreshToken,
-          user,
-          restaurants,
-          isAuthenticated: true,
-          // default to first restaurant unless one is already selected
-          activeRestaurantId: get().activeRestaurantId ?? restaurants[0]?.id ?? null,
-        }),
+  set({
+    accessToken,
+    refreshToken,
+    user,
+    restaurants,
+    isAuthenticated: true,
+    activeRestaurantId:
+      restaurants.some((r) => r.id === get().activeRestaurantId)
+        ? get().activeRestaurantId
+        : restaurants[0]?.id ?? null,
+  }),
 
       setAccessToken: (accessToken) => set({ accessToken }),
 
