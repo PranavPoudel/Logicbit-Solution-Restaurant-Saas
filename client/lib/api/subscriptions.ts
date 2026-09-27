@@ -29,6 +29,15 @@ export interface SubscriptionPlanInput {
   [key: string]: unknown;
 }
 
+export interface SubscriptionPlan {
+  id: string;
+  name: string;
+  priceMonthly: number;  
+  isActive: boolean;
+  features?: string[];
+  durationDays?: number;
+}
+
 export async function createSubscriptionPlan(input: SubscriptionPlanInput) {
   const { data } = await platformApiClient.post("/platform-admin/subscriptions/plans", input);
   return data;
