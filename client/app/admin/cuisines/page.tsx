@@ -1,19 +1,29 @@
 "use client";
+
 import { useEffect, useState, FormEvent } from "react";
-import { platformApiClient } from "@/lib/api/platform-client";
+import { 
+  getPlatformCuisines, 
+  createCuisine, 
+  deleteCuisine, 
+  updateCuisine, 
+  Cuisine 
+} from "@/lib/api/cuisines";
 
 export default function CuisinesPage() {
-  const [cuisines, setCuisines] = useState<any[]>([]);
+  const [cuisines, setCuisines] = useState<Cuisine[]>([]);
   const [loading, setLoading] = useState(true);
   const [newCuisine, setNewCuisine] = useState("");
   const [isAdding, setIsAdding] = useState(false);
 
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
+  const [isUpdating, setIsUpdating] = useState(false);
+
   const loadCuisines = async () => {
     try {
       setLoading(true);
-      const { data } = await platformApiClient.get("/platform-admin/cuisines");
-      
-      setCuisines(data?.data || data || []);
+      const data = await getPlatformCuisines();
+      setCuisines(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Failed to load cuisines", err);
     } finally {
@@ -29,37 +39,42 @@ export default function CuisinesPage() {
     e.preventDefault();
     if (!newCuisine.trim()) return;
 
-    const generatedSlug = newCuisine
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-") 
-      .replace(/^-+|-+$/g, "");   
-
     try {
       setIsAdding(true);
-      await platformApiClient.post("/platform-admin/cuisines", {
-        name: newCuisine.trim(),
-        slug: generatedSlug,
-        isActive: true, 
-      });
+      await createCuisine({ name: newCuisine.trim() });
       setNewCuisine("");
-      loadCuisines();    
+      await loadCuisines();    
     } catch (err: any) {
       const errorMsg = Array.isArray(err?.response?.data?.message) 
         ? err.response.data.message[0] 
         : err?.response?.data?.message;
-        
       alert(errorMsg || "Failed to create cuisine");
     } finally {
       setIsAdding(false);
     }
   };
+
+  const handleUpdate = async (id: string) => {
+    if (!editName.trim()) return;
+    
+    try {
+      setIsUpdating(true);
+      await updateCuisine(id, { name: editName.trim() });
+      setEditingId(null);
+      await loadCuisines();
+    } catch (err: any) {
+      alert(err?.response?.data?.message || "Failed to update cuisine");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   const handleDelete = async (id: string, name: string) => {
     if (!window.confirm(`Are you sure you want to delete "${name}"?`)) return;
 
     try {
-      await platformApiClient.delete(`/platform-admin/cuisines/${id}`);
-      loadCuisines(); // Refresh the list
+      await deleteCuisine(id);
+      await loadCuisines(); 
     } catch (err: any) {
       alert(err?.response?.data?.message || "Failed to delete cuisine");
     }
@@ -73,7 +88,6 @@ export default function CuisinesPage() {
           <p className="text-sm text-gray-500 mt-1">Manage food categories for restaurants</p>
         </div>
 
-        {/* Inline Create Form */}
         <form onSubmit={handleCreate} className="flex gap-2">
           <input
             type="text"
@@ -94,13 +108,13 @@ export default function CuisinesPage() {
       </div>
 
       {loading ? (
-        <p className="text-gray-500">Loading cuisines...</p>
+        <div className="text-gray-500 animate-pulse">Loading cuisines...</div>
       ) : (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-200 text-sm">
-                <th className="p-4 font-semibold text-gray-600">ID</th>
+                <th className="p-4 font-semibold text-gray-600 w-32">ID</th>
                 <th className="p-4 font-semibold text-gray-600">Name</th>
                 <th className="p-4 font-semibold text-gray-600 text-right">Actions</th>
               </tr>
@@ -116,19 +130,61 @@ export default function CuisinesPage() {
                 cuisines.map((cuisine) => (
                   <tr key={cuisine.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
                     <td className="p-4 text-sm text-gray-500 font-mono">
-                      {/* Truncating ID to make it look cleaner in the UI */}
                       {cuisine.id.slice(0, 8)}...
                     </td>
+                    
                     <td className="p-4 text-sm font-medium text-gray-900">
-                      {cuisine.name}
+                      {editingId === cuisine.id ? (
+                        <input
+                          autoFocus
+                          type="text"
+                          value={editName}
+                          onChange={(e) => setEditName(e.target.value)}
+                          className="px-3 py-1.5 border border-blue-400 rounded-md outline-none focus:ring-2 focus:ring-blue-200 text-sm w-full max-w-xs"
+                          onKeyDown={(e) => e.key === 'Enter' && handleUpdate(cuisine.id)}
+                        />
+                      ) : (
+                        cuisine.name
+                      )}
                     </td>
+                    
                     <td className="p-4 text-right space-x-2">
-                      <button
-                        onClick={() => handleDelete(cuisine.id, cuisine.name)}
-                        className="text-sm bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 font-medium px-3 py-1.5 rounded-md transition-colors"
-                      >
-                        Delete
-                      </button>
+                      {editingId === cuisine.id ? (
+                        <>
+                          <button
+                            onClick={() => handleUpdate(cuisine.id)}
+                            disabled={isUpdating}
+                            className="text-sm bg-green-50 text-green-700 hover:bg-green-100 font-medium px-3 py-1.5 rounded-md transition-colors disabled:opacity-50"
+                          >
+                            Save
+                          </button>
+                          <button
+                            onClick={() => setEditingId(null)}
+                            disabled={isUpdating}
+                            className="text-sm bg-gray-100 text-gray-600 hover:bg-gray-200 font-medium px-3 py-1.5 rounded-md transition-colors"
+                          >
+                            Cancel
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => {
+                              setEditingId(cuisine.id);
+                              setEditName(cuisine.name);
+                            }}
+                            className="text-sm bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 font-medium px-3 py-1.5 rounded-md transition-colors"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDelete(cuisine.id, cuisine.name)}
+                            className="text-sm bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 font-medium px-3 py-1.5 rounded-md transition-colors"
+                          >
+                            Delete
+                          </button>
+                        </>
+                      )}
                     </td>
                   </tr>
                 ))
