@@ -101,7 +101,7 @@ export default function OrdersPage() {
         <AlertTriangle className="text-neutral-300" size={28} />
         <p className="text-sm text-red-500">
   Couldn&apos;t load orders:{" "}
-  {String((ordersQuery.error as any)?.response?.data?.message || ordersQuery.error)}
+  {String((allOrdersQuery.error as any)?.response?.data?.message || allOrdersQuery.error)}
 </p>
       </div>
     );
