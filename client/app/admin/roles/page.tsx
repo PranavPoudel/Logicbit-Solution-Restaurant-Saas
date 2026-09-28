@@ -65,9 +65,12 @@ export default function RolesPage() {
                     <td className="p-4">
                       <div className="flex flex-wrap gap-2">
                         {role.permissions?.length > 0 ? (
-                          role.permissions.map(p => (
-                            <span key={p.id} className="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-md border border-blue-100">
-                              {p.name}
+                          role.permissions.map((p: any, idx) => (
+                            <span 
+                              key={p.id || idx} 
+                              className="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-md border border-blue-100"
+                            >
+                              {p.permission?.name || p.name || "Unknown"}
                             </span>
                           ))
                         ) : (

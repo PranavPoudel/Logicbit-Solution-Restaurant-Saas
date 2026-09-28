@@ -1,9 +1,16 @@
-import { IsString, IsNotEmpty, IsOptional, IsEmail, MinLength, IsUUID, IsBoolean } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { IsString, IsNotEmpty, IsOptional, IsEmail, MinLength, IsUUID, IsBoolean, IsArray } from 'class-validator';
 
 export class CreatePlatformRoleDto {
   @IsString()
   @IsNotEmpty()
   name: string;
+
+  @ApiPropertyOptional({ type: [String] })
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  permissionIds?: string[];
 }
 
 export class CreatePlatformStaffDto {
