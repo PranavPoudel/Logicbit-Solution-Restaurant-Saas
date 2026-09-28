@@ -85,12 +85,12 @@ export default function StaffPage() {
                     </td>
                     <td className="p-4 text-sm text-gray-600">
                       {staff.role ? (
-                        <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-md border border-gray-200">
-                          {staff.role.name}
-                        </span>
-                      ) : (
-                        <span className="text-gray-400 italic text-xs">No role</span>
-                      )}
+                          <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-md border border-gray-200">
+                            {typeof staff.role === "string" ? staff.role : (staff.role as any).name || "Unknown Role"}
+                          </span>
+                        ) : (
+                          <span className="text-gray-400 italic text-xs">No role</span>
+                        )}
                     </td>
                     <td className="p-4">
                       <span className={`px-2 py-1 text-xs font-medium rounded-full ${
