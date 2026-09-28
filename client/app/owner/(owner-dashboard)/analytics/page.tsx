@@ -1,3 +1,5 @@
+// owner-dashboard/analytics/page.tsx
+// This is the analytics page for the owner dashboard. It displays various statistics and charts related to the restaurant's performance.
 "use client";
 
 import { useQuery } from "@tanstack/react-query";

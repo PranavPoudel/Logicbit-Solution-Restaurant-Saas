@@ -1,3 +1,4 @@
+//src/modules/analytics/analytics.controller.ts
 import { Controller, Get, Param, UseGuards, Req } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
