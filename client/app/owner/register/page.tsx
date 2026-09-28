@@ -1,3 +1,4 @@
+// app/owner/register/page.tsx
 "use client";
 
 import { useState } from "react";
@@ -34,23 +35,33 @@ export default function OwnerRegisterPage() {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setIsLoading(true);
 
     try {
+      // Because of the interceptor, 'response' is likely the unwrapped inner data
       const response = await registerOwner(formData);
-        
-      if (response.success && response.data?.tokens) {
-        // ✅ FIX: Pass a single object matching your Zustand store's expected shape
+      
+      // DEBUG: Uncomment this temporarily to see the exact shape in your browser console
+      // console.log("Registration Response:", response);
+
+      // Check for tokens directly on the response, or fallback to response.data if the interceptor behaves differently
+      const tokens = response.tokens || response.data?.tokens;
+      const user = response.user || response.data?.user;
+      const restaurants = response.restaurants || response.data?.restaurants || [];
+
+      if (tokens && user) {
         setAuth({
-          accessToken: response.data.tokens.accessToken,
-          refreshToken: response.data.tokens.refreshToken,
-          user: response.data.user,
-          restaurants: response.data.restaurants || [], 
+          accessToken: tokens.accessToken,
+          refreshToken: tokens.refreshToken,
+          user: user,
+          restaurants: restaurants, 
         });
         
+        // Use window.location for a hard redirect if next/navigation is being stubborn, 
+        // but router.push should work if the store updates correctly.
         router.push("/owner/dashboard"); 
       } else {
         setError(response.message || "Registration failed. Please try again.");
@@ -58,7 +69,7 @@ export default function OwnerRegisterPage() {
     } catch (err: any) {
       const errorMsg = err.response?.data?.message 
         ? (Array.isArray(err.response.data.message) ? err.response.data.message.join(", ") : err.response.data.message)
-        : "An unexpected error occurred. Please check your connection.";
+        : err.message || "An unexpected error occurred. Please check your connection.";
       setError(errorMsg);
     } finally {
       setIsLoading(false);
