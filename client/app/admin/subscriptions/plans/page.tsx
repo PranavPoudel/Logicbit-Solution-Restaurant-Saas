@@ -49,7 +49,7 @@ export default function PlansPage() {
               <tr className="bg-gray-50 border-b border-gray-200 text-sm">
                 <th className="p-4 font-semibold text-gray-600">Plan Name</th>
                 <th className="p-4 font-semibold text-gray-600">Monthly Price</th>
-                <th className="p-4 font-semibold text-gray-600">Duration (Days)</th>
+                <th className="p-4 font-semibold text-gray-600">Duration (Months)</th>
                 <th className="p-4 font-semibold text-gray-600">Status</th>
               </tr>
             </thead>
@@ -68,10 +68,10 @@ export default function PlansPage() {
                     </td>
                     <td className="p-4 text-sm text-gray-600">
                 
-                      ${Number(plan.priceMonthly || 0).toFixed(2)}
+                      Rs. {Number(plan.price || 0).toFixed(2)}
                     </td>
                     <td className="p-4 text-sm text-gray-600">
-                      {plan.durationDays || "30 (Default)"}
+                      {plan.durationMonths || "30 (Default)"}
                     </td>
                     <td className="p-4">
                       <span className={`px-2 py-1 text-xs font-medium rounded-full ${

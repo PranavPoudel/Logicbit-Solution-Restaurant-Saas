@@ -10,25 +10,27 @@ export default function CreatePlanPage() {
   
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
-  const [durationDays, setDurationDays] = useState("30");
+  const [durationMonths, setDurationMonths] = useState("1");  
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !price || !durationDays) return;
-
+    setIsSubmitting(true);
+    
     try {
-      setIsSubmitting(true);
-      await createSubscriptionPlan({
-        name: name.trim(),
-        priceMonthly: parseFloat(price), 
-        durationDays: parseInt(durationDays, 10),
-      });
-      router.push("/admin/subscriptions/plans");
-      router.refresh();
-    } catch (err: any) {
-      const msg = err?.response?.data?.message || "Failed to create plan";
-      alert(Array.isArray(msg) ? msg[0] : msg);
+   
+      const payload = {
+        name: name,
+        price: Number(price), 
+        durationMonths: Number(durationMonths),
+      };
+
+      await createSubscriptionPlan(payload);
+      alert("Plan created successfully!");
+      router.push("/admin/subscriptions/plans"); 
+    } catch (error) {
+      console.error("Failed to create plan:", error);
+      alert("Failed to create plan.");
     } finally {
       setIsSubmitting(false);
     }
@@ -61,7 +63,7 @@ export default function CreatePlanPage() {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Monthly Price (USD) <span className="text-red-500">*</span>
+              Price (USD) <span className="text-red-500">*</span>
             </label>
             <input
               type="number"
@@ -77,16 +79,16 @@ export default function CreatePlanPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Duration (Days) <span className="text-red-500">*</span>
+              Duration (Months) <span className="text-red-500">*</span>
             </label>
             <input
               type="number"
               min="1"
               required
-              placeholder="30"
+              placeholder="1"
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm"
-              value={durationDays}
-              onChange={(e) => setDurationDays(e.target.value)}
+              value={durationMonths}
+              onChange={(e) => setDurationMonths(e.target.value)} // Updated setter
             />
           </div>
         </div>
@@ -100,7 +102,7 @@ export default function CreatePlanPage() {
           </Link>
           <button
             type="submit"
-            disabled={isSubmitting || !name.trim() || !price || !durationDays}
+            disabled={isSubmitting || !name.trim() || !price || !durationMonths}
             className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
           >
             {isSubmitting ? "Saving..." : "Save Plan"}

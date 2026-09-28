@@ -23,19 +23,18 @@
 
   // Platform — manage
   export interface SubscriptionPlanInput {
-    name: string;
-    priceMonthly: number;
-    features?: string[];
-    [key: string]: unknown;
-  }
+  name: string;
+  price: number;        
+  durationMonths: number;  
+  isActive?: boolean;
+}
 
   export interface SubscriptionPlan {
     id: string;
     name: string;
-    priceMonthly: number;  
+    price: number;           
+    durationMonths: number;  
     isActive: boolean;
-    features?: string[];
-    durationDays?: number;
   }
 
   export async function createSubscriptionPlan(input: SubscriptionPlanInput) {
