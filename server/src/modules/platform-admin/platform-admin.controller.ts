@@ -102,7 +102,7 @@ export class PlatformAdminController {
     return this.activityLogService.findAll(page ? Number(page) : undefined, limit ? Number(limit) : undefined);
   }
 
-  // NOTE: If you create a Refund module later, move these two endpoints there.
+ 
   @Get('refunds/pending')
   @RequirePlatformPermission('PROCESS_REFUNDS')
   listPendingRefunds() {

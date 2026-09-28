@@ -12,7 +12,7 @@ export default function PlansPage() {
     const loadPlans = async () => {
       try {
         const data = await listSubscriptionPlans();
-        // Make sure we extract the array properly if it's wrapped in { data: [...] }
+   
         const plansArray = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
         setPlans(plansArray);
       } catch (error) {
@@ -67,7 +67,7 @@ export default function PlansPage() {
                       {plan.name}
                     </td>
                     <td className="p-4 text-sm text-gray-600">
-                      {/* FIXED: Using priceMonthly instead of price */}
+                
                       ${Number(plan.priceMonthly || 0).toFixed(2)}
                     </td>
                     <td className="p-4 text-sm text-gray-600">

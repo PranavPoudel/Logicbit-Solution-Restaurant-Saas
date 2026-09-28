@@ -39,13 +39,13 @@ export interface SubscriptionPlan {
 }
 
 export async function createSubscriptionPlan(input: SubscriptionPlanInput) {
-  const { data } = await platformApiClient.post("/platform-admin/subscriptions/plans", input);
+  const { data } = await platformApiClient.post("platform-admin/subscriptions/plans", input);
   return data;
 }
 
 // Public — plan list is unauthenticated per the endpoint list
 export async function listSubscriptionPlans() {
-  const { data } = await apiClient.get("/platform-admin/subscriptions/plans");
+  const { data } = await apiClient.get("platform-admin/subscriptions/plans");
   return data;
 }
 
