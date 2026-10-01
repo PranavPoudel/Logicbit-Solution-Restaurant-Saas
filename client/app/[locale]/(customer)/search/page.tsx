@@ -13,6 +13,12 @@ export default function SearchPage() {
   const [allRestaurants, setAllRestaurants] = useState<DiscoveryRestaurant[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Read ?q=... from the link (coming from the homepage search)
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get("q");
+    if (q) setQuery(q);
+  }, []);
+
   useEffect(() => {
     // Default to Kirtipur coordinates used elsewhere on the site;
     // swap for real geolocation later if available.

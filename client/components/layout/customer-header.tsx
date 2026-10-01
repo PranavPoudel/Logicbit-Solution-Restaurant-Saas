@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { MapPin, ShoppingBag, ChevronDown, User, Store, Search } from "lucide-react";
+import { ShoppingBag, User, Store, Search } from "lucide-react";
 import { useCartStore } from "@/store/cart-store";
 
 export function CustomerHeader() {
@@ -27,13 +27,7 @@ export function CustomerHeader() {
           </span>
         </Link>
 
-        <button className="hidden sm:flex items-center gap-1.5 text-sm text-[#2B1410] hover:bg-[#2B1410]/5 px-3 py-1.5 rounded-full border border-[#2B1410]/10 transition-colors">
-          <MapPin size={14} className="text-[#C0392B]" />
-          {t('location')}
-          <ChevronDown size={13} className="text-[#2B1410]/40" />
-        </button>
-
-                <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-3 shrink-0">
           <Link
             href="/search"
             className="w-9 h-9 rounded-full border border-[#2B1410]/10 flex items-center justify-center text-[#2B1410] hover:bg-[#2B1410]/5 transition-colors"
@@ -64,7 +58,7 @@ export function CustomerHeader() {
           >
             <ShoppingBag size={16} />
             <span className="hidden sm:inline">{t('cart')}</span>
-            
+
             {mounted && itemCount > 0 && (
               <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-[#C0392B] text-[#FDF6EC] text-[11px] font-mono font-bold flex items-center justify-center">
                 {itemCount}
