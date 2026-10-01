@@ -1,9 +1,16 @@
+
 "use client";
 
 import { useEffect } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
+import {
+  MapContainer,
+  Marker,
+  Popup,
+  TileLayer,
+  useMap,
+} from "react-leaflet";
 
 interface Point {
   lat: number;
@@ -22,7 +29,32 @@ function pin(color: string, label: string) {
     iconSize: [34, 44],
     iconAnchor: [17, 42],
     popupAnchor: [0, -38],
-    html: `<div style="width:34px;height:34px;border-radius:50% 50% 50% 0;background:${color};transform:rotate(-45deg);border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center"><span style="transform:rotate(45deg);color:#fff;font:700 13px system-ui">${label}</span></div>`,
+    html: `
+      <div
+        style="
+          width:34px;
+          height:34px;
+          border-radius:50% 50% 50% 0;
+          background:${color};
+          transform:rotate(-45deg);
+          border:3px solid #fff;
+          box-shadow:0 2px 6px rgba(0,0,0,.35);
+          display:flex;
+          align-items:center;
+          justify-content:center;
+        "
+      >
+        <span
+          style="
+            transform:rotate(45deg);
+            color:#fff;
+            font:700 13px system-ui;
+          "
+        >
+          ${label}
+        </span>
+      </div>
+    `,
   });
 }
 
@@ -30,70 +62,144 @@ const restaurantIcon = pin("#17181C", "R");
 const customerIcon = pin("#DC2626", "D");
 const riderIcon = pin("#2563EB", "Me");
 
-// Fits the view to the order's own pins only, so live rider updates
-// don't keep resetting the map while the rider pans around.
-function FitBounds({ points }: { points: Point[] }) {
+function FitOrderBounds({
+  restaurant,
+  customer,
+}: {
+  restaurant?: Point | null;
+  customer?: Point | null;
+}) {
   const map = useMap();
-  const key = points.map((p) => `${p.lat.toFixed(5)},${p.lng.toFixed(5)}`).join("|");
+
+  const points: Point[] = [restaurant, customer].filter(
+    (point): point is Point =>
+      !!point &&
+      Number.isFinite(point.lat) &&
+      Number.isFinite(point.lng)
+  );
+
+  const key = points
+    .map((point) => `${point.lat.toFixed(6)},${point.lng.toFixed(6)}`)
+    .join("|");
 
   useEffect(() => {
     map.invalidateSize();
-    if (points.length === 1) {
-      map.setView([points[0].lat, points[0].lng], 15);
-    } else if (points.length > 1) {
-      map.fitBounds(
-        L.latLngBounds(points.map((p) => [p.lat, p.lng] as [number, number])),
-        { padding: [48, 48], maxZoom: 16 }
-      );
+
+    if (points.length === 0) {
+      return;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    if (points.length === 1) {
+      map.setView([points[0].lat, points[0].lng], 16);
+      return;
+    }
+
+    map.fitBounds(
+      L.latLngBounds(
+        points.map(
+          (point) => [point.lat, point.lng] as [number, number]
+        )
+      ),
+      {
+        padding: [50, 50],
+        maxZoom: 16,
+      }
+    );
   }, [map, key]);
 
   return null;
 }
 
-export default function OrderMap({ restaurant, customer, rider }: Props) {
-  const orderPoints: Point[] = [restaurant, customer].filter(
-    (p): p is NonNullable<typeof p> => !!p
-  );
-  const center: [number, number] = orderPoints[0]
-    ? [orderPoints[0].lat, orderPoints[0].lng]
-    : [27.7172, 85.324];
+export default function OrderMap({
+  restaurant,
+  customer,
+  rider,
+}: Props) {
+  const hasCustomer =
+    !!customer &&
+    Number.isFinite(customer.lat) &&
+    Number.isFinite(customer.lng);
+
+  const hasRestaurant =
+    !!restaurant &&
+    Number.isFinite(restaurant.lat) &&
+    Number.isFinite(restaurant.lng);
+
+  /*
+   * IMPORTANT:
+   * Customer delivery location gets priority.
+   *
+   * There is deliberately NO Kathmandu fallback here.
+   */
+  const center: [number, number] = hasCustomer
+    ? [customer!.lat, customer!.lng]
+    : hasRestaurant
+      ? [restaurant!.lat, restaurant!.lng]
+      : [0, 0];
 
   return (
-    <MapContainer center={center} zoom={14} scrollWheelZoom className="h-full w-full">
+    <MapContainer
+      center={center}
+      zoom={hasCustomer || hasRestaurant ? 15 : 2}
+      scrollWheelZoom
+      className="h-full w-full"
+    >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <FitBounds points={orderPoints} />
-      {restaurant && (
-        <Marker position={[restaurant.lat, restaurant.lng]} icon={restaurantIcon}>
+
+      <FitOrderBounds
+        restaurant={hasRestaurant ? restaurant : null}
+        customer={hasCustomer ? customer : null}
+      />
+
+      {hasRestaurant && (
+        <Marker
+          position={[restaurant!.lat, restaurant!.lng]}
+          icon={restaurantIcon}
+        >
           <Popup>
             <strong>Pickup</strong>
             <br />
-            {restaurant.name}
+            {restaurant!.name ?? "Restaurant"}
           </Popup>
         </Marker>
       )}
-      {customer && (
-        <Marker position={[customer.lat, customer.lng]} icon={customerIcon}>
+
+      {hasCustomer && (
+        <Marker
+          position={[customer!.lat, customer!.lng]}
+          icon={customerIcon}
+        >
           <Popup>
             <strong>Drop-off</strong>
-            {customer.address && (
+
+            {customer!.address && (
               <>
                 <br />
-                {customer.address}
+                {customer!.address}
               </>
             )}
+
+            <br />
+            <span>
+              {customer!.lat.toFixed(6)}, {customer!.lng.toFixed(6)}
+            </span>
           </Popup>
         </Marker>
       )}
-      {rider && (
-        <Marker position={[rider.lat, rider.lng]} icon={riderIcon}>
-          <Popup>You are here</Popup>
-        </Marker>
-      )}
+
+      {rider &&
+        Number.isFinite(rider.lat) &&
+        Number.isFinite(rider.lng) && (
+          <Marker
+            position={[rider.lat, rider.lng]}
+            icon={riderIcon}
+          >
+            <Popup>You are here</Popup>
+          </Marker>
+        )}
     </MapContainer>
   );
 }
