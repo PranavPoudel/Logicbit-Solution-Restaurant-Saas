@@ -10,16 +10,62 @@ export class PlatformAdminService {
   ) {}
 
   async getRevenueSummary(startDate?: string, endDate?: string) {
+    // 1. Get active subscriptions to calculate MRR and count
+    const activeSubs = await this.prisma.restaurantSubscription.findMany({
+      where: { status: 'ACTIVE' },
+      include: { plan: true },
+    });
+
+    const activeSubscriptions = activeSubs.length;
+    const mrr = activeSubs.reduce((sum, sub) => sum + (Number(sub.plan?.price) || 0), 0);
+
+    // 2. Fetch recent subscriptions (REMOVED the invalid 'restaurant' include)
+    const recentSubs = await this.prisma.restaurantSubscription.findMany({
+      take: 10,
+      orderBy: { createdAt: 'desc' },
+      include: { 
+        plan: { select: { name: true, price: true } } 
+      },
+    });
+
+    // 3. Manually fetch the restaurant names to avoid Prisma schema errors
+    const restaurantIds = recentSubs.map(sub => sub.restaurantId);
+    const restaurants = await this.prisma.restaurant.findMany({
+      where: { id: { in: restaurantIds } },
+      select: { id: true, name: true }
+    });
+
+    // 4. Calculate total platform commission from orders
     const whereClause: any = { status: 'DELIVERED' };
     if (startDate && endDate) {
       whereClause.createdAt = { gte: new Date(startDate), lte: new Date(endDate) };
     }
-
     const orders = await this.prisma.order.findMany({ where: whereClause });
-    const totalOrderValue = orders.reduce((sum, order) => sum + order.total, 0);
     const totalPlatformCommission = orders.reduce((sum, order) => sum + order.platformCommissionAmount, 0);
 
-    return { success: true, data: { totalOrders: orders.length, totalOrderValue, totalPlatformCommission } };
+    const recentTransactions = recentSubs.map(sub => {
+      const restaurant = restaurants.find(r => r.id === sub.restaurantId);
+      return {
+        id: sub.id,
+        restaurantName: restaurant?.name || 'Unknown Restaurant',
+        planName: sub.plan?.name || 'Custom Plan',
+        amount: sub.plan?.price || 0,
+        date: sub.createdAt,
+        status: sub.status,
+      };
+    });
+
+    const totalRevenue = totalPlatformCommission + mrr; 
+
+    return { 
+      success: true, 
+      data: { 
+        totalRevenue,
+        mrr,
+        activeSubscriptions,
+        recentTransactions 
+      } 
+    };
   }
 
   async getTopRestaurantsByRevenue(limit: number = 10) {
