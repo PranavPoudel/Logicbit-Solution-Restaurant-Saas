@@ -1,4 +1,4 @@
-// app/(owner-dashboard)/layout.tsx
+// app/owner/(owner-dashboard)/layout.tsx
 import { OwnerSidebar } from "@/components/layout/owner-sidebar";
 import { OwnerTopbar } from "@/components/layout/owner-topbar";
 import { OwnerAuthGuard } from "@/components/auth/owner-auth-guard";

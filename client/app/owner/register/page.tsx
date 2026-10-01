@@ -12,6 +12,7 @@ export default function OwnerRegisterPage() {
   const setAuth = useOwnerAuthStore((state) => state.setAuth); 
   
   const [isLoading, setIsLoading] = useState(false);
+  const [isGeocoding, setIsGeocoding] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<OwnerRegisterInput>({
@@ -34,6 +35,69 @@ export default function OwnerRegisterPage() {
     }));
   };
 
+  // 1. Forward Geocoding: Address -> Map
+  const handleGeocodeAddress = async () => {
+    if (!formData.restaurantAddress.trim()) return;
+    
+    setIsGeocoding(true);
+    setError(null);
+    
+    try {
+      // Using OpenStreetMap Nominatim (Free, no API key needed for low volume)
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(formData.restaurantAddress)}&limit=1`,
+        {
+          headers: {
+            'User-Agent': 'LogicBitAI/1.0 (owner@logicbit.ai)' // Required by Nominatim
+          }
+        }
+      );
+      const data = await response.json();
+      
+      if (data && data.length > 0) {
+        const { lat, lon, display_name } = data[0];
+        setFormData((prev) => ({
+          ...prev,
+          latitude: parseFloat(lat),
+          longitude: parseFloat(lon),
+          // Optional: Standardize the address to the official OSM format for accuracy
+          restaurantAddress: display_name, 
+        }));
+      } else {
+        setError("Could not find this address. Please try a more specific location or adjust the pin manually.");
+      }
+    } catch (err) {
+      console.error("Geocoding error:", err);
+      setError("Failed to search address. Please check your connection or adjust the pin manually.");
+    } finally {
+      setIsGeocoding(false);
+    }
+  };
+
+  // 2. Reverse Geocoding: Map -> Address (Triggered on dragend)
+  const handleMapChange = async (lat: number, lng: number) => {
+    // Update coordinates immediately for responsive UI
+    setFormData((prev) => ({ ...prev, latitude: lat, longitude: lng }));
+    
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`,
+        {
+          headers: {
+            'User-Agent': 'LogicBitAI/1.0 (owner@logicbit.ai)'
+          }
+        }
+      );
+      const data = await response.json();
+      if (data && data.display_name) {
+        setFormData((prev) => ({ ...prev, restaurantAddress: data.display_name }));
+      }
+    } catch (err) {
+      console.error("Reverse geocoding error:", err);
+      // Silent fail for reverse geocoding so we don't annoy the user while dragging
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -41,16 +105,22 @@ export default function OwnerRegisterPage() {
 
     try {
       const response = await registerOwner(formData);
-        
-      if (response.success && response.data?.tokens) {
-        // ✅ FIX: Pass a single object matching your Zustand store's expected shape
+      
+      // ✅ FIX: The interceptor unwraps { success, data, message } -> data.
+      // So `response` is the inner payload. We check for tokens directly on it.
+      const tokens = response.tokens || response.data?.tokens;
+      const user = response.user || response.data?.user;
+      const restaurants = response.restaurants || response.data?.restaurants || [];
+
+      if (tokens && user) {
         setAuth({
-          accessToken: response.data.tokens.accessToken,
-          refreshToken: response.data.tokens.refreshToken,
-          user: response.data.user,
-          restaurants: response.data.restaurants || [], 
+          accessToken: tokens.accessToken,
+          refreshToken: tokens.refreshToken,
+          user: user,
+          restaurants: restaurants, 
         });
         
+        // Redirect to dashboard
         router.push("/owner/dashboard"); 
       } else {
         setError(response.message || "Registration failed. Please try again.");
@@ -58,7 +128,7 @@ export default function OwnerRegisterPage() {
     } catch (err: any) {
       const errorMsg = err.response?.data?.message 
         ? (Array.isArray(err.response.data.message) ? err.response.data.message.join(", ") : err.response.data.message)
-        : "An unexpected error occurred. Please check your connection.";
+        : err.message || "An unexpected error occurred. Please check your connection.";
       setError(errorMsg);
     } finally {
       setIsLoading(false);
@@ -157,15 +227,40 @@ export default function OwnerRegisterPage() {
 
               <div>
                 <label className="block text-sm font-medium text-[#1B2333] mb-1">Restaurant Address</label>
-                <input
-                  type="text"
-                  name="restaurantAddress"
-                  required
-                  value={formData.restaurantAddress}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-[#1B2333] focus:border-transparent outline-none transition"
-                  placeholder="e.g. Thamel, Kathmandu"
-                />
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    name="restaurantAddress"
+                    required
+                    value={formData.restaurantAddress}
+                    onChange={handleChange}
+                    className="flex-1 px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-[#1B2333] focus:border-transparent outline-none transition"
+                    placeholder="e.g. Thamel, Kathmandu"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleGeocodeAddress}
+                    disabled={isGeocoding || !formData.restaurantAddress.trim()}
+                    className="px-4 py-2 bg-[#1B2333] text-white text-sm font-medium rounded-lg hover:bg-[#2B2D33] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 whitespace-nowrap"
+                  >
+                    {isGeocoding ? (
+                      <>
+                        <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Searching...
+                      </>
+                    ) : (
+                      <>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        Find
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
 
               {/* Map Picker UI */}
@@ -179,9 +274,7 @@ export default function OwnerRegisterPage() {
                 <DynamicMapPicker
                   lat={formData.latitude || 27.7172}
                   lng={formData.longitude || 85.3240}
-                  onChange={(lat, lng) => {
-                    setFormData((prev) => ({ ...prev, latitude: lat, longitude: lng }));
-                  }}
+                  onChange={handleMapChange}
                 />
                 <div className="flex gap-4 mt-2 text-xs font-mono text-neutral-500">
                   <span>Lat: {formData.latitude?.toFixed(5)}</span>
