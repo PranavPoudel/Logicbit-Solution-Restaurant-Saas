@@ -87,14 +87,21 @@ export class DeliveryService {
   // ---------- Delivery Person-facing: Orders ----------
 
   /** Restaurant ले "Ready" बनाइसकेको, अझै कसैलाई assign नभएको order हरू — gig-marketplace जस्तो "available job" list */
-  async findAvailableOrders() {
+        async findAvailableOrders() {
     return this.prisma.order.findMany({
       where: {
         orderType: 'DELIVERY',
-        status: 'READY',
-        OR: [{ delivery: null }, { delivery: { status: 'UNASSIGNED' } }],
+        status: { in: ['PENDING', 'ACCEPTED', 'PREPARING', 'READY'] },
+        AND: [
+          { OR: [{ delivery: null }, { delivery: { status: 'UNASSIGNED' } }] },
+          { OR: [{ deliveryHandledBy: null }, { deliveryHandledBy: { not: 'SELF_DELIVERY' } }] },
+        ],
       },
-      include: { restaurant: { select: { name: true, address: true, latitude: true, longitude: true } } },
+      include: {
+        restaurant: { select: { name: true, address: true, latitude: true, longitude: true } },
+        customer: { select: { name: true, phone: true } },
+        items: { include: { menuItem: { select: { name: true } } } },
+      },
       orderBy: { createdAt: 'asc' },
     });
   }
@@ -191,7 +198,19 @@ export class DeliveryService {
     });
   }
 
-  async findMyDeliveries(deliveryPersonId: string) {
-    return this.prisma.delivery.findMany({ where: { deliveryPersonId }, include: { order: true }, orderBy: { createdAt: 'desc' } });
+    async findMyDeliveries(deliveryPersonId: string) {
+    return this.prisma.delivery.findMany({
+      where: { deliveryPersonId },
+      include: {
+        order: {
+          include: {
+            restaurant: { select: { name: true, address: true, latitude: true, longitude: true } },
+            customer: { select: { name: true, phone: true } },
+            items: { include: { menuItem: { select: { name: true } } } },
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
   }
 }
