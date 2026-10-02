@@ -20,7 +20,14 @@ export class PlatformStaffService {
   async createRole(dto: CreatePlatformRoleDto) {
     const existing = await this.prisma.platformRole.findUnique({ where: { name: dto.name } });
     if (existing) throw new ConflictException(`Role "${dto.name}" already exists`);
-    return this.prisma.platformRole.create({ data: { name: dto.name } });
+    return this.prisma.platformRole.create({
+      data: { 
+        name: dto.name,
+        permissions: dto.permissionIds ? {
+          create: dto.permissionIds.map(id => ({
+           permission: { connect: { id } }
+          }))
+      }  : undefined } });
   }
 
   async findAllRoles() {

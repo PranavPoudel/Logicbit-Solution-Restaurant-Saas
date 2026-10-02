@@ -16,16 +16,20 @@ export async function getOutstandingSettlement(restaurantId: string) {
 }
 
 // Platform — manage
-export async function generateSettlement(restaurantId: string) {
+export async function generateSettlement(
+  restaurantId: string, 
+  payload: { periodStart: string; periodEnd: string }
+) {
   const { data } = await platformApiClient.post(
-    `/platform-admin/settlements/restaurants/${restaurantId}/generate`
+    `/platform-admin/settlements/restaurants/${restaurantId}/generate`,
+    payload
   );
   return data;
 }
 
 export async function listPendingSettlements() {
   const { data } = await platformApiClient.get("/platform-admin/settlements/pending");
-  return data;
+  return data;  
 }
 
 export async function markSettlementPaid(id: string) {

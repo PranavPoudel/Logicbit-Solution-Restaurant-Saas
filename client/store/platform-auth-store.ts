@@ -1,4 +1,3 @@
-// store/platform-auth-store.ts
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -9,7 +8,6 @@ export interface PlatformStaffProfile {
   role?: string;
   permissions?: string[];
 }
-
 
 interface PlatformAuthState {
   accessToken: string | null;
@@ -36,9 +34,20 @@ export const usePlatformAuthStore = create<PlatformAuthState>()(
 
       setAuth: ({ accessToken, refreshToken = null, staff }) =>
         set({ accessToken, refreshToken, staff, isAuthenticated: true }),
+      
       setAccessToken: (accessToken) => set({ accessToken }),
-      logout: () =>
-        set({ accessToken: null, refreshToken: null, staff: null, isAuthenticated: false }),
+      
+      logout: () => {
+        set({ accessToken: null, refreshToken: null, staff: null, isAuthenticated: false });
+        
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('admin_token');
+          document.cookie = 'admin_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
+          document.cookie = 'accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
+          
+          window.location.href = '/admin/login';
+        }
+      },
     }),
     { name: "logicbit-platform-auth" }
   )
