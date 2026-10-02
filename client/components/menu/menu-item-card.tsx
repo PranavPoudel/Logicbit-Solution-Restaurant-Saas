@@ -1,9 +1,9 @@
-// components/menu/menu-item-card.tsx
 "use client";
 
 import { Plus, Minus } from "lucide-react";
 import type { MenuItem } from "@/types/menu";
 import { useCartStore } from "@/store/cart-store";
+import { getFullImageUrl } from "@/lib/utils/image";
 
 export function MenuItemCard({
   item,
@@ -21,6 +21,10 @@ export function MenuItemCard({
   const name = item.name ?? "Menu item";
   const price = item.price ?? 0;
   const isAvailable = item.isAvailable !== false;
+  
+  // ✅ FIX: Check for BOTH 'imageUrl' and 'image' to be safe
+  const rawImagePath = (item as any).imageUrl || (item as any).image;
+  const imageUrl = getFullImageUrl(rawImagePath);
 
   function handleAddClick() {
     if (item.hasModifiers) {
@@ -39,9 +43,9 @@ export function MenuItemCard({
   return (
     <div className="bg-white rounded-2xl border border-[#2B1410]/8 overflow-hidden">
       <div className="relative aspect-square bg-[#2B1410]/5">
-        {item.imageUrl ? (
+        {imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={item.imageUrl} alt={name} className="w-full h-full object-cover" />
+          <img src={imageUrl} alt={name} className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-[#2B1410]/20 font-serif text-3xl">
             {name.charAt(0)}
@@ -56,7 +60,6 @@ export function MenuItemCard({
           </div>
         )}
 
-        {/* Add / quantity control, overlapping bottom-right of image */}
         {isAvailable && (
           quantity > 0 ? (
             <div className="absolute -bottom-3 right-3 flex items-center gap-1.5 bg-[#2B1410] text-[#FDF6EC] rounded-full px-1 py-1 shadow-md">
