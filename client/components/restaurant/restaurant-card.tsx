@@ -7,6 +7,9 @@ import { useState } from "react";
 import type { DiscoveryRestaurant } from "@/types/restaurant";
 import { theme } from "@/config/theme";
 
+const FALLBACK_IMAGE =
+  "https://images.unsplash.com/photo-1595917248955-a96ace4780b6?q=80&w=1169&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
+
 export function RestaurantCard({ restaurant }: { restaurant: DiscoveryRestaurant }) {
   const [isFavorited, setIsFavorited] = useState(false);
 
@@ -25,25 +28,16 @@ export function RestaurantCard({ restaurant }: { restaurant: DiscoveryRestaurant
       style={{ border: `1px solid ${theme.colors.dark}14` }}
     >
       <div className="relative aspect-[4/3] overflow-hidden" style={{ backgroundColor: `${theme.colors.dark}0D` }}>
-        {restaurant.coverImageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={restaurant.coverImageUrl}
-            alt={name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            onError={(e) => {
-              // Fallback if image URL is broken
-              (e.target as HTMLImageElement).style.display = 'none';
-            }}
-          />
-        ) : (
-          <div
-            className="w-full h-full flex items-center justify-center font-serif text-4xl"
-            style={{ backgroundColor: theme.colors.dark, color: `${theme.colors.background}33` }}
-          >
-            {name.charAt(0)}
-          </div>
-        )}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={restaurant.coverImageUrl || FALLBACK_IMAGE}
+          alt={name}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          onError={(e) => {
+            // Fallback if image URL is broken
+            (e.target as HTMLImageElement).style.display = 'none';
+          }}
+        />
 
         <div
           className="absolute inset-0"

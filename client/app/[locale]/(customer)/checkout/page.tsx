@@ -1,12 +1,13 @@
-// app/%5Blocale%5D/%28customer%29/checkout/page.tsx
+// app/[locale]/(customer)/checkout/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useMutation } from "@tanstack/react-query";
 import { useCartStore } from "@/store/cart-store";
 import { checkout } from "@/lib/api/orders";
+import { checkDeliveryAvailability } from "@/lib/api/discovery";
 import { AlertCircle, Loader2, ShoppingBag, MapPin, Tag, Navigation } from "lucide-react";
 import Link from "next/link";
 
@@ -23,9 +24,14 @@ export default function CheckoutPage() {
   const [error, setError] = useState("");
   const [isGettingLocation, setIsGettingLocation] = useState(false);
 
+  const [deliveryFee, setDeliveryFee] = useState<number | null>(null);
+  const [distanceKm, setDistanceKm] = useState<number | null>(null);
+  const [deliveryCheckLoading, setDeliveryCheckLoading] = useState(false);
+  const [notDeliverable, setNotDeliverable] = useState(false);
+
   const sub = subtotal();
-  const deliveryFee = orderType === "DELIVERY" ? 50 : 0; 
-  const total = sub + deliveryFee;
+  const effectiveDeliveryFee = deliveryFee ?? 0;
+  const total = sub + (orderType === "DELIVERY" ? effectiveDeliveryFee : 0);
 
   const handleGetLocation = () => {
     if (!navigator.geolocation) {
@@ -38,7 +44,6 @@ export default function CheckoutPage() {
         setDeliveryLatitude(position.coords.latitude);
         setDeliveryLongitude(position.coords.longitude);
         setIsGettingLocation(false);
-        // UX: Pre-fill address field with coords if empty, so user knows it worked
         if (!deliveryAddress.trim()) {
           setDeliveryAddress(`Lat: ${position.coords.latitude.toFixed(4)}, Lng: ${position.coords.longitude.toFixed(4)}`);
         }
@@ -51,6 +56,31 @@ export default function CheckoutPage() {
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   };
+
+  // Distance-based delivery fee: fetches the real fee once we have the customer's location
+  useEffect(() => {
+    if (orderType !== "DELIVERY" || !restaurantId || deliveryLatitude == null || deliveryLongitude == null) {
+      return;
+    }
+    setDeliveryCheckLoading(true);
+    setNotDeliverable(false);
+    checkDeliveryAvailability(restaurantId, deliveryLatitude, deliveryLongitude)
+      .then((res: any) => {
+        const data = res?.data ?? res;
+        if (data?.deliverable === false) {
+          setNotDeliverable(true);
+          setDeliveryFee(null);
+        } else {
+          setDeliveryFee(typeof data?.deliveryFee === "number" ? data.deliveryFee : 60);
+          setDistanceKm(typeof data?.distanceKm === "number" ? data.distanceKm : null);
+        }
+      })
+      .catch(() => {
+        setDeliveryFee(60);
+        setDistanceKm(null);
+      })
+      .finally(() => setDeliveryCheckLoading(false));
+  }, [orderType, restaurantId, deliveryLatitude, deliveryLongitude]);
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -67,7 +97,6 @@ export default function CheckoutPage() {
         items: items.map(item => ({
           menuItemId: item.menuItemId,
           quantity: item.quantity,
-          // ✅ STRICTLY MATCHES BACKEND DTO: Only UUIDs, no extra fields!
           selectedModifiers: item.selectedModifiers?.map(m => ({
             modifierGroupId: m.modifierGroupId,
             modifierOptionId: m.modifierOptionId,
@@ -78,13 +107,12 @@ export default function CheckoutPage() {
       return checkout(payload);
     },
     onSuccess: (data) => {
-      clear(); // Clear cart ONLY on success
+      clear();
       const orderId = data?.id || data?.orderId; 
       router.push(`/account/orders/${orderId}`); 
     },
     onError: (err: any) => {
       console.error("Checkout failed:", err);
-      // ✅ Backend validates the coupon here. If invalid, it returns a 400 with a message.
       const rawMessage = err?.response?.data?.message || t("genericError");
       const errorMessage = typeof rawMessage === 'string' ? rawMessage : JSON.stringify(rawMessage);
       setError(errorMessage);
@@ -129,10 +157,8 @@ export default function CheckoutPage() {
       )}
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column: Form */}
         <div className="lg:col-span-2 space-y-6">
           
-          {/* Order Type Toggle */}
           <div className="bg-white border border-[#E8E7E2] rounded-2xl p-1 flex gap-1">
             {(["DELIVERY", "PICKUP"] as const).map((type) => (
               <button
@@ -150,7 +176,6 @@ export default function CheckoutPage() {
             ))}
           </div>
 
-          {/* Delivery Address (Conditional) */}
           {orderType === "DELIVERY" && (
             <div className="bg-white border border-[#E8E7E2] rounded-2xl p-6">
               <h2 className="font-semibold text-[#17181C] mb-4">{t("deliveryAddress")}</h2>
@@ -174,10 +199,14 @@ export default function CheckoutPage() {
                   {isGettingLocation ? <Loader2 size={16} className="animate-spin" /> : <Navigation size={16} />}
                 </button>
               </div>
+              {notDeliverable && (
+                <p className="text-xs text-red-600 mt-2">
+                  This restaurant doesn't deliver to your current location.
+                </p>
+              )}
             </div>
           )}
 
-          {/* Coupon Code */}
           <div className="bg-white border border-[#E8E7E2] rounded-2xl p-6">
             <h2 className="font-semibold text-[#17181C] mb-4">{t("couponCode")}</h2>
             <div className="flex gap-3">
@@ -191,7 +220,6 @@ export default function CheckoutPage() {
                   className="w-full pl-10 pr-4 py-2.5 text-sm border border-[#E8E7E2] rounded-xl focus:ring-2 focus:ring-[#E3A008]/40 focus:border-[#E3A008] outline-none uppercase"
                 />
               </div>
-              {/* Note: Validation happens on the backend during checkout submission */}
               <button
                 type="button"
                 onClick={() => {
@@ -199,8 +227,6 @@ export default function CheckoutPage() {
                     setError("Please enter a coupon code first.");
                     return;
                   }
-                  // Visual feedback only; actual validation occurs when "Place Order" is clicked
-                  // to prevent creating dummy orders or requiring a backend endpoint we don't have.
                   setError(""); 
                 }}
                 className="px-6 py-2.5 text-sm font-medium text-white bg-[#17181C] rounded-xl hover:bg-[#2B2D33] transition-colors"
@@ -214,7 +240,6 @@ export default function CheckoutPage() {
           </div>
         </div>
 
-        {/* Right Column: Order Summary */}
         <div className="lg:col-span-1">
           <div className="bg-white border border-[#E8E7E2] rounded-2xl p-5 sticky top-24 space-y-4">
             <h2 className="font-semibold text-[#17181C] border-b border-[#E8E7E2] pb-3">{t("orderSummary")}</h2>
@@ -242,8 +267,15 @@ export default function CheckoutPage() {
               </div>
               {orderType === "DELIVERY" && (
                 <div className="flex justify-between text-neutral-500">
-                  <span>{t("deliveryFee")}</span>
-                  <span className="font-mono">Rs {deliveryFee}</span>
+                  <span>
+                    {t("deliveryFee")}
+                    {distanceKm != null && (
+                      <span className="text-neutral-400"> ({distanceKm.toFixed(1)} km)</span>
+                    )}
+                  </span>
+                  <span className="font-mono">
+                    {deliveryCheckLoading ? "…" : `Rs ${effectiveDeliveryFee}`}
+                  </span>
                 </div>
               )}
               <div className="flex justify-between font-semibold text-[#17181C] pt-2 border-t border-[#E8E7E2]">
@@ -254,7 +286,10 @@ export default function CheckoutPage() {
 
             <button
               type="submit"
-              disabled={mutation.isPending}
+              disabled={
+                mutation.isPending ||
+                (orderType === "DELIVERY" && (!deliveryAddress.trim() || notDeliverable || deliveryCheckLoading))
+              }
               className="w-full bg-[#17181C] text-white text-sm font-medium py-3.5 rounded-xl hover:bg-[#2B2D33] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {mutation.isPending ? (

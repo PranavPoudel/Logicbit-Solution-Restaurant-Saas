@@ -1,5 +1,7 @@
+// components/home/filter-bar.tsx
 "use client";
 
+import Link from "next/link";
 import { Cuisine } from "@/lib/api/cuisines";
 
 interface FilterBarProps {
@@ -9,15 +11,18 @@ interface FilterBarProps {
   onCuisineChange: (id: string | null) => void;
 }
 
-export function FilterBar({ 
-  cuisines, 
-  isLoadingCuisines, 
-  activeCuisineId, 
-  onCuisineChange 
+const QUICK_TAGS = [
+  { label: "Trending now", slug: "trending" },
+  { label: "New on LogicBit", slug: "new" },
+  { label: "Popular this week", slug: "popular" },
+];
+
+export function FilterBar({
+  activeCuisineId,
+  onCuisineChange,
 }: FilterBarProps) {
   return (
     <div className="flex items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-      {/* "All" Chip */}
       <button
         onClick={() => onCuisineChange(null)}
         className={`shrink-0 text-xs font-medium px-3.5 py-2 rounded-full border transition-all ${
@@ -29,33 +34,15 @@ export function FilterBar({
         All
       </button>
 
-      {/* Dynamic Cuisine Chips */}
-      {isLoadingCuisines ? (
-        // Loading skeleton to prevent layout shift
-        Array.from({ length: 5 }).map((_, i) => (
-          <div
-            key={i}
-            className="shrink-0 w-20 h-8 rounded-full bg-neutral-100 animate-pulse"
-          />
-        ))
-      ) : (
-        cuisines.map((cuisine) => {
-          const isActive = activeCuisineId === cuisine.id;
-          return (
-            <button
-              key={cuisine.id}
-              onClick={() => onCuisineChange(isActive ? null : cuisine.id)}
-              className={`shrink-0 text-xs font-medium px-3.5 py-2 rounded-full border transition-all ${
-                isActive
-                  ? "bg-[#E3A008] text-[#17181C] border-[#E3A008] shadow-sm"
-                  : "bg-white text-[#17181C] border-[#E8E7E2] hover:border-[#E3A008]"
-              }`}
-            >
-              {cuisine.name}
-            </button>
-          );
-        })
-      )}
+      {QUICK_TAGS.map((tag) => (
+        <Link
+          key={tag.slug}
+          href={`/explore/${tag.slug}`}
+          className="shrink-0 text-xs font-medium px-3.5 py-2 rounded-full border bg-white text-[#17181C] border-[#E8E7E2] hover:border-[#E3A008] hover:bg-[#E3A008]/5 transition-all"
+        >
+          {tag.label}
+        </Link>
+      ))}
     </div>
   );
 }
