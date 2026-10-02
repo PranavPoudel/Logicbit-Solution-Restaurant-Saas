@@ -1,10 +1,21 @@
 // components/home/hero-section.tsx
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 import { theme } from "@/config/theme";
 
 export function HeroSection() {
+  const router = useRouter();
+  const [query, setQuery] = useState("");
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const q = query.trim();
+    router.push(q ? `/search?q=${encodeURIComponent(q)}` : "/search");
+  };
+
   return (
     <div className="relative overflow-hidden rounded-b-[2.5rem] min-h-[520px]">
       {/* background images now come from theme.brand.heroImages */}
@@ -42,7 +53,8 @@ export function HeroSection() {
         </p>
 
         {/* search bar */}
-        <div
+        <form
+          onSubmit={handleSearch}
           className="mt-8 max-w-md mx-auto bg-white rounded-full p-1.5 flex items-center gap-2 shadow-lg"
           style={{
             boxShadow: `0 10px 25px -5px ${theme.colors.dark}0D`,
@@ -53,12 +65,15 @@ export function HeroSection() {
             <Search size={16} style={{ color: `${theme.colors.dark}59` }} className="shrink-0" />
             <input
               type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
               placeholder={theme.content.searchPlaceholder}
               className="w-full bg-transparent text-sm focus:outline-none"
               style={{ color: theme.colors.dark }}
             />
           </div>
           <button
+            type="submit"
             className="text-sm font-medium px-6 py-2.5 rounded-full shrink-0 active:scale-95 transition-all duration-200"
             style={{ backgroundColor: theme.colors.dark, color: theme.colors.background }}
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = theme.colors.darkHover)}
@@ -66,7 +81,7 @@ export function HeroSection() {
           >
             Search
           </button>
-        </div>
+        </form>
 
         <p className="text-xs mt-4" style={{ color: `${theme.colors.dark}66` }}>
           {theme.content.freeDeliveryNote}
