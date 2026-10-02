@@ -22,7 +22,7 @@ export function MenuItemCard({
   const price = item.price ?? 0;
   const isAvailable = item.isAvailable !== false;
   
-  // ✅ FIX: Check for BOTH 'imageUrl' and 'image' to be safe
+  // Check for BOTH 'imageUrl' and 'image' to be safe
   const rawImagePath = (item as any).imageUrl || (item as any).image;
   const imageUrl = getFullImageUrl(rawImagePath);
 
