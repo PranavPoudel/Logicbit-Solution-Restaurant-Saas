@@ -5,7 +5,8 @@ import { useLocale, useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle } from "lucide-react";
 import { HeroSection } from "@/components/home/hero-section";
-import { HowItWorks } from "@/components/home/how-it-works";
+import { WhyLogicBit } from "@/components/home/why-logicbit";
+import { OwnerBanner } from "@/components/home/owner-banner";
 import { CategoryGrid } from "@/components/home/category-grid";
 import { BannerCarousel } from "@/components/home/banner-carousel";
 import { FilterBar } from "@/components/home/filter-bar";
@@ -101,7 +102,8 @@ export default function HomePage() {
         </div>
       </div>
 
-      <HowItWorks />
+      <WhyLogicBit />
+      <OwnerBanner />
 
       <PopupAd />
       <HomepageFooter />
