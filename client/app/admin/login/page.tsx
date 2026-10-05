@@ -1,4 +1,5 @@
 "use client";
+
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { platformLogin } from "@/lib/api/platform-auth";
@@ -9,8 +10,8 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  
   const router = useRouter();
-
   const setAccessToken = usePlatformAuthStore((state) => state.setAccessToken);
 
   const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
@@ -28,16 +29,18 @@ export default function AdminLoginPage() {
 
       if (token) {
         setAccessToken(token);
-        localStorage.setItem('admin_token', token)
+        
+        localStorage.setItem("admin_token", token);
         document.cookie = `admin_token=${token}; path=/; max-age=86400; SameSite=Lax`;
-        document.cookie = `accessToken=${token}; path=/; max-age=86400; SameSite=Lax`;
-        window.location.href = "/admin/dashboard";
+        
+        router.push("/admin/dashboard");
+        router.refresh(); 
       } else {
-        setError(response?.message || "Invalid credentials");
+        setError(response?.message || "Invalid credentials received from server.");
       }
     } catch (err: any) {
       setError(
-        err?.response?.data?.message || err?.message || "Login failed. Please check credentials."
+        err?.response?.data?.message || err?.message || "Login failed. Please check your credentials."
       );
     } finally {
       setLoading(false);

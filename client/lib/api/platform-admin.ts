@@ -1,4 +1,3 @@
-// lib/api/platform-admin.ts — Module 20: Platform Admin
 import { platformApiClient } from "@/lib/api/platform-client";
 
 // --- Revenue & restaurants ---
@@ -36,17 +35,17 @@ export async function overrideRestaurant(id: string, override: Record<string, un
   return data;
 }
 
-export async function suspendRestaurant(id: string, reason?: string) {
+export async function suspendRestaurant(id: string, suspend: boolean) {
   const { data } = await platformApiClient.patch(`/platform-admin/restaurants/${id}/suspend`, {
-    reason,
+    suspend,
   });
   return data;
 }
 
-export async function setRestaurantCommission(id: string, commissionPercent: number) {
+export async function setRestaurantCommission(id: string, percent: number) {
   const { data } = await platformApiClient.patch(
     `/platform-admin/restaurants/${id}/commission`,
-    { commissionPercent }
+    { percent }
   );
   return data;
 }

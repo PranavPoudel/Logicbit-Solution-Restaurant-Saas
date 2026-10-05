@@ -24,7 +24,11 @@ export class PublicCuisineController {
 @Controller('api/v1/platform-admin/cuisines')
 export class PlatformCuisineController {
   constructor(private readonly cuisineService: CuisineService) {}
-
+  @Get()
+  @RequirePlatformPermission('MANAGE_CUISINES')
+  findAll() {
+    return this.cuisineService.findAllActive(); 
+  }
   @Post()
   @RequirePlatformPermission('MANAGE_CUISINES')
   create(@Body() dto: CreateCuisineDto) {

@@ -1,3 +1,4 @@
+// app/%5Blocale%5D/%28customer%29/restaurants/%5Bslug%5D/page.tsx
 "use client";
 
 import { use, useState } from "react";
