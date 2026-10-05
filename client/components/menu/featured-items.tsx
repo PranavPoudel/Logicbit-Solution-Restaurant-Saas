@@ -4,6 +4,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { getFeaturedItems } from "@/lib/api/discovery";
 import { theme } from "@/config/theme";
+import { getItemImage } from "@/lib/utils/image";
+import type { MenuItem } from "@/types/menu";
+import { AppImage } from "@/components/ui/app-image";
 
 interface FeaturedItemsProps {
   restaurantId: string;
@@ -17,7 +20,7 @@ export function FeaturedItems({ restaurantId, onSelect }: FeaturedItemsProps) {
     enabled: !!restaurantId,
   });
 
-  const items = Array.isArray(data) ? data : data?.items ?? [];
+  const items: MenuItem[] = Array.isArray(data) ? data : data?.items ?? [];
 
   if (isLoading || items.length === 0) return null;
 
@@ -27,7 +30,7 @@ export function FeaturedItems({ restaurantId, onSelect }: FeaturedItemsProps) {
         Chef&apos;s Picks
       </h3>
       <div className="flex gap-3 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-        {items.map((item: any) => (
+        {items.map((item) => (
           <button
             key={item.id}
             onClick={() => onSelect(item.id)}
@@ -38,9 +41,8 @@ export function FeaturedItems({ restaurantId, onSelect }: FeaturedItemsProps) {
               className="w-36 h-24 overflow-hidden"
               style={{ backgroundColor: `${theme.colors.dark}0D` }}
             >
-              {item.imageUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
+              {getItemImage(item) ? (
+                <AppImage sizes="144px" src={getItemImage(item)} alt={item.name ?? ""} className="w-full h-full object-cover" />
               ) : (
                 <div
                   className="w-full h-full flex items-center justify-center font-serif text-2xl"

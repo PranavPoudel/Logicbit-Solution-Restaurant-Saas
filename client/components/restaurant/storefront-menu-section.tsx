@@ -3,57 +3,69 @@
 
 import { CategoryNav } from "@/components/menu/category-nav";
 import { MenuItemCard } from "@/components/menu/menu-item-card";
+import { CartSummaryCard } from "@/components/menu/cart-summary-card";
 import { useState } from "react";
+import type { MenuCategory } from "@/types/menu";
 
 interface StorefrontMenuSectionProps {
   title: string;
-  categories: any[];
+  categories: MenuCategory[];
+  restaurantId: string;
+  aside?: React.ReactNode;
   onOpenModifiers?: (itemId: string) => void; 
 }
-export function StorefrontMenuSection({ title, categories, onOpenModifiers }: StorefrontMenuSectionProps) {
+export function StorefrontMenuSection({ title, categories, restaurantId, aside, onOpenModifiers }: StorefrontMenuSectionProps) {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const activeCategoryId = selectedCategoryId ?? categories[0]?.id ?? null;
 
-  function scrollToCategory(id: string) {
-    setSelectedCategoryId(id);
-    document.getElementById(`category-${id}`)?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
-  }
+  const activeCategory = categories.find((c) => c.id === activeCategoryId) ?? categories[0];
 
   if (categories.length === 0) return null;
 
   return (
-    <div className="max-w-4xl mx-auto px-4">
-      <h2 className="font-display text-2xl font-bold text-[#2B1410] mb-6">{title}</h2>
-      
-      <CategoryNav
-        categories={categories}
-        activeId={activeCategoryId}
-        onSelect={scrollToCategory}
-      />
+    <div className="max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12">
+      <div className="grid lg:grid-cols-[minmax(0,1fr)_420px] lg:grid-rows-[auto_auto_1fr] lg:gap-x-8">
+        <h2 className="font-serif text-3xl font-bold text-brand-dark mb-8 text-center lg:col-start-1 lg:row-start-1">
+          {title}
+        </h2>
 
-      <div className="space-y-8 mt-6">
-        {categories.map((category) => (
-          <div key={category.id} id={`category-${category.id}`} className="scroll-mt-32">
-            <h3 className="font-serif font-semibold text-lg text-[#2B1410] mb-4">
-              {category.name ?? "Menu"}
-            </h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-              {(category.items ?? []).map((item: any) => (
+        <CategoryNav
+          categories={categories}
+          activeId={activeCategoryId}
+          onSelect={setSelectedCategoryId}
+          className="self-start lg:col-start-1 lg:row-start-2"
+        />
+
+        <div key={activeCategory.id} className="mt-1 lg:col-start-1 lg:row-start-3">
+          <h3 className="animate-fade-up font-serif font-semibold text-lg text-brand-dark mb-4 mt-6">
+            {activeCategory.name ?? "Menu"}
+          </h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+            {(activeCategory.items ?? []).map((item, i) => (
+              <div
+                key={item.id}
+                className="animate-fade-up"
+                style={{ animationDelay: `${Math.min(i, 8) * 60}ms` }}
+              >
                 <MenuItemCard
-                  key={item.id}
                   item={item}
-                  restaurantId=""
-onOpenModifiers={onOpenModifiers ?? (() => {})}                />
-              ))}
-            </div>
-            {(category.items ?? []).length === 0 && (
-              <p className="text-xs text-[#2B1410]/40 py-3">No items in this category.</p>
-            )}
+                  restaurantId={restaurantId}
+                  onOpenModifiers={onOpenModifiers ?? (() => {})}
+                />
+              </div>
+            ))}
           </div>
-        ))}
+          {(activeCategory.items ?? []).length === 0 && (
+            <p className="text-xs text-brand-dark/40 py-3">No items in this category.</p>
+          )}
+        </div>
+
+        <aside className="mt-8 lg:mt-0 lg:col-start-2 lg:row-start-1 lg:row-span-3 space-y-4">
+          <div className="hidden lg:block empty:hidden">
+            <CartSummaryCard />
+          </div>
+          {aside}
+        </aside>
       </div>
     </div>
   );

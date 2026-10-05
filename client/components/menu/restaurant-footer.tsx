@@ -5,13 +5,13 @@ import type { DiscoveryRestaurant } from "@/types/restaurant";
 
 export function RestaurantFooter({ restaurant }: { restaurant: DiscoveryRestaurant }) {
   const name = restaurant.name ?? "Restaurant";
-  const address = (restaurant as any).address ?? null;
-  const phone = (restaurant as any).phone ?? null;
+  const address = restaurant.address ?? null;
+  const phone = restaurant.phone ?? null;
 
   return (
     // 🆕 Added mt-auto to push it to the bottom of a flex-col parent
     <footer className="bg-[#2B1410] text-[#FDF6EC] mt-auto">
-      <div className="max-w-4xl mx-auto px-4 py-10 grid sm:grid-cols-3 gap-8">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 py-10 grid sm:grid-cols-3 gap-8">
         <div>
           <h3 className="font-serif text-lg mb-2">{name}</h3>
           <p className="text-sm text-[#FDF6EC]/80">

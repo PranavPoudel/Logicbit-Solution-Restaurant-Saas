@@ -105,6 +105,7 @@ function FitOrderBounds({
         maxZoom: 16,
       }
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map, key]);
 
   return null;

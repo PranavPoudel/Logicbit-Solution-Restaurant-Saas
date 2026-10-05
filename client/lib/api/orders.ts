@@ -87,3 +87,21 @@ export async function cancelRestaurantOrder(restaurantId: string, orderId: strin
   );
   return data;
 }
+
+export interface CouponPreview {
+  code: string;
+  discountAmount: number;
+}
+
+export async function validateCoupon(
+  restaurantId: string,
+  code: string,
+  subtotal: number
+): Promise<CouponPreview> {
+  const { data } = await apiClient.post("/orders/validate-coupon", {
+    restaurantId,
+    code,
+    subtotal,
+  });
+  return data;
+}

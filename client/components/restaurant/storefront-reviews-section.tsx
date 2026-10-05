@@ -19,7 +19,7 @@ export function StorefrontReviewsSection({ title, restaurantId }: StorefrontRevi
 
   if (isLoading) {
     return (
-      <div className="max-w-4xl mx-auto px-4">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12">
         <h2 className="font-display text-2xl font-bold text-[#2B1410] mb-6">{title}</h2>
         <div className="bg-white border border-[#E8E7E2] rounded-2xl p-8 text-center">
           <p className="text-sm text-[#2B1410]/40">Loading reviews...</p>
@@ -30,7 +30,7 @@ export function StorefrontReviewsSection({ title, restaurantId }: StorefrontRevi
 
   if (!reviews || reviews.length === 0) {
     return (
-      <div className="max-w-4xl mx-auto px-4">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12">
         <h2 className="font-display text-2xl font-bold text-[#2B1410] mb-6">{title}</h2>
         <div className="bg-white border border-[#E8E7E2] rounded-2xl p-8 text-center">
           <MessageCircle className="w-10 h-10 text-[#2B1410]/20 mx-auto mb-3" />
@@ -41,10 +41,10 @@ export function StorefrontReviewsSection({ title, restaurantId }: StorefrontRevi
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4">
+    <div className="max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12">
       <h2 className="font-display text-2xl font-bold text-[#2B1410] mb-6">{title}</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {reviews.slice(0, 6).map((review: any) => (
+        {reviews.slice(0, 6).map((review) => (
           <div
             key={review.id}
             className="bg-white border border-[#E8E7E2] rounded-2xl p-5 hover:shadow-md transition-shadow"

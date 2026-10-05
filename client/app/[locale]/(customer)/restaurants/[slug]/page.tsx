@@ -16,7 +16,6 @@ import {
 } from "@/lib/api/discovery";
 import { StorefrontSectionRenderer } from "@/components/restaurant/storefront-section-renderer";
 import { StorefrontPopupModal } from "@/components/restaurant/storefront-popup-modal";
-import { RestaurantFooter } from "@/components/menu/restaurant-footer";
 
 export default function RestaurantDetailPage({
   params,
@@ -65,6 +64,10 @@ export default function RestaurantDetailPage({
   const contact = storefrontData?.contact;
   const socialLinks = storefrontData?.socialLinks;
 
+  const hasSidebarCart =
+    categories.length > 0 &&
+    (sectionSettings.length === 0 || sectionSettings.some((s) => s.id === "menu" && s.isVisible));
+
   if (restaurantQuery.isLoading) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-16 text-center text-sm text-neutral-400">
@@ -78,15 +81,14 @@ export default function RestaurantDetailPage({
       <div className="max-w-4xl mx-auto px-4 py-16 flex flex-col items-center text-center gap-3">
         <AlertTriangle className="text-neutral-300" size={28} />
         <p className="text-sm text-neutral-500">
-          Couldn&apos;t load this restaurant. It may not exist, or the backend
-          isn&apos;t reachable.
+          Couldn&apos;t load this restaurant. It may not exist, or the backend isn&apos;t reachable.
         </p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col pb-24">
+    <div className="flex flex-col">
       <RestaurantHeader restaurant={restaurantQuery.data} />
 
       {/* Dynamic Storefront Sections (Uses currentLocale for proper i18n) */}
@@ -100,13 +102,12 @@ export default function RestaurantDetailPage({
         contact={contact}
         socialLinks={socialLinks}
         banners={banners}
-        latitude={(restaurantQuery.data as any).latitude}
-        longitude={(restaurantQuery.data as any).longitude}
+        latitude={restaurantQuery.data.latitude}
+        longitude={restaurantQuery.data.longitude}
       />
 
       {/* Footer & Floating Cart */}
-      <RestaurantFooter restaurant={restaurantQuery.data} />
-      <FloatingCartBar />
+      <FloatingCartBar sidebarCart={hasSidebarCart} />
 
       {modifierItemId && (
         <ModifierModal

@@ -2,13 +2,17 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 import { Phone, Mail, Camera, Globe } from "lucide-react";
 import { theme } from "@/config/theme";
+import { RestaurantFooter } from "@/components/menu/restaurant-footer";
+import { getRestaurantByIdOrSlug } from "@/lib/api/discovery";
 
 export function HomepageFooter() {
   return (
     <footer style={{ backgroundColor: theme.colors.dark, color: theme.colors.background }} className="mt-12">
-      <div className="max-w-6xl mx-auto px-5 py-12 grid sm:grid-cols-4 gap-8">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 py-12 grid sm:grid-cols-4 gap-8">
         <div>
           <h3 className="font-serif text-xl mb-2">{theme.brand.name}</h3>
           <p className="text-sm" style={{ color: `${theme.colors.background}8C` }}>
@@ -79,4 +83,25 @@ export function HomepageFooter() {
       </div>
     </footer>
   );
+}
+
+export function CustomerFooter() {
+  const pathname = usePathname();
+  const slug = pathname.match(/(?:^|\/)restaurants\/([^/]+)/)?.[1];
+
+  const restaurantQuery = useQuery({
+    queryKey: ["restaurant", slug],
+    queryFn: () => getRestaurantByIdOrSlug(slug as string),
+    enabled: !!slug,
+  });
+
+  if (slug) {
+    return (
+      <div style={{ backgroundColor: theme.colors.dark }} className="mt-auto pb-20 lg:pb-0">
+        <RestaurantFooter restaurant={restaurantQuery.data ?? { id: "", name: "" }} />
+      </div>
+    );
+  }
+
+  return <HomepageFooter />;
 }

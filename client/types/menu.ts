@@ -1,4 +1,5 @@
 // types/menu.ts
+import type { CuisineLike } from "@/types/restaurant";
 
 export interface RestaurantDetail {
   id: string;
@@ -7,7 +8,9 @@ export interface RestaurantDetail {
   coverImageUrl?: string;
   logoUrl?: string;
   avgRating?: number;
-  cuisines?: string[];
+  cuisines?: CuisineLike[];
+  latitude?: number;
+  longitude?: number;
   isOpen?: boolean;
   distanceKm?: number;
   estimatedDeliveryMinutes?: number;
@@ -21,6 +24,7 @@ export interface MenuItem {
   description?: string;
   price?: number;
   imageUrl?: string;
+  image?: string;
   isAvailable?: boolean;
   hasModifiers?: boolean;
 }

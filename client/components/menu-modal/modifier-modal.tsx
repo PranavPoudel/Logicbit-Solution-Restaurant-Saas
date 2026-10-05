@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useEscapeKey } from "@/hooks/use-escape-key";
 import { X, Minus, Plus } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { getMenuItemDetail } from "@/lib/api/discovery";
@@ -23,7 +24,7 @@ export function ModifierModal({ restaurantId, menuItemId, onClose }: ModifierMod
   const [selections, setSelections] = useState<Record<string, string[]>>({});
   const [quantity, setQuantity] = useState(1);
 
-  const groups = item?.modifierGroups ?? [];
+  const groups = useMemo(() => item?.modifierGroups ?? [], [item]);
 
   function toggleOption(groupId: string, optionId: string, group: (typeof groups)[number]) {
     setSelections((prev) => {
@@ -90,12 +91,16 @@ export function ModifierModal({ restaurantId, menuItemId, onClose }: ModifierMod
     onClose();
   }
 
+  useEscapeKey(onClose);
+
   return (
     <div
       className="fixed inset-0 z-50 bg-black/40 flex items-end sm:items-center justify-center"
       onClick={onClose}
     >
       <div
+        role="dialog"
+        aria-modal="true"
         onClick={(e) => e.stopPropagation()}
         className="bg-white w-full sm:max-w-md sm:rounded-2xl rounded-t-2xl max-h-[85vh] flex flex-col"
       >
@@ -126,7 +131,7 @@ export function ModifierModal({ restaurantId, menuItemId, onClose }: ModifierMod
                       {group.isRequired && <span className="text-red-500 ml-1">*</span>}
                     </p>
                     <span className="text-[11px] text-neutral-400">
-                      {isSingle ? "Choose 1" : `Choose up to ${group.maxSelect}`}
+                      {isSingle ? "Choose 1" : `Choose up to ${group.maxSelect ?? 1}`}
                     </span>
                   </div>
                   <div className="space-y-1.5">
@@ -188,7 +193,7 @@ export function ModifierModal({ restaurantId, menuItemId, onClose }: ModifierMod
             disabled={isLoading || missingRequired}
             className="w-full bg-[#17181C] text-white text-sm font-medium py-3 rounded-2xl disabled:opacity-50"
           >
-            Add {quantity} to cart — Rs {unitPrice * quantity}
+            {`Add ${quantity} to cart — Rs ${unitPrice * quantity}`}
           </button>
         </div>
       </div>

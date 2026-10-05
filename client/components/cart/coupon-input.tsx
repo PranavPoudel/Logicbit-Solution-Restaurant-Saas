@@ -46,6 +46,7 @@ export function CouponInput({
     <div>
       <div className="flex gap-2">
         <input
+          aria-label="Coupon code"
           value={code}
           onChange={(e) => {
             setCode(e.target.value.toUpperCase());

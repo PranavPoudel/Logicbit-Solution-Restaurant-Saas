@@ -39,7 +39,7 @@ export function CuisineSelector({
   }
 
   if (error) {
-    return <div className="flex gap-2 px-4 py-3 text-sm" style={{ color: theme.colors.primary }}>Couldn't load cuisines.</div>;
+    return <div className="flex gap-2 px-4 py-3 text-sm" style={{ color: theme.colors.primary }}>Couldn&apos;t load cuisines.</div>;
   }
 
   if (cuisines.length === 0) {

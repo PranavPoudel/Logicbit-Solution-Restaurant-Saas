@@ -10,6 +10,7 @@ interface StorefrontContactSectionProps {
   socialLinks?: Record<string, string>;
   latitude?: number;
   longitude?: number;
+  embedded?: boolean;
 }
 
 export function StorefrontContactSection({
@@ -18,39 +19,40 @@ export function StorefrontContactSection({
   socialLinks,
   latitude,
   longitude,
+  embedded = false,
 }: StorefrontContactSectionProps) {
   if (!contact && !socialLinks) return null;
 
   return (
-    <div className="max-w-4xl mx-auto px-4">
-      <h2 className="font-display text-2xl font-bold text-[#2B1410] mb-6">{title}</h2>
-      
-      <div className="bg-white border border-[#E8E7E2] rounded-2xl p-6 sm:p-8 space-y-6">
+    <div className={embedded ? "" : "max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 flex lg:justify-end"}>
+      <div className={`bg-white border border-brand-line rounded-2xl p-5 space-y-4 -translate-y-1 shadow-lg shadow-brand-dark/10 w-full ${embedded ? "" : "lg:w-[460px]"}`}>
+        <h2 className="font-display text-lg font-bold text-brand-dark">{title}</h2>
+
         {/* Contact Info */}
         {(contact?.phone || contact?.email || contact?.address) && (
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-3">
             {contact.phone && (
               <a
                 href={`tel:${contact.phone}`}
-                className="flex items-center gap-3 p-4 bg-[#0F6B5C]/5 rounded-xl hover:bg-[#0F6B5C]/10 transition-colors"
+                className="flex items-center gap-3 px-3.5 py-3 bg-brand-success/5 rounded-xl hover:bg-brand-success/10 transition-colors"
               >
-                <Phone className="w-5 h-5 text-[#0F6B5C]" />
-                <span className="text-sm font-medium text-[#2B1410]">{contact.phone}</span>
+                <Phone className="w-[18px] h-[18px] shrink-0 text-brand-success" />
+                <span className="text-sm font-medium text-brand-dark">{contact.phone}</span>
               </a>
             )}
             {contact.email && (
               <a
                 href={`mailto:${contact.email}`}
-                className="flex items-center gap-3 p-4 bg-[#E3A008]/5 rounded-xl hover:bg-[#E3A008]/10 transition-colors"
+                className="flex items-center gap-3 px-3.5 py-3 bg-brand-gold/5 rounded-xl hover:bg-brand-gold/10 transition-colors"
               >
-                <Mail className="w-5 h-5 text-[#E3A008]" />
-                <span className="text-sm font-medium text-[#2B1410]">{contact.email}</span>
+                <Mail className="w-[18px] h-[18px] shrink-0 text-brand-gold" />
+                <span className="text-sm font-medium text-brand-dark">{contact.email}</span>
               </a>
             )}
             {contact.address && (
-              <div className="flex items-center gap-3 p-4 bg-[#2B1410]/5 rounded-xl">
-                <MapPin className="w-5 h-5 text-[#2B1410]/60" />
-                <span className="text-sm font-medium text-[#2B1410]">{contact.address}</span>
+              <div className="flex items-center gap-3 px-3.5 py-3 bg-brand-dark/5 rounded-xl hover:bg-brand-dark/10 transition-colors">
+                <MapPin className="w-[18px] h-[18px] shrink-0 text-brand-dark/60" />
+                <span className="text-sm font-medium text-brand-dark">{contact.address}</span>
               </div>
             )}
           </div>
@@ -91,7 +93,6 @@ export function StorefrontContactSection({
             <DynamicRestaurantLocationMap
               lat={latitude}
               lng={longitude}
-              address={contact?.address}
             />
           </div>
         )}

@@ -2,6 +2,7 @@
 import { apiClient } from "@/lib/api/client";
 import type { DiscoveryRestaurant } from "@/types/restaurant";
 import type { RestaurantDetail, MenuCategory, MenuItemDetail } from "@/types/menu";
+import type { Review } from "@/lib/api/reviews";
 
 export interface NearbyRestaurantsParams {
   lat: number;
@@ -187,7 +188,7 @@ export async function checkDeliveryAvailability(
   return data;
 }
 
-export async function getRestaurantReviews(restaurantId: string) {
+export async function getRestaurantReviews(restaurantId: string): Promise<Review[]> {
   const { data } = await apiClient.get(`/discovery/restaurants/${restaurantId}/reviews`);
   return data;
 }

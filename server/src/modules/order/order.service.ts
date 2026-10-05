@@ -23,6 +23,11 @@ export class OrderService {
     private readonly activityLog: ActivityLogService,
   ) {}
 
+  async previewCoupon(customerId: string, restaurantId: string, code: string, subtotal: number) {
+    const { coupon, discountAmount } = await this.couponService.validateAndCalculate(restaurantId, customerId, code.trim(), subtotal);
+    return { code: coupon.code, discountAmount };
+  }
+
   /**
    * checkout()
    * -----------
@@ -257,6 +262,7 @@ export class OrderService {
       where: { id: orderId },
       include: {
         items: { include: { menuItem: true } },
+        restaurant: { select: { id: true, name: true, address: true, latitude: true, longitude: true } },
         statusHistory: { orderBy: { createdAt: 'asc' } },
         refund: true,
         delivery: {
