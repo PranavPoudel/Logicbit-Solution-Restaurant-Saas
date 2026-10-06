@@ -6,6 +6,8 @@ import { Star, Heart } from "lucide-react";
 import { useState } from "react";
 import type { DiscoveryRestaurant } from "@/types/restaurant";
 import { theme } from "@/config/theme";
+import { cuisineList } from "@/lib/utils/cuisine";
+import { AppImage } from "@/components/ui/app-image";
 
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1595917248955-a96ace4780b6?q=80&w=1169&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
@@ -15,7 +17,7 @@ export function RestaurantCard({ restaurant }: { restaurant: DiscoveryRestaurant
 
   // Defensive fallbacks
   const name = restaurant.name ?? "Restaurant";
-  const cuisines = restaurant.cuisines ?? [];
+  const cuisines = cuisineList(restaurant.cuisines);
   const rating = typeof restaurant.avgRating === "number" ? restaurant.avgRating : null;
   const distanceKm = typeof restaurant.distanceKm === "number" ? restaurant.distanceKm : null;
   const slug = restaurant.slug ?? restaurant.id;
@@ -27,9 +29,9 @@ export function RestaurantCard({ restaurant }: { restaurant: DiscoveryRestaurant
       className="group block bg-white rounded-2xl overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all"
       style={{ border: `1px solid ${theme.colors.dark}14` }}
     >
-      <div className="relative aspect-[4/3] overflow-hidden" style={{ backgroundColor: `${theme.colors.dark}0D` }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+      <div className="relative h-56 sm:h-60 overflow-hidden" style={{ backgroundColor: `${theme.colors.dark}0D` }}>
+        <AppImage
+          sizes="(min-width:1024px) 33vw, (min-width:640px) 50vw, 100vw"
           src={restaurant.coverImageUrl || FALLBACK_IMAGE}
           alt={name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
@@ -103,9 +105,9 @@ export function RestaurantCard({ restaurant }: { restaurant: DiscoveryRestaurant
 
         <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
           {cuisines.length > 0 ? (
-            cuisines.slice(0, 3).map((cuisine: any) => (
+            cuisines.slice(0, 3).map((cuisine) => (
               <span
-                key={cuisine.id || cuisine.slug}
+                key={cuisine.key}
                 className="text-[11px] font-medium px-2 py-0.5 rounded-full truncate"
                 style={{ color: theme.colors.primary, backgroundColor: `${theme.colors.primary}14` }}
               >

@@ -5,6 +5,8 @@ import { Plus, Minus } from "lucide-react";
 import type { MenuItem } from "@/types/menu";
 import { useCartStore } from "@/store/cart-store";
 import { theme } from "@/config/theme";
+import { getItemImage } from "@/lib/utils/image";
+import { AppImage } from "@/components/ui/app-image";
 
 export function MenuItemRow({
   item,
@@ -47,9 +49,8 @@ export function MenuItemRow({
         className="w-16 h-16 rounded-xl overflow-hidden shrink-0"
         style={{ backgroundColor: `${theme.colors.dark}0D` }}
       >
-        {item.imageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={item.imageUrl} alt={name} className="w-full h-full object-cover" />
+        {getItemImage(item) ? (
+          <AppImage sizes="96px" src={getItemImage(item)} alt={name} className="w-full h-full object-cover" />
         ) : (
           <div
             className="w-full h-full flex items-center justify-center font-serif"

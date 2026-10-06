@@ -11,7 +11,6 @@ export default function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname; 
 
   const excludedPrefixes = [
-    '/for-restaurants',
     '/owner',
     '/admin',
     '/delivery',

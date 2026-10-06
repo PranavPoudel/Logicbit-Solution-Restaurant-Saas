@@ -2,11 +2,21 @@
 "use client";
 
 import { use, useState } from "react";
+import dynamic from "next/dynamic";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, Phone, Star } from "lucide-react";
 import { getMyOrder } from "@/lib/api/orders";
 import { StatusTimeline } from "@/components/order/status-timeline";
 import { ReviewModal } from "@/components/review/review-modal";
+
+const OrderMap = dynamic(() => import("@/components/delivery/order-map"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-full w-full flex items-center justify-center bg-neutral-100 text-sm text-neutral-500">
+      Loading map...
+    </div>
+  ),
+});
 
 export default function OrderTrackingPage({
   params,
@@ -52,7 +62,7 @@ export default function OrderTrackingPage({
       <p className="text-xs text-neutral-400 font-mono mt-1">#{order.id}</p>
 
       <div className="bg-white border border-[#E8E7E2] rounded-2xl p-5 mt-5">
-        <StatusTimeline status={order.status} />
+        <StatusTimeline status={order.status} orderType={order.orderType} />
       </div>
 
       {/* ✅ NEW: Review Prompt (Only shows for Delivered/Completed orders) */}
@@ -101,6 +111,11 @@ export default function OrderTrackingPage({
             <div key={item.id} className="flex justify-between text-sm text-neutral-600">
               <span>
                 {item.quantity ?? 1}× {item.menuItem?.name ?? `Item (Rs ${item.unitPrice ?? "?"})`}
+                {item.selectedModifiers && item.selectedModifiers.length > 0 && (
+                  <span className="block text-xs text-neutral-400">
+                    {item.selectedModifiers.map((m) => m.name).join(", ")}
+                  </span>
+                )}
               </span>
               <span className="font-mono">Rs {item.subtotal ?? item.price ?? 0}</span>
             </div>
@@ -116,10 +131,22 @@ export default function OrderTrackingPage({
         <div className="bg-white border border-[#E8E7E2] rounded-2xl p-4 mt-4">
           <p className="text-xs text-neutral-400 mb-1">Delivering to</p>
           <p className="text-sm text-[#17181C]">{order.deliveryAddress}</p>
+
+          {order.deliveryLatitude != null && order.deliveryLongitude != null && (
+            <div className="mt-4 h-72 overflow-hidden rounded-xl border border-brand-line z-0">
+              <OrderMap
+                restaurant={
+                  order.restaurant?.latitude != null && order.restaurant?.longitude != null
+                    ? { lat: order.restaurant.latitude, lng: order.restaurant.longitude, name: order.restaurant.name }
+                    : null
+                }
+                customer={{ lat: order.deliveryLatitude, lng: order.deliveryLongitude, address: order.deliveryAddress }}
+              />
+            </div>
+          )}
         </div>
       )}
 
-  
       <ReviewModal
         orderId={order.id}
         restaurantId={order.restaurant?.id ?? ""}        

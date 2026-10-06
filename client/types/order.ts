@@ -10,6 +10,7 @@ export interface OrderItemDetail {
   price?: number;
   unitPrice?: number;
   subtotal?: number;
+  selectedModifiers?: Array<{ name: string; price?: number }>;
 }
 
 export interface OrderRestaurant {
@@ -22,6 +23,7 @@ export interface OrderRestaurant {
 
 export interface OrderDetail {
   id: string;
+  restaurantId?: string;
   orderNumber?: string;
   status?: string;
   orderType?: string;
@@ -60,3 +62,5 @@ export const ORDER_STATUS_STEPS = [
   "OUT_FOR_DELIVERY",
   "DELIVERED",
 ] as const;
+
+export const PICKUP_STATUS_STEPS = ORDER_STATUS_STEPS.filter((s) => s !== "OUT_FOR_DELIVERY");

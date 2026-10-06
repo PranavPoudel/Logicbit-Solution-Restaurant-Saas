@@ -3,7 +3,11 @@
 import { Plus, Minus } from "lucide-react";
 import type { MenuItem } from "@/types/menu";
 import { useCartStore } from "@/store/cart-store";
-import { getFullImageUrl } from "@/lib/utils/image";
+import { getItemImage } from "@/lib/utils/image";
+import { AppImage } from "@/components/ui/app-image";
+import { useRequireLogin } from "@/hooks/use-require-login";
+import { useQueryClient } from "@tanstack/react-query";
+import { getMenuItemDetail } from "@/lib/api/discovery";
 
 export function MenuItemCard({
   item,
@@ -15,6 +19,8 @@ export function MenuItemCard({
   onOpenModifiers: (menuItemId: string) => void;
 }) {
   const { items, addItem, removeOneOrAll } = useCartStore();
+  const requireLogin = useRequireLogin();
+  const queryClient = useQueryClient();
   const cartItem = items.find((i) => i.menuItemId === item.id && i.variantKey === "");
   const quantity = cartItem?.quantity ?? 0;
 
@@ -22,12 +28,26 @@ export function MenuItemCard({
   const price = item.price ?? 0;
   const isAvailable = item.isAvailable !== false;
   
-  // Check for BOTH 'imageUrl' and 'image' to be safe
-  const rawImagePath = (item as any).imageUrl || (item as any).image;
-  const imageUrl = getFullImageUrl(rawImagePath);
+  const imageUrl = getItemImage(item);
 
-  function handleAddClick() {
-    if (item.hasModifiers) {
+  async function handleAddClick() {
+    if (!requireLogin()) return;
+
+    let hasOptions = item.hasModifiers === true;
+    if (!hasOptions) {
+      try {
+        const detail = await queryClient.fetchQuery({
+          queryKey: ["menu-item-detail", restaurantId, item.id],
+          queryFn: () => getMenuItemDetail(restaurantId, item.id),
+          staleTime: 60_000,
+        });
+        hasOptions = (detail.modifierGroups ?? []).length > 0;
+      } catch {
+        hasOptions = true;
+      }
+    }
+
+    if (hasOptions) {
       onOpenModifiers(item.id);
       return;
     }
@@ -44,8 +64,7 @@ export function MenuItemCard({
     <div className="bg-white rounded-2xl border border-[#2B1410]/8 overflow-hidden">
       <div className="relative aspect-square bg-[#2B1410]/5">
         {imageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={imageUrl} alt={name} className="w-full h-full object-cover" />
+          <AppImage sizes="(min-width:1280px) 20vw, (min-width:640px) 33vw, 50vw" src={imageUrl} alt={name} className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-[#2B1410]/20 font-serif text-3xl">
             {name.charAt(0)}

@@ -314,6 +314,10 @@ export class DiscoveryService {
       address: r.address,
       city: r.city,
       currencyCode: r.currencyCode,
+      latitude: r.latitude,
+      longitude: r.longitude,
+      createdAt: r.createdAt,
+      totalOrders: r.totalOrders ?? 0,
     };
   }
 }

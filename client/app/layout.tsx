@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { QueryProvider } from "@/providers/query-provider";
+import { themeCssVariables } from "@/config/theme";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,6 +34,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      style={themeCssVariables}
       className={`${geistSans.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-sans">

@@ -2,6 +2,7 @@
 "use client";
 
 import { theme } from "@/config/theme";
+import { AppImage } from "@/components/ui/app-image";
 
 interface SignatureDish {
   id: string;
@@ -35,8 +36,7 @@ export function SignatureDishes() {
               }}
             >
               {dish.imageUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={dish.imageUrl} alt={dish.name} className="w-full h-full object-cover" />
+                <AppImage sizes="80px" src={dish.imageUrl} alt={dish.name} className="w-full h-full object-cover" />
               ) : (
                 <span className="font-serif text-lg" style={{ color: theme.colors.primary }}>
                   {dish.name.charAt(0)}

@@ -3,32 +3,25 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useCartStore } from "@/store/cart-store";
-import { checkout } from "@/lib/api/orders";
+import { checkout, validateCoupon } from "@/lib/api/orders";
+import { geocodeAddress, reverseGeocode } from "@/lib/geocode";
+import { DynamicMapPicker } from "@/components/map/dynamic-map-picker";
 import { checkDeliveryAvailability } from "@/lib/api/discovery";
-import { AlertCircle, Loader2, ShoppingBag, MapPin, Tag, Navigation } from "lucide-react";
+import { AlertCircle, CheckCircle2, Loader2, ShoppingBag, MapPin, Tag, X, Search } from "lucide-react";
 import Link from "next/link";
-
-const DeliveryLocationPicker = dynamic(
-  () => import("@/components/customer/delivery-location-picker"),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="flex h-[360px] items-center justify-center rounded-xl border border-[#E8E7E2] bg-neutral-50 text-sm text-neutral-500">
-        Loading map...
-      </div>
-    ),
-  }
-);
+import { isAxiosError } from "axios";
+import { getErrorMessage } from "@/lib/utils/error";
 
 export default function CheckoutPage() {
   const t = useTranslations("checkout");
   const router = useRouter();
 
-  const { items, restaurantId, subtotal, clear } = useCartStore();
+  const { items, restaurantId: storedRestaurantId, subtotal, clear } = useCartStore();
+  const restaurantId =
+    storedRestaurantId || items.find((i) => i.restaurantId)?.restaurantId || null;
 
   const [orderType, setOrderType] = useState<"DELIVERY" | "PICKUP">("DELIVERY");
   const [deliveryAddress, setDeliveryAddress] = useState("");
@@ -37,80 +30,120 @@ export default function CheckoutPage() {
   const [couponCode, setCouponCode] = useState("");
   const [error, setError] = useState("");
   
-  // Dynamic delivery fee states (from main)
-  const [deliveryFee, setDeliveryFee] = useState<number | null>(null);
-  const [distanceKm, setDistanceKm] = useState<number | null>(null);
-  const [deliveryCheckLoading, setDeliveryCheckLoading] = useState(false);
-  const [notDeliverable, setNotDeliverable] = useState(false);
-  const [isGettingLocation, setIsGettingLocation] = useState(false); // Added to prevent crash in handleGetLocation
+  const [isSearchingAddress, setIsSearchingAddress] = useState(false);
+  const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discountAmount: number } | null>(null);
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponError, setCouponError] = useState("");
 
   const sub = subtotal();
+
+  const hasLocation = orderType === "DELIVERY" && !!restaurantId && deliveryLatitude != null && deliveryLongitude != null;
+  const deliveryQuery = useQuery({
+    queryKey: ["delivery-check", restaurantId, deliveryLatitude, deliveryLongitude],
+    queryFn: () => checkDeliveryAvailability(restaurantId as string, deliveryLatitude as number, deliveryLongitude as number),
+    enabled: hasLocation,
+    retry: false,
+  });
+  type DeliveryCheck = { deliverable?: boolean; deliveryFee?: number; distanceKm?: number };
+  const checkResult = deliveryQuery.data as (DeliveryCheck & { data?: DeliveryCheck }) | undefined;
+  const deliveryData: DeliveryCheck | undefined = checkResult?.data ?? checkResult;
+  const deliveryCheckLoading = hasLocation && deliveryQuery.isFetching;
+  const notDeliverable = hasLocation && deliveryData?.deliverable === false;
+  const distanceKm: number | null =
+    hasLocation && typeof deliveryData?.distanceKm === "number" ? deliveryData.distanceKm : null;
+  const deliveryFee: number | null =
+    hasLocation && !notDeliverable && typeof deliveryData?.deliveryFee === "number" ? deliveryData.deliveryFee : null;
+  const feeUnavailable =
+    hasLocation && !notDeliverable && !deliveryCheckLoading && (deliveryQuery.isError || (!!deliveryData && deliveryFee === null));
   const effectiveDeliveryFee = deliveryFee ?? 0;
-  const total = sub + (orderType === "DELIVERY" ? effectiveDeliveryFee : 0);
+  const discount = appliedCoupon ? Math.min(appliedCoupon.discountAmount, sub) : 0;
+  const total = Math.max(0, sub - discount) + (orderType === "DELIVERY" ? effectiveDeliveryFee : 0);
 
-  // Derived state to keep the DeliveryLocationPicker happy
-  const selectedLocation =
-    deliveryLatitude != null && deliveryLongitude != null
-      ? { latitude: deliveryLatitude, longitude: deliveryLongitude }
-      : null;
-
-  const handleGetLocation = () => {
-    if (!navigator.geolocation) {
-      setError("Geolocation is not supported by your browser.");
-      return;
-    }
-    setIsGettingLocation(true);
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setDeliveryLatitude(position.coords.latitude);
-        setDeliveryLongitude(position.coords.longitude);
-        setIsGettingLocation(false);
-        if (!deliveryAddress.trim()) {
-          setDeliveryAddress(`Lat: ${position.coords.latitude.toFixed(4)}, Lng: ${position.coords.longitude.toFixed(4)}`);
-        }
-      },
-      () => {
-        setIsGettingLocation(false);
-        setError("Unable to retrieve your location.");
-      }
-    );
-  };
-
-  const handleLocationChange = (location: { latitude: number; longitude: number }) => {
-    setDeliveryLatitude(location.latitude);
-    setDeliveryLongitude(location.longitude);
+  const handleMapChange = async (lat: number, lng: number) => {
+    setDeliveryLatitude(lat);
+    setDeliveryLongitude(lng);
     setError("");
+    const address = await reverseGeocode(lat, lng);
+    if (address) setDeliveryAddress(address);
   };
 
-  // Distance-based delivery fee: fetches the real fee once we have the customer's location
-  useEffect(() => {
-    if (orderType !== "DELIVERY" || !restaurantId || deliveryLatitude == null || deliveryLongitude == null) {
+  const handleFindAddress = async () => {
+    if (!deliveryAddress.trim()) return;
+    setIsSearchingAddress(true);
+    setError("");
+    try {
+      const result = await geocodeAddress(deliveryAddress);
+      if (result) {
+        setDeliveryLatitude(result.lat);
+        setDeliveryLongitude(result.lng);
+        setDeliveryAddress(result.address);
+      } else {
+        setError("Could not find this address. Try a more specific one or drag the pin.");
+      }
+    } catch {
+      setError("Address search failed. Check your connection or drag the pin instead.");
+    } finally {
+      setIsSearchingAddress(false);
+    }
+  };
+
+  const handleApplyCoupon = async () => {
+    const code = couponCode.trim();
+    setCouponError("");
+    if (!code) {
+      setCouponError("Please enter a coupon code first.");
       return;
     }
-    setDeliveryCheckLoading(true);
-    setNotDeliverable(false);
-    checkDeliveryAvailability(restaurantId, deliveryLatitude, deliveryLongitude)
-      .then((res: any) => {
-        const data = res?.data ?? res;
-        if (data?.deliverable === false) {
-          setNotDeliverable(true);
-          setDeliveryFee(null);
-        } else {
-          setDeliveryFee(typeof data?.deliveryFee === "number" ? data.deliveryFee : 60);
-          setDistanceKm(typeof data?.distanceKm === "number" ? data.distanceKm : null);
-        }
+    if (!restaurantId) {
+      setCouponError("This cart has no restaurant attached. Clear the cart and add your items again.");
+      return;
+    }
+    setCouponLoading(true);
+    try {
+      setAppliedCoupon(await validateCoupon(restaurantId, code.toUpperCase(), sub));
+    } catch (err) {
+      setAppliedCoupon(null);
+      const response = isAxiosError(err) ? err.response : undefined;
+      setCouponError(
+        response?.status === 401
+          ? "Please log in to apply a coupon."
+          : !response
+            ? "Could not reach the server. Check your connection."
+            : getErrorMessage(err, "This coupon could not be applied.")
+      );
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode("");
+    setCouponError("");
+  };
+
+  const appliedCode = appliedCoupon?.code;
+  useEffect(() => {
+    if (!appliedCode || !restaurantId) return;
+    let cancelled = false;
+    validateCoupon(restaurantId, appliedCode, sub)
+      .then((preview) => {
+        if (!cancelled) setAppliedCoupon(preview);
       })
       .catch(() => {
-        setDeliveryFee(60);
-        setDistanceKm(null);
-      })
-      .finally(() => setDeliveryCheckLoading(false));
-  }, [orderType, restaurantId, deliveryLatitude, deliveryLongitude]);
+        if (cancelled) return;
+        setAppliedCoupon(null);
+        setError("Your coupon is no longer valid for this cart.");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [sub, appliedCode, restaurantId]);
 
   const mutation = useMutation({
     mutationFn: async () => {
       if (!restaurantId) throw new Error("Restaurant ID is missing.");
-      if (items.length === 0) throw new Error("Cart is empty.");
+      if (items.length === 0) throw new Error(t("errors.emptyCart"));
 
       if (orderType === "DELIVERY") {
         if (deliveryLatitude == null || deliveryLongitude == null) {
@@ -132,7 +165,7 @@ export default function CheckoutPage() {
               deliveryLongitude: deliveryLongitude ?? undefined,
             }
           : {}),
-        ...(couponCode.trim() ? { couponCode: couponCode.trim().toUpperCase() } : {}),
+        ...(appliedCoupon ? { couponCode: appliedCoupon.code } : {}),
         items: items.map((item) => ({
           menuItemId: item.menuItemId,
           quantity: item.quantity,
@@ -149,14 +182,12 @@ export default function CheckoutPage() {
     onSuccess: (data) => {
       clear();
       const orderId = data?.id || data?.orderId; 
-      router.push(`/account/orders/${orderId}`); 
+      router.push(`/orders/${orderId}`); 
     },
 
-    onError: (err: any) => {
+    onError: (err: unknown) => {
       console.error("Checkout failed:", err);
-      const rawMessage = err?.response?.data?.message || err?.message || t("genericError");
-      const errorMessage = typeof rawMessage === "string" ? rawMessage : JSON.stringify(rawMessage);
-      setError(errorMessage);
+      setError(getErrorMessage(err, t("genericError"), { includeErrorMessage: true }));
 
       window.scrollTo({ top: 0, behavior: "smooth" });
     },
@@ -167,7 +198,7 @@ export default function CheckoutPage() {
     setError("");
 
     if (items.length === 0) {
-      setError(t("errors.emptyCart") || "Cart is empty.");
+      setError(t("errors.emptyCart"));
       return;
     }
     if (!restaurantId) {
@@ -181,6 +212,10 @@ export default function CheckoutPage() {
       }
       if (!deliveryAddress.trim()) {
         setError("Please enter your delivery address.");
+        return;
+      }
+      if (feeUnavailable) {
+        setError("We couldn't work out the delivery fee. Please retry, or choose pickup.");
         return;
       }
     }
@@ -245,6 +280,7 @@ export default function CheckoutPage() {
               <div className="relative">
                 <MapPin size={16} className="absolute left-3 top-3 text-neutral-400" />
                 <textarea
+                  aria-label={t("placeholders.address")}
                   required
                   value={deliveryAddress}
                   onChange={(e) => setDeliveryAddress(e.target.value)}
@@ -253,23 +289,36 @@ export default function CheckoutPage() {
                   className="w-full resize-none rounded-xl border border-[#E8E7E2] py-2.5 pl-10 pr-4 text-sm outline-none focus:border-[#E3A008] focus:ring-2 focus:ring-[#E3A008]/40"
                 />
               </div>
+              <button
+                type="button"
+                onClick={handleFindAddress}
+                disabled={isSearchingAddress || !deliveryAddress.trim()}
+                className="mt-3 inline-flex items-center gap-2 rounded-xl bg-brand-ink px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-ink-hover disabled:opacity-50"
+              >
+                {isSearchingAddress ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
+                Find on map
+              </button>
 
               <div className="mt-5">
                 <p className="mb-3 text-sm font-medium text-[#17181C]">Select delivery location</p>
-                <DeliveryLocationPicker
-                  value={selectedLocation}
-                  onChange={handleLocationChange}
+                <DynamicMapPicker
+                  lat={deliveryLatitude ?? 0}
+                  lng={deliveryLongitude ?? 0}
+                  onChange={handleMapChange}
                 />
-                
+                <p className="mt-2 text-xs text-neutral-500">
+                  Type your address and press Find, or drag the pin to your exact spot.
+                </p>
+
                 {/* Merged UX: Show not deliverable warning AND coordinate confirmation */}
                 {notDeliverable && (
                   <p className="text-xs text-red-600 mt-3">
-                    This restaurant doesn't deliver to your current location.
+                    This restaurant doesn&apos;t deliver to your current location.
                   </p>
                 )}
-                {!notDeliverable && selectedLocation && (
+                {!notDeliverable && deliveryLatitude != null && deliveryLongitude != null && (
                   <p className="text-xs text-amber-600 mt-3">
-                    Delivery pin selected: Lat {selectedLocation.latitude.toFixed(4)}, Lng {selectedLocation.longitude.toFixed(4)}
+                    {`Delivery pin selected: Lat ${deliveryLatitude.toFixed(4)}, Lng ${deliveryLongitude.toFixed(4)}`}
                   </p>
                 )}
               </div>
@@ -283,30 +332,46 @@ export default function CheckoutPage() {
               <div className="relative flex-1">
                 <Tag size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
                 <input
+                  aria-label={t("placeholders.coupon")}
                   type="text"
                   value={couponCode}
                   onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                  disabled={!!appliedCoupon}
                   placeholder={t("placeholders.coupon")}
                   className="w-full rounded-xl border border-[#E8E7E2] py-2.5 pl-10 pr-4 text-sm uppercase outline-none focus:border-[#E3A008] focus:ring-2 focus:ring-[#E3A008]/40"
                 />
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  if (!couponCode.trim()) {
-                    setError("Please enter a coupon code first.");
-                    return;
-                  }
-                  setError(""); 
-                }}
-                className="rounded-xl bg-[#17181C] px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2B2D33]"
-              >
-                {t("apply")}
-              </button>
+              {appliedCoupon ? (
+                <button
+                  type="button"
+                  onClick={handleRemoveCoupon}
+                  className="flex items-center gap-1.5 rounded-xl border border-brand-line px-4 py-2.5 text-sm font-medium text-neutral-600 hover:text-red-600"
+                >
+                  <X size={14} /> Remove
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleApplyCoupon}
+                  disabled={couponLoading}
+                  className="rounded-xl bg-brand-ink px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-brand-ink-hover disabled:opacity-50"
+                >
+                  {couponLoading ? "…" : t("apply")}
+                </button>
+              )}
             </div>
-            <p className="mt-2 text-xs text-neutral-400">
-              * Coupon validity will be verified when you place your order.
-            </p>
+            {couponError && (
+              <div role="alert" className="mt-3 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3.5 py-2.5 text-sm font-medium text-red-700">
+                <AlertCircle size={16} className="shrink-0" />
+                {couponError}
+              </div>
+            )}
+            {appliedCoupon && (
+              <div role="status" className="mt-3 flex items-center gap-2 rounded-xl border border-green-200 bg-green-50 px-3.5 py-2.5 text-sm font-medium text-green-700">
+                <CheckCircle2 size={16} className="shrink-0" />
+                {`Coupon ${appliedCoupon.code} applied. You save Rs ${appliedCoupon.discountAmount}!`}
+              </div>
+            )}
           </div>
         </div>
 
@@ -339,6 +404,13 @@ export default function CheckoutPage() {
                 <span className="font-mono">Rs {sub}</span>
               </div>
 
+              {appliedCoupon && (
+                <div className="flex justify-between text-brand-success">
+                  <span>{`Discount (${appliedCoupon.code})`}</span>
+                  <span className="font-mono">- Rs {discount}</span>
+                </div>
+              )}
+
               {orderType === "DELIVERY" && (
                 <div className="flex justify-between text-neutral-500">
                   <span>
@@ -348,8 +420,21 @@ export default function CheckoutPage() {
                     )}
                   </span>
                   <span className="font-mono">
-                    {deliveryCheckLoading ? "…" : `Rs ${effectiveDeliveryFee}`}
+                    {deliveryCheckLoading ? "…" : feeUnavailable ? "—" : `Rs ${effectiveDeliveryFee}`}
                   </span>
+                </div>
+              )}
+
+              {orderType === "DELIVERY" && feeUnavailable && (
+                <div role="alert" className="flex items-center justify-between gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-700">
+                  <span>We couldn&apos;t work out the delivery fee. Please retry, or choose pickup.</span>
+                  <button
+                    type="button"
+                    onClick={() => deliveryQuery.refetch()}
+                    className="shrink-0 rounded-lg border border-red-300 px-2.5 py-1 hover:bg-red-100"
+                  >
+                    Retry
+                  </button>
                 </div>
               )}
 
@@ -359,11 +444,17 @@ export default function CheckoutPage() {
               </div>
             </div>
 
+            {error && (
+              <div role="alert" className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-3.5 py-2.5 text-sm font-medium text-red-700">
+                <AlertCircle size={16} className="mt-0.5 shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
             <button
               type="submit"
               disabled={
                 mutation.isPending ||
-                (orderType === "DELIVERY" && (!deliveryAddress.trim() || notDeliverable || deliveryCheckLoading))
+                (orderType === "DELIVERY" && (!deliveryAddress.trim() || notDeliverable || deliveryCheckLoading || feeUnavailable))
               }
               className="w-full bg-[#17181C] text-white text-sm font-medium py-3.5 rounded-xl hover:bg-[#2B2D33] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >

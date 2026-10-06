@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useEscapeKey } from "@/hooks/use-escape-key";
 import { X, Percent } from "lucide-react";
 import { theme } from "@/config/theme";
 
@@ -23,6 +24,8 @@ export function PopupAd() {
     sessionStorage.setItem("logicbit-popup-shown", "1");
   }
 
+  useEscapeKey(dismiss, visible);
+
   if (!visible) return null;
 
   return (
@@ -32,6 +35,8 @@ export function PopupAd() {
       onClick={dismiss}
     >
       <div
+        role="dialog"
+        aria-modal="true"
         onClick={(e) => e.stopPropagation()}
         className="rounded-[2rem] w-full max-w-sm overflow-hidden animate-in zoom-in-95 fade-in duration-300 shadow-2xl shadow-black/30"
         style={{

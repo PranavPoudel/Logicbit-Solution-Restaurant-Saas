@@ -1,8 +1,13 @@
 // lib/utils/image.ts
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'http://localhost:3700';
+import { API_ORIGIN } from "@/lib/api-config";
+
+export const getItemImage = (item: { imageUrl?: string; image?: string }) => item.imageUrl || item.image;
 
 export function getFullImageUrl(path: string | null | undefined): string {
-  if (!path) return '';
-  if (path.startsWith('http')) return path; // Already a full URL
-  return `${BACKEND_URL}${path}`; // Prepend backend URL
+  if (!path) return "";
+  if (/^(https?:)?\/\//.test(path) || path.startsWith("data:") || path.startsWith("blob:")) {
+    return path;
+  }
+  if (path.startsWith("/images/")) return path;
+  return `${API_ORIGIN}${path.startsWith("/") ? "" : "/"}${path}`;
 }
