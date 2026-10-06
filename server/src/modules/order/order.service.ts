@@ -418,6 +418,18 @@ export class OrderService {
     }
   }
 
+  async rejectRider(tenantId: string, restaurantId: string, orderId: string) {
+    const order = await this.findOneForRestaurant(tenantId, restaurantId, orderId);
+    if (order.status !== 'READY' || order.delivery?.status !== 'ASSIGNED') {
+      throw new BadRequestException('There is no rider waiting for approval on this order');
+    }
+
+    return this.prisma.delivery.update({
+      where: { orderId },
+      data: { status: 'UNASSIGNED', deliveryPersonId: null, assignedAt: null },
+    });
+  }
+
   /**
    * cancel()
    * ---------

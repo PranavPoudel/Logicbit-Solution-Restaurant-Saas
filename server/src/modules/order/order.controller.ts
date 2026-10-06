@@ -72,4 +72,9 @@ export class RestaurantOrderController {
   cancel(@Req() req, @Param('id') id: string, @Body() dto: CancelOrderDto) {
     return this.orderService.cancel('RESTAURANT', req.user.id, id, dto);
   }
+
+  @Patch(':id/reject-rider')
+  rejectRider(@Req() req, @Param('restaurantId') restaurantId: string, @Param('id') id: string) {
+    return this.orderService.rejectRider(req.user.tenantId, restaurantId, id);
+  }
 }

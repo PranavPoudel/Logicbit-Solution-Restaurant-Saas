@@ -81,6 +81,13 @@ export async function updateOrderStatus(
   return data;
 }
 
+export async function rejectRider(restaurantId: string, orderId: string) {
+  const { data } = await ownerApiClient.patch(
+    `/restaurants/${restaurantId}/orders/${orderId}/reject-rider`
+  );
+  return data;
+}
+
 export async function cancelRestaurantOrder(restaurantId: string, orderId: string) {
   const { data } = await ownerApiClient.patch(
     `/restaurants/${restaurantId}/orders/${orderId}/cancel`

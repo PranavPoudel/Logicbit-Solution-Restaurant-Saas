@@ -3,20 +3,37 @@
 
 import { use } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, AlertTriangle, ShoppingBag, User, MapPin, Clock } from "lucide-react";
 import { useOwnerAuthStore } from "@/store/owner-auth-store";
-import { getOrderById } from "@/lib/api/orders";
+import { OrderActions, RiderCard } from "@/components/layout/owner-notifications";
+import { getOrderById, rejectRider, updateOrderStatus } from "@/lib/api/orders";
+
+const RIDER_STATUS = { approve: "OUT_FOR_DELIVERY", complete: "DELIVERED" } as const;
 
 export default function OrderDetailPage({ params }: { params: Promise<{ orderId: string }> }) {
   const { orderId } = use(params);
   const router = useRouter();
   const restaurantId = useOwnerAuthStore((s) => s.activeRestaurantId);
 
+  const queryClient = useQueryClient();
+
   const { data: order, isLoading, isError } = useQuery({
     queryKey: ["order-detail", orderId],
     queryFn: () => getOrderById(restaurantId as string, orderId),
     enabled: !!restaurantId && !!orderId,
+    refetchInterval: 15000,
+  });
+
+  const riderMutation = useMutation({
+    mutationFn: (action: keyof typeof RIDER_STATUS | "reject") =>
+      action === "reject"
+        ? rejectRider(restaurantId as string, orderId)
+        : updateOrderStatus(restaurantId as string, orderId, RIDER_STATUS[action]),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["order-detail", orderId] });
+      queryClient.invalidateQueries({ queryKey: ["owner-orders", restaurantId] });
+    },
   });
 
   if (isLoading) {
@@ -42,6 +59,10 @@ export default function OrderDetailPage({ params }: { params: Promise<{ orderId:
       </div>
     );
   }
+
+  const rider = order.delivery?.deliveryPerson;
+  const awaitingApproval = order.status === "READY" && order.delivery?.status === "ASSIGNED";
+  const awaitingConfirm = order.status === "OUT_FOR_DELIVERY" && order.delivery?.status === "DELIVERED";
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -75,6 +96,29 @@ export default function OrderDetailPage({ params }: { params: Promise<{ orderId:
         </div>
 
         <div className="p-6 space-y-6">
+          {rider && (
+            <div>
+              <RiderCard order={order} />
+              {awaitingConfirm && (
+                <OrderActions
+                  large
+                  disabled={riderMutation.isPending}
+                  acceptLabel="Confirm complete"
+                  onAccept={() => riderMutation.mutate("complete")}
+                />
+              )}
+              {awaitingApproval && (
+                <OrderActions
+                  large
+                  disabled={riderMutation.isPending}
+                  acceptLabel="Approve & send out"
+                  onAccept={() => riderMutation.mutate("approve")}
+                  onReject={() => riderMutation.mutate("reject")}
+                />
+              )}
+            </div>
+          )}
+
           {/* Customer Info */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex items-start gap-3">
@@ -109,7 +153,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ orderId:
                     {item.notes && <p className="text-xs text-neutral-500 mt-1 italic">Note: {item.notes}</p>}
                   </div>
                   <span className="font-mono text-neutral-900">
-                    Rs. {(item.price * item.quantity).toLocaleString()}
+                    Rs. {(item.subtotal ?? 0).toLocaleString()}
                   </span>
                 </li>
               ))}
@@ -120,7 +164,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ orderId:
           <div className="border-t border-neutral-100 pt-4 space-y-2">
             <div className="flex justify-between text-sm text-neutral-600">
               <span>Subtotal</span>
-              <span>Rs. {(order.total || 0).toLocaleString()}</span>
+              <span>Rs. {(order.subtotal ?? order.total ?? 0).toLocaleString()}</span>
             </div>
             {order.deliveryFee > 0 && (
               <div className="flex justify-between text-sm text-neutral-600">
