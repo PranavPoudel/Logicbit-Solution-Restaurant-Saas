@@ -1,7 +1,8 @@
-// app/(owner-dashboard)/orders/page.tsx
+// app/owner/(owner-dashboard)/orders/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
+import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, Trash2 } from "lucide-react";
 import { useOwnerAuthStore } from "@/store/owner-auth-store";
@@ -12,7 +13,6 @@ import {
 } from "@/lib/api/orders";
 import { OrderTabs } from "@/components/owner-orders/order-tabs";
 import { OrderCard, type OwnerOrderSummary } from "@/components/owner-orders/order-card";
-import { OrderDetailModal } from "@/components/owner-orders/order-detail-modal";
 import { OrderTable } from "@/components/owner-orders/order-table";
 import { SubscriptionUpgradeBanner } from "@/components/ui/subscription-upgrade-banner";
 
@@ -27,13 +27,14 @@ const TAB_DEFS = [
   { key: "TRASH", label: "Trash", isSystem: true, icon: Trash2 },
 ];
 
-export default function OrdersPage() {
+function OrdersPageContent() {
+  const router = useRouter();
   const restaurantId = useOwnerAuthStore((s) => s.activeRestaurantId);
   const queryClient = useQueryClient();
+  
   const [activeTab, setActiveTab] = useState("ALL");
-  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
-  // Fetch all orders (for ALL tab and general data)
+  // Fetch all orders
   const allOrdersQuery = useQuery({
     queryKey: ["owner-orders", restaurantId, "all"],
     queryFn: () => listRestaurantOrders(restaurantId as string) as Promise<OwnerOrderSummary[]>,
@@ -41,7 +42,7 @@ export default function OrdersPage() {
     refetchInterval: 15000,
   });
 
-  // Fetch filtered orders (for status tabs)
+  // Fetch filtered orders
   const filteredOrdersQuery = useQuery({
     queryKey: ["owner-orders", restaurantId, activeTab],
     queryFn: () => {
@@ -57,7 +58,6 @@ export default function OrdersPage() {
   const allOrders = allOrdersQuery.data ?? [];
   const filteredOrders = filteredOrdersQuery.data ?? [];
   
-  // Use all orders for ALL tab, filtered for others, and cancelled for TRASH
   const orders = activeTab === "ALL" 
     ? allOrders 
     : activeTab === "TRASH"
@@ -81,7 +81,6 @@ export default function OrdersPage() {
 
   const isMutating = statusMutation.isPending || cancelMutation.isPending;
 
-  // Calculate counts for tabs
   const tabs = TAB_DEFS.map((tab) => {
     if (tab.key === "ALL") {
       const nonCancelled = allOrders.filter(o => (o.status ?? "").toUpperCase() !== "CANCELLED");
@@ -100,9 +99,9 @@ export default function OrdersPage() {
       <div className="max-w-6xl mx-auto flex flex-col items-center text-center gap-3 py-16">
         <AlertTriangle className="text-neutral-300" size={28} />
         <p className="text-sm text-red-500">
-  Couldn&apos;t load orders:{" "}
-  {String((allOrdersQuery.error as any)?.response?.data?.message || allOrdersQuery.error)}
-</p>
+          Couldn&apos;t load orders:{" "}
+          {String((allOrdersQuery.error as any)?.response?.data?.message || allOrdersQuery.error)}
+        </p>
       </div>
     );
   }
@@ -111,13 +110,9 @@ export default function OrdersPage() {
     <div className="max-w-7xl">
       <div className="flex items-center justify-between mb-1">
         <h1 className="text-xl font-semibold text-neutral-900">Orders</h1>
-        <p className="text-xs text-neutral-500">
-          Auto-refresh every 15 seconds
-        </p>
+        <p className="text-xs text-neutral-500">Auto-refresh every 15 seconds</p>
       </div>
-      <p className="text-sm text-neutral-500 mb-6">
-        Manage and track all your restaurant orders.
-      </p>
+      <p className="text-sm text-neutral-500 mb-6">Manage and track all your restaurant orders.</p>
       
       <SubscriptionUpgradeBanner />
        
@@ -142,45 +137,39 @@ export default function OrdersPage() {
           </p>
         </div>
       ) : activeTab === "ALL" || activeTab === "TRASH" ? (
-        // Table view for ALL and TRASH tabs
         <OrderTable
           orders={orders}
           isTrash={activeTab === "TRASH"}
           isMutating={isMutating}
-          onView={(orderId) => setSelectedOrderId(orderId)}
-          onStatusChange={(orderId, status) =>
-            statusMutation.mutate({ orderId, status })
-          }
+          // ✅ FIX: Redirect to the dedicated order detail page
+          onView={(orderId) => router.push(`/owner/orders/${orderId}`)}
+          onStatusChange={(orderId, status) => statusMutation.mutate({ orderId, status })}
           onCancel={(orderId) => cancelMutation.mutate(orderId)}
         />
       ) : (
-        // Card view for workflow tabs
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {orders.map((order) => (
             <OrderCard
               key={order.id}
               order={order}
               isMutating={isMutating}
-              onView={() => setSelectedOrderId(order.id)}
-              onAccept={() =>
-                statusMutation.mutate({ orderId: order.id, status: "ACCEPTED" })
-              }
+              // ✅ FIX: Redirect to the dedicated order detail page
+              onView={() => router.push(`/owner/orders/${order.id}`)}
+              onAccept={() => statusMutation.mutate({ orderId: order.id, status: "ACCEPTED" })}
               onReject={() => cancelMutation.mutate(order.id)}
-              onAdvance={(next) =>
-                statusMutation.mutate({ orderId: order.id, status: next })
-              }
+              onAdvance={(next) => statusMutation.mutate({ orderId: order.id, status: next })}
             />
           ))}
         </div>
       )}
-
-      {selectedOrderId && (
-        <OrderDetailModal
-          restaurantId={restaurantId}
-          orderId={selectedOrderId}
-          onClose={() => setSelectedOrderId(null)}
-        />
-      )}
     </div>
+  );
+}
+
+export default function OrdersPage() {
+  return (
+    <Suspense fallback={<p className="text-center py-12 text-neutral-500">Loading orders...</p>}>
+      <OrdersPageContent />
+    </Suspense>
   );
 }

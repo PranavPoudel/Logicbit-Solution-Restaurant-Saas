@@ -1,4 +1,4 @@
-// app/(owner-dashboard)/dashboard/page.tsx
+// app/owner/(owner-dashboard)/dashboard/page.tsx
 "use client";
 
 import { ShoppingBag, Wallet, Clock, CheckCircle2, AlertCircle, Link as LinkIcon, Users } from "lucide-react";
@@ -58,9 +58,10 @@ export default function DashboardPage() {
 
   const analytics = analyticsQuery.data;
 
+  // ✅ Map orders safely, ensuring 'id' is always present and valid
   const pendingOrders = (ordersQuery.data ?? []).map((o) => ({
     id: o.id,
-    code: o.orderNumber ?? o.id.slice(0, 6),
+    code: o.orderNumber ?? (o.id ? o.id.slice(0, 6).toUpperCase() : "N/A"),
     customerName: o.customer?.name ?? "Customer",
     itemCount: (o.items ?? []).reduce((sum, i) => sum + (i.quantity ?? 1), 0),
     total: o.total ?? 0,
@@ -69,9 +70,12 @@ export default function DashboardPage() {
       : 0,
   }));
 
-  const sub = subscriptionQuery.data as any;
-  const hasNoSubscription = sub?.status === "NO_SUBSCRIPTION";
-  const isExpiring = sub?.status === "expiring";
+  // 🔍 DIAGNOSTIC LOG: Check your browser console to confirm IDs are flowing correctly
+  console.log("Dashboard Pending Orders Data:", pendingOrders);
+
+  const sub = subscriptionQuery.data;
+  const hasNoSubscription = sub && "status" in sub && sub.status === "NO_SUBSCRIPTION";
+  const isExpiring = sub && "status" in sub && sub.status === "expiring";
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto p-1">
@@ -102,7 +106,9 @@ export default function DashboardPage() {
             <div>
               <p className="text-sm font-semibold text-amber-700">Subscription Expiring Soon</p>
               <p className="text-xs text-amber-600 mt-0.5">
-                Your plan expires on {sub?.expiryDate && new Date(sub.expiryDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                Your plan expires on {sub && "expiryDate" in sub && sub.expiryDate 
+                  ? new Date(sub.expiryDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) 
+                  : "soon"}
               </p>
             </div>
           </div>
@@ -114,8 +120,8 @@ export default function DashboardPage() {
         <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-center gap-3">
           <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
           <p className="text-sm font-medium text-emerald-800">
-            Active Plan: <span className="font-semibold">{sub.planName ?? "Standard"}</span>
-            {sub.daysRemaining && ` · ${sub.daysRemaining} days remaining`}
+            Active Plan: <span className="font-semibold">{sub && "planName" in sub ? sub.planName : "Standard"}</span>
+            {sub && "daysRemaining" in sub && sub.daysRemaining && ` · ${sub.daysRemaining} days remaining`}
           </p>
         </div>
       ) : null}

@@ -105,3 +105,7 @@ export async function validateCoupon(
   });
   return data;
 }
+export async function getOrderById(restaurantId: string, orderId: string) {
+  const { data } = await ownerApiClient.get(`/restaurants/${restaurantId}/orders/${orderId}`);
+  return data;
+}
