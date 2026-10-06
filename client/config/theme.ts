@@ -11,6 +11,13 @@ export const theme = {
     ratingGold: "#E3A008",
     statusOpenBg: "#5B8C5A",
     statusOpenText: "#3E6B3D",
+    ink: "#17181C",
+    inkHover: "#2B2D33",
+    line: "#E8E7E2",
+    surface: "#FAFAF7",
+    success: "#0F6B5C",
+    openSoftBg: "#E7F1E9",
+    openSoftText: "#2F6B3C",
   },
   brand: {
     name: "LogicBit",
@@ -109,3 +116,19 @@ export const theme = {
     readyToStartHeading: "Ready to get started?",
   },
 };
+
+export const themeCssVariables = {
+  "--brand-primary": theme.colors.primary,
+  "--brand-primary-hover": theme.colors.primaryHover,
+  "--brand-background": theme.colors.background,
+  "--brand-dark": theme.colors.dark,
+  "--brand-dark-hover": theme.colors.darkHover,
+  "--brand-gold": theme.colors.ratingGold,
+  "--brand-ink": theme.colors.ink,
+  "--brand-ink-hover": theme.colors.inkHover,
+  "--brand-line": theme.colors.line,
+  "--brand-surface": theme.colors.surface,
+  "--brand-success": theme.colors.success,
+  "--brand-open-bg": theme.colors.openSoftBg,
+  "--brand-open-text": theme.colors.openSoftText,
+} as React.CSSProperties;

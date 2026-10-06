@@ -17,6 +17,7 @@ export function SearchBar({ value, onChange, autoFocus }: SearchBarProps) {
         className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400"
       />
       <input
+        aria-label="Search restaurants or dishes"
         type="text"
         autoFocus={autoFocus}
         value={value}

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link"; // ✅ Re-added from HEAD for clickable banners
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { AppImage } from "@/components/ui/app-image";
 
 interface Banner {
   id: string;
@@ -43,7 +44,8 @@ export function StorefrontBannerCarousel({ banners }: StorefrontBannerCarouselPr
           // ✅ Extract content so we can conditionally wrap it in a Link
           const Content = (
             <div className="w-full flex-shrink-0 relative aspect-[16/9] sm:aspect-[21/9]">
-              <img
+              <AppImage
+                sizes="100vw"
                 src={banner.imageUrl}
                 alt={banner.title || "Banner"}
                 className="w-full h-full object-cover"

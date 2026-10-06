@@ -2,6 +2,7 @@
 "use client";
 
 import { theme } from "@/config/theme";
+import { AppImage } from "@/components/ui/app-image";
 
 interface Banner {
   id: string;
@@ -45,10 +46,11 @@ export function BannerCarousel() {
       {mockBanners.map((banner) => (
         <div
           key={banner.id}
-          className="relative rounded-2xl overflow-hidden h-[150px] cursor-pointer group"
+          className="relative rounded-2xl overflow-hidden h-[165px] sm:h-[180px] cursor-pointer group"
           style={{ boxShadow: `0 1px 4px ${theme.colors.dark}14` }}
         >
-          <img
+          <AppImage
+            sizes="(min-width:640px) 33vw, 100vw"
             src={banner.image}
             alt=""
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
@@ -60,15 +62,15 @@ export function BannerCarousel() {
               background: `linear-gradient(180deg, ${theme.colors.dark}00 30%, ${theme.colors.dark}CC 100%)`,
             }}
           />
-          <div className="absolute inset-0 p-4 flex flex-col justify-end">
-            <p className="font-serif font-semibold text-base leading-tight" style={{ color: theme.colors.background }}>
+          <div className="absolute inset-0 p-5 flex flex-col justify-end">
+            <p className="font-serif font-semibold text-lg leading-tight" style={{ color: theme.colors.background }}>
               {banner.title}
             </p>
-            <p className="text-xs mt-0.5" style={{ color: `${theme.colors.background}CC` }}>
+            <p className="text-sm mt-1" style={{ color: `${theme.colors.background}CC` }}>
               {banner.subtitle}
             </p>
             <span
-              className="text-xs font-medium mt-2 inline-flex items-center gap-1 w-fit"
+              className="text-sm font-medium mt-2.5 inline-flex items-center gap-1 w-fit"
               style={{ color: theme.colors.ratingGold }}
             >
               {banner.cta} →

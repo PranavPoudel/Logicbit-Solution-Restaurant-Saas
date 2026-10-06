@@ -6,6 +6,7 @@ import { X } from "lucide-react";
 import Link from "next/link";
 import type { PublicPopup } from "@/lib/api/public-storefront";
 import { theme } from "@/config/theme";
+import { AppImage } from "@/components/ui/app-image";
 
 interface StorefrontPopupModalProps {
   popups: PublicPopup[];
@@ -51,8 +52,7 @@ export function StorefrontPopupModal({ popups }: StorefrontPopupModalProps) {
         </button>
 
         {currentPopup.imageUrl && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={currentPopup.imageUrl} alt={currentPopup.title} className="w-full h-40 object-cover" />
+          <AppImage sizes="400px" src={currentPopup.imageUrl} alt={currentPopup.title} className="w-full h-40 object-cover" />
         )}
 
         <div className="p-6 text-center space-y-4">

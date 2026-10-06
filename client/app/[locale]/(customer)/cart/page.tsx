@@ -7,7 +7,7 @@ import { useCartStore } from "@/store/cart-store";
 
 export default function CartPage() {
   const t = useTranslations("cart");
-  const { items, restaurantId, subtotal, addItem, removeOneOrAll, removeItem } = useCartStore();
+  const { items, subtotal, addItem, removeOneOrAll, removeItem } = useCartStore();
   const sub = subtotal();
 
   if (items.length === 0) {
@@ -46,6 +46,7 @@ export default function CartPage() {
             <div className="flex items-center gap-3">
               <div className="flex items-center border border-[#E8E7E2] rounded-full bg-[#FAFAF7]">
                 <button
+                  aria-label={`Remove one ${item.name}`}
                   onClick={() => removeOneOrAll(item.menuItemId, item.variantKey)}
                   className="p-1.5 text-neutral-600 hover:text-[#17181C] transition-colors"
                 >
@@ -53,6 +54,7 @@ export default function CartPage() {
                 </button>
                 <span className="w-6 text-center text-sm font-medium text-[#17181C]">{item.quantity}</span>
                 <button
+                  aria-label={`Add one ${item.name}`}
                   onClick={() =>
                     addItem({
                       id: item.id,
@@ -76,6 +78,7 @@ export default function CartPage() {
               </p>
 
               <button
+                aria-label={`Remove ${item.name} from cart`}
                 onClick={() => removeItem(item.menuItemId, item.variantKey)}
                 className="p-1.5 text-neutral-400 hover:text-red-600 transition-colors"
               >

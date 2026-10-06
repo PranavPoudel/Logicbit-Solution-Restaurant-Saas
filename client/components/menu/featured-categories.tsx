@@ -17,13 +17,13 @@ export function FeaturedCategories({ restaurantId, onSelect }: FeaturedCategorie
     enabled: !!restaurantId,
   });
 
-  const categories = Array.isArray(data) ? data : data?.categories ?? [];
+  const categories: { id: string; name?: string }[] = Array.isArray(data) ? data : data?.categories ?? [];
 
   if (isLoading || categories.length === 0) return null;
 
   return (
     <div className="flex gap-2 overflow-x-auto pb-1 mb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-      {categories.map((cat: any) => (
+      {categories.map((cat) => (
         <button
           key={cat.id}
           onClick={() => onSelect(cat.id)}
