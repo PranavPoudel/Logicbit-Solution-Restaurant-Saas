@@ -1,3 +1,4 @@
+// src/modules/delivery/delivery.service.ts
 import { BadRequestException, ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -28,7 +29,21 @@ export class DeliveryService {
   }
 
   async findAllForTenant(tenantId: string) {
-    return this.prisma.deliveryPerson.findMany({ where: { tenantId } });
+    return this.prisma.deliveryPerson.findMany({
+      where: {
+        OR: [
+          // 1. Delivery persons dedicated to this specific restaurant
+          { tenantId: tenantId },
+          // 2. Independent freelancers registered to the SaaS (tenantId: null) who are currently active and available
+          { tenantId: null, isActive: true, isAvailable: true }
+        ]
+      },
+      orderBy: [
+        // Sort dedicated staff first, then by name
+        { tenantId: 'desc' }, 
+        { name: 'asc' }
+      ]
+    });
   }
 
   // ---------- Delivery Person Auth ----------
