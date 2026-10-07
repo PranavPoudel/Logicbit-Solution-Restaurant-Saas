@@ -179,11 +179,11 @@ export class DeliveryService {
       this.prisma.order.update({
         where: { id: orderId },
         data: {
-          status: dto.status === 'DELIVERED' ? 'DELIVERED' : dto.status === 'ON_THE_WAY' ? 'OUT_FOR_DELIVERY' : undefined,
+          status: dto.status === 'ON_THE_WAY' ? 'OUT_FOR_DELIVERY' : undefined,
         },
       }),
       this.prisma.orderStatusHistory.create({
-        data: { orderId, status: (dto.status === 'DELIVERED' ? 'DELIVERED' : 'OUT_FOR_DELIVERY') as any, changedBy: deliveryPersonId },
+        data: { orderId, status: 'OUT_FOR_DELIVERY', changedBy: deliveryPersonId },
       }),
     ]);
 

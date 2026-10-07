@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, Trash2 } from "lucide-react";
 import { useOwnerAuthStore } from "@/store/owner-auth-store";
+import { useAutoApprove, useAutoRiderStore } from "@/store/auto-rider-store";
+import { useIsMounted } from "@/hooks/use-is-mounted";
 import {
   listRestaurantOrders,
   updateOrderStatus,
@@ -31,7 +33,11 @@ function OrdersPageContent() {
   const router = useRouter();
   const restaurantId = useOwnerAuthStore((s) => s.activeRestaurantId);
   const queryClient = useQueryClient();
-  
+  const mounted = useIsMounted();
+  const autoApprove = useAutoApprove(restaurantId);
+  const setAutoApprove = useAutoRiderStore((s) => s.setAutoApprove);
+  const on = mounted && autoApprove;
+
   const [activeTab, setActiveTab] = useState("ALL");
 
   // Fetch all orders
@@ -112,7 +118,28 @@ function OrdersPageContent() {
         <h1 className="text-xl font-semibold text-neutral-900">Orders</h1>
         <p className="text-xs text-neutral-500">Auto-refresh every 15 seconds</p>
       </div>
-      <p className="text-sm text-neutral-500 mb-6">Manage and track all your restaurant orders.</p>
+      <div className="flex items-center justify-between mb-6">
+        <p className="text-sm text-neutral-500">Manage and track all your restaurant orders.</p>
+        <button
+          role="switch"
+          aria-checked={on}
+          onClick={() => restaurantId && setAutoApprove(restaurantId, !autoApprove)}
+          className="flex items-center gap-3 text-sm font-medium text-neutral-700"
+        >
+          Auto-approve riders
+          <span
+            className={`relative h-6 w-11 rounded-full transition-colors ${
+              on ? "bg-neutral-900" : "bg-neutral-300"
+            }`}
+          >
+            <span
+              className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white transition-transform ${
+                on ? "translate-x-5" : ""
+              }`}
+            />
+          </span>
+        </button>
+      </div>
       
       <SubscriptionUpgradeBanner />
        

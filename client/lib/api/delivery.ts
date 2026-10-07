@@ -46,6 +46,13 @@ export async function getAvailableDeliveries() {
   return getAvailableOrders();
 }
 
+export async function updateDeliveryStatus(orderId: string, status: string) {
+  const { data } = await deliveryApiClient.patch(`/delivery/orders/${orderId}/status`, {
+    status,
+  });
+  return data;
+}
+
 export async function getMyDeliveries() {
   const { data } = await deliveryApiClient.get("/delivery/my-deliveries");
   return data;
