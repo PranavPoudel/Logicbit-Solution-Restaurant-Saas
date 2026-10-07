@@ -52,7 +52,7 @@ export class CustomerService {
   async findAllFavorites(customerId: string) {
     return this.prisma.customerFavorite.findMany({
       where: { customerId },
-      include: { restaurant: { select: { id: true, name: true, logoUrl: true, avgRating: true, city: true } } },
+      include: { restaurant: { select: { id: true, name: true, slug: true, logoUrl: true, avgRating: true, city: true } } },
     });
   }
 

@@ -16,6 +16,7 @@ import {
 } from "@/lib/api/orders";
 import type { OwnerOrderSummary } from "@/components/owner-orders/order-card";
 import { useEscapeKey } from "@/hooks/use-escape-key";
+import { useDialogFocus } from "@/hooks/use-dialog-focus";
 import { useIsMounted } from "@/hooks/use-is-mounted";
 
 interface Notice {
@@ -306,16 +307,11 @@ function NotificationsFullScreen({
 
   useEscapeKey(close);
 
-  useEffect(() => {
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = prev;
-    };
-  }, []);
+  const dialogRef = useDialogFocus<HTMLDivElement>();
 
   return createPortal(
     <div
+      ref={dialogRef}
       role="dialog"
       aria-modal="true"
       aria-label="Notifications"

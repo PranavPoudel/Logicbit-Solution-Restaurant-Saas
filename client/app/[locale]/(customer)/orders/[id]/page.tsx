@@ -3,11 +3,16 @@
 
 import { use, useState } from "react";
 import dynamic from "next/dynamic";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, Phone, Star } from "lucide-react";
-import { getMyOrder } from "@/lib/api/orders";
+import { cancelMyOrder, getMyOrder } from "@/lib/api/orders";
+import { getErrorMessage } from "@/lib/utils/error";
 import { StatusTimeline } from "@/components/order/status-timeline";
 import { ReviewModal } from "@/components/review/review-modal";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+
+const DONE_STATUSES = ["DELIVERED", "COMPLETED", "CANCELLED"];
+const CANCELLABLE_STATUSES = ["PENDING", "ACCEPTED"];
 
 const OrderMap = dynamic(() => import("@/components/delivery/order-map"), {
   ssr: false,
@@ -26,10 +31,17 @@ export default function OrderTrackingPage({
   const { id } = use(params);
   const queryClient = useQueryClient();
   const [showReviewModal, setShowReviewModal] = useState(false);
+  const [confirmCancel, setConfirmCancel] = useState(false);
 
   const { data: order, isLoading, isError } = useQuery({
     queryKey: ["order", id],
     queryFn: () => getMyOrder(id),
+    refetchInterval: (query) => (DONE_STATUSES.includes(query.state.data?.status ?? "") ? false : 10000),
+  });
+
+  const cancelMutation = useMutation({
+    mutationFn: () => cancelMyOrder(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["order", id] }),
   });
 
   if (isLoading) {
@@ -53,6 +65,8 @@ export default function OrderTrackingPage({
 
   // Show review prompt ONLY if the order is delivered/completed
   const canReview = order.status === "DELIVERED" || order.status === "COMPLETED";
+  const rider = order.delivery?.deliveryPerson;
+  const riderOnTheWay = order.status === "OUT_FOR_DELIVERY" || canReview;
 
   return (
     <div className="max-w-lg mx-auto px-4 py-6 pb-24">
@@ -64,6 +78,23 @@ export default function OrderTrackingPage({
       <div className="bg-white border border-[#E8E7E2] rounded-2xl p-5 mt-5">
         <StatusTimeline status={order.status} orderType={order.orderType} />
       </div>
+
+      {CANCELLABLE_STATUSES.includes(order.status ?? "") && (
+        <div className="mt-4">
+          <button
+            onClick={() => setConfirmCancel(true)}
+            disabled={cancelMutation.isPending}
+            className="w-full rounded-xl border border-red-200 bg-white px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-50"
+          >
+            {cancelMutation.isPending ? "Cancelling…" : "Cancel order"}
+          </button>
+          {cancelMutation.isError && (
+            <p className="mt-2 text-xs text-red-600">
+              {getErrorMessage(cancelMutation.error, "Couldn't cancel this order. Please try again.")}
+            </p>
+          )}
+        </div>
+      )}
 
       {/* ✅ NEW: Review Prompt (Only shows for Delivered/Completed orders) */}
       {canReview && (
@@ -84,17 +115,17 @@ export default function OrderTrackingPage({
         </div>
       )}
 
-      {order.deliveryPerson && (
+      {rider && riderOnTheWay && (
         <div className="bg-white border border-[#E8E7E2] rounded-2xl p-4 mt-4 flex items-center justify-between">
           <div>
             <p className="text-xs text-neutral-400">Delivery partner</p>
             <p className="text-sm font-medium text-[#17181C]">
-              {order.deliveryPerson.fullName ?? "Assigned"}
+              {rider.name ?? "Assigned"}
             </p>
           </div>
-          {order.deliveryPerson.phone && (
+          {rider.phone && (
             <a
-              href={`tel:${order.deliveryPerson.phone}`}
+              href={`tel:${rider.phone}`}
               className="w-10 h-10 rounded-full bg-[#0F6B5C]/10 text-[#0F6B5C] flex items-center justify-center"
               aria-label="Call delivery partner"
             >
@@ -133,7 +164,7 @@ export default function OrderTrackingPage({
           <p className="text-sm text-[#17181C]">{order.deliveryAddress}</p>
 
           {order.deliveryLatitude != null && order.deliveryLongitude != null && (
-            <div className="mt-4 h-72 overflow-hidden rounded-xl border border-brand-line z-0">
+            <div className="mt-4 h-72 overflow-hidden rounded-xl border border-brand-line isolate">
               <OrderMap
                 restaurant={
                   order.restaurant?.latitude != null && order.restaurant?.longitude != null
@@ -145,6 +176,21 @@ export default function OrderTrackingPage({
             </div>
           )}
         </div>
+      )}
+
+      {confirmCancel && (
+        <ConfirmDialog
+          destructive
+          title="Cancel this order?"
+          message="The restaurant will be told, and this can't be undone."
+          confirmLabel="Yes, cancel order"
+          cancelLabel="Keep order"
+          onConfirm={() => {
+            setConfirmCancel(false);
+            cancelMutation.mutate();
+          }}
+          onClose={() => setConfirmCancel(false)}
+        />
       )}
 
       <ReviewModal
