@@ -452,6 +452,9 @@ model Order {
   paymentStatus PaymentStatus @default(UNPAID)
   paymentMethod PaymentMethod @default(COD)
 
+ // --- Printing ---
+  printedAt     DateTime?       //  Null = unprinted, Timestamp = printed
+
   // --- Cancellation tracking ---
   cancelledBy     CancelledBy?
   cancellationReason String?

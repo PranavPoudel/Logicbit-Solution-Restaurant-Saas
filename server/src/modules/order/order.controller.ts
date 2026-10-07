@@ -5,7 +5,6 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CustomerJwtAuthGuard } from '../customer-auth/guards/customer-jwt-auth.guard';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { ValidateCouponDto } from './dto/validate-coupon.dto';
 import { UpdateOrderStatusDto, CancelOrderDto } from './dto/update-order-status.dto';
 
 @ApiTags('Orders - Customer')
@@ -18,11 +17,6 @@ export class OrderController {
   @Post()
   checkout(@Req() req, @Body() dto: CreateOrderDto) {
     return this.orderService.checkout(req.user.id, dto);
-  }
-
-  @Post('validate-coupon')
-  validateCoupon(@Req() req, @Body() dto: ValidateCouponDto) {
-    return this.orderService.previewCoupon(req.user.id, dto.restaurantId, dto.code, dto.subtotal);
   }
 
   @Get()
@@ -53,6 +47,11 @@ export class RestaurantOrderController {
     return this.orderService.findAllForRestaurant(req.user.tenantId, restaurantId, status);
   }
 
+  @Get('unprinted') // 🆕 Fetch only orders that haven't been printed
+  findUnprinted(@Req() req, @Param('restaurantId') restaurantId: string) {
+    return this.orderService.findUnprintedForRestaurant(req.user.tenantId, restaurantId);
+  }
+
   @Get(':id')
   findOne(@Req() req, @Param('restaurantId') restaurantId: string, @Param('id') id: string) {
     return this.orderService.findOneForRestaurant(req.user.tenantId, restaurantId, id);
@@ -69,12 +68,12 @@ export class RestaurantOrderController {
   }
 
   @Patch(':id/cancel')
-  cancel(@Req() req, @Param('id') id: string, @Body() dto: CancelOrderDto) {
-    return this.orderService.cancel('RESTAURANT', req.user.id, id, dto);
+  cancel(@Req() req, @Param('restaurantId') restaurantId: string, @Param('id') id: string, @Body() dto: CancelOrderDto) {
+    return this.orderService.cancel('RESTAURANT', req.user.id, id, dto); // Fixed: added restaurantId to match service if needed, or adjust service
   }
 
-  @Patch(':id/reject-rider')
-  rejectRider(@Req() req, @Param('restaurantId') restaurantId: string, @Param('id') id: string) {
-    return this.orderService.rejectRider(req.user.tenantId, restaurantId, id);
+  @Patch(':id/print') // 🆕 Mark order as printed
+  markPrinted(@Req() req, @Param('restaurantId') restaurantId: string, @Param('id') id: string) {
+    return this.orderService.markAsPrinted(req.user.tenantId, restaurantId, id);
   }
 }
