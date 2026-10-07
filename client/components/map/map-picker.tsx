@@ -49,7 +49,7 @@ export function MapPicker({ lat, lng, onChange }: MapPickerProps) {
   const centerLng = lng || 85.3240;
 
   return (
-    <div className="w-full h-64 rounded-xl overflow-hidden border border-neutral-300 z-0">
+    <div className="w-full h-64 rounded-xl overflow-hidden border border-neutral-300 isolate">
       <MapContainer
         center={[centerLat, centerLng]}
         zoom={13}

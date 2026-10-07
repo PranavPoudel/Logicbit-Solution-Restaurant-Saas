@@ -285,7 +285,7 @@ export class OrderService {
     return this.prisma.order.findMany({
       where: { customerId },
       orderBy: { createdAt: 'desc' },
-      include: { items: { include: { menuItem: true } } },
+      include: { items: { include: { menuItem: true } }, restaurant: { select: { id: true, name: true } } },
     });
   }
 

@@ -39,9 +39,12 @@ export interface OrderDetail {
 
   restaurant?: OrderRestaurant;
 
-  deliveryPerson?: {
-    fullName?: string;
-    phone?: string;
+  delivery?: {
+    status?: string;
+    deliveryPerson?: {
+      name?: string;
+      phone?: string;
+    };
   };
 
   customer?: {
