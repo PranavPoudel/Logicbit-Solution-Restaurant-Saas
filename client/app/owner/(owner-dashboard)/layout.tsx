@@ -1,7 +1,7 @@
-// app/owner/(owner-dashboard)/layout.tsx
 import { OwnerSidebar } from "@/components/layout/owner-sidebar";
 import { OwnerTopbar } from "@/components/layout/owner-topbar";
 import { OwnerAuthGuard } from "@/components/auth/owner-auth-guard";
+import { OrderPrintListener } from "@/components/print/OrderPrintListener";
 
 export default function OwnerDashboardLayout({
   children,
@@ -17,6 +17,9 @@ export default function OwnerDashboardLayout({
           <main className="flex-1 overflow-y-auto p-6">{children}</main>
         </div>
       </div>
+
+      {/* Global listener for auto-printing new orders */}
+      <OrderPrintListener />
     </OwnerAuthGuard>
   );
 }

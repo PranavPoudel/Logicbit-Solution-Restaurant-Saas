@@ -505,6 +505,33 @@ export class OrderService {
     return { success: true, message: 'Order cancelled successfully', data: updated };
   }
 
+
+    /** 🆕 Fetch only unprinted, non-cancelled orders for auto-print polling */
+  async findUnprintedForRestaurant(tenantId: string, restaurantId: string) {
+    return this.prisma.order.findMany({
+      where: { 
+        tenantId, 
+        restaurantId, 
+        printedAt: null, 
+        status: { not: 'CANCELLED' } // Don't auto-print cancelled orders
+      },
+      orderBy: { createdAt: 'asc' }, // Process oldest first
+      include: { 
+        items: { include: { menuItem: true } }, 
+        customer: { select: { name: true, phone: true } } 
+      },
+    });
+  }
+
+  /** 🆕 Mark an order as printed */
+  async markAsPrinted(tenantId: string, restaurantId: string, orderId: string) {
+    return this.prisma.order.update({
+      where: { id: orderId, tenantId, restaurantId },
+      data: { printedAt: new Date() },
+    });
+  }
+
+  
   private generateOrderNumber(): string {
     const year = new Date().getFullYear();
     const random = Math.floor(100000 + Math.random() * 900000);
