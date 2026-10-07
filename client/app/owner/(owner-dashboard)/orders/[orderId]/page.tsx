@@ -1,13 +1,14 @@
 // app/owner/(owner-dashboard)/orders/[orderId]/page.tsx
 "use client";
 
-import { use } from "react";
+import { useState, use } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, AlertTriangle, ShoppingBag, User, MapPin, Clock } from "lucide-react";
+import { ArrowLeft, AlertTriangle, ShoppingBag, User, MapPin, Clock, Printer } from "lucide-react";
 import { useOwnerAuthStore } from "@/store/owner-auth-store";
 import { OrderActions, RiderCard } from "@/components/layout/owner-notifications";
 import { getOrderById, rejectRider, updateOrderStatus } from "@/lib/api/orders";
+import { ThermalReceipt } from "@/components/print/ThermalReceipt"; // 🆕 Added
 
 const RIDER_STATUS = { approve: "OUT_FOR_DELIVERY", complete: "DELIVERED" } as const;
 
@@ -15,8 +16,10 @@ export default function OrderDetailPage({ params }: { params: Promise<{ orderId:
   const { orderId } = use(params);
   const router = useRouter();
   const restaurantId = useOwnerAuthStore((s) => s.activeRestaurantId);
-
   const queryClient = useQueryClient();
+
+  //  State for controlling reprint modal
+  const [isReprinting, setIsReprinting] = useState(false);
 
   const { data: order, isLoading, isError } = useQuery({
     queryKey: ["order-detail", orderId],
@@ -36,6 +39,16 @@ export default function OrderDetailPage({ params }: { params: Promise<{ orderId:
     },
   });
 
+  // 🆕 Handler for reprint button
+  const handleReprint = () => {
+    setIsReprinting(true);
+    // Small delay to ensure the receipt DOM is fully rendered
+    setTimeout(() => {
+      window.print();
+      setIsReprinting(false);
+    }, 500);
+  };
+
   if (isLoading) {
     return (
       <div className="max-w-4xl mx-auto p-8 text-center text-neutral-500">
@@ -49,7 +62,6 @@ export default function OrderDetailPage({ params }: { params: Promise<{ orderId:
       <div className="max-w-4xl mx-auto p-8 flex flex-col items-center text-center gap-3">
         <AlertTriangle className="text-neutral-300" size={28} />
         <p className="text-sm text-neutral-500">Order not found or you don&apos;t have permission to view it.</p>
-        {/* ✅ FIX 1: Added leading slash to ensure absolute path to owner orders */}
         <button 
           onClick={() => router.push("/owner/orders")} 
           className="text-sm text-[#1B2333] font-medium hover:underline flex items-center gap-1"
@@ -66,23 +78,33 @@ export default function OrderDetailPage({ params }: { params: Promise<{ orderId:
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      {/* Header with Back Button */}
-      <div className="flex items-center gap-4">
-        {/* ✅ FIX 2: Changed from "/orders" to "/owner/orders" */}
-        <button 
-          onClick={() => router.push("/owner/orders")} 
-          className="p-2 rounded-lg hover:bg-neutral-100 text-neutral-600 transition-colors"
-        >
-          <ArrowLeft size={20} />
-        </button>
-        <div>
-          <h1 className="text-xl font-bold text-neutral-900">
-            Order #{order.orderNumber || order.id.slice(0, 6).toUpperCase()}
-          </h1>
-          <p className="text-sm text-neutral-500">
-            Placed on {order.createdAt ? new Date(order.createdAt).toLocaleString() : "Unknown date"}
-          </p>
+      {/* Header with Back Button and Reprint Button */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={() => router.push("/owner/orders")} 
+            className="p-2 rounded-lg hover:bg-neutral-100 text-neutral-600 transition-colors"
+          >
+            <ArrowLeft size={20} />
+          </button>
+          <div>
+            <h1 className="text-xl font-bold text-neutral-900">
+              Order #{order.orderNumber || order.id.slice(0, 6).toUpperCase()}
+            </h1>
+            <p className="text-sm text-neutral-500">
+              Placed on {order.createdAt ? new Date(order.createdAt).toLocaleString() : "Unknown date"}
+            </p>
+          </div>
         </div>
+        
+        {/*  Reprint Button */}
+        <button
+          onClick={handleReprint}
+          className="flex items-center gap-2 px-4 py-2 bg-[#1B2333] text-white rounded-lg hover:bg-[#2D3748] transition-colors shadow-sm"
+        >
+          <Printer size={18} />
+          <span className="text-sm font-medium">Reprint Receipt</span>
+        </button>
       </div>
 
       {/* Main Order Card */}
@@ -192,6 +214,21 @@ export default function OrderDetailPage({ params }: { params: Promise<{ orderId:
           )}
         </div>
       </div>
+
+      {/* 🆕 Hidden Reprint Renderer - Only shows when isReprinting is true */}
+      {isReprinting && (
+        <div className="fixed inset-0 z-[9999] bg-white/90 flex items-center justify-center print:static print:z-auto print:bg-white">
+          <div className="print:hidden absolute top-4 right-4">
+            <button 
+              onClick={() => setIsReprinting(false)}
+              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors shadow-lg"
+            >
+              Cancel Print
+            </button>
+          </div>
+          <ThermalReceipt order={order} />
+        </div>
+      )}
     </div>
   );
 }

@@ -116,3 +116,13 @@ export async function getOrderById(restaurantId: string, orderId: string) {
   const { data } = await ownerApiClient.get(`/restaurants/${restaurantId}/orders/${orderId}`);
   return data;
 }
+
+export const getUnprintedOrders = async (restaurantId: string) => {
+  const response = await ownerApiClient.get(`/restaurants/${restaurantId}/orders/unprinted`);
+  return response.data; // Interceptor unwraps { success, data, message }
+};
+
+export const markOrderAsPrinted = async (restaurantId: string, orderId: string) => {
+  const response = await ownerApiClient.patch(`/restaurants/${restaurantId}/orders/${orderId}/print`);
+  return response.data;
+};
