@@ -16,6 +16,7 @@ export enum PaymentMethodDto {
   KHALTI = 'KHALTI',
   IPS = 'IPS',
   PHONEPAY = 'PHONEPAY',
+  PAYPAY = 'PAYPAY',
 }
 
 export class CreateOrderDto {

@@ -80,6 +80,52 @@ export class PlatformAdminService {
     return { success: true, data: result };
   }
 
+  async getOwnersOverview() {
+    const [tenants, stats] = await Promise.all([
+      this.prisma.tenant.findMany({
+        where: { restaurants: { some: {} } },
+        include: {
+          users: { where: { isSuperAdmin: true }, select: { name: true, email: true, phone: true }, take: 1 },
+          restaurants: { select: { id: true, name: true } },
+        },
+      }),
+      this.prisma.order.groupBy({
+        by: ['restaurantId', 'status'],
+        _count: true,
+        _sum: { total: true, platformCommissionAmount: true },
+      }),
+    ]);
+
+    const byRestaurant = new Map<string, { orders: number; sales: number; commission: number }>();
+    for (const row of stats) {
+      const entry = byRestaurant.get(row.restaurantId) ?? { orders: 0, sales: 0, commission: 0 };
+      if (row.status !== 'CANCELLED') entry.orders += row._count;
+      if (row.status === 'DELIVERED' || row.status === 'COMPLETED') {
+        entry.sales += row._sum.total ?? 0;
+        entry.commission += row._sum.platformCommissionAmount ?? 0;
+      }
+      byRestaurant.set(row.restaurantId, entry);
+    }
+
+    const owners = tenants.map((tenant) => {
+      const restaurants = tenant.restaurants.map((r) => ({
+        ...r,
+        ...(byRestaurant.get(r.id) ?? { orders: 0, sales: 0, commission: 0 }),
+      }));
+      const sum = (key: 'orders' | 'sales' | 'commission') => restaurants.reduce((t, r) => t + r[key], 0);
+      return {
+        tenantId: tenant.id,
+        owner: tenant.users[0] ?? null,
+        restaurants,
+        orders: sum('orders'),
+        sales: sum('sales'),
+        commission: sum('commission'),
+      };
+    });
+
+    return { success: true, data: owners };
+  }
+
   async listAllRestaurants(page: number = 1, limit: number = 20) {
     const skip = (page - 1) * limit;
     const [restaurants, total] = await Promise.all([

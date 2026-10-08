@@ -53,6 +53,12 @@ export class PlatformAdminController {
     return this.platformAdminService.getTopRestaurantsByRevenue(limit ? Number(limit) : undefined);
   }
 
+  @Get('owners-overview')
+  @RequirePlatformPermission('VIEW_REVENUE')
+  getOwnersOverview() {
+    return this.platformAdminService.getOwnersOverview();
+  }
+
   @Get('restaurants')
   @RequirePlatformPermission('VIEW_RESTAURANTS')
   listAllRestaurants(@Query('page') page?: string, @Query('limit') limit?: string) {

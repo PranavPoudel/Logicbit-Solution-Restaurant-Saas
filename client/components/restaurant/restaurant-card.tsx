@@ -3,17 +3,34 @@
 
 import Link from "next/link";
 import { Star, Heart } from "lucide-react";
-import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { DiscoveryRestaurant } from "@/types/restaurant";
 import { theme } from "@/config/theme";
 import { cuisineList } from "@/lib/utils/cuisine";
 import { AppImage } from "@/components/ui/app-image";
+import { favoritesApi } from "@/lib/api/customers";
+import { useCustomerAuthStore } from "@/store/customer-auth-store";
+import { useRequireLogin } from "@/hooks/use-require-login";
 
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1595917248955-a96ace4780b6?q=80&w=1169&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
 
 export function RestaurantCard({ restaurant }: { restaurant: DiscoveryRestaurant }) {
-  const [isFavorited, setIsFavorited] = useState(false);
+  const queryClient = useQueryClient();
+  const requireLogin = useRequireLogin();
+  const isAuthenticated = useCustomerAuthStore((s) => s.isAuthenticated);
+
+  const { data: favorites } = useQuery({
+    queryKey: ["my-favorites"],
+    queryFn: () => favoritesApi.list() as Promise<{ restaurantId: string }[]>,
+    enabled: isAuthenticated,
+  });
+  const isFavorited = !!favorites?.some((f) => f.restaurantId === restaurant.id);
+
+  const toggleFavorite = useMutation({
+    mutationFn: () => (isFavorited ? favoritesApi.remove(restaurant.id) : favoritesApi.add(restaurant.id)),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["my-favorites"] }),
+  });
 
   // Defensive fallbacks
   const name = restaurant.name ?? "Restaurant";
@@ -60,7 +77,7 @@ export function RestaurantCard({ restaurant }: { restaurant: DiscoveryRestaurant
           <button
             onClick={(e) => {
               e.preventDefault();
-              setIsFavorited((v) => !v);
+              if (requireLogin()) toggleFavorite.mutate();
             }}
             aria-label={isFavorited ? "Remove from favorites" : "Add to favorites"}
             className="w-7 h-7 rounded-full backdrop-blur flex items-center justify-center transition-colors"

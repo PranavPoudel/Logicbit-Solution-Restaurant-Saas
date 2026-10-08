@@ -3,13 +3,11 @@
 
 import { use, useState } from "react";
 import dynamic from "next/dynamic";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, Phone, Star } from "lucide-react";
-import { cancelMyOrder, getMyOrder } from "@/lib/api/orders";
-import { getErrorMessage } from "@/lib/utils/error";
+import { getMyOrder } from "@/lib/api/orders";
 import { StatusTimeline } from "@/components/order/status-timeline";
 import { ReviewModal } from "@/components/review/review-modal";
-import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 const DONE_STATUSES = ["DELIVERED", "COMPLETED", "CANCELLED"];
 const CANCELLABLE_STATUSES = ["PENDING", "ACCEPTED"];
@@ -31,17 +29,11 @@ export default function OrderTrackingPage({
   const { id } = use(params);
   const queryClient = useQueryClient();
   const [showReviewModal, setShowReviewModal] = useState(false);
-  const [confirmCancel, setConfirmCancel] = useState(false);
 
   const { data: order, isLoading, isError } = useQuery({
     queryKey: ["order", id],
     queryFn: () => getMyOrder(id),
     refetchInterval: (query) => (DONE_STATUSES.includes(query.state.data?.status ?? "") ? false : 10000),
-  });
-
-  const cancelMutation = useMutation({
-    mutationFn: () => cancelMyOrder(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["order", id] }),
   });
 
   if (isLoading) {
@@ -80,20 +72,9 @@ export default function OrderTrackingPage({
       </div>
 
       {CANCELLABLE_STATUSES.includes(order.status ?? "") && (
-        <div className="mt-4">
-          <button
-            onClick={() => setConfirmCancel(true)}
-            disabled={cancelMutation.isPending}
-            className="w-full rounded-xl border border-red-200 bg-white px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-50"
-          >
-            {cancelMutation.isPending ? "Cancelling…" : "Cancel order"}
-          </button>
-          {cancelMutation.isError && (
-            <p className="mt-2 text-xs text-red-600">
-              {getErrorMessage(cancelMutation.error, "Couldn't cancel this order. Please try again.")}
-            </p>
-          )}
-        </div>
+        <p className="mt-4 text-center text-xs text-neutral-500">
+          Need to cancel? Please call the restaurant.
+        </p>
       )}
 
       {/* ✅ NEW: Review Prompt (Only shows for Delivered/Completed orders) */}
@@ -176,21 +157,6 @@ export default function OrderTrackingPage({
             </div>
           )}
         </div>
-      )}
-
-      {confirmCancel && (
-        <ConfirmDialog
-          destructive
-          title="Cancel this order?"
-          message="The restaurant will be told, and this can't be undone."
-          confirmLabel="Yes, cancel order"
-          cancelLabel="Keep order"
-          onConfirm={() => {
-            setConfirmCancel(false);
-            cancelMutation.mutate();
-          }}
-          onClose={() => setConfirmCancel(false)}
-        />
       )}
 
       <ReviewModal
