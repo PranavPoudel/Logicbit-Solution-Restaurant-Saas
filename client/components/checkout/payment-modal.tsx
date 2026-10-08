@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertCircle, Banknote, CreditCard, Loader2, Smartphone, Wallet, X } from "lucide-react";
+import { AlertCircle, Banknote, CreditCard, Loader2, QrCode, Smartphone, X } from "lucide-react";
 import { useEscapeKey } from "@/hooks/use-escape-key";
 import { useDialogFocus } from "@/hooks/use-dialog-focus";
 import type { CheckoutInput } from "@/lib/api/orders";
@@ -10,8 +10,8 @@ export type PaymentMethod = CheckoutInput["paymentMethod"];
 const OPTIONS: Array<{ id: PaymentMethod; label: string; Icon: typeof Banknote }> = [
   { id: "COD", label: "Cash on Delivery", Icon: Banknote },
   { id: "CREDIT_CARD", label: "Card", Icon: CreditCard },
-  { id: "KHALTI", label: "Khalti", Icon: Wallet },
   { id: "ESEWA", label: "eSewa", Icon: Smartphone },
+  { id: "PAYPAY", label: "PayPay", Icon: QrCode },
 ];
 
 interface PaymentModalProps {
