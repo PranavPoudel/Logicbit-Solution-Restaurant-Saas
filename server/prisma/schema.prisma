@@ -603,22 +603,29 @@ enum DeliveryStatus {
   FAILED
 }
 
+enum RiderApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model DeliveryPerson {
-  id           String   @id @default(uuid())
-  tenantId     String?  // null भए platform-wide independent delivery person (एकभन्दा बढी restaurant को लागि काम गर्न सक्ने)
-  name         String
-  phone        String   @unique
-  email        String?  @unique
-  passwordHash String
-  vehicleType  String?
-  isAvailable  Boolean  @default(true)
-  isActive     Boolean  @default(true)
+  id               String              @id @default(uuid())
+  tenantId         String?
+  name             String
+  phone            String              @unique
+  email            String?             @unique
+  passwordHash     String
+  vehicleType      String?
+  isAvailable      Boolean             @default(true)
+  isActive         Boolean             @default(true)
+  approvalStatus   RiderApprovalStatus @default(PENDING) 
   currentLatitude  Float?
   currentLongitude Float?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
 
-  deliveries Delivery[]
+  deliveries       Delivery[]
 }
 
 model Delivery {

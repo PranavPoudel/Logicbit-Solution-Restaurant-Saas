@@ -150,10 +150,97 @@ export class PlatformAdminService {
     return { success: true, message: 'Banner removed by platform admin' };
   }
 
+  // --- DELIVERIES & RIDERS SERVICE METHODS ---
+
   async listAllDeliveries(status?: string) {
     const where = status ? { status: status as any } : {};
-    return this.prisma.delivery.findMany({ where, include: { order: true, deliveryPerson: true } });
+    const deliveries = await this.prisma.delivery.findMany({ 
+      where, 
+      include: { 
+        order: {
+          select: {
+            orderNumber: true,
+            total: true,
+            deliveryAddress: true,
+            restaurant: { select: { name: true } },
+            customer: { select: { name: true, phone: true } },
+          }
+        }, 
+        deliveryPerson: {
+          select: {
+            id: true,
+            name: true,
+            phone: true,
+            vehicleType: true,
+          }
+        } 
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    return { success: true, data: deliveries };
   }
+
+async listAllRiders(approvalStatus?: string) {
+    const where: any = {};
+    
+    if (approvalStatus) {
+      where.approvalStatus = approvalStatus;
+    }
+
+    const riders = await this.prisma.deliveryPerson.findMany({
+      where,
+      include: {
+        _count: { select: { deliveries: true } }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    return { success: true, data: riders };
+  }
+
+  async toggleRiderLock(id: string, isActive: boolean) {
+    const rider = await this.prisma.deliveryPerson.findUnique({ where: { id } });
+    if (!rider) throw new NotFoundException('Delivery rider not found');
+
+    const updatedRider = await this.prisma.deliveryPerson.update({
+      where: { id },
+      data: { isActive },
+    });
+
+    await this.activityLog.log({
+      actorType: 'PLATFORM_ADMIN',
+      action: isActive ? 'RIDER_UNLOCKED' : 'RIDER_LOCKED',
+      description: `Rider ${rider.name} (${rider.phone}) account was ${isActive ? 'unlocked' : 'locked'}`,
+      metadata: { riderId: id }
+    });
+
+    return { success: true, message: `Rider account ${isActive ? 'unlocked' : 'locked'} successfully`, data: updatedRider };
+  }
+
+  async reviewRiderApproval(id: string, status: 'APPROVED' | 'REJECTED') {
+    const rider = await this.prisma.deliveryPerson.findUnique({ where: { id } });
+    if (!rider) throw new NotFoundException('Delivery rider not found');
+
+    const updatedRider = await this.prisma.deliveryPerson.update({
+      where: { id },
+      data: { 
+        approvalStatus: status,
+        isActive: status === 'APPROVED', // Enable account if approved, keep locked if rejected
+      },
+    });
+
+    await this.activityLog.log({
+      actorType: 'PLATFORM_ADMIN',
+      action: status === 'APPROVED' ? 'RIDER_APPROVED' : 'RIDER_REJECTED',
+      description: `Rider ${rider.name} registration application was ${status.toLowerCase()}`,
+      metadata: { riderId: id }
+    });
+
+    return { success: true, message: `Rider status updated to ${status}`, data: updatedRider };
+  }
+
+  // --- REFUNDS ---
 
   async listPendingRefunds() {
     const refunds = await this.prisma.refund.findMany({
