@@ -51,4 +51,8 @@ export class CreateOrderDto {
   @IsNumber()
   @IsOptional()
   deliveryLongitude?: number;
+
+  @IsOptional() 
+  @IsString() 
+  notes?: string;
 }

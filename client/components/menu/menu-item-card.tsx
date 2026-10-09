@@ -1,3 +1,4 @@
+// components/menu/menu-item-card.tsx
 "use client";
 
 import { Plus, Minus } from "lucide-react";
@@ -64,11 +65,25 @@ export function MenuItemCard({
     <div className="bg-white rounded-2xl border border-[#2B1410]/8 overflow-hidden">
       <div className="relative aspect-square bg-[#2B1410]/5">
         {imageUrl ? (
-          <AppImage sizes="(min-width:1280px) 20vw, (min-width:640px) 33vw, 50vw" src={imageUrl} alt={name} className="w-full h-full object-cover" />
+          <AppImage 
+            sizes="(min-width:1280px) 20vw, (min-width:640px) 33vw, 50vw" 
+            src={imageUrl} 
+            alt={name} 
+            className="w-full h-full object-cover" 
+          />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-[#2B1410]/20 font-serif text-3xl">
             {name.charAt(0)}
           </div>
+        )}
+
+        {/* 🆕 Make the entire image area clickable to open modifiers */}
+        {isAvailable && (
+          <div 
+            onClick={handleAddClick}
+            className="absolute inset-0 cursor-pointer"
+            aria-label={`Customize ${name}`}
+          />
         )}
 
         {!isAvailable && (
@@ -83,7 +98,10 @@ export function MenuItemCard({
           quantity > 0 ? (
             <div className="absolute -bottom-3 right-3 flex items-center gap-1.5 bg-[#2B1410] text-[#FDF6EC] rounded-full px-1 py-1 shadow-md">
               <button
-                onClick={() => removeOneOrAll(item.id)}
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent triggering the card click
+                  removeOneOrAll(item.id);
+                }}
                 className="w-6 h-6 flex items-center justify-center"
                 aria-label="Remove one"
               >
@@ -91,7 +109,10 @@ export function MenuItemCard({
               </button>
               <span className="text-xs font-mono w-4 text-center">{quantity}</span>
               <button
-                onClick={handleAddClick}
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent triggering the card click
+                  handleAddClick();
+                }}
                 className="w-6 h-6 flex items-center justify-center"
                 aria-label="Add one more"
               >
@@ -100,8 +121,11 @@ export function MenuItemCard({
             </div>
           ) : (
             <button
-              onClick={handleAddClick}
-              className="absolute -bottom-3 right-3 w-8 h-8 rounded-full bg-[#C0392B] text-[#FDF6EC] flex items-center justify-center shadow-md hover:bg-[#A8301F] active:scale-95 transition-all"
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent double-triggering
+                handleAddClick();
+              }}
+              className="absolute -bottom-3 right-3 w-8 h-8 rounded-full bg-[#C0392B] text-[#FDF6EC] flex items-center justify-center shadow-md hover:bg-[#A8301F] active:scale-95 transition-all z-10"
               aria-label={item.hasModifiers ? "Customize" : "Add"}
             >
               <Plus size={16} />
@@ -110,7 +134,11 @@ export function MenuItemCard({
         )}
       </div>
 
-      <div className="p-3 pt-4">
+      {/* 🆕 Make the card body clickable too */}
+      <div 
+        onClick={isAvailable ? handleAddClick : undefined}
+        className={`p-3 pt-4 ${isAvailable ? 'cursor-pointer' : ''}`}
+      >
         <h4 className="text-sm font-medium text-[#2B1410] truncate">{name}</h4>
         <p className="text-sm font-mono text-[#2B1410]/70 mt-0.5">
           {item.hasModifiers ? "From " : ""}Rs {price}

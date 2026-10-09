@@ -27,6 +27,7 @@ export interface MenuItem {
   image?: string;
   isAvailable?: boolean;
   hasModifiers?: boolean;
+  allergenInfo?: string;
 }
 
 export interface ModifierOption {

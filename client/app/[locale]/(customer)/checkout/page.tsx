@@ -140,6 +140,10 @@ export default function CheckoutPage() {
             }
           : {}),
         ...(appliedCoupon ? { couponCode: appliedCoupon.code } : {}),
+        
+        //  Optional order-level delivery instructions 
+        // deliveryInstructions: deliveryInstructions?.trim() || undefined, 
+
         items: items.map((item) => ({
           menuItemId: item.menuItemId,
           quantity: item.quantity,
@@ -147,6 +151,7 @@ export default function CheckoutPage() {
             modifierGroupId: m.modifierGroupId,
             modifierOptionId: m.modifierOptionId,
           })) || [],
+          notes: item.notes?.trim() || undefined, // 🆕 CRITICAL: Pass per-item notes to backend
         })),
       };
 

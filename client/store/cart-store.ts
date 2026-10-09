@@ -1,12 +1,11 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-// ✅ Updated to match backend SelectedModifierDto
 export interface SelectedModifier {
-  modifierGroupId: string;   // UUID from backend
-  modifierOptionId: string;  // UUID from backend
-  groupName?: string;        // Optional: kept for UI display
-  optionName?: string;       // Optional: kept for UI display
+  modifierGroupId: string;
+  modifierOptionId: string;
+  groupName?: string;
+  optionName?: string;
   priceDelta: number;
 }
 
@@ -15,11 +14,11 @@ export interface CartItem {
   menuItemId: string;
   restaurantId: string;
   name: string;
-  price: number; // base price + sum(selectedModifiers priceDelta)
+  price: number;
   quantity: number;
   selectedModifiers?: SelectedModifier[];
-  /** Distinguishes "Small Coke" from "Large Coke" so they don't merge into
-   *  one cart line. Empty string for items with no modifiers. */
+  notes?: string; // 🆕 ADDED: Per-item special instructions
+  /** Distinguishes variants so they don't merge incorrectly */
   variantKey: string;
 }
 
@@ -51,11 +50,14 @@ export const useCartStore = create<CartState>()(
 
       addItem: (item) =>
         set((state) => {
-          const variantKey = item.variantKey ?? "";
+          // 🆕 Include notes in variantKey so different notes create separate cart lines
+          const variantKey = item.variantKey ?? (item.notes ? `notes:${item.notes}` : "");
           const key = lineKey(item.menuItemId, variantKey);
+          
           const existing = state.items.find(
             (i) => lineKey(i.menuItemId, i.variantKey) === key
           );
+          
           if (existing) {
             return {
               restaurantId: item.restaurantId,

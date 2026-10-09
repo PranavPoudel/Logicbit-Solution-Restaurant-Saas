@@ -117,6 +117,7 @@ export class OrderService {
         unitPrice,
         subtotal: itemSubtotal,
         selectedModifiers: resolvedModifiers,
+        notes: inputItem.notes,
       });
     }
 
