@@ -8,7 +8,7 @@ import type { OrderDetail } from "@/types/order";
 export interface CheckoutInput {
   restaurantId: string;
   orderType: "DELIVERY" | "PICKUP" | "DINE_IN";
-  paymentMethod: "COD" | "CREDIT_CARD" | "ESEWA" | "KHALTI" | "IPS" | "PHONEPAY";
+  paymentMethod: "COD" | "CREDIT_CARD" | "ESEWA" | "KHALTI" | "IPS" | "PHONEPAY" | "PAYPAY";
   couponCode?: string;
   deliveryAddress?: string;
   deliveryLatitude?: number;
@@ -39,11 +39,6 @@ export async function getMyOrder(id: string): Promise<OrderDetail> {
     // eslint-disable-next-line no-console
     console.log("[orders/:id] unwrapped payload:", data);
   }
-  return data;
-}
-
-export async function cancelMyOrder(id: string) {
-  const { data } = await apiClient.patch(`/orders/${id}/cancel`);
   return data;
 }
 

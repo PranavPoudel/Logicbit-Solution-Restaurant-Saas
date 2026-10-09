@@ -410,6 +410,7 @@ enum PaymentMethod {
   KHALTI
   IPS
   PHONEPAY
+  PAYPAY
 }
 
 enum CancelledBy {
