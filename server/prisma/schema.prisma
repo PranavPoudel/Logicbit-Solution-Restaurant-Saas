@@ -516,7 +516,9 @@ model OrderItem {
   unitPrice         Float
   subtotal          Float
   selectedModifiers Json?
+  notes             String?
 
+  
   order    Order    @relation(fields: [orderId], references: [id])
   menuItem MenuItem @relation(fields: [menuItemId], references: [id])
 
