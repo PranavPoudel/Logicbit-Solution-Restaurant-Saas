@@ -9,6 +9,9 @@ import { getMyOrder } from "@/lib/api/orders";
 import { StatusTimeline } from "@/components/order/status-timeline";
 import { ReviewModal } from "@/components/review/review-modal";
 
+const DONE_STATUSES = ["DELIVERED", "COMPLETED", "CANCELLED"];
+const CANCELLABLE_STATUSES = ["PENDING", "ACCEPTED"];
+
 const OrderMap = dynamic(() => import("@/components/delivery/order-map"), {
   ssr: false,
   loading: () => (
@@ -30,6 +33,7 @@ export default function OrderTrackingPage({
   const { data: order, isLoading, isError } = useQuery({
     queryKey: ["order", id],
     queryFn: () => getMyOrder(id),
+    refetchInterval: (query) => (DONE_STATUSES.includes(query.state.data?.status ?? "") ? false : 10000),
   });
 
   if (isLoading) {
@@ -53,6 +57,8 @@ export default function OrderTrackingPage({
 
   // Show review prompt ONLY if the order is delivered/completed
   const canReview = order.status === "DELIVERED" || order.status === "COMPLETED";
+  const rider = order.delivery?.deliveryPerson;
+  const riderOnTheWay = order.status === "OUT_FOR_DELIVERY" || canReview;
 
   return (
     <div className="max-w-lg mx-auto px-4 py-6 pb-24">
@@ -64,6 +70,12 @@ export default function OrderTrackingPage({
       <div className="bg-white border border-[#E8E7E2] rounded-2xl p-5 mt-5">
         <StatusTimeline status={order.status} orderType={order.orderType} />
       </div>
+
+      {CANCELLABLE_STATUSES.includes(order.status ?? "") && (
+        <p className="mt-4 text-center text-xs text-neutral-500">
+          Need to cancel? Please call the restaurant.
+        </p>
+      )}
 
       {/* ✅ NEW: Review Prompt (Only shows for Delivered/Completed orders) */}
       {canReview && (
@@ -84,17 +96,17 @@ export default function OrderTrackingPage({
         </div>
       )}
 
-      {order.deliveryPerson && (
+      {rider && riderOnTheWay && (
         <div className="bg-white border border-[#E8E7E2] rounded-2xl p-4 mt-4 flex items-center justify-between">
           <div>
             <p className="text-xs text-neutral-400">Delivery partner</p>
             <p className="text-sm font-medium text-[#17181C]">
-              {order.deliveryPerson.fullName ?? "Assigned"}
+              {rider.name ?? "Assigned"}
             </p>
           </div>
-          {order.deliveryPerson.phone && (
+          {rider.phone && (
             <a
-              href={`tel:${order.deliveryPerson.phone}`}
+              href={`tel:${rider.phone}`}
               className="w-10 h-10 rounded-full bg-[#0F6B5C]/10 text-[#0F6B5C] flex items-center justify-center"
               aria-label="Call delivery partner"
             >
@@ -133,7 +145,7 @@ export default function OrderTrackingPage({
           <p className="text-sm text-[#17181C]">{order.deliveryAddress}</p>
 
           {order.deliveryLatitude != null && order.deliveryLongitude != null && (
-            <div className="mt-4 h-72 overflow-hidden rounded-xl border border-brand-line z-0">
+            <div className="mt-4 h-72 overflow-hidden rounded-xl border border-brand-line isolate">
               <OrderMap
                 restaurant={
                   order.restaurant?.latitude != null && order.restaurant?.longitude != null

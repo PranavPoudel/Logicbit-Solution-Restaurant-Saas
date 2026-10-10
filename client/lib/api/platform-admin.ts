@@ -69,9 +69,33 @@ export async function getRestaurantActivityLogs(restaurantId: string) {
   return data;
 }
 
-export async function getAllActivityLogs() {
-  const { data } = await platformApiClient.get("/platform-admin/activity-logs");
+export async function getAllActivityLogs(page?: number, limit?: number) {
+  const { data } = await platformApiClient.get("/platform-admin/activity-logs", {
+    params: { page, limit },
+  });
   return data;
+}
+
+export interface OwnerStats {
+  orders: number;
+  sales: number;
+  commission: number;
+}
+
+export interface OwnerRestaurantStats extends OwnerStats {
+  id: string;
+  name: string;
+}
+
+export interface OwnerOverview extends OwnerStats {
+  tenantId: string;
+  owner: { name: string; email: string; phone: string | null } | null;
+  restaurants: OwnerRestaurantStats[];
+}
+
+export async function getOwnersOverview(): Promise<OwnerOverview[]> {
+  const { data } = await platformApiClient.get("/platform-admin/owners-overview");
+  return data?.data || data;
 }
 
 // --- Refunds ---

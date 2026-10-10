@@ -25,7 +25,7 @@ export function RestaurantLocationMap({ lat, lng, address }: RestaurantLocationM
   return (
     <div className="py-4">
       <h3 className="font-serif text-lg text-[#2B1410] mb-3">Location</h3>
-      <div className="w-full h-56 rounded-2xl overflow-hidden border border-[#2B1410]/8 z-0">
+      <div className="w-full h-56 rounded-2xl overflow-hidden border border-[#2B1410]/8 isolate">
         <MapContainer
           center={[lat, lng]}
           zoom={15}

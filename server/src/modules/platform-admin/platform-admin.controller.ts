@@ -1,5 +1,5 @@
 import { Controller, Get, Patch, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
-import { IsNumber, Min, Max, IsBoolean } from 'class-validator';
+import { IsNumber, Min, Max, IsBoolean, IsEnum, IsString, IsOptional } from 'class-validator';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
 import { PlatformStaffJwtAuthGuard } from '../platform-auth/guards/platform-staff-jwt-auth.guard';
@@ -19,6 +19,16 @@ export class UpdateCommissionDto {
 export class SuspendRestaurantDto {
   @IsBoolean()
   suspend: boolean;
+}
+
+export class ToggleRiderLockDto {
+  @IsBoolean()
+  isActive: boolean;
+}
+
+export class ReviewRiderApprovalDto {
+  @IsEnum(['APPROVED', 'REJECTED'])
+  status: 'APPROVED' | 'REJECTED';
 }
 
 @ApiTags('Platform Admin - Core Dashboard')
@@ -41,6 +51,12 @@ export class PlatformAdminController {
   @RequirePlatformPermission('VIEW_REVENUE')
   getTopRestaurants(@Query('limit') limit?: string) {
     return this.platformAdminService.getTopRestaurantsByRevenue(limit ? Number(limit) : undefined);
+  }
+
+  @Get('owners-overview')
+  @RequirePlatformPermission('VIEW_REVENUE')
+  getOwnersOverview() {
+    return this.platformAdminService.getOwnersOverview();
   }
 
   @Get('restaurants')
@@ -79,11 +95,33 @@ export class PlatformAdminController {
     return this.platformAdminService.removeStorefrontBanner(id);
   }
 
+  // --- DELIVERIES & RIDERS MANAGEMENT ---
+
   @Get('deliveries')
   @RequirePlatformPermission('VIEW_DELIVERIES')
   listAllDeliveries(@Query('status') status?: string) {
     return this.platformAdminService.listAllDeliveries(status);
   }
+
+  @Get('riders')
+  @RequirePlatformPermission('VIEW_DELIVERIES')
+  listAllRiders(@Query('approvalStatus') approvalStatus?: string) {
+    return this.platformAdminService.listAllRiders(approvalStatus);
+  }
+
+  @Patch('riders/:id/lock')
+  @RequirePlatformPermission('MANAGE_DELIVERIES')
+  toggleRiderLock(@Param('id') id: string, @Body() dto: ToggleRiderLockDto) {
+    return this.platformAdminService.toggleRiderLock(id, dto.isActive);
+  }
+
+  @Patch('riders/:id/approval')
+  @RequirePlatformPermission('MANAGE_DELIVERIES')
+  reviewRiderApproval(@Param('id') id: string, @Body() dto: ReviewRiderApprovalDto) {
+    return this.platformAdminService.reviewRiderApproval(id, dto.status);
+  }
+
+  // --- ACTIVITY LOGS & REFUNDS ---
 
   @Get('restaurants/:id/activity-logs')
   @RequirePlatformPermission('VIEW_ACTIVITY_LOGS')
@@ -102,7 +140,6 @@ export class PlatformAdminController {
     return this.activityLogService.findAll(page ? Number(page) : undefined, limit ? Number(limit) : undefined);
   }
 
- 
   @Get('refunds/pending')
   @RequirePlatformPermission('PROCESS_REFUNDS')
   listPendingRefunds() {

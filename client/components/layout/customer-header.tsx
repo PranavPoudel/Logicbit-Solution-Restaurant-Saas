@@ -40,8 +40,7 @@ export function CustomerHeader() {
   useEscapeKey(() => setMenuOpen(false), menuOpen);
 
   const signedIn = mounted && isAuthenticated && !!customer;
-  const displayName =
-    customer?.fullName || (customer as { name?: string } | null)?.name || customer?.email || "";
+  const displayName = customer?.name || customer?.email || "";
   const firstName = displayName.split(" ")[0];
   const initial = (displayName.trim()[0] ?? "?").toUpperCase();
 

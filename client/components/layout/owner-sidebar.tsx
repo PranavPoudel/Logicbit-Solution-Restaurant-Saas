@@ -99,7 +99,7 @@ export function OwnerSidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto py-5 px-3 space-y-6">
+      <nav className="flex-1 overflow-y-auto py-5 px-3 space-y-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         {navGroups.map((group, i) => (
           <div key={i}>
             {group.label && (

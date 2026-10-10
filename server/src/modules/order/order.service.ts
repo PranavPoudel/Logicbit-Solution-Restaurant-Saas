@@ -117,6 +117,7 @@ export class OrderService {
         unitPrice,
         subtotal: itemSubtotal,
         selectedModifiers: resolvedModifiers,
+        notes: inputItem.notes,
       });
     }
 
@@ -285,7 +286,7 @@ export class OrderService {
     return this.prisma.order.findMany({
       where: { customerId },
       orderBy: { createdAt: 'desc' },
-      include: { items: { include: { menuItem: true } } },
+      include: { items: { include: { menuItem: true } }, restaurant: { select: { id: true, name: true } } },
     });
   }
 
@@ -418,6 +419,18 @@ export class OrderService {
     }
   }
 
+  async rejectRider(tenantId: string, restaurantId: string, orderId: string) {
+    const order = await this.findOneForRestaurant(tenantId, restaurantId, orderId);
+    if (order.status !== 'READY' || order.delivery?.status !== 'ASSIGNED') {
+      throw new BadRequestException('There is no rider waiting for approval on this order');
+    }
+
+    return this.prisma.delivery.update({
+      where: { orderId },
+      data: { status: 'UNASSIGNED', deliveryPersonId: null, assignedAt: null },
+    });
+  }
+
   /**
    * cancel()
    * ---------
@@ -493,6 +506,33 @@ export class OrderService {
     return { success: true, message: 'Order cancelled successfully', data: updated };
   }
 
+
+    /** 🆕 Fetch only unprinted, non-cancelled orders for auto-print polling */
+  async findUnprintedForRestaurant(tenantId: string, restaurantId: string) {
+    return this.prisma.order.findMany({
+      where: { 
+        tenantId, 
+        restaurantId, 
+        printedAt: null, 
+        status: { not: 'CANCELLED' } // Don't auto-print cancelled orders
+      },
+      orderBy: { createdAt: 'asc' }, // Process oldest first
+      include: { 
+        items: { include: { menuItem: true } }, 
+        customer: { select: { name: true, phone: true } } 
+      },
+    });
+  }
+
+  /** 🆕 Mark an order as printed */
+  async markAsPrinted(tenantId: string, restaurantId: string, orderId: string) {
+    return this.prisma.order.update({
+      where: { id: orderId, tenantId, restaurantId },
+      data: { printedAt: new Date() },
+    });
+  }
+
+  
   private generateOrderNumber(): string {
     const year = new Date().getFullYear();
     const random = Math.floor(100000 + Math.random() * 900000);

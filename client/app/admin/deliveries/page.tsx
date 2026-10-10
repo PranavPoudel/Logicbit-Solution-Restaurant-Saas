@@ -1,479 +1,338 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Truck, Clock, Bike, CheckCircle2, XCircle, Search, X, RefreshCw, FlaskConical } from "lucide-react";
-import { listAllDeliveries } from "@/lib/api/platform-admin";
-import { StatCard } from "@/components/dashboard/stat-card";
+import { useEffect, useState } from "react";
+import { 
+  getAllDeliveries, 
+  getAllRiders, 
+  toggleRiderLock, 
+  reviewRiderApproval, 
+  Delivery, 
+  Rider 
+} from "@/lib/api/platform-admin-delivery";
+import { 
+  Truck, 
+  UserCheck, 
+  UserX, 
+  Lock, 
+  Unlock, 
+  CheckCircle2, 
+  XCircle, 
+  Clock, 
+  Phone, 
+  MapPin, 
+  Bike,
+  RefreshCw
+} from "lucide-react";
 
-// ---------- helpers ----------
-const TABS = ["All", "Pending", "On the way", "Delivered", "Cancelled"] as const;
-type Tab = (typeof TABS)[number];
-type Group = Exclude<Tab, "All">;
-
-const DATE_FILTERS = [
-  { key: "today", label: "Today" },
-  { key: "7d", label: "Last 7 days" },
-  { key: "30d", label: "Last 30 days" },
-  { key: "all", label: "All time" },
-] as const;
-type DateKey = (typeof DATE_FILTERS)[number]["key"];
-
-// Read the first value that exists from a list of possible field paths
-function pick(obj: any, ...paths: string[]): any {
-  for (const path of paths) {
-    const value = path.split(".").reduce((acc, key) => (acc == null ? undefined : acc[key]), obj);
-    if (value !== undefined && value !== null && value !== "") return value;
-  }
-  return undefined;
-}
-
-function statusGroup(raw: string): Group {
-  const s = String(raw || "").toUpperCase();
-  if (s.includes("CANCEL") || s.includes("REJECT") || s.includes("FAIL")) return "Cancelled";
-  if (s.includes("DELIVERED") || s.includes("COMPLETE")) return "Delivered";
-  if (
-    s.includes("PICK") ||
-    s.includes("TRANSIT") ||
-    s.includes("WAY") ||
-    s.includes("OUT_FOR") ||
-    s.includes("ACCEPT") ||
-    s.includes("PROGRESS") ||
-    s.includes("ARRIV")
-  )
-    return "On the way";
-  return "Pending";
-}
-
-const GROUP_STYLES: Record<Group, string> = {
-  Pending: "bg-amber-100 text-amber-700",
-  "On the way": "bg-blue-100 text-blue-700",
-  Delivered: "bg-emerald-100 text-emerald-700",
-  Cancelled: "bg-rose-100 text-rose-700",
-};
-
-function prettyStatus(raw: string) {
-  return String(raw || "UNKNOWN")
-    .toLowerCase()
-    .replace(/_/g, " ")
-    .replace(/^\w/, (c) => c.toUpperCase());
-}
-
-function fmtDate(value: any) {
-  if (!value) return "—";
-  const d = new Date(value);
-  if (isNaN(d.getTime())) return "—";
-  return d.toLocaleString([], {
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
-function money(value: any) {
-  if (value === undefined || value === null || value === "") return "—";
-  const n = Number(value);
-  return isNaN(n) ? "—" : `Rs. ${n.toFixed(2)}`;
-}
-
-// Turn one raw delivery into the fields the page needs
-function normalize(d: any) {
-  const status = String(pick(d, "status", "deliveryStatus", "order.status") ?? "UNKNOWN");
-  return {
-    raw: d,
-    id: String(pick(d, "id") ?? ""),
-    orderNumber: String(
-      pick(d, "order.orderNumber", "orderNumber", "orderId", "order.id") ?? pick(d, "id") ?? ""
-    ),
-    restaurant: pick(d, "order.restaurant.name", "restaurant.name", "restaurantName") ?? "—",
-    rider:
-      pick(
-        d,
-        "deliveryPerson.user.fullName",
-        "deliveryPerson.user.name",
-        "deliveryPerson.fullName",
-        "deliveryPerson.name",
-        "rider.name",
-        "rider.fullName",
-        "riderName"
-      ) ?? "Not assigned",
-    customer: pick(d, "order.customer.name", "order.customer.fullName", "customer.name") ?? "—",
-    address: pick(d, "order.deliveryAddress", "deliveryAddress", "address", "order.address") ?? "—",
-    fee: pick(d, "deliveryFee", "order.deliveryFee", "fee"),
-    total: pick(d, "order.total", "total"),
-    createdAt: pick(d, "createdAt", "order.createdAt"),
-    deliveredAt: pick(d, "deliveredAt", "completedAt"),
-    status,
-    group: statusGroup(status),
-  };
-}
-type Row = ReturnType<typeof normalize>;
-
-function startOfRange(key: DateKey): number | null {
-  const now = new Date();
-  if (key === "all") return null;
-  if (key === "today") return new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-  const days = key === "7d" ? 7 : 30;
-  return now.getTime() - days * 24 * 60 * 60 * 1000;
-}
-
-// ---------- sample data (preview only, development mode) ----------
-const HOUR = 60 * 60 * 1000;
-const DAY = 24 * HOUR;
-
-function sample(
-  n: number,
-  restaurant: string,
-  rider: string | null,
-  status: string,
-  ageMs: number,
-  fee: number,
-  total: number,
-  customer: string,
-  address: string
-) {
-  const created = new Date(Date.now() - ageMs).toISOString();
-  return {
-    id: `sample-${n}`,
-    status,
-    deliveryFee: fee,
-    createdAt: created,
-    deliveredAt: status === "DELIVERED" ? new Date(Date.now() - ageMs + 40 * 60 * 1000).toISOString() : null,
-    deliveryPerson: rider ? { user: { fullName: rider } } : null,
-    order: {
-      orderNumber: `ORD-10${n}`,
-      total,
-      deliveryAddress: address,
-      restaurant: { name: restaurant },
-      customer: { name: customer },
-    },
-  };
-}
-
-const SAMPLE_ROWS: Row[] = [
-  sample(1, "Momo's & More", "Bikash Rai", "DELIVERED", 2 * HOUR, 80, 650, "Test Customer", "Baneshwor, Kathmandu"),
-  sample(2, "Burger Station", "Suman Thapa", "PICKED_UP", 1 * HOUR, 60, 820, "Anita Gurung", "Thamel, Kathmandu"),
-  sample(3, "Newari Bhanchha Ghar", null, "PENDING", 30 * 60 * 1000, 70, 540, "Rojan Shrestha", "Patan Dhoka, Lalitpur"),
-  sample(4, "Momo's & More", "Bikash Rai", "ACCEPTED", 45 * 60 * 1000, 90, 410, "Sita Maharjan", "Koteshwor, Kathmandu"),
-  sample(5, "Burger Station", "Suman Thapa", "DELIVERED", 1 * DAY + 2 * HOUR, 60, 960, "Test Customer", "Kalanki, Kathmandu"),
-  sample(6, "Newari Bhanchha Ghar", "Dipesh KC", "CANCELLED", 2 * DAY, 70, 380, "Prakash Joshi", "Jawalakhel, Lalitpur"),
-  sample(7, "Momo's & More", "Dipesh KC", "DELIVERED", 5 * DAY, 80, 720, "Anita Gurung", "Maitighar, Kathmandu"),
-  sample(8, "Burger Station", "Bikash Rai", "DELIVERED", 40 * DAY, 60, 1100, "Rojan Shrestha", "Lazimpat, Kathmandu"),
-].map(normalize);
-
-// ---------- page ----------
-export default function AdminDeliveriesPage() {
-  const [rows, setRows] = useState<Row[]>([]);
+export default function DeliveriesPage() {
+  const [activeTab, setActiveTab] = useState<"deliveries" | "pending" | "riders">("deliveries");
+  const [deliveries, setDeliveries] = useState<Delivery[]>([]);
+  const [riders, setRiders] = useState<Rider[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-  const [tab, setTab] = useState<Tab>("All");
-  const [dateKey, setDateKey] = useState<DateKey>("30d");
-  const [query, setQuery] = useState("");
-  const [selected, setSelected] = useState<Row | null>(null);
-  const [useSample, setUseSample] = useState(false);
-
-  const isDev = process.env.NODE_ENV !== "production";
-
-  const load = useCallback(async (silent = false) => {
-    if (!silent) setLoading(true);
+  const fetchData = async () => {
+    setLoading(true);
     try {
-      const data = await listAllDeliveries();
-      const list: any[] = Array.isArray(data) ? data : data?.deliveries ?? data?.data ?? [];
-      if (process.env.NODE_ENV === "development") {
-        // eslint-disable-next-line no-console
-        console.log("[admin deliveries] first item:", list[0]);
-      }
-      const normalized = list.map(normalize).sort((a, b) => {
-        return new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime();
-      });
-      setRows(normalized);
-      setError(null);
-      setLastUpdated(new Date());
+      const [deliveriesData, ridersData] = await Promise.all([
+        getAllDeliveries(),
+        getAllRiders(),
+      ]);
+      setDeliveries(deliveriesData || []);
+      setRiders(ridersData || []);
     } catch (err) {
-      console.error("Failed to load deliveries:", err);
-      if (!silent) setError("Could not load deliveries. Is the backend running?");
+      console.error("Failed to load delivery module data", err);
     } finally {
-      if (!silent) setLoading(false);
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
+    fetchData();
   }, []);
 
-  useEffect(() => {
-    load();
-  }, [load]);
+  const handleToggleLock = async (riderId: string, currentStatus: boolean) => {
+    setActionLoading(riderId);
+    try {
+      await toggleRiderLock(riderId, !currentStatus);
+      await fetchData();
+    } catch (err) {
+      alert("Failed to update rider status");
+    } finally {
+      setActionLoading(null);
+    }
+  };
 
-  // Auto refresh every 30 seconds
-  useEffect(() => {
-    const timer = setInterval(() => load(true), 30000);
-    return () => clearInterval(timer);
-  }, [load]);
+  const handleApproval = async (riderId: string, status: "APPROVED" | "REJECTED") => {
+    setActionLoading(riderId);
+    try {
+      await reviewRiderApproval(riderId, status);
+      await fetchData();
+    } catch (err) {
+      alert("Failed to update rider approval");
+    } finally {
+      setActionLoading(null);
+    }
+  };
 
-  const sourceRows = useSample ? SAMPLE_ROWS : rows;
-
-  // Rows after the date filter (used for stat cards and tab counts)
-  const inDateRange = useMemo(() => {
-    const start = startOfRange(dateKey);
-    if (start === null) return sourceRows;
-    return sourceRows.filter((r) => {
-      const t = new Date(r.createdAt ?? 0).getTime();
-      return !isNaN(t) && t >= start;
-    });
-  }, [sourceRows, dateKey]);
-
-  const counts = useMemo(() => {
-    const c: Record<Tab, number> = {
-      All: inDateRange.length,
-      Pending: 0,
-      "On the way": 0,
-      Delivered: 0,
-      Cancelled: 0,
-    };
-    inDateRange.forEach((r) => {
-      c[r.group] += 1;
-    });
-    return c;
-  }, [inDateRange]);
-
-  const visible = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return inDateRange.filter((r) => {
-      if (tab !== "All" && r.group !== tab) return false;
-      if (!q) return true;
-      return [r.orderNumber, r.restaurant, r.rider, r.customer, r.id]
-        .join(" ")
-        .toLowerCase()
-        .includes(q);
-    });
-  }, [inDateRange, tab, query]);
+  const pendingRiders = riders.filter((r) => r.approvalStatus === "PENDING");
+  const activeRiders = riders.filter((r) => r.approvalStatus === "APPROVED");
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
+    <div className="p-8 max-w-7xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Deliveries</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Delivery report across all restaurants
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900">Deliveries & Riders</h1>
+          <p className="text-gray-500 mt-1">Manage live logistics, rider applications, and account access.</p>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          {lastUpdated && !useSample && (
-            <span className="text-xs text-gray-400">
-              Updated {lastUpdated.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+        <button
+          onClick={fetchData}
+          className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm font-medium text-gray-700 transition"
+        >
+          <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} /> Refresh
+        </button>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex border-b border-gray-200 bg-white rounded-t-xl px-4 pt-3 gap-6">
+        <button
+          onClick={() => setActiveTab("deliveries")}
+          className={`flex items-center gap-2 pb-3 font-semibold text-sm border-b-2 transition ${
+            activeTab === "deliveries"
+              ? "border-emerald-600 text-emerald-600"
+              : "border-transparent text-gray-500 hover:text-gray-700"
+          }`}
+        >
+          <Truck className="w-4 h-4" /> All Deliveries ({deliveries.length})
+        </button>
+
+        <button
+          onClick={() => setActiveTab("pending")}
+          className={`flex items-center gap-2 pb-3 font-semibold text-sm border-b-2 transition relative ${
+            activeTab === "pending"
+              ? "border-emerald-600 text-emerald-600"
+              : "border-transparent text-gray-500 hover:text-gray-700"
+          }`}
+        >
+          <UserCheck className="w-4 h-4" /> Pending Approval
+          {pendingRiders.length > 0 && (
+            <span className="bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">
+              {pendingRiders.length}
             </span>
           )}
-          {isDev && (
-            <button
-              onClick={() => {
-                setUseSample((v) => !v);
-                setSelected(null);
-              }}
-              className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-purple-700 bg-purple-50 border border-purple-200 rounded-lg hover:bg-purple-100 transition-colors"
-            >
-              <FlaskConical size={14} />
-              {useSample ? "Hide sample data" : "Preview sample data"}
-            </button>
-          )}
-          <button
-            onClick={() => load()}
-            className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            <RefreshCw size={14} />
-            Refresh
-          </button>
-        </div>
+        </button>
+
+        <button
+          onClick={() => setActiveTab("riders")}
+          className={`flex items-center gap-2 pb-3 font-semibold text-sm border-b-2 transition ${
+            activeTab === "riders"
+              ? "border-emerald-600 text-emerald-600"
+              : "border-transparent text-gray-500 hover:text-gray-700"
+          }`}
+        >
+          <Bike className="w-4 h-4" /> Riders Directory ({activeRiders.length})
+        </button>
       </div>
 
-      {useSample && (
-        <div className="px-4 py-3 text-sm text-purple-800 bg-purple-50 border border-purple-200 rounded-lg">
-          Showing sample data for preview only. These deliveries are not real.
-        </div>
-      )}
-
-      {/* Stat cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="Total deliveries" value={String(counts.All)} icon={Truck} colorVariant="blue" />
-        <StatCard
-          label="In progress"
-          value={String(counts.Pending + counts["On the way"])}
-          icon={Clock}
-          colorVariant="amber"
-        />
-        <StatCard label="Delivered" value={String(counts.Delivered)} icon={CheckCircle2} colorVariant="teal" />
-        <StatCard label="Cancelled" value={String(counts.Cancelled)} icon={XCircle} colorVariant="red" />
-      </div>
-
-      {/* Filters */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        <div className="flex flex-wrap gap-2">
-          {TABS.map((t) => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
-              className={`px-3.5 py-1.5 rounded-full text-sm font-medium border transition-colors ${
-                tab === t
-                  ? "bg-gray-900 text-white border-gray-900"
-                  : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
-              }`}
-            >
-              {t} <span className="opacity-60">({counts[t]})</span>
-            </button>
-          ))}
-        </div>
-
-        <div className="flex flex-col sm:flex-row gap-3">
-          <select
-            value={dateKey}
-            onChange={(e) => setDateKey(e.target.value as DateKey)}
-            className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            {DATE_FILTERS.map((f) => (
-              <option key={f.key} value={f.key}>
-                {f.label}
-              </option>
-            ))}
-          </select>
-
-          <div className="relative">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search order, restaurant, rider"
-              className="w-full sm:w-72 pl-9 pr-3 py-2 text-sm bg-white border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Table */}
-      {loading && !useSample ? (
-        <div className="p-8 text-center text-gray-500 animate-pulse">Loading deliveries...</div>
-      ) : error && !useSample ? (
-        <div className="p-8 text-center space-y-3">
-          <p className="text-sm text-rose-600">{error}</p>
-          <button
-            onClick={() => load()}
-            className="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg"
-          >
-            Try again
-          </button>
-        </div>
+      {loading ? (
+        <div className="p-12 text-center text-gray-500">Loading delivery logistics...</div>
       ) : (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                <th className="p-4">Order #</th>
-                <th className="p-4">Restaurant</th>
-                <th className="p-4">Rider</th>
-                <th className="p-4">Status</th>
-                <th className="p-4">Fee</th>
-                <th className="p-4">Time</th>
-                <th className="p-4 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 text-sm">
-              {visible.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="p-8 text-center text-gray-400 italic">
-                    No deliveries found.
-                  </td>
-                </tr>
-              ) : (
-                visible.map((r) => (
-                  <tr
-                    key={r.id || r.orderNumber}
-                    onClick={() => setSelected(r)}
-                    className="hover:bg-gray-50 transition-colors cursor-pointer"
-                  >
-                    <td className="p-4 font-mono font-medium text-gray-900">
-                      #{r.orderNumber.length > 12 ? r.orderNumber.slice(-6) : r.orderNumber}
-                    </td>
-                    <td className="p-4 text-gray-700">{r.restaurant}</td>
-                    <td className="p-4 text-gray-600 flex items-center gap-1.5">
-                      <Bike size={14} className="text-gray-400" />
-                      {r.rider}
-                    </td>
-                    <td className="p-4">
-                      <span
-                        className={`px-2.5 py-1 rounded-full text-xs font-semibold ${GROUP_STYLES[r.group]}`}
-                      >
-                        {prettyStatus(r.status)}
-                      </span>
-                    </td>
-                    <td className="p-4 text-gray-700">{money(r.fee)}</td>
-                    <td className="p-4 text-gray-500">{fmtDate(r.createdAt)}</td>
-                    <td className="p-4 text-right">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelected(r);
-                        }}
-                        className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition-colors"
-                      >
-                        View
-                      </button>
-                    </td>
+        <>
+          {/* TAB 1: ALL DELIVERIES */}
+          {activeTab === "deliveries" && (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <table className="w-full text-left text-sm text-gray-600">
+                <thead className="bg-gray-50 border-b border-gray-200 text-xs uppercase font-semibold text-gray-500">
+                  <tr>
+                    <th className="py-3 px-4">Order #</th>
+                    <th className="py-3 px-4">Restaurant</th>
+                    <th className="py-3 px-4">Customer / Address</th>
+                    <th className="py-3 px-4">Assigned Rider</th>
+                    <th className="py-3 px-4">Status</th>
+                    <th className="py-3 px-4">Earning</th>
                   </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {deliveries.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="text-center py-8 text-gray-400">No deliveries found</td>
+                    </tr>
+                  ) : (
+                    deliveries.map((delivery) => (
+                      <tr key={delivery.id} className="hover:bg-gray-50 transition">
+                        <td className="py-3 px-4 font-mono font-bold text-gray-900">
+                          #{delivery.order?.orderNumber || "N/A"}
+                        </td>
+                        <td className="py-3 px-4 font-medium text-gray-800">
+                          {delivery.order?.restaurant?.name || "Unknown"}
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="font-medium text-gray-900">{delivery.order?.customer?.name || "Customer"}</div>
+                          <div className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
+                            <MapPin className="w-3 h-3" /> {delivery.order?.deliveryAddress || "N/A"}
+                          </div>
+                        </td>
+                        <td className="py-3 px-4">
+                          {delivery.deliveryPerson ? (
+                            <div>
+                              <span className="font-semibold text-gray-900">{delivery.deliveryPerson.name}</span>
+                              <div className="text-xs text-gray-400 flex items-center gap-1">
+                                <Phone className="w-3 h-3" /> {delivery.deliveryPerson.phone}
+                              </div>
+                            </div>
+                          ) : (
+                            <span className="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-md font-medium">
+                              Unassigned
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-3 px-4">
+                          <span
+                            className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
+                              delivery.status === "DELIVERED"
+                                ? "bg-emerald-100 text-emerald-800"
+                                : delivery.status === "ON_THE_WAY" || delivery.status === "PICKED_UP"
+                                ? "bg-blue-100 text-blue-800"
+                                : delivery.status === "ASSIGNED"
+                                ? "bg-purple-100 text-purple-800"
+                                : "bg-amber-100 text-amber-800"
+                            }`}
+                          >
+                            {delivery.status.replace(/_/g, " ")}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 font-semibold text-gray-900">
+                          Rs. {delivery.earningAmount}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* TAB 2: PENDING RIDER APPROVALS */}
+          {activeTab === "pending" && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {pendingRiders.length === 0 ? (
+                <div className="col-span-full bg-white p-12 text-center text-gray-400 rounded-xl border border-gray-200">
+                  No pending rider applications to review.
+                </div>
+              ) : (
+                pendingRiders.map((rider) => (
+                  <div key={rider.id} className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm space-y-4">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="font-bold text-lg text-gray-900">{rider.name}</h3>
+                        <p className="text-sm text-gray-500 flex items-center gap-1 mt-1">
+                          <Phone className="w-3.5 h-3.5" /> {rider.phone}
+                        </p>
+                      </div>
+                      <span className="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
+                        <Clock className="w-3 h-3" /> Pending
+                      </span>
+                    </div>
+
+                    <div className="bg-gray-50 p-3 rounded-lg text-sm space-y-1">
+                      <div className="text-gray-600">
+                        <span className="font-medium">Vehicle:</span> {rider.vehicleType || "Not specified"}
+                      </div>
+                      <div className="text-gray-600">
+                        <span className="font-medium">Applied Date:</span> {new Date(rider.createdAt).toLocaleDateString()}
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3 pt-2">
+                      <button
+                        disabled={actionLoading === rider.id}
+                        onClick={() => handleApproval(rider.id, "APPROVED")}
+                        className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-3 rounded-lg text-sm flex items-center justify-center gap-1 transition"
+                      >
+                        <CheckCircle2 className="w-4 h-4" /> Accept
+                      </button>
+                      <button
+                        disabled={actionLoading === rider.id}
+                        onClick={() => handleApproval(rider.id, "REJECTED")}
+                        className="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-semibold py-2 px-3 rounded-lg text-sm flex items-center justify-center gap-1 transition"
+                      >
+                        <XCircle className="w-4 h-4" /> Reject
+                      </button>
+                    </div>
+                  </div>
                 ))
               )}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {/* Detail panel */}
-      {selected && (
-        <div className="fixed inset-0 z-50 flex justify-end">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setSelected(null)} />
-          <div className="relative w-full max-w-md bg-white h-full shadow-xl p-6 overflow-y-auto space-y-6">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Delivery</p>
-                <h2 className="text-xl font-bold text-gray-900 font-mono">
-                  #{selected.orderNumber.length > 12 ? selected.orderNumber.slice(-6) : selected.orderNumber}
-                </h2>
-              </div>
-              <button
-                onClick={() => setSelected(null)}
-                className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg"
-                aria-label="Close"
-              >
-                <X size={18} />
-              </button>
             </div>
+          )}
 
-            <span
-              className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${GROUP_STYLES[selected.group]}`}
-            >
-              {prettyStatus(selected.status)}
-            </span>
-
-            <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 space-y-3 text-sm">
-              <DetailRow label="Restaurant" value={selected.restaurant} />
-              <DetailRow label="Customer" value={selected.customer} />
-              <DetailRow label="Rider" value={selected.rider} />
-              <DetailRow label="Address" value={String(selected.address)} />
-              <DetailRow label="Delivery fee" value={money(selected.fee)} />
-              <DetailRow label="Order total" value={money(selected.total)} />
-              <DetailRow label="Created" value={fmtDate(selected.createdAt)} />
-              <DetailRow label="Delivered" value={fmtDate(selected.deliveredAt)} />
+          {/* TAB 3: RIDERS DIRECTORY & ACCOUNT LOCKING */}
+          {activeTab === "riders" && (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <table className="w-full text-left text-sm text-gray-600">
+                <thead className="bg-gray-50 border-b border-gray-200 text-xs uppercase font-semibold text-gray-500">
+                  <tr>
+                    <th className="py-3 px-4">Rider Name</th>
+                    <th className="py-3 px-4">Contact</th>
+                    <th className="py-3 px-4">Vehicle</th>
+                    <th className="py-3 px-4">Total Deliveries</th>
+                    <th className="py-3 px-4">Account Status</th>
+                    <th className="py-3 px-4 text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {activeRiders.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="text-center py-8 text-gray-400">No active riders registered</td>
+                    </tr>
+                  ) : (
+                    activeRiders.map((rider) => (
+                      <tr key={rider.id} className="hover:bg-gray-50 transition">
+                        <td className="py-3 px-4 font-bold text-gray-900">{rider.name}</td>
+                        <td className="py-3 px-4 text-gray-600">{rider.phone}</td>
+                        <td className="py-3 px-4 text-gray-600">{rider.vehicleType || "N/A"}</td>
+                        <td className="py-3 px-4 font-semibold text-gray-800">{rider._count?.deliveries || 0}</td>
+                        <td className="py-3 px-4">
+                          <span
+                            className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
+                              rider.isActive
+                                ? "bg-emerald-100 text-emerald-800"
+                                : "bg-rose-100 text-rose-800"
+                            }`}
+                          >
+                            {rider.isActive ? "Active" : "Locked / Suspended"}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 text-right">
+                          <button
+                            disabled={actionLoading === rider.id}
+                            onClick={() => handleToggleLock(rider.id, rider.isActive)}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 ml-auto transition ${
+                              rider.isActive
+                                ? "bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200"
+                                : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200"
+                            }`}
+                          >
+                            {rider.isActive ? (
+                              <>
+                                <Lock className="w-3.5 h-3.5" /> Lock Account
+                              </>
+                            ) : (
+                              <>
+                                <Unlock className="w-3.5 h-3.5" /> Unlock Account
+                              </>
+                            )}
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
             </div>
-          </div>
-        </div>
+          )}
+        </>
       )}
-    </div>
-  );
-}
-
-function DetailRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex justify-between gap-4">
-      <span className="text-gray-500">{label}</span>
-      <span className="font-medium text-gray-900 text-right">{value}</span>
     </div>
   );
 }

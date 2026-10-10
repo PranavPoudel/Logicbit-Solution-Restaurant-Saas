@@ -20,7 +20,7 @@ export function StorefrontOffersSection({ title, restaurantId }: StorefrontOffer
   if (offers.length === 0) return null;
 
   return (
-    <div className="max-w-4xl mx-auto px-4">
+    <div className="max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12">
       <h2 className="font-display text-2xl font-bold text-[#2B1410] mb-6">{title}</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {offers.map((offer) => (

@@ -410,6 +410,7 @@ enum PaymentMethod {
   KHALTI
   IPS
   PHONEPAY
+  PAYPAY
 }
 
 enum CancelledBy {
@@ -451,6 +452,9 @@ model Order {
 
   paymentStatus PaymentStatus @default(UNPAID)
   paymentMethod PaymentMethod @default(COD)
+
+ // --- Printing ---
+  printedAt     DateTime?       //  Null = unprinted, Timestamp = printed
 
   // --- Cancellation tracking ---
   cancelledBy     CancelledBy?
@@ -512,7 +516,9 @@ model OrderItem {
   unitPrice         Float
   subtotal          Float
   selectedModifiers Json?
+  notes             String?
 
+  
   order    Order    @relation(fields: [orderId], references: [id])
   menuItem MenuItem @relation(fields: [menuItemId], references: [id])
 
@@ -600,22 +606,29 @@ enum DeliveryStatus {
   FAILED
 }
 
+enum RiderApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model DeliveryPerson {
-  id           String   @id @default(uuid())
-  tenantId     String?  // null भए platform-wide independent delivery person (एकभन्दा बढी restaurant को लागि काम गर्न सक्ने)
-  name         String
-  phone        String   @unique
-  email        String?  @unique
-  passwordHash String
-  vehicleType  String?
-  isAvailable  Boolean  @default(true)
-  isActive     Boolean  @default(true)
+  id               String              @id @default(uuid())
+  tenantId         String?
+  name             String
+  phone            String              @unique
+  email            String?             @unique
+  passwordHash     String
+  vehicleType      String?
+  isAvailable      Boolean             @default(true)
+  isActive         Boolean             @default(true)
+  approvalStatus   RiderApprovalStatus @default(PENDING) 
   currentLatitude  Float?
   currentLongitude Float?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
 
-  deliveries Delivery[]
+  deliveries       Delivery[]
 }
 
 model Delivery {

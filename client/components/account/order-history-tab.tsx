@@ -7,6 +7,7 @@ import { listMyOrders } from "@/lib/api/orders";
 
 interface OrderRow {
   id: string;
+  orderNumber?: string;
   restaurant?: { name?: string };
   status?: string;
   total?: number;
@@ -39,7 +40,7 @@ export function OrderHistoryTab() {
                 {order.restaurant?.name ?? "Order"}
               </p>
               <p className="text-xs text-neutral-400 mt-0.5">
-                {order.status ?? "—"}
+                {order.orderNumber ? `#${order.orderNumber} · ` : ""}{order.status ?? "—"}
                 {order.createdAt ? ` · ${new Date(order.createdAt).toLocaleDateString()}` : ""}
               </p>
             </div>

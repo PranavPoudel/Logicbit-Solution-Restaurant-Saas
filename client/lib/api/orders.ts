@@ -8,7 +8,7 @@ import type { OrderDetail } from "@/types/order";
 export interface CheckoutInput {
   restaurantId: string;
   orderType: "DELIVERY" | "PICKUP" | "DINE_IN";
-  paymentMethod: "COD" | "CREDIT_CARD" | "ESEWA" | "KHALTI" | "IPS" | "PHONEPAY";
+  paymentMethod: "COD" | "CREDIT_CARD" | "ESEWA" | "KHALTI" | "IPS" | "PHONEPAY" | "PAYPAY";
   couponCode?: string;
   deliveryAddress?: string;
   deliveryLatitude?: number;
@@ -39,11 +39,6 @@ export async function getMyOrder(id: string): Promise<OrderDetail> {
     // eslint-disable-next-line no-console
     console.log("[orders/:id] unwrapped payload:", data);
   }
-  return data;
-}
-
-export async function cancelMyOrder(id: string) {
-  const { data } = await apiClient.patch(`/orders/${id}/cancel`);
   return data;
 }
 
@@ -81,6 +76,13 @@ export async function updateOrderStatus(
   return data;
 }
 
+export async function rejectRider(restaurantId: string, orderId: string) {
+  const { data } = await ownerApiClient.patch(
+    `/restaurants/${restaurantId}/orders/${orderId}/reject-rider`
+  );
+  return data;
+}
+
 export async function cancelRestaurantOrder(restaurantId: string, orderId: string) {
   const { data } = await ownerApiClient.patch(
     `/restaurants/${restaurantId}/orders/${orderId}/cancel`
@@ -105,3 +107,17 @@ export async function validateCoupon(
   });
   return data;
 }
+export async function getOrderById(restaurantId: string, orderId: string) {
+  const { data } = await ownerApiClient.get(`/restaurants/${restaurantId}/orders/${orderId}`);
+  return data;
+}
+
+export const getUnprintedOrders = async (restaurantId: string) => {
+  const response = await ownerApiClient.get(`/restaurants/${restaurantId}/orders/unprinted`);
+  return response.data; // Interceptor unwraps { success, data, message }
+};
+
+export const markOrderAsPrinted = async (restaurantId: string, orderId: string) => {
+  const response = await ownerApiClient.patch(`/restaurants/${restaurantId}/orders/${orderId}/print`);
+  return response.data;
+};

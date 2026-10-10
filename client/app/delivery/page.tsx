@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { useDeliveryAuthStore } from "@/store/delivery-auth-store";
+import { getErrorMessage } from "@/lib/utils/error";
 
 import {
   updateDeliveryLocation,
@@ -11,6 +12,7 @@ import {
   getAvailableOrders,
   getMyDeliveries,
   acceptOrder,
+  updateDeliveryStatus,
 } from "@/lib/api/delivery";
 
 import {
@@ -23,6 +25,15 @@ const ACTIVE_STATUSES = [
   "PICKED_UP",
   "ON_THE_WAY",
 ];
+
+const NEXT_STEP: Record<string, { label: string; next: string } | undefined> = {
+  ASSIGNED: { label: "Mark picked up", next: "PICKED_UP" },
+  PICKED_UP: { label: "Start delivery", next: "ON_THE_WAY" },
+  ON_THE_WAY: { label: "Mark delivered", next: "DELIVERED" },
+};
+
+const isActive = (delivery: { status?: unknown }) =>
+  ACTIVE_STATUSES.includes(String(delivery.status).toUpperCase());
 
 function toList(data: any): any[] {
   if (Array.isArray(data)) {
@@ -96,6 +107,8 @@ export default function DeliveryDashboardPage() {
     useState<string | null>(null);
 
   const [error, setError] = useState("");
+
+  const [updating, setUpdating] = useState(false);
 
   const watchIdRef = useRef<number | null>(null);
 
@@ -188,11 +201,7 @@ export default function DeliveryDashboardPage() {
         const deliveries = toList(data);
 
         const activeDelivery = deliveries.find(
-          (delivery: any) =>
-            delivery?.order &&
-            ACTIVE_STATUSES.includes(
-              String(delivery.status).toUpperCase()
-            )
+          (delivery: any) => delivery?.order && isActive(delivery)
         );
 
         if (activeDelivery) {
@@ -213,6 +222,34 @@ export default function DeliveryDashboardPage() {
     // startWatch is intentionally omitted.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessToken]);
+
+  const activeOrderId = activeOrder?.id;
+
+  useEffect(() => {
+    if (!activeOrderId) {
+      return;
+    }
+
+    const interval = window.setInterval(() => {
+      getMyDeliveries()
+        .then((data) => {
+          const match = toList(data).find(
+            (d: { order?: { id?: string } }) => d.order?.id === activeOrderId
+          );
+
+          if (!match) {
+            setActiveOrder(null);
+            setError("This delivery is no longer assigned to you.");
+            return;
+          }
+
+          setActiveOrder(isActive(match) ? fromDelivery(match) : null);
+        })
+        .catch(() => {});
+    }, 8000);
+
+    return () => window.clearInterval(interval);
+  }, [activeOrderId]);
 
   /*
    * Poll available orders while rider is online
@@ -253,6 +290,27 @@ export default function DeliveryDashboardPage() {
       window.clearInterval(interval);
     };
   }, [isOnline, activeOrder]);
+
+  async function handleStep(next: string) {
+    if (!activeOrder) {
+      return;
+    }
+
+    setUpdating(true);
+    setError("");
+
+    try {
+      await updateDeliveryStatus(activeOrder.id, next);
+
+      setActiveOrder(
+        next === "DELIVERED" ? null : { ...activeOrder, deliveryStatus: next }
+      );
+    } catch (err) {
+      setError(getErrorMessage(err, "Could not update this delivery."));
+    } finally {
+      setUpdating(false);
+    }
+  }
 
   /*
    * Online / offline button.
@@ -328,6 +386,9 @@ export default function DeliveryDashboardPage() {
   function handleOpenMap(order: RiderOrder) {
     setSelected(order);
   }
+
+  const awaitingApproval = activeOrder?.status === "READY";
+  const step = NEXT_STEP[String(activeOrder?.deliveryStatus).toUpperCase()];
 
   return (
     <main className="min-h-screen bg-gray-50 px-4 py-8">
@@ -414,8 +475,14 @@ export default function DeliveryDashboardPage() {
                 )}
               </div>
 
-              <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
-                Assigned
+              <span
+                className={`rounded-full px-3 py-1 text-xs font-medium ${
+                  awaitingApproval
+                    ? "bg-amber-100 text-amber-700"
+                    : "bg-green-100 text-green-700"
+                }`}
+              >
+                {awaitingApproval ? "Waiting for approval" : "Assigned"}
               </span>
             </div>
 
@@ -440,12 +507,29 @@ export default function DeliveryDashboardPage() {
               </div>
             )}
 
+            {awaitingApproval && (
+              <div className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700">
+                Waiting for the restaurant to approve this delivery.
+              </div>
+            )}
+
+            {step && (
+              <button
+                type="button"
+                disabled={awaitingApproval || updating}
+                onClick={() => handleStep(step.next)}
+                className="w-full rounded-lg bg-black px-4 py-3 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
+              >
+                {updating ? "Updating…" : step.label}
+              </button>
+            )}
+
             <button
               type="button"
               onClick={() =>
                 handleOpenMap(activeOrder)
               }
-              className="w-full rounded-lg bg-black px-4 py-3 text-sm font-medium text-white hover:bg-gray-800"
+              className="w-full rounded-lg border border-black bg-white px-4 py-3 text-sm font-medium text-black hover:bg-gray-100"
             >
               View Delivery on Map
             </button>

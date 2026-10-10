@@ -6,22 +6,23 @@ import { useMutation } from "@tanstack/react-query";
 import { CheckCircle2 } from "lucide-react";
 import { useCustomerAuthStore } from "@/store/customer-auth-store";
 import { updateMyProfile } from "@/lib/api/customers";
+import { getErrorMessage } from "@/lib/utils/error";
 import { FormField } from "@/components/ui/form-field";
 
 export function ProfileTab() {
   const customer = useCustomerAuthStore((s) => s.customer);
-  const [fullName, setFullName] = useState(customer?.fullName ?? "");
+  const setCustomer = useCustomerAuthStore((s) => s.setCustomer);
+  const [name, setName] = useState(customer?.name ?? "");
   const [phone, setPhone] = useState(customer?.phone ?? "");
-  const [savedAt, setSavedAt] = useState<number | null>(null);
 
   const mutation = useMutation({
-    mutationFn: () => updateMyProfile({ fullName, phone }),
-    onSuccess: () => setSavedAt(Date.now()),
+    mutationFn: () => updateMyProfile({ name, phone }),
+    onSuccess: setCustomer,
   });
 
   return (
     <div className="max-w-sm space-y-4 py-5">
-      <FormField label="Full name" value={fullName} onChange={(e) => setFullName(e.target.value)} />
+      <FormField label="Full name" value={name} onChange={(e) => setName(e.target.value)} />
       <FormField
         label="Email"
         value={customer?.email ?? ""}
@@ -38,7 +39,12 @@ export function ProfileTab() {
         >
           {mutation.isPending ? "Saving…" : "Save changes"}
         </button>
-        {savedAt && (
+        {mutation.isError && (
+          <span className="text-xs text-red-600">
+            {getErrorMessage(mutation.error, "Couldn't save your changes. Please try again.")}
+          </span>
+        )}
+        {mutation.isSuccess && (
           <span className="flex items-center gap-1 text-xs text-[#0F6B5C]">
             <CheckCircle2 size={13} />
             Saved

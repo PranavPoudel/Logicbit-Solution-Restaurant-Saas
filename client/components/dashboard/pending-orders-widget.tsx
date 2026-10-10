@@ -1,4 +1,6 @@
 // components/dashboard/pending-orders-widget.tsx
+"use client";
+
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 
@@ -18,8 +20,9 @@ export function PendingOrdersWidget({ orders }: { orders: PendingOrder[] }) {
         <h3 className="text-sm font-medium text-neutral-800">
           Needs your action
         </h3>
+        {/* ✅ FIX: Point "View all" to the owner orders page */}
         <Link
-          href="/orders"
+          href="/owner/orders"
           className="text-xs text-neutral-500 hover:text-neutral-800 flex items-center gap-1"
         >
           View all <ArrowUpRight size={12} />
@@ -42,8 +45,9 @@ export function PendingOrdersWidget({ orders }: { orders: PendingOrder[] }) {
                   {order.itemCount} items · Rs {order.total} · {order.placedMinutesAgo}m ago
                 </p>
               </div>
+              {/* ✅ FIX: Point "Review" to the specific owner order page */}
               <Link
-                href={`/orders?id=${order.id}`}
+                href={`/owner/orders/${order.id}`}
                 className="text-xs font-medium bg-[#1B2333] text-white px-3 py-1.5 rounded-md hover:bg-[#1B2333]/90"
               >
                 Review

@@ -23,7 +23,7 @@ export interface ApiErrorResponse {
  */
 export interface Customer {
   id: string;
-  fullName: string;
+  name: string;
   email: string;
   phone?: string;
   createdAt?: string;

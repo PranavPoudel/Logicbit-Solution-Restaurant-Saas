@@ -6,10 +6,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Heart } from "lucide-react";
 import { favoritesApi } from "@/lib/api/customers";
 
-interface FavoriteRestaurant {
+interface FavoriteRow {
   id: string;
-  slug?: string;
-  name?: string;
+  restaurantId: string;
+  restaurant?: { slug?: string; name?: string; city?: string };
 }
 
 export function FavoritesTab() {
@@ -17,7 +17,7 @@ export function FavoritesTab() {
 
   const { data, isLoading } = useQuery({
     queryKey: ["my-favorites"],
-    queryFn: () => favoritesApi.list() as Promise<FavoriteRestaurant[]>,
+    queryFn: () => favoritesApi.list() as Promise<FavoriteRow[]>,
   });
 
   const removeMutation = useMutation({
@@ -34,16 +34,17 @@ export function FavoritesTab() {
       ) : favorites.length === 0 ? (
         <p className="text-sm text-neutral-400">No favorite restaurants yet.</p>
       ) : (
-        favorites.map((r) => (
+        favorites.map((fav) => (
           <div
-            key={r.id}
+            key={fav.id}
             className="flex items-center justify-between bg-white border border-[#E8E7E2] rounded-xl p-3.5"
           >
-            <Link href={`/restaurants/${r.slug ?? r.id}`} className="text-sm font-medium text-[#17181C]">
-              {r.name ?? "Restaurant"}
+            <Link href={`/restaurants/${fav.restaurant?.slug ?? fav.restaurantId}`} className="text-sm font-medium text-[#17181C]">
+              {fav.restaurant?.name ?? "Restaurant"}
+              {fav.restaurant?.city && <span className="block text-xs font-normal text-neutral-400">{fav.restaurant.city}</span>}
             </Link>
             <button
-              onClick={() => removeMutation.mutate(r.id)}
+              onClick={() => removeMutation.mutate(fav.restaurantId)}
               aria-label="Remove from favorites"
             >
               <Heart size={16} className="fill-red-500 text-red-500" />

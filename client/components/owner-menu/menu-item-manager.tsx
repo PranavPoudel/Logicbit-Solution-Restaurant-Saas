@@ -1,12 +1,11 @@
-// components/owner-menu/menu-item-manager.tsx
 "use client";
 
 import { useState, useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Pencil, Trash2, X, Check, Search, Flame, Tag } from "lucide-react";
-import { menuItemsApi, type MenuItemInput } from "@/lib/api/menu";
-import { uploadMedia } from "@/lib/api/media";
+import { Plus, Pencil, Trash2, X, Check, Search, Tag, Layers } from "lucide-react";
+import { menuItemsApi, modifierGroupsApi, type MenuItemInput } from "@/lib/api/menu";
 import { FindDuplicatesModal } from "./find-duplicates-modal";
+import { ItemModifierLinkModal } from "./item-modifier-link-modal";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { FormField } from "@/components/ui/form-field";
 
@@ -22,7 +21,7 @@ const SPICE_LEVELS = [
   { value: "MILD", label: "Mild", icon: "🌶️" },
   { value: "MEDIUM", label: "Medium", icon: "🌶️🌶️" },
   { value: "HOT", label: "Hot", icon: "🌶️🌶️️" },
-  { value: "VERY_HOT", label: "Very Hot", icon: "" },
+  { value: "VERY_HOT", label: "Very Hot", icon: "🔥" },
 ];
 
 const HOMEPAGE_SECTIONS = [
@@ -38,6 +37,10 @@ export function MenuItemManager({ items, categories, restaurantId, isLoading }: 
   const [showDuplicatesModal, setShowDuplicatesModal] = useState(false);
   const [activeCategoryFilter, setActiveCategoryFilter] = useState<string>("ALL");
 
+  // 🆕 State for Modifier Linking Modal
+  const [linkingItemId, setLinkingItemId] = useState<string | null>(null);
+  const [linkedGroupIds, setLinkedGroupIds] = useState<Set<string>>(new Set());
+
   // Form State
   const [name, setName] = useState("");
   const [nameJa, setNameJa] = useState("");
@@ -49,6 +52,13 @@ export function MenuItemManager({ items, categories, restaurantId, isLoading }: 
   const [image, setImage] = useState<string | undefined>(undefined);
   const [sections, setSections] = useState<string[]>([]);
   const [formError, setFormError] = useState<string | null>(null);
+
+  // 🆕 Fetch modifier groups for this restaurant
+  const modifierGroupsQuery = useQuery({
+    queryKey: ["owner-modifier-groups", restaurantId],
+    queryFn: () => modifierGroupsApi.list(restaurantId),
+    enabled: !!restaurantId,
+  });
 
   const saveMutation = useMutation({
     mutationFn: (input: MenuItemInput) =>
@@ -70,26 +80,34 @@ export function MenuItemManager({ items, categories, restaurantId, isLoading }: 
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["owner-menu-items", restaurantId] }),
   });
 
+  // 🆕 Mutation for linking/unlinking modifiers
+  const linkMutation = useMutation({
+    mutationFn: ({ groupId, menuItemId, isLinked }: { groupId: string; menuItemId: string; isLinked: boolean }) =>
+      isLinked 
+        ? modifierGroupsApi.linkToMenuItem(restaurantId, groupId, menuItemId)
+        : modifierGroupsApi.unlinkFromMenuItem(restaurantId, groupId, menuItemId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["owner-modifier-groups", restaurantId] });
+      queryClient.invalidateQueries({ queryKey: ["owner-menu-items", restaurantId] });
+    },
+  });
+
   const duplicatesQuery = useQuery({
     queryKey: ["menu-duplicates", restaurantId],
     queryFn: () => menuItemsApi.findDuplicates(restaurantId),
     enabled: showDuplicatesModal,
   });
 
-  // Filter items by selected category
   const filteredItems = useMemo(() => {
     if (activeCategoryFilter === "ALL") return items;
     return items.filter((item) => item.categoryId === activeCategoryFilter);
   }, [items, activeCategoryFilter]);
 
-  // Group items by category for visual organization
   const groupedItems = useMemo(() => {
     if (activeCategoryFilter !== "ALL") {
-      // When filtered, just return as single group
       const cat = categories.find((c) => c.id === activeCategoryFilter);
       return [{ categoryId: activeCategoryFilter, categoryName: cat?.name || "Unknown", items: filteredItems }];
     }
-    // Group by category
     const groups: Record<string, { categoryName: string; items: any[] }> = {};
     filteredItems.forEach((item) => {
       const catId = item.categoryId || "uncategorized";
@@ -169,6 +187,34 @@ export function MenuItemManager({ items, categories, restaurantId, isLoading }: 
 
   const getSpiceInfo = (level: string) => {
     return SPICE_LEVELS.find((s) => s.value === level) || SPICE_LEVELS[0];
+  };
+
+  // 🆕 Handlers for Modifier Linking
+  const handleOpenLinkModal = (item: any) => {
+    setLinkingItemId(item.id);
+    // Safely extract linked group IDs (handles both Prisma relation shapes)
+    const linked = new Set(
+      (item.modifierGroups || []).map((mg: any) => mg.modifierGroupId || mg.id)
+    );
+    setLinkedGroupIds(linked);
+  };
+
+  const handleToggleModifier = (groupId: string, isLinked: boolean) => {
+    if (!linkingItemId) return;
+    
+    // Optimistic UI update
+    setLinkedGroupIds(prev => {
+      const next = new Set(prev);
+      if (isLinked) next.add(groupId);
+      else next.delete(groupId);
+      return next;
+    });
+
+    linkMutation.mutate({
+      groupId,
+      menuItemId: linkingItemId,
+      isLinked
+    });
   };
 
   if (isLoading) return <p className="text-sm text-neutral-400 py-8 text-center">Loading items...</p>;
@@ -252,32 +298,13 @@ export function MenuItemManager({ items, categories, restaurantId, isLoading }: 
               </div>
             )}
 
-            {/* Names Row */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                label="Name (English) *"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Chicken Curry"
-              />
-              <FormField
-                label="Name (Japanese)"
-                value={nameJa}
-                onChange={(e) => setNameJa(e.target.value)}
-                placeholder="e.g. チキンカレー"
-              />
+              <FormField label="Name (English) *" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Chicken Curry" />
+              <FormField label="Name (Japanese)" value={nameJa} onChange={(e) => setNameJa(e.target.value)} placeholder="e.g. チキンカレー" />
             </div>
 
-            {/* Price + Category + Spice */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <FormField
-                label="Price (Rs) *"
-                type="number"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                placeholder="0"
-                min="0"
-              />
+              <FormField label="Price (Rs) *" type="number" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="0" min="0" />
               <div>
                 <label className="block text-sm font-medium text-[#17181C] mb-1.5">Category *</label>
                 <select
@@ -287,9 +314,7 @@ export function MenuItemManager({ items, categories, restaurantId, isLoading }: 
                 >
                   <option value="">Select a category</option>
                   {categories.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
+                    <option key={c.id} value={c.id}>{c.name}</option>
                   ))}
                 </select>
               </div>
@@ -301,72 +326,37 @@ export function MenuItemManager({ items, categories, restaurantId, isLoading }: 
                   className="w-full bg-white border border-[#E8E7E2] rounded-xl px-3.5 py-2.5 text-sm text-[#17181C] focus:outline-none focus:ring-2 focus:ring-[#E3A008]/40 focus:border-[#E3A008]"
                 >
                   {SPICE_LEVELS.map((s) => (
-                    <option key={s.value} value={s.value}>
-                      {s.icon} {s.label}
-                    </option>
+                    <option key={s.value} value={s.value}>{s.icon} {s.label}</option>
                   ))}
                 </select>
               </div>
             </div>
 
-            {/* Descriptions */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-[#17181C] mb-1.5">Description (English)</label>
-                <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  rows={3}
-                  placeholder="Brief description of the dish..."
-                  className="w-full bg-white border border-[#E8E7E2] rounded-xl px-3.5 py-2.5 text-sm text-[#17181C] placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#E3A008]/40 focus:border-[#E3A008] resize-none"
-                />
+                <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} placeholder="Brief description..." className="w-full bg-white border border-[#E8E7E2] rounded-xl px-3.5 py-2.5 text-sm text-[#17181C] placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#E3A008]/40 focus:border-[#E3A008] resize-none" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-[#17181C] mb-1.5">Description (Japanese)</label>
-                <textarea
-                  value={descriptionJa}
-                  onChange={(e) => setDescriptionJa(e.target.value)}
-                  rows={3}
-                  placeholder="料理の簡単な説明..."
-                  className="w-full bg-white border border-[#E8E7E2] rounded-xl px-3.5 py-2.5 text-sm text-[#17181C] placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#E3A008]/40 focus:border-[#E3A008] resize-none"
-                />
+                <textarea value={descriptionJa} onChange={(e) => setDescriptionJa(e.target.value)} rows={3} placeholder="料理の簡単な説明..." className="w-full bg-white border border-[#E8E7E2] rounded-xl px-3.5 py-2.5 text-sm text-[#17181C] placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#E3A008]/40 focus:border-[#E3A008] resize-none" />
               </div>
             </div>
 
-            {/* Image Upload */}
             <div>
               <label className="block text-sm font-medium text-[#17181C] mb-1.5">Feature Image</label>
               <div className="max-w-xs">
-                <ImageUpload
-                  restaurantId={restaurantId}
-                  value={image}
-                  onChange={(url) => setImage(url)}
-                  onRemove={() => setImage(undefined)}
-                  className="w-full h-40"
-                  label="Click or drag to upload"
-                />
+                <ImageUpload restaurantId={restaurantId} value={image} onChange={(url) => setImage(url)} onRemove={() => setImage(undefined)} className="w-full h-40" label="Click or drag to upload" />
               </div>
             </div>
 
-            {/* Homepage Sections */}
             <div>
-              <label className="block text-sm font-medium text-[#17181C] mb-2">
-                Homepage Sections <span className="text-neutral-400 font-normal">(optional)</span>
-              </label>
+              <label className="block text-sm font-medium text-[#17181C] mb-2">Homepage Sections <span className="text-neutral-400 font-normal">(optional)</span></label>
               <div className="flex flex-wrap gap-2">
                 {HOMEPAGE_SECTIONS.map((sec) => {
                   const isSelected = sections.includes(sec.value);
                   return (
-                    <button
-                      key={sec.value}
-                      type="button"
-                      onClick={() => toggleSection(sec.value)}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-medium transition-all ${
-                        isSelected
-                          ? "bg-[#E3A008]/10 border-[#E3A008] text-[#B8860B]"
-                          : "bg-white border-neutral-200 text-neutral-600 hover:bg-neutral-50"
-                      }`}
-                    >
+                    <button key={sec.value} type="button" onClick={() => toggleSection(sec.value)} className={`flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-medium transition-all ${isSelected ? "bg-[#E3A008]/10 border-[#E3A008] text-[#B8860B]" : "bg-white border-neutral-200 text-neutral-600 hover:bg-neutral-50"}`}>
                       <Check size={14} className={isSelected ? "opacity-100" : "opacity-0"} />
                       {sec.label}
                     </button>
@@ -376,33 +366,21 @@ export function MenuItemManager({ items, categories, restaurantId, isLoading }: 
             </div>
           </div>
 
-          {/* Form Actions */}
           <div className="flex justify-end gap-2 px-6 py-4 border-t border-neutral-100 bg-neutral-50">
-            <button
-              onClick={resetForm}
-              className="px-4 py-2 text-sm font-medium text-neutral-600 hover:bg-neutral-200 rounded-lg transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={saveMutation.isPending}
-              className="px-6 py-2 text-sm font-medium bg-[#1B2333] text-white rounded-lg hover:bg-[#1B2333]/90 disabled:opacity-50 transition-colors"
-            >
+            <button onClick={resetForm} className="px-4 py-2 text-sm font-medium text-neutral-600 hover:bg-neutral-200 rounded-lg transition-colors">Cancel</button>
+            <button onClick={handleSave} disabled={saveMutation.isPending} className="px-6 py-2 text-sm font-medium bg-[#1B2333] text-white rounded-lg hover:bg-[#1B2333]/90 disabled:opacity-50 transition-colors">
               {saveMutation.isPending ? "Saving..." : editingId ? "Update Item" : "Create Item"}
             </button>
           </div>
         </div>
       )}
 
-      {/* Items List - Grouped by Category */}
+      {/* Items List */}
       {groupedItems.length === 0 ? (
         <div className="bg-white border border-neutral-200 rounded-xl p-12 text-center">
           <Tag className="mx-auto text-neutral-300 mb-3" size={32} />
           <p className="text-sm text-neutral-500">
-            {activeCategoryFilter === "ALL"
-              ? "No menu items yet. Create your first item to get started."
-              : "No items in this category yet."}
+            {activeCategoryFilter === "ALL" ? "No menu items yet. Create your first item to get started." : "No items in this category yet."}
           </p>
         </div>
       ) : (
@@ -435,31 +413,30 @@ export function MenuItemManager({ items, categories, restaurantId, isLoading }: 
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2 flex-wrap">
                               <p className="text-sm font-semibold text-neutral-900">{item.name}</p>
-                              {item.nameJa && (
-                                <span className="text-xs text-neutral-400 font-normal">{item.nameJa}</span>
-                              )}
+                              {item.nameJa && <span className="text-xs text-neutral-400 font-normal">{item.nameJa}</span>}
                               {item.spiceLevel && item.spiceLevel !== "NONE" && (
-                                <span className="text-xs" title={spice.label}>
-                                  {spice.icon}
-                                </span>
+                                <span className="text-xs" title={spice.label}>{spice.icon}</span>
                               )}
                             </div>
                             <div className="flex items-center gap-3 mt-1">
                               <span className="text-sm font-mono text-neutral-700 font-medium">Rs {item.price}</span>
-                              {item.description && (
-                                <span className="text-xs text-neutral-500 truncate max-w-md">
-                                  {item.description}
-                                </span>
-                              )}
+                              {item.description && <span className="text-xs text-neutral-500 truncate max-w-md">{item.description}</span>}
                               {item.homepageSections?.length > 0 && (
-                                <span className="text-[10px] font-bold text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full">
-                                  FEATURED
-                                </span>
+                                <span className="text-[10px] font-bold text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full">FEATURED</span>
                               )}
                             </div>
                           </div>
                         </div>
+                        
+                        {/* 🆕 Action Buttons Row */}
                         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={() => handleOpenLinkModal(item)}
+                            className="p-2 text-neutral-400 hover:text-[#0F6B5C] hover:bg-teal-50 rounded-lg transition-colors"
+                            title="Link Modifiers"
+                          >
+                            <Layers size={14} />
+                          </button>
                           <button
                             onClick={() => startEdit(item)}
                             className="p-2 text-neutral-400 hover:text-[#E3A008] hover:bg-amber-50 rounded-lg transition-colors"
@@ -477,7 +454,7 @@ export function MenuItemManager({ items, categories, restaurantId, isLoading }: 
                             title="Delete item"
                           >
                             <Trash2 size={14} />
-          </button>
+                          </button>
                         </div>
                       </li>
                     );
@@ -487,6 +464,17 @@ export function MenuItemManager({ items, categories, restaurantId, isLoading }: 
             </div>
           ))}
         </div>
+      )}
+
+      {/* 🆕 Modifier Linking Modal */}
+      {linkingItemId && (
+        <ItemModifierLinkModal
+          itemName={items.find(i => i.id === linkingItemId)?.name || "Item"}
+          allGroups={modifierGroupsQuery.data || []}
+          linkedGroupIds={linkedGroupIds}
+          onToggle={handleToggleModifier}
+          onClose={() => setLinkingItemId(null)}
+        />
       )}
 
       {/* Find Duplicates Modal */}

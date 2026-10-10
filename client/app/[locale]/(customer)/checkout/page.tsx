@@ -7,17 +7,19 @@ import { useTranslations } from "next-intl";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useCartStore } from "@/store/cart-store";
 import { checkout, validateCoupon } from "@/lib/api/orders";
-import { geocodeAddress, reverseGeocode } from "@/lib/geocode";
-import { DynamicMapPicker } from "@/components/map/dynamic-map-picker";
+import { AddressPicker } from "@/components/map/address-picker";
+import { PaymentModal, type PaymentMethod } from "@/components/checkout/payment-modal";
 import { checkDeliveryAvailability } from "@/lib/api/discovery";
-import { AlertCircle, CheckCircle2, Loader2, ShoppingBag, MapPin, Tag, X, Search } from "lucide-react";
+import { AlertCircle, CheckCircle2, Loader2, ShoppingBag, Tag, X } from "lucide-react";
 import Link from "next/link";
 import { isAxiosError } from "axios";
 import { getErrorMessage } from "@/lib/utils/error";
+import { useRedirectToLogin } from "@/hooks/use-require-login";
 
 export default function CheckoutPage() {
   const t = useTranslations("checkout");
   const router = useRouter();
+  const isLoggedIn = useRedirectToLogin();
 
   const { items, restaurantId: storedRestaurantId, subtotal, clear } = useCartStore();
   const restaurantId =
@@ -29,8 +31,8 @@ export default function CheckoutPage() {
   const [deliveryLongitude, setDeliveryLongitude] = useState<number | null>(null);
   const [couponCode, setCouponCode] = useState("");
   const [error, setError] = useState("");
+  const [payOpen, setPayOpen] = useState(false);
   
-  const [isSearchingAddress, setIsSearchingAddress] = useState(false);
   const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discountAmount: number } | null>(null);
   const [couponLoading, setCouponLoading] = useState(false);
   const [couponError, setCouponError] = useState("");
@@ -58,34 +60,6 @@ export default function CheckoutPage() {
   const effectiveDeliveryFee = deliveryFee ?? 0;
   const discount = appliedCoupon ? Math.min(appliedCoupon.discountAmount, sub) : 0;
   const total = Math.max(0, sub - discount) + (orderType === "DELIVERY" ? effectiveDeliveryFee : 0);
-
-  const handleMapChange = async (lat: number, lng: number) => {
-    setDeliveryLatitude(lat);
-    setDeliveryLongitude(lng);
-    setError("");
-    const address = await reverseGeocode(lat, lng);
-    if (address) setDeliveryAddress(address);
-  };
-
-  const handleFindAddress = async () => {
-    if (!deliveryAddress.trim()) return;
-    setIsSearchingAddress(true);
-    setError("");
-    try {
-      const result = await geocodeAddress(deliveryAddress);
-      if (result) {
-        setDeliveryLatitude(result.lat);
-        setDeliveryLongitude(result.lng);
-        setDeliveryAddress(result.address);
-      } else {
-        setError("Could not find this address. Try a more specific one or drag the pin.");
-      }
-    } catch {
-      setError("Address search failed. Check your connection or drag the pin instead.");
-    } finally {
-      setIsSearchingAddress(false);
-    }
-  };
 
   const handleApplyCoupon = async () => {
     const code = couponCode.trim();
@@ -141,7 +115,7 @@ export default function CheckoutPage() {
   }, [sub, appliedCode, restaurantId]);
 
   const mutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (paymentMethod: PaymentMethod) => {
       if (!restaurantId) throw new Error("Restaurant ID is missing.");
       if (items.length === 0) throw new Error(t("errors.emptyCart"));
 
@@ -157,7 +131,7 @@ export default function CheckoutPage() {
       const payload = {
         restaurantId,
         orderType,
-        paymentMethod: "COD" as const,
+        paymentMethod,
         ...(orderType === "DELIVERY"
           ? {
               deliveryAddress: deliveryAddress.trim(),
@@ -166,6 +140,10 @@ export default function CheckoutPage() {
             }
           : {}),
         ...(appliedCoupon ? { couponCode: appliedCoupon.code } : {}),
+        
+        //  Optional order-level delivery instructions 
+        // deliveryInstructions: deliveryInstructions?.trim() || undefined, 
+
         items: items.map((item) => ({
           menuItemId: item.menuItemId,
           quantity: item.quantity,
@@ -173,6 +151,7 @@ export default function CheckoutPage() {
             modifierGroupId: m.modifierGroupId,
             modifierOptionId: m.modifierOptionId,
           })) || [],
+          notes: item.notes?.trim() || undefined, // 🆕 CRITICAL: Pass per-item notes to backend
         })),
       };
 
@@ -180,6 +159,10 @@ export default function CheckoutPage() {
     },
 
     onSuccess: (data) => {
+      if (data?.redirectUrl) {
+        window.location.href = data.redirectUrl;
+        return;
+      }
       clear();
       const orderId = data?.id || data?.orderId; 
       router.push(`/orders/${orderId}`); 
@@ -189,7 +172,7 @@ export default function CheckoutPage() {
       console.error("Checkout failed:", err);
       setError(getErrorMessage(err, t("genericError"), { includeErrorMessage: true }));
 
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      if (!payOpen) window.scrollTo({ top: 0, behavior: "smooth" });
     },
   });
 
@@ -220,8 +203,10 @@ export default function CheckoutPage() {
       }
     }
 
-    mutation.mutate();
+    setPayOpen(true);
   };
+
+  if (!isLoggedIn) return null;
 
   if (items.length === 0) {
     return (
@@ -240,7 +225,7 @@ export default function CheckoutPage() {
     <div className="mx-auto max-w-5xl px-4 py-8">
       <h1 className="mb-6 font-display text-2xl font-semibold text-[#17181C]">{t("title")}</h1>
 
-      {error && (
+      {error && !payOpen && (
         <div className="mb-6 flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           <AlertCircle size={18} className="mt-0.5 shrink-0" />
           <span>{error}</span>
@@ -277,39 +262,20 @@ export default function CheckoutPage() {
             <div className="rounded-2xl border border-[#E8E7E2] bg-white p-6">
               <h2 className="mb-4 font-semibold text-[#17181C]">{t("deliveryAddress")}</h2>
 
-              <div className="relative">
-                <MapPin size={16} className="absolute left-3 top-3 text-neutral-400" />
-                <textarea
-                  aria-label={t("placeholders.address")}
-                  required
-                  value={deliveryAddress}
-                  onChange={(e) => setDeliveryAddress(e.target.value)}
-                  placeholder={t("placeholders.address")}
-                  rows={3}
-                  className="w-full resize-none rounded-xl border border-[#E8E7E2] py-2.5 pl-10 pr-4 text-sm outline-none focus:border-[#E3A008] focus:ring-2 focus:ring-[#E3A008]/40"
-                />
-              </div>
-              <button
-                type="button"
-                onClick={handleFindAddress}
-                disabled={isSearchingAddress || !deliveryAddress.trim()}
-                className="mt-3 inline-flex items-center gap-2 rounded-xl bg-brand-ink px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-ink-hover disabled:opacity-50"
-              >
-                {isSearchingAddress ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
-                Find on map
-              </button>
+              <AddressPicker
+                value={{ address: deliveryAddress, lat: deliveryLatitude, lng: deliveryLongitude }}
+                onChange={({ address, lat, lng }) => {
+                  setDeliveryAddress(address);
+                  setDeliveryLatitude(lat);
+                  setDeliveryLongitude(lng);
+                  setError("");
+                }}
+                onError={setError}
+                placeholder={t("placeholders.address")}
+                mapLabel="Select delivery location"
+              />
 
-              <div className="mt-5">
-                <p className="mb-3 text-sm font-medium text-[#17181C]">Select delivery location</p>
-                <DynamicMapPicker
-                  lat={deliveryLatitude ?? 0}
-                  lng={deliveryLongitude ?? 0}
-                  onChange={handleMapChange}
-                />
-                <p className="mt-2 text-xs text-neutral-500">
-                  Type your address and press Find, or drag the pin to your exact spot.
-                </p>
-
+              <>
                 {/* Merged UX: Show not deliverable warning AND coordinate confirmation */}
                 {notDeliverable && (
                   <p className="text-xs text-red-600 mt-3">
@@ -321,7 +287,7 @@ export default function CheckoutPage() {
                     {`Delivery pin selected: Lat ${deliveryLatitude.toFixed(4)}, Lng ${deliveryLongitude.toFixed(4)}`}
                   </p>
                 )}
-              </div>
+              </>
             </div>
           )}
 
@@ -444,7 +410,7 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            {error && (
+            {error && !payOpen && (
               <div role="alert" className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-3.5 py-2.5 text-sm font-medium text-red-700">
                 <AlertCircle size={16} className="mt-0.5 shrink-0" />
                 <span>{error}</span>
@@ -470,6 +436,22 @@ export default function CheckoutPage() {
           </div>
         </div>
       </form>
+
+      {payOpen && (
+        <PaymentModal
+          total={total}
+          pending={mutation.isPending}
+          error={error}
+          onSelect={(method) => {
+            setError("");
+            mutation.mutate(method);
+          }}
+          onClose={() => {
+            setError("");
+            setPayOpen(false);
+          }}
+        />
+      )}
     </div>
   );
 }

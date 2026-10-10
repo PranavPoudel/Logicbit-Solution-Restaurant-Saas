@@ -1,3 +1,4 @@
+//lib/api/delivery-persons.ts
 import { ownerApiClient } from "@/lib/api/owner-client";
 import { useOwnerAuthStore } from "@/store/owner-auth-store";
 
@@ -17,23 +18,18 @@ const getActiveRestaurantId = () => {
   return restaurantId;
 };
 
+
 export async function addDeliveryPerson(input: AddDeliveryPersonInput) {
-  const restaurantId = getActiveRestaurantId();
-  
-  // ✅ Scoped to the specific restaurant
   const { data } = await ownerApiClient.post(
-    `/restaurants/${restaurantId}/delivery-persons`, 
+    `/delivery-persons`, 
     input
   );
   return data;
 }
 
 export async function listDeliveryPersons() {
-  const restaurantId = getActiveRestaurantId();
-  
-  // ✅ Scoped to the specific restaurant
   const { data } = await ownerApiClient.get(
-    `/restaurants/${restaurantId}/delivery-persons`
+    `/delivery-persons`
   );
   return data;
 }
