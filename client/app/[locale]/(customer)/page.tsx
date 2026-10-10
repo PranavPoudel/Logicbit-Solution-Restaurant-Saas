@@ -11,6 +11,8 @@ import { FilterBar, QUICK_TAGS, type QuickTag } from "@/components/home/filter-b
 import { RestaurantCard } from "@/components/restaurant/restaurant-card";
 import { RestaurantCardSkeleton } from "@/components/restaurant/restaurant-card-skeleton";
 import { PopupAd } from "@/components/home/popup-ad";
+import { WhyLogicBit } from "@/components/home/why-logicbit";
+import { OwnerBanner } from "@/components/home/owner-banner";
 import { getNearbyRestaurants } from "@/lib/api/discovery";
 import type { DiscoveryRestaurant } from "@/types/restaurant";
 import { listCuisines } from "@/lib/api/cuisines";
@@ -133,6 +135,9 @@ export default function HomePage() {
           )}
         </div>
       </div>
+
+      <WhyLogicBit />
+      <OwnerBanner />
 
       <PopupAd />
     </div>
