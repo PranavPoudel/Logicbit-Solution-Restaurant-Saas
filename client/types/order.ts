@@ -1,4 +1,3 @@
-
 export interface OrderItemDetail {
   id: string;
   menuItemId?: string;
@@ -32,6 +31,10 @@ export interface OrderDetail {
   deliveryFee?: number;
   discountAmount?: number;
   total?: number;
+
+  // ✅ ADDED: Payment fields for callback and tracking
+  paymentStatus?: "UNPAID" | "PAID" | "REFUNDED";
+  paymentMethod?: "COD" | "CREDIT_CARD" | "ESEWA" | "KHALTI" | "IPS" | "PHONEPAY" | "PAYPAY";
 
   items?: OrderItemDetail[];
 

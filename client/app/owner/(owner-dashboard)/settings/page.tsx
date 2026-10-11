@@ -1,17 +1,16 @@
-// app/(owner-dashboard)/settings/page.tsx
+// app/owner/(owner-dashboard)/settings/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, CheckCircle2 } from "lucide-react";
+import { AlertTriangle, CheckCircle2, CreditCard, ExternalLink } from "lucide-react";
 import { useOwnerAuthStore } from "@/store/owner-auth-store";
-import { getMyRestaurant, updateMyRestaurant } from "@/lib/api/restaurants";
+import { getMyRestaurant, updateMyRestaurant, listMyRestaurants } from "@/lib/api/restaurants";
 import { SettingsTabs } from "@/components/owner-settings/settings-tabs";
 import { SettingsField, SettingsToggle } from "@/components/owner-settings/settings-field";
 import { useGeolocation } from "@/hooks/use-geolocation";
 import { DynamicMapPicker } from "@/components/map/dynamic-map-picker";
 import { listCuisines, getRestaurantCuisines, setRestaurantCuisines } from "@/lib/api/cuisines";
-import { listMyRestaurants } from "@/lib/api/restaurants";
 
 const TABS = [
   { key: "general", label: "General" },
@@ -19,12 +18,9 @@ const TABS = [
   { key: "delivery", label: "Delivery" },
   { key: "branding", label: "Branding" },
   { key: "service", label: "Service type" },
+  { key: "payments", label: "Payments" }, // <-- NEW TAB
 ];
 
-// TODO: field names here are assumed from the blueprint's Module 6 spec —
-// confirm the exact PATCH /restaurants/:id body shape via Swagger and
-// adjust. Unknown fields are harmless to send since UpdateRestaurantInput
-// allows extras, but the backend may ignore ones it doesn't recognize.
 interface SettingsForm {
   name: string;
   address: string;
@@ -42,6 +38,9 @@ interface SettingsForm {
   selfDeliveryRadiusKm: string;
   selfDeliveryFlatFee: string;
   maxDeliveryRadiusKm: string;
+  paypayMerchantId: string;
+  paypayApiKey: string;
+  paypayApiSecret: string;
 }
 
 const EMPTY_FORM: SettingsForm = {
@@ -61,16 +60,22 @@ const EMPTY_FORM: SettingsForm = {
   selfDeliveryRadiusKm: "5",
   selfDeliveryFlatFee: "60",
   maxDeliveryRadiusKm: "10",
+  paypayMerchantId: "",
+  paypayApiKey: "",
+  paypayApiSecret: "",
 };
 
 export default function SettingsPage() {
   const restaurantId = useOwnerAuthStore((s) => s.activeRestaurantId);
-   const setRestaurants = useOwnerAuthStore((s) => s.setRestaurants);
+  const setRestaurants = useOwnerAuthStore((s) => s.setRestaurants);
   const queryClient = useQueryClient();
   const { lat, lng } = useGeolocation();
   const [activeTab, setActiveTab] = useState("general");
   const [form, setForm] = useState<SettingsForm>(EMPTY_FORM);
   const [savedAt, setSavedAt] = useState<number | null>(null);
+  
+  // Track if the user is actively typing a new secret (since we don't send the existing one)
+  const [hasNewSecret, setHasNewSecret] = useState(false);
 
   const restaurantQuery = useQuery({
     queryKey: ["owner-restaurant", restaurantId],
@@ -78,13 +83,9 @@ export default function SettingsPage() {
     enabled: !!restaurantId,
   });
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect -- seeding
-  // editable form state from an async fetch; the form is mutated by the
-  // user afterward so it can't be purely derived at render time.
   useEffect(() => {
     const r = restaurantQuery.data as Record<string, unknown> | undefined;
     if (!r) return;
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setForm((prev) => ({
       ...prev,
       name: (r.name as string) ?? prev.name,
@@ -97,52 +98,64 @@ export default function SettingsPage() {
       heroHeading: (r.heroHeading as string) ?? prev.heroHeading,
       heroSubheading: (r.heroSubheading as string) ?? prev.heroSubheading,
       isOpen: r.isOpen != null ? Boolean(r.isOpen) : prev.isOpen,
+      paypayMerchantId: (r.paypayMerchantId as string) ?? prev.paypayMerchantId,
+      paypayApiKey: (r.paypayApiKey as string) ?? prev.paypayApiKey,
+      // NOTE: paypayApiSecret is intentionally NOT seeded from backend for security.
     }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [restaurantQuery.data]);
 
-  // Helper to safely parse numbers, returning undefined for empty/invalid strings
   const parseNumber = (val: string) => {
     if (!val || val.trim() === "") return undefined;
     const num = Number(val);
     return isNaN(num) ? undefined : num;
   };
 
-const saveMutation = useMutation({
-  mutationFn: () =>
-    updateMyRestaurant(restaurantId as string, {
-      name: form.name,
-      address: form.address,
-      city: form.city,
-      latitude: parseNumber(form.latitude),
-      longitude: parseNumber(form.longitude),
-      primaryColor: form.primaryColor,
-      secondaryColor: form.secondaryColor,
-      heroHeading: form.heroHeading,
-      heroSubheading: form.heroSubheading,
-      isOpen: form.isOpen,
-      supportsDelivery: form.supportsDelivery,
-      supportsPickup: form.supportsPickup,
-      supportsDineIn: form.supportsDineIn,
-      selfDeliveryRadiusKm: parseNumber(form.selfDeliveryRadiusKm),
-      selfDeliveryFlatFee: parseNumber(form.selfDeliveryFlatFee),
-      maxDeliveryRadiusKm: parseNumber(form.maxDeliveryRadiusKm),
-    }),
-  onSuccess: async () => {
-    setSavedAt(Date.now());
-    queryClient.invalidateQueries({ queryKey: ["owner-restaurant", restaurantId] });
-    queryClient.invalidateQueries({ queryKey: ["restaurant-cuisines", restaurantId] });
+  const saveMutation = useMutation({
+    mutationFn: () => {
+      const payload: any = {
+        name: form.name,
+        address: form.address,
+        city: form.city,
+        latitude: parseNumber(form.latitude),
+        longitude: parseNumber(form.longitude),
+        primaryColor: form.primaryColor,
+        secondaryColor: form.secondaryColor,
+        heroHeading: form.heroHeading,
+        heroSubheading: form.heroSubheading,
+        isOpen: form.isOpen,
+        supportsDelivery: form.supportsDelivery,
+        supportsPickup: form.supportsPickup,
+        supportsDineIn: form.supportsDineIn,
+        selfDeliveryRadiusKm: parseNumber(form.selfDeliveryRadiusKm),
+        selfDeliveryFlatFee: parseNumber(form.selfDeliveryFlatFee),
+        maxDeliveryRadiusKm: parseNumber(form.maxDeliveryRadiusKm),
+        paypayMerchantId: form.paypayMerchantId,
+        paypayApiKey: form.paypayApiKey,
+      };
 
-    try {
+      // Security: Only send the secret if the user explicitly typed something new
+      if (hasNewSecret && form.paypayApiSecret.trim().length > 0) {
+        payload.paypayApiSecret = form.paypayApiSecret;
+      }
+
+      return updateMyRestaurant(restaurantId as string, payload);
+    },
+    onSuccess: async () => {
+      setSavedAt(Date.now());
+      setHasNewSecret(false); // Reset secret state after successful save
+      queryClient.invalidateQueries({ queryKey: ["owner-restaurant", restaurantId] });
+      queryClient.invalidateQueries({ queryKey: ["restaurant-cuisines", restaurantId] });
+
+      try {
         const freshRestaurants = await listMyRestaurants();
         setRestaurants(freshRestaurants);
       } catch (error) {
         console.error("Failed to refresh restaurant list:", error);
       }
-  },
-});
+    },
+  });
 
-    // --- Cuisine Queries & State ---
   const allCuisinesQuery = useQuery({
     queryKey: ["all-cuisines"],
     queryFn: listCuisines,
@@ -156,10 +169,8 @@ const saveMutation = useMutation({
 
   const [selectedCuisineIds, setSelectedCuisineIds] = useState<string[]>([]);
 
-  // Sync local state when restaurant cuisines are fetched
   useEffect(() => {
     if (restaurantCuisinesQuery.data) {
-      // Assuming the API returns an array of cuisine objects: [{ id: "1", name: "Nepali" }]
       const ids = restaurantCuisinesQuery.data.map((c: any) => c.id);
       setSelectedCuisineIds(ids);
     }
@@ -177,8 +188,8 @@ const saveMutation = useMutation({
       ? selectedCuisineIds.filter((id) => id !== cuisineId)
       : [...selectedCuisineIds, cuisineId];
     
-    setSelectedCuisineIds(nextIds); // Instant UI update
-    updateCuisinesMutation.mutate(nextIds); // Save to backend
+    setSelectedCuisineIds(nextIds);
+    updateCuisinesMutation.mutate(nextIds);
   };
 
   function set<K extends keyof SettingsForm>(key: K, value: SettingsForm[K]) {
@@ -221,14 +232,14 @@ const saveMutation = useMutation({
         </div>
       </div>
       <p className="text-sm text-neutral-500 mb-6">
-        Manage your restaurant&apos;s profile, location, delivery, and branding.
+        Manage your restaurant&apos;s profile, location, delivery, branding, and payment gateways.
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-[180px_1fr] gap-6 items-start">
         <SettingsTabs tabs={TABS} activeKey={activeTab} onSelect={setActiveTab} />
 
         <div className="bg-white border border-neutral-200 rounded-xl p-5 space-y-4">
-                    {activeTab === "general" && (
+          {activeTab === "general" && (
             <>
               <SettingsField
                 label="Restaurant name"
@@ -282,7 +293,7 @@ const saveMutation = useMutation({
             </>
           )}
 
-                    {activeTab === "location" && (
+          {activeTab === "location" && (
             <>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -294,11 +305,10 @@ const saveMutation = useMutation({
                     }}
                     className="text-xs font-medium text-[#0F6B5C] hover:underline"
                   >
-                    Use browser's current location
+                    Use browser&apos;s current location
                   </button>
                 </div>
 
-                {/* Map Picker */}
                 <DynamicMapPicker
                   lat={form.latitude ? Number(form.latitude) : 27.7172}
                   lng={form.longitude ? Number(form.longitude) : 85.3240}
@@ -308,7 +318,6 @@ const saveMutation = useMutation({
                   }}
                 />
 
-                {/* Coordinate Display */}
                 <div className="grid grid-cols-2 gap-3 pt-3 border-t border-neutral-200">
                   <div>
                     <label className="block text-xs font-medium text-neutral-600 mb-1">
@@ -338,11 +347,12 @@ const saveMutation = useMutation({
 
                 <p className="text-xs text-neutral-500">
                   Drag the marker on the map or enter coordinates manually. 
-                  This determines your delivery radius and appears in "Near Me" searches.
+                  This determines your delivery radius and appears in &quot;Near Me&quot; searches.
                 </p>
               </div>
             </>
           )}
+
           {activeTab === "delivery" && (
             <>
               <SettingsField
@@ -441,6 +451,67 @@ const saveMutation = useMutation({
                 onChange={(v) => set("supportsDineIn", v)}
               />
             </>
+          )}
+
+          {activeTab === "payments" && (
+            <div className="space-y-6">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h3 className="text-sm font-semibold text-blue-900 flex items-center gap-2">
+                  <CreditCard size={16} /> PayPay Integration
+                </h3>
+                <p className="text-xs text-blue-700 mt-1.5 leading-relaxed">
+                  Enter your PayPay for Developers credentials to accept PayPay payments. 
+                  These are stored securely and used exclusively to process orders for this specific restaurant.
+                </p>
+              </div>
+
+              <SettingsField
+                label="Merchant ID"
+                value={form.paypayMerchantId}
+                onChange={(e) => set("paypayMerchantId", e.target.value)}
+                placeholder="e.g., 123456789"
+              />
+              
+              <SettingsField
+                label="API Key"
+                value={form.paypayApiKey}
+                onChange={(e) => set("paypayApiKey", e.target.value)}
+                placeholder="e.g., sample_key"
+              />
+
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium text-neutral-700">
+                  API Secret
+                </label>
+                <input
+                  type={hasNewSecret ? "text" : "password"}
+                  value={form.paypayApiSecret}
+                  onChange={(e) => {
+                    set("paypayApiSecret", e.target.value);
+                    if (!hasNewSecret && e.target.value.length > 0) {
+                      setHasNewSecret(true);
+                    }
+                  }}
+                  className="w-full px-3 py-2 text-sm border border-neutral-300 rounded-lg focus:ring-2 focus:ring-[#1B2333] focus:border-transparent outline-none font-mono"
+                  placeholder="•••••••••••••••• (Leave blank to keep existing)"
+                />
+                <p className="text-xs text-neutral-500">
+                  For security, your existing secret is hidden and never sent to the frontend. 
+                  Only fill this field if you need to update or rotate your secret.
+                </p>
+              </div>
+
+              <div className="pt-2 border-t border-neutral-100">
+                <a 
+                  href="https://developer.paypay.ne.jp/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-xs text-[#0F6B5C] hover:underline flex items-center gap-1.5 font-medium"
+                >
+                  <ExternalLink size={12} /> Get credentials from PayPay for Developers
+                </a>
+              </div>
+            </div>
           )}
         </div>
       </div>

@@ -1,3 +1,4 @@
+// src/modules/payment/payment-provider.interface.ts
 export interface PaymentInitiationResult {
   success: boolean;
   paymentStatus: 'UNPAID' | 'PAID' | 'PENDING';

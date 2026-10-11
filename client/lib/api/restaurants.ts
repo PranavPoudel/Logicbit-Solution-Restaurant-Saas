@@ -29,6 +29,9 @@ export interface UpdateRestaurantInput {
   selfDeliveryRadiusKm?: number;
   selfDeliveryFlatFee?: number;
   maxDeliveryRadiusKm?: number;
+  paypayMerchantId?: string;
+  paypayApiKey?: string;
+  paypayApiSecret?: string;
 }
 
 export async function updateMyRestaurant(id: string, input: UpdateRestaurantInput) {
