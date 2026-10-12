@@ -336,6 +336,8 @@ async function main() {
   console.log('  Customer:                    customer@test.com (Password: password123)');
 }
 
+
+
 main()
   .catch((e) => {
     console.error('❌ Seed failed:', e);
