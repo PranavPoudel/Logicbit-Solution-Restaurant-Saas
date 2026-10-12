@@ -538,4 +538,16 @@ export class OrderService {
     const random = Math.floor(100000 + Math.random() * 900000);
     return `ORD-${year}-${random}`;
   }
+
+    /**
+   * markOrderAsPaid
+   * Safely updates paymentStatus to PAID. 
+   * Used exclusively by payment webhooks to confirm successful online payments.
+   */
+  async markOrderAsPaid(orderId: string) {
+    return this.prisma.order.update({
+      where: { id: orderId },
+      data: { paymentStatus: 'PAID' },
+    });
+  }
 }

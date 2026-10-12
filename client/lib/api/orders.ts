@@ -20,6 +20,7 @@ export interface CheckoutInput {
       modifierGroupId: string;
       modifierOptionId: string;
     }>;
+        notes?: string;
   }>;
 }
 

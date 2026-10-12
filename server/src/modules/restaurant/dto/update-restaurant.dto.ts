@@ -1,3 +1,4 @@
+// src/modules/restaurant/dto/update-restaurant.dto.ts
 import {
   IsString,
   IsOptional,
@@ -147,4 +148,16 @@ export class UpdateRestaurantDto {
   @IsString()
   @IsOptional()
   currencyCode?: string;
+
+    @IsString()
+  @IsOptional()
+  paypayMerchantId?: string;
+
+  @IsString()
+  @IsOptional()
+  paypayApiKey?: string;
+
+  @IsString()
+  @IsOptional()
+  paypayApiSecret?: string;
 }

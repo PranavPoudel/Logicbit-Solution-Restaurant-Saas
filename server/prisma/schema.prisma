@@ -197,6 +197,12 @@ model Restaurant {
   locale         String  @default("en")
   currencyCode   String  @default("NPR")
 
+  // --- PayPay Integration (Model 1: Per-Restaurant Credentials) ---
+  // These must be encrypted at rest in production using your preferred encryption service.
+  paypayMerchantId String?
+  paypayApiKey     String?
+  paypayApiSecret  String?
+
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

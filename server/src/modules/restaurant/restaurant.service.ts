@@ -3,23 +3,28 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { UpdateRestaurantDto } from './dto/update-restaurant.dto';
 import { CreateRestaurantDto } from './dto/create-restaurant.dto';
 
-
 @Injectable()
 export class RestaurantService {
   constructor(private readonly prisma: PrismaService) {}
 
-  /** Logged-in tenant भित्रका सबै restaurant (प्राय: एउटा मात्र हुन्छ, तर multi-branch सम्भव) */
   async findAll(tenantId: string) {
-    return this.prisma.restaurant.findMany({ where: { tenantId } });
+    const restaurants = await this.prisma.restaurant.findMany({ where: { tenantId } });
+    
+    // Strip the secret from the response using destructuring
+    return restaurants.map(({ paypayApiSecret, ...safeData }) => safeData);
   }
 
   async findOne(tenantId: string, id: string) {
     const restaurant = await this.prisma.restaurant.findFirst({ where: { id, tenantId } });
     if (!restaurant) throw new NotFoundException('Restaurant not found');
-    return restaurant;
+    
+    // Strip the secret from the response
+    const { paypayApiSecret, ...safeRestaurant } = restaurant;
+    return safeRestaurant;
   }
- async create(tenantId: string, dto: CreateRestaurantDto) {
- const restaurant = await this.prisma.restaurant.create({
+
+  async create(tenantId: string, dto: CreateRestaurantDto) {
+    const restaurant = await this.prisma.restaurant.create({
       data: {
         tenantId,
         name: dto.name,
@@ -29,7 +34,6 @@ export class RestaurantService {
         supportsDelivery: dto.supportsDelivery ?? true,
         supportsPickup: dto.supportsPickup ?? true,
         supportsDineIn: dto.supportsDineIn ?? false,
-        // Defaults for required fields
         selfDeliveryRadiusKm: 5,
         maxDeliveryRadiusKm: 10,
         platformCommissionPercent: 10,
@@ -40,9 +44,15 @@ export class RestaurantService {
 
     return restaurant;
   }
+
   async update(tenantId: string, id: string, dto: UpdateRestaurantDto) {
-    await this.findOne(tenantId, id);
-    await this.prisma.restaurant.updateMany({ where: { id, tenantId }, data: dto });
+    await this.findOne(tenantId, id); 
+    
+    await this.prisma.restaurant.updateMany({ 
+      where: { id, tenantId }, 
+      data: dto 
+    });
+    
     return this.findOne(tenantId, id);
   }
 }
