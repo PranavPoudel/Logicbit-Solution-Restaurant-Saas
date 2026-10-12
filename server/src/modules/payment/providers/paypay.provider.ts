@@ -1,3 +1,4 @@
+//src/modules/payment/providers/paypay.provider.ts
 import { Injectable, BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { PaymentProvider, PaymentInitiationResult } from '../payment-provider.interface';
 import { PrismaService } from '../../../prisma/prisma.service';

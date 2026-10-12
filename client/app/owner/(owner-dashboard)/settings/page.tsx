@@ -41,6 +41,14 @@ interface SettingsForm {
   paypayMerchantId: string;
   paypayApiKey: string;
   paypayApiSecret: string;
+
+  supportsCod: boolean;
+  supportsCreditCard: boolean;
+  supportsEsewa: boolean;
+  supportsKhalti: boolean;
+  supportsIps: boolean;
+  supportsPhonePay: boolean;
+  supportsPaypay: boolean;
 }
 
 const EMPTY_FORM: SettingsForm = {
@@ -63,6 +71,14 @@ const EMPTY_FORM: SettingsForm = {
   paypayMerchantId: "",
   paypayApiKey: "",
   paypayApiSecret: "",
+
+  supportsCod: true,
+  supportsCreditCard: false,
+  supportsEsewa: false,
+  supportsKhalti: false,
+  supportsIps: false,
+  supportsPhonePay: false,
+  supportsPaypay: false,
 };
 
 export default function SettingsPage() {
@@ -101,6 +117,15 @@ export default function SettingsPage() {
       paypayMerchantId: (r.paypayMerchantId as string) ?? prev.paypayMerchantId,
       paypayApiKey: (r.paypayApiKey as string) ?? prev.paypayApiKey,
       // NOTE: paypayApiSecret is intentionally NOT seeded from backend for security.
+
+      supportsCod: r.supportsCod != null ? Boolean(r.supportsCod) : prev.supportsCod,
+      supportsCreditCard: r.supportsCreditCard != null ? Boolean(r.supportsCreditCard) : prev.supportsCreditCard,
+      supportsEsewa: r.supportsEsewa != null ? Boolean(r.supportsEsewa) : prev.supportsEsewa,
+      supportsKhalti: r.supportsKhalti != null ? Boolean(r.supportsKhalti) : prev.supportsKhalti,
+      supportsIps: r.supportsIps != null ? Boolean(r.supportsIps) : prev.supportsIps,
+      supportsPhonePay: r.supportsPhonePay != null ? Boolean(r.supportsPhonePay) : prev.supportsPhonePay,
+      supportsPaypay: r.supportsPaypay != null ? Boolean(r.supportsPaypay) : prev.supportsPaypay,
+
     }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [restaurantQuery.data]);
@@ -130,6 +155,15 @@ export default function SettingsPage() {
         selfDeliveryRadiusKm: parseNumber(form.selfDeliveryRadiusKm),
         selfDeliveryFlatFee: parseNumber(form.selfDeliveryFlatFee),
         maxDeliveryRadiusKm: parseNumber(form.maxDeliveryRadiusKm),
+
+        supportsCod: form.supportsCod,
+        supportsCreditCard: form.supportsCreditCard,
+        supportsEsewa: form.supportsEsewa,
+        supportsKhalti: form.supportsKhalti,
+        supportsIps: form.supportsIps,
+        supportsPhonePay: form.supportsPhonePay,
+        supportsPaypay: form.supportsPaypay,
+      
         paypayMerchantId: form.paypayMerchantId,
         paypayApiKey: form.paypayApiKey,
       };
@@ -454,62 +488,62 @@ export default function SettingsPage() {
           )}
 
           {activeTab === "payments" && (
-            <div className="space-y-6">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h3 className="text-sm font-semibold text-blue-900 flex items-center gap-2">
-                  <CreditCard size={16} /> PayPay Integration
-                </h3>
-                <p className="text-xs text-blue-700 mt-1.5 leading-relaxed">
-                  Enter your PayPay for Developers credentials to accept PayPay payments. 
-                  These are stored securely and used exclusively to process orders for this specific restaurant.
-                </p>
+            <div className="space-y-8">
+              {/* Section 1: Toggle Visibility */}
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-sm font-semibold text-neutral-900">Enabled Payment Methods</h3>
+                  <p className="text-xs text-neutral-500 mt-1">
+                    Select which payment methods you want to offer to your customers at checkout.
+                  </p>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <SettingsToggle label="Cash on Delivery (COD)" checked={form.supportsCod} onChange={(v) => set("supportsCod", v)} />
+                  <SettingsToggle label="Credit / Debit Card" checked={form.supportsCreditCard} onChange={(v) => set("supportsCreditCard", v)} />
+                  <SettingsToggle label="eSewa" checked={form.supportsEsewa} onChange={(v) => set("supportsEsewa", v)} />
+                  <SettingsToggle label="Khalti" checked={form.supportsKhalti} onChange={(v) => set("supportsKhalti", v)} />
+                  <SettingsToggle label="IPS" checked={form.supportsIps} onChange={(v) => set("supportsIps", v)} />
+                  <SettingsToggle label="PhonePe" checked={form.supportsPhonePay} onChange={(v) => set("supportsPhonePay", v)} />
+                  <SettingsToggle label="PayPay" checked={form.supportsPaypay} onChange={(v) => set("supportsPaypay", v)} />
+                </div>
               </div>
 
-              <SettingsField
-                label="Merchant ID"
-                value={form.paypayMerchantId}
-                onChange={(e) => set("paypayMerchantId", e.target.value)}
-                placeholder="e.g., 123456789"
-              />
-              
-              <SettingsField
-                label="API Key"
-                value={form.paypayApiKey}
-                onChange={(e) => set("paypayApiKey", e.target.value)}
-                placeholder="e.g., sample_key"
-              />
+              {/* Section 2: PayPay Credentials (Only shown if PayPay is enabled, or always visible but clearly separated) */}
+              <div className="pt-6 border-t border-neutral-100">
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                  <h3 className="text-sm font-semibold text-blue-900 flex items-center gap-2">
+                    <CreditCard size={16} /> PayPay Integration Credentials
+                  </h3>
+                  <p className="text-xs text-blue-700 mt-1.5 leading-relaxed">
+                    Enter your PayPay for Developers credentials. These are stored securely and used exclusively to process orders for this restaurant.
+                  </p>
+                </div>
 
-              <div className="space-y-1.5">
-                <label className="block text-sm font-medium text-neutral-700">
-                  API Secret
-                </label>
-                <input
-                  type={hasNewSecret ? "text" : "password"}
-                  value={form.paypayApiSecret}
-                  onChange={(e) => {
-                    set("paypayApiSecret", e.target.value);
-                    if (!hasNewSecret && e.target.value.length > 0) {
-                      setHasNewSecret(true);
-                    }
-                  }}
-                  className="w-full px-3 py-2 text-sm border border-neutral-300 rounded-lg focus:ring-2 focus:ring-[#1B2333] focus:border-transparent outline-none font-mono"
-                  placeholder="•••••••••••••••• (Leave blank to keep existing)"
-                />
-                <p className="text-xs text-neutral-500">
-                  For security, your existing secret is hidden and never sent to the frontend. 
-                  Only fill this field if you need to update or rotate your secret.
-                </p>
-              </div>
+                <SettingsField label="Merchant ID" value={form.paypayMerchantId} onChange={(e) => set("paypayMerchantId", e.target.value)} placeholder="e.g., 123456789" />
+                <SettingsField label="API Key" value={form.paypayApiKey} onChange={(e) => set("paypayApiKey", e.target.value)} placeholder="e.g., sample_key" />
 
-              <div className="pt-2 border-t border-neutral-100">
-                <a 
-                  href="https://developer.paypay.ne.jp/" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-xs text-[#0F6B5C] hover:underline flex items-center gap-1.5 font-medium"
-                >
-                  <ExternalLink size={12} /> Get credentials from PayPay for Developers
-                </a>
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium text-neutral-700">API Secret</label>
+                  <input
+                    type={hasNewSecret ? "text" : "password"}
+                    value={form.paypayApiSecret}
+                    onChange={(e) => {
+                      set("paypayApiSecret", e.target.value);
+                      if (!hasNewSecret && e.target.value.length > 0) setHasNewSecret(true);
+                    }}
+                    className="w-full px-3 py-2 text-sm border border-neutral-300 rounded-lg focus:ring-2 focus:ring-[#1B2333] focus:border-transparent outline-none font-mono"
+                    placeholder="•••••••••••••••• (Leave blank to keep existing)"
+                  />
+                  <p className="text-xs text-neutral-500">
+                    For security, your existing secret is hidden. Only fill this if you need to update or rotate it.
+                  </p>
+                </div>
+
+                <div className="pt-2">
+                  <a href="https://developer.paypay.ne.jp/" target="_blank" rel="noopener noreferrer" className="text-xs text-[#0F6B5C] hover:underline flex items-center gap-1.5 font-medium">
+                    <ExternalLink size={12} /> Get credentials from PayPay for Developers
+                  </a>
+                </div>
               </div>
             </div>
           )}

@@ -1,3 +1,4 @@
+//types/order.ts
 export interface OrderItemDetail {
   id: string;
   menuItemId?: string;

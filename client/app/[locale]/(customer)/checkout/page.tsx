@@ -1,7 +1,6 @@
-// app/[locale]/(customer)/checkout/page.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -9,7 +8,7 @@ import { useCartStore } from "@/store/cart-store";
 import { checkout, validateCoupon } from "@/lib/api/orders";
 import { AddressPicker } from "@/components/map/address-picker";
 import { PaymentModal, type PaymentMethod } from "@/components/checkout/payment-modal";
-import { checkDeliveryAvailability } from "@/lib/api/discovery";
+import { checkDeliveryAvailability, getPublicRestaurant } from "@/lib/api/discovery";
 import { AlertCircle, CheckCircle2, Loader2, ShoppingBag, Tag, X } from "lucide-react";
 import Link from "next/link";
 import { isAxiosError } from "axios";
@@ -46,6 +45,31 @@ export default function CheckoutPage() {
     enabled: hasLocation,
     retry: false,
   });
+
+  const restaurantSettingsQuery = useQuery({
+    queryKey: ["public-restaurant-settings", restaurantId],
+    queryFn: () => getPublicRestaurant(restaurantId as string),
+    enabled: !!restaurantId,
+  });
+
+   // Compute the list of enabled methods based on restaurant settings
+  const enabledMethods = useMemo(() => {
+    const r = restaurantSettingsQuery.data as any;
+    if (!r) return ["COD"] as PaymentMethod[]; // Safe fallback while loading
+
+    const methods: PaymentMethod[] = [];
+    if (r.supportsCod) methods.push("COD");
+    if (r.supportsCreditCard) methods.push("CREDIT_CARD");
+    if (r.supportsEsewa) methods.push("ESEWA");
+    if (r.supportsKhalti) methods.push("KHALTI");
+    if (r.supportsIps) methods.push("IPS");
+    if (r.supportsPhonePay) methods.push("PHONEPAY");
+    if (r.supportsPaypay) methods.push("PAYPAY");
+    
+    // Always ensure at least one method is available (fallback to COD)
+    return methods.length > 0 ? methods : (["COD"] as PaymentMethod[]);
+  }, [restaurantSettingsQuery.data]);
+
   type DeliveryCheck = { deliverable?: boolean; deliveryFee?: number; distanceKm?: number };
   const checkResult = deliveryQuery.data as (DeliveryCheck & { data?: DeliveryCheck }) | undefined;
   const deliveryData: DeliveryCheck | undefined = checkResult?.data ?? checkResult;
@@ -141,7 +165,7 @@ export default function CheckoutPage() {
           : {}),
         ...(appliedCoupon ? { couponCode: appliedCoupon.code } : {}),
         
-        //  Optional order-level delivery instructions 
+        // Optional order-level delivery instructions 
         // deliveryInstructions: deliveryInstructions?.trim() || undefined, 
 
         items: items.map((item) => ({
@@ -442,6 +466,7 @@ export default function CheckoutPage() {
           total={total}
           pending={mutation.isPending}
           error={error}
+          enabledMethods={enabledMethods} // <-- ADDED: Passes the filtered payment methods to the modal
           onSelect={(method) => {
             setError("");
             mutation.mutate(method);

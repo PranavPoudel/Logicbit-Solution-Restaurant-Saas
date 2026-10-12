@@ -1,3 +1,4 @@
+//src/modules/discovery/discovery.controller.ts
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { DiscoveryService } from './discovery.service';

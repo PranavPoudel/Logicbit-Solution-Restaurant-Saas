@@ -160,4 +160,32 @@ export class UpdateRestaurantDto {
   @IsString()
   @IsOptional()
   paypayApiSecret?: string;
+
+  @IsBoolean()
+  @IsOptional()
+  supportsCod?: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  supportsCreditCard?: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  supportsEsewa?: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  supportsKhalti?: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  supportsIps?: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  supportsPhonePay?: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  supportsPaypay?: boolean;
 }

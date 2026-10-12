@@ -32,6 +32,15 @@ export interface UpdateRestaurantInput {
   paypayMerchantId?: string;
   paypayApiKey?: string;
   paypayApiSecret?: string;
+
+  // Enabled Payment Methods
+  supportsCod?: boolean;
+  supportsCreditCard?: boolean;
+  supportsEsewa?: boolean;
+  supportsKhalti?: boolean;
+  supportsIps?: boolean;
+  supportsPhonePay?: boolean;
+  supportsPaypay?: boolean;
 }
 
 export async function updateMyRestaurant(id: string, input: UpdateRestaurantInput) {
