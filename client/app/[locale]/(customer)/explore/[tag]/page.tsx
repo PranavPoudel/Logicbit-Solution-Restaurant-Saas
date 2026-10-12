@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { getNearbyRestaurants } from "@/lib/api/discovery";
+import { AppImage } from "@/components/ui/app-image";
 
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1595917248955-a96ace4780b6?q=80&w=1169&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
@@ -67,10 +68,10 @@ export default function ExploreTagPage() {
             className="overflow-hidden rounded-2xl border border-[#E8E7E2] bg-white transition hover:border-[#E3A008] hover:shadow-md"
           >
             <div className="h-40 w-full bg-[#F4F3EE]">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <AppImage
                 src={r.coverImageUrl ?? r.coverImage ?? r.imageUrl ?? FALLBACK_IMAGE}
                 alt={r.name}
+                sizes="(min-width:1024px) 33vw, (min-width:640px) 50vw, 100vw"
                 className="h-full w-full object-cover"
               />
             </div>

@@ -87,7 +87,6 @@ export function StorefrontSectionRenderer({
                 <StorefrontMenuSection
                   title={title}
                   categories={categories}
-                  restaurantId={restaurantId}
                   aside={
                     contactBesideMenu ? (
                       <StorefrontContactSection

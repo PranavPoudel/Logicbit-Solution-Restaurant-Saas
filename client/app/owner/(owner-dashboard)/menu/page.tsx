@@ -57,7 +57,7 @@ export default function MenuPage() {
   });
 
   const addOptionMutation = useMutation({
-    mutationFn: ({ groupId, input }: { groupId: string; input: { name: string; extraPrice: number } }) =>
+    mutationFn: ({ groupId, input }: { groupId: string; input: { name: string; extraPrice: number; allergenInfo?: string } }) =>
       modifierGroupsApi.addOption(restaurantId as string, groupId, input),
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: ["owner-modifier-groups", restaurantId] }),

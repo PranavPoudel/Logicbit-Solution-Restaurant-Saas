@@ -8,6 +8,7 @@ export interface OwnerModifierOption {
   id: string;
   name?: string;
   extraPrice?: number;
+  allergenInfo?: string;
 }
 
 export interface OwnerModifierGroup {
@@ -23,7 +24,7 @@ interface ModifierGroupManagerProps {
   groups: OwnerModifierGroup[];
   onAddGroup: (input: { name: string; minSelect: number; maxSelect: number; isRequired: boolean }) => void;
   onDeleteGroup: (id: string) => void;
-  onAddOption: (groupId: string, input: { name: string; extraPrice: number }) => void;
+  onAddOption: (groupId: string, input: { name: string; extraPrice: number; allergenInfo?: string }) => void;
   onDeleteOption: (groupId: string, optionId: string) => void;
   isMutating: boolean;
 }
@@ -177,24 +178,29 @@ function OptionEditor({
   onDelete,
 }: {
   options: OwnerModifierOption[];
-  onAdd: (input: { name: string; extraPrice: number }) => void;
+  onAdd: (input: { name: string; extraPrice: number; allergenInfo?: string }) => void;
   onDelete: (optionId: string) => void;
 }) {
   const [name, setName] = useState("");
   const [extraPrice, setExtraPrice] = useState("");
+  const [allergenInfo, setAllergenInfo] = useState("");
 
   function submit() {
     if (!name.trim()) return;
-    onAdd({ name: name.trim(), extraPrice: Number(extraPrice) || 0 });
+    onAdd({ name: name.trim(), extraPrice: Number(extraPrice) || 0, allergenInfo: allergenInfo.trim() || undefined });
     setName("");
     setExtraPrice("");
+    setAllergenInfo("");
   }
 
   return (
     <div className="mt-2 ml-5 pl-3 border-l border-neutral-100 space-y-1.5">
       {options.map((opt) => (
         <div key={opt.id} className="group flex items-center justify-between text-sm">
-          <span className="text-neutral-600">{opt.name}</span>
+          <span className="text-neutral-600">
+            {opt.name}
+            {opt.allergenInfo && <span className="ml-2 text-[11px] text-red-500">Allergen: {opt.allergenInfo}</span>}
+          </span>
           <div className="flex items-center gap-2">
             <span className="text-xs font-mono text-neutral-400">
               {opt.extraPrice ? `+Rs ${opt.extraPrice}` : "Free"}
@@ -210,13 +216,13 @@ function OptionEditor({
         </div>
       ))}
 
-      <div className="flex gap-1.5 pt-1">
+      <div className="flex flex-wrap gap-1.5 pt-1">
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && submit()}
           placeholder="Option name"
-          className="flex-1 text-xs border border-neutral-200 rounded-md px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#E3A008]/40"
+          className="min-w-[8rem] flex-1 text-xs border border-neutral-200 rounded-md px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#E3A008]/40"
         />
         <input
           value={extraPrice}
@@ -225,6 +231,14 @@ function OptionEditor({
           placeholder="+Rs"
           type="number"
           className="w-16 text-xs border border-neutral-200 rounded-md px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#E3A008]/40"
+        />
+        <input
+          value={allergenInfo}
+          onChange={(e) => setAllergenInfo(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && submit()}
+          placeholder="Allergen (optional)"
+          maxLength={200}
+          className="min-w-[8rem] flex-1 text-xs border border-neutral-200 rounded-md px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#E3A008]/40"
         />
         <button
           onClick={submit}

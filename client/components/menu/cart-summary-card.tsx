@@ -5,11 +5,15 @@ import Link from "next/link";
 import { ChevronDown, Minus, Plus } from "lucide-react";
 import { useCartStore } from "@/store/cart-store";
 import { useIsMounted } from "@/hooks/use-is-mounted";
+import { CouponBox } from "@/components/cart/coupon-input";
+import { AllergenNote } from "@/components/cart/allergen-note";
 
 export function CartSummaryCard() {
   const items = useCartStore((s) => s.items);
   const itemCount = useCartStore((s) => s.itemCount());
   const subtotal = useCartStore((s) => s.subtotal());
+  const coupon = useCartStore((s) => s.coupon);
+  const discount = useCartStore((s) => s.discount());
   const addItem = useCartStore((s) => s.addItem);
   const removeOneOrAll = useCartStore((s) => s.removeOneOrAll);
 
@@ -57,6 +61,7 @@ export function CartSummaryCard() {
                         {item.selectedModifiers.map((m) => m.optionName).join(", ")}
                       </p>
                     )}
+                    <AllergenNote text={item.allergenInfo} dark />
                     <p className="font-mono text-xs text-brand-background/60 mt-0.5">Rs {item.price}</p>
                   </div>
 
@@ -97,10 +102,26 @@ export function CartSummaryCard() {
               ))}
             </ul>
 
+            <div className="mt-3 pt-3 border-t border-brand-background/15">
+              <CouponBox dark />
+            </div>
+
             <div className="flex items-center justify-between mt-3 pt-3 border-t border-brand-background/15 text-sm">
               <span className="text-brand-background/70">Subtotal</span>
               <span className="font-mono font-semibold">Rs {subtotal}</span>
             </div>
+            {coupon && (
+              <>
+                <div className="flex items-center justify-between mt-2 text-sm">
+                  <span className="text-brand-background/70">{`Discount (${coupon.code})`}</span>
+                  <span className="font-mono font-semibold">- Rs {discount}</span>
+                </div>
+                <div className="flex items-center justify-between mt-2 text-sm">
+                  <span className="text-brand-background/70">Total</span>
+                  <span className="font-mono font-semibold">Rs {subtotal - discount}</span>
+                </div>
+              </>
+            )}
 
             <div className="mt-4 grid grid-cols-2 gap-2">
               <Link

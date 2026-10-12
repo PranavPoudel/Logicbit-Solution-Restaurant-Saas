@@ -34,6 +34,7 @@ export interface ModifierOption {
   id: string;
   name?: string;
   extraPrice?: number;
+  allergenInfo?: string;
 }
 
 export interface ModifierGroupDetail {
@@ -46,6 +47,10 @@ export interface ModifierGroupDetail {
 }
 
 export interface MenuItemDetail extends MenuItem {
+  ingredients?: string;
+  spiceLevel?: string;
+  isVegetarian?: boolean;
+  isVegan?: boolean;
   modifierGroups?: ModifierGroupDetail[];
 }
 

@@ -87,7 +87,7 @@ export class OrderService {
         }
 
         modifierTotal += option.extraPrice;
-        resolvedModifiers.push({ groupId: mod.modifierGroupId, optionId: option.id, name: option.name, price: option.extraPrice });
+        resolvedModifiers.push({ groupId: mod.modifierGroupId, optionId: option.id, name: option.name, price: option.extraPrice, allergenInfo: option.allergenInfo });
         selectedGroupCounts.set(mod.modifierGroupId, (selectedGroupCounts.get(mod.modifierGroupId) ?? 0) + 1);
       }
 

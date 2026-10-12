@@ -45,21 +45,24 @@ export function KitchenTicket({ order }: KitchenTicketProps) {
                 <p className="text-xs font-bold text-gray-500 uppercase mb-1">Modifiers:</p>
                 <ul className="list-disc list-inside text-sm font-medium text-gray-800">
                   {item.selectedModifiers.map((mod: any, mIdx: number) => (
-                    <li key={mIdx}>{mod.optionName || mod.name}</li>
+                    <li key={mIdx}>
+                      {mod.optionName || mod.name}
+                      {mod.allergenInfo && <span className="font-black text-red-700"> - ⚠ {mod.allergenInfo}</span>}
+                    </li>
                   ))}
                 </ul>
               </div>
             )}
 
-            {/* 🚨 CRITICAL: Notes / Allergies  */}
-            {item.notes && (
-              <div className="bg-red-100 border-4 border-red-600 p-3 mt-2">
-                <p className="text-xs font-black text-red-800 uppercase mb-1">⚠️ Special Instructions / Allergy:</p>
-                <p className="text-lg font-black text-red-900 uppercase leading-tight break-words">
-                  {item.notes}
-                </p>
+            {[
+              ['⚠️ Allergens:', item.menuItem?.allergenInfo],
+              ['⚠️ Special Instructions / Allergy:', item.notes],
+            ].map(([label, text]) => text && (
+              <div key={label} className="bg-red-100 border-4 border-red-600 p-3 mt-2">
+                <p className="text-xs font-black text-red-800 uppercase mb-1">{label}</p>
+                <p className="text-lg font-black text-red-900 uppercase leading-tight break-words">{text}</p>
               </div>
-            )}
+            ))}
           </div>
         ))}
       </div>

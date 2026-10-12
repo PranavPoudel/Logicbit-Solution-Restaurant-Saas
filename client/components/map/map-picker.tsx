@@ -28,6 +28,12 @@ function LocationMarker({ lat, lng, onChange }: MapPickerProps) {
     map.panTo([lat, lng]);
   }, [lat, lng, map]);
 
+  useEffect(() => {
+    const observer = new ResizeObserver(() => map.invalidateSize());
+    observer.observe(map.getContainer());
+    return () => observer.disconnect();
+  }, [map]);
+
   return (
     <Marker
       position={[lat, lng]}

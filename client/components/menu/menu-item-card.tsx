@@ -7,23 +7,18 @@ import { useCartStore } from "@/store/cart-store";
 import { getItemImage } from "@/lib/utils/image";
 import { AppImage } from "@/components/ui/app-image";
 import { useRequireLogin } from "@/hooks/use-require-login";
-import { useQueryClient } from "@tanstack/react-query";
-import { getMenuItemDetail } from "@/lib/api/discovery";
 
 export function MenuItemCard({
   item,
-  restaurantId,
   onOpenModifiers,
 }: {
   item: MenuItem;
-  restaurantId: string;
   onOpenModifiers: (menuItemId: string) => void;
 }) {
-  const { items, addItem, removeOneOrAll } = useCartStore();
+  const { items, removeOneOrAll } = useCartStore();
   const requireLogin = useRequireLogin();
-  const queryClient = useQueryClient();
-  const cartItem = items.find((i) => i.menuItemId === item.id && i.variantKey === "");
-  const quantity = cartItem?.quantity ?? 0;
+  const lines = items.filter((i) => i.menuItemId === item.id);
+  const quantity = lines.reduce((sum, i) => sum + i.quantity, 0);
 
   const name = item.name ?? "Menu item";
   const price = item.price ?? 0;
@@ -31,34 +26,8 @@ export function MenuItemCard({
   
   const imageUrl = getItemImage(item);
 
-  async function handleAddClick() {
-    if (!requireLogin()) return;
-
-    let hasOptions = item.hasModifiers === true;
-    if (!hasOptions) {
-      try {
-        const detail = await queryClient.fetchQuery({
-          queryKey: ["menu-item-detail", restaurantId, item.id],
-          queryFn: () => getMenuItemDetail(restaurantId, item.id),
-          staleTime: 60_000,
-        });
-        hasOptions = (detail.modifierGroups ?? []).length > 0;
-      } catch {
-        hasOptions = true;
-      }
-    }
-
-    if (hasOptions) {
-      onOpenModifiers(item.id);
-      return;
-    }
-    addItem({
-      id: `${item.id}-${Date.now()}`,
-      menuItemId: item.id,
-      restaurantId,
-      name,
-      price,
-    });
+  function handleAddClick() {
+    if (requireLogin()) onOpenModifiers(item.id);
   }
 
   return (
@@ -100,7 +69,7 @@ export function MenuItemCard({
               <button
                 onClick={(e) => {
                   e.stopPropagation(); // Prevent triggering the card click
-                  removeOneOrAll(item.id);
+                  removeOneOrAll(item.id, lines[lines.length - 1]?.variantKey);
                 }}
                 className="w-6 h-6 flex items-center justify-center"
                 aria-label="Remove one"

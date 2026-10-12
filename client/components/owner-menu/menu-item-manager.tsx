@@ -49,6 +49,8 @@ export function MenuItemManager({ items, categories, restaurantId, isLoading }: 
   const [spiceLevel, setSpiceLevel] = useState("NONE");
   const [description, setDescription] = useState("");
   const [descriptionJa, setDescriptionJa] = useState("");
+  const [allergenInfo, setAllergenInfo] = useState("");
+  const [ingredients, setIngredients] = useState("");
   const [image, setImage] = useState<string | undefined>(undefined);
   const [sections, setSections] = useState<string[]>([]);
   const [formError, setFormError] = useState<string | null>(null);
@@ -134,6 +136,8 @@ export function MenuItemManager({ items, categories, restaurantId, isLoading }: 
     setSpiceLevel("NONE");
     setDescription("");
     setDescriptionJa("");
+    setAllergenInfo("");
+    setIngredients("");
     setImage(undefined);
     setSections([]);
     setFormError(null);
@@ -148,6 +152,8 @@ export function MenuItemManager({ items, categories, restaurantId, isLoading }: 
     setSpiceLevel(item.spiceLevel || "NONE");
     setDescription(item.description || "");
     setDescriptionJa(item.descriptionJa || "");
+    setAllergenInfo(item.allergenInfo || "");
+    setIngredients(item.ingredients || "");
     setImage(item.image);
     setSections(item.homepageSections || []);
     setShowForm(true);
@@ -176,6 +182,8 @@ export function MenuItemManager({ items, categories, restaurantId, isLoading }: 
       spiceLevel,
       description: description.trim() || undefined,
       descriptionJa: descriptionJa.trim() || undefined,
+      allergenInfo: allergenInfo.trim() || undefined,
+      ingredients: ingredients.trim() || undefined,
       image,
       homepageSections: sections,
     });
@@ -341,6 +349,16 @@ export function MenuItemManager({ items, categories, restaurantId, isLoading }: 
                 <label className="block text-sm font-medium text-[#17181C] mb-1.5">Description (Japanese)</label>
                 <textarea value={descriptionJa} onChange={(e) => setDescriptionJa(e.target.value)} rows={3} placeholder="料理の簡単な説明..." className="w-full bg-white border border-[#E8E7E2] rounded-xl px-3.5 py-2.5 text-sm text-[#17181C] placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#E3A008]/40 focus:border-[#E3A008] resize-none" />
               </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-[#17181C] mb-1.5">Ingredients <span className="font-normal text-neutral-400">(optional)</span></label>
+              <textarea value={ingredients} onChange={(e) => setIngredients(e.target.value)} rows={2} maxLength={500} placeholder="e.g. Chicken, wheat flour, ginger, garlic" className="w-full bg-white border border-[#E8E7E2] rounded-xl px-3.5 py-2.5 text-sm text-[#17181C] placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#E3A008]/40 focus:border-[#E3A008] resize-none" />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-[#17181C] mb-1.5">Allergen info <span className="font-normal text-neutral-400">(optional)</span></label>
+              <input value={allergenInfo} onChange={(e) => setAllergenInfo(e.target.value)} maxLength={150} placeholder="e.g. Contains nuts, dairy" className="w-full bg-white border border-[#E8E7E2] rounded-xl px-3.5 py-2.5 text-sm text-[#17181C] placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#E3A008]/40 focus:border-[#E3A008]" />
             </div>
 
             <div>

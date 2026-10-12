@@ -4,11 +4,16 @@ import Link from "next/link";
 import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCartStore } from "@/store/cart-store";
+import { CouponBox } from "@/components/cart/coupon-input";
+import { AllergenNote } from "@/components/cart/allergen-note";
+import { DiscountRow } from "@/components/cart/discount-row";
 
 export default function CartPage() {
   const t = useTranslations("cart");
-  const { items, subtotal, addItem, removeOneOrAll, removeItem } = useCartStore();
+  const { items, subtotal, addItem, removeOneOrAll, removeItem, coupon } = useCartStore();
+  const discount = useCartStore((s) => s.discount());
   const sub = subtotal();
+  const total = sub - discount;
 
   if (items.length === 0) {
     return (
@@ -40,6 +45,7 @@ export default function CartPage() {
                   {item.selectedModifiers.map(m => m.optionName).join(", ")}
                 </p>
               )}
+              <AllergenNote text={item.allergenInfo} />
               <p className="text-xs text-neutral-500 mt-1 font-mono">Rs {item.price}</p>
             </div>
 
@@ -90,17 +96,21 @@ export default function CartPage() {
       </div>
 
       <div className="bg-white border border-[#E8E7E2] rounded-2xl p-4 mt-4 space-y-2 text-sm">
+        <div className="pb-2">
+          <CouponBox />
+        </div>
         <div className="flex justify-between text-neutral-500">
           <span>{t("subtotal")}</span>
           <span className="font-mono">Rs {sub}</span>
         </div>
+        {coupon && <DiscountRow code={coupon.code} amount={discount} />}
         <div className="flex justify-between text-neutral-500">
           <span>{t("deliveryFee")}</span>
           <span className="text-xs text-neutral-400 italic">{t("calculatedAtCheckout")}</span>
         </div>
         <div className="flex justify-between font-semibold text-[#17181C] pt-2 border-t border-[#E8E7E2]">
           <span>{t("baseTotal")}</span>
-          <span className="font-mono">Rs {sub}</span>
+          <span className="font-mono">Rs {total}</span>
         </div>
       </div>
 
@@ -108,7 +118,7 @@ export default function CartPage() {
         href="/checkout" // ✅ next-intl middleware automatically prefixes this with /en or /ja
         className="block w-full mt-5 bg-[#17181C] text-white text-sm font-medium py-3.5 rounded-2xl text-center hover:bg-[#2B2D33] transition-colors"
       >
-        {t("proceedToCheckout")} — Rs {sub}
+        {t("proceedToCheckout")} — Rs {total}
       </Link>
     </div>
   );
