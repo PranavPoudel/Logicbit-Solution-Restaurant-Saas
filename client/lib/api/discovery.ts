@@ -23,6 +23,10 @@ export interface NearbyRestaurantsResponse {
   total: number;
 }
 
+export async function getPublicRestaurant(id: string) {
+  const { data } = await apiClient.get(`/discovery/restaurants/${id}`);
+  return data;
+}
 export async function getNearbyRestaurants(
   params: NearbyRestaurantsParams
 ): Promise<NearbyRestaurantsResponse> {

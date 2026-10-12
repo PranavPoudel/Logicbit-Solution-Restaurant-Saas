@@ -1,3 +1,4 @@
+//src/common/utils/paypay.util.ts
 import * as crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -64,5 +65,37 @@ export class PayPayUtil {
       isAuthorization: false,
       authorizationExpiry: null,
     };
+  }
+    static verifyWebhookSignature(
+    apiSecret: string,
+    headers: any,
+    rawBody: string,
+    url: string,
+    method: string,
+  ): boolean {
+    const authHeader = headers['authorization'] || headers['Authorization'];
+    if (!authHeader || !authHeader.startsWith('hmac OPA-Auth:')) {
+      return false;
+    }
+
+    const providedSignature = authHeader.replace('hmac OPA-Auth:', '');
+    const nonce = headers['x-nonce'] || headers['X-Nonce'];
+    const epoch = headers['x-epoch'] || headers['X-Epoch'];
+
+    if (!nonce || !epoch) {
+      return false;
+    }
+
+    const message = [url, method, nonce, epoch, rawBody].join('\n');
+    const expectedSignature = crypto
+      .createHmac('SHA256', apiSecret)
+      .update(message)
+      .digest('base64');
+
+    // Use timingSafeEqual to prevent timing attacks
+    return crypto.timingSafeEqual(
+      Buffer.from(expectedSignature),
+      Buffer.from(providedSignature),
+    );
   }
 }

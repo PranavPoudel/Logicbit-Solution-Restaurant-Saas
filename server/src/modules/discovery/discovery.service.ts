@@ -1,3 +1,4 @@
+//src/modules/discovery/discovery.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -318,6 +319,15 @@ export class DiscoveryService {
       longitude: r.longitude,
       createdAt: r.createdAt,
       totalOrders: r.totalOrders ?? 0,
+
+  //ADDED: Expose enabled payment methods to the public checkout flow
+      supportsCod: r.supportsCod ?? true,
+      supportsCreditCard: r.supportsCreditCard ?? false,
+      supportsEsewa: r.supportsEsewa ?? false,
+      supportsKhalti: r.supportsKhalti ?? false,
+      supportsIps: r.supportsIps ?? false,
+      supportsPhonePay: r.supportsPhonePay ?? false,
+      supportsPaypay: r.supportsPaypay ?? false,
+    };
     };
   }
-}

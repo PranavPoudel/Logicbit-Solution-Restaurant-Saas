@@ -1,3 +1,4 @@
+//src/modules/restaurant/restaurant.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { UpdateRestaurantDto } from './dto/update-restaurant.dto';

@@ -1,3 +1,4 @@
+//app/[locale]/(customer)/payment/callback/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
