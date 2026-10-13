@@ -16,6 +16,7 @@ import {
 } from "@/lib/api/discovery";
 import { StorefrontSectionRenderer } from "@/components/restaurant/storefront-section-renderer";
 import { StorefrontPopupModal } from "@/components/restaurant/storefront-popup-modal";
+import { getRestaurantThemeStyle } from "@/lib/utils/restaurant-theme";
 
 export default function RestaurantDetailPage({
   params,
@@ -88,7 +89,7 @@ export default function RestaurantDetailPage({
   }
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col" style={getRestaurantThemeStyle(restaurantQuery.data)}>
       <RestaurantHeader restaurant={restaurantQuery.data} />
 
       {/* Dynamic Storefront Sections (Uses currentLocale for proper i18n) */}

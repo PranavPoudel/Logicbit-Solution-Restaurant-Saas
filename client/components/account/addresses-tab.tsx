@@ -61,7 +61,7 @@ export function AddressesTab() {
   const error = pickerError || (addMutation.isError ? getErrorMessage(addMutation.error, "Couldn't save this address.") : "");
 
   return (
-    <div className="max-w-md py-5 space-y-3">
+    <div className="animate-fade-up max-w-3xl pb-5 space-y-3">
       {isLoading ? (
         <p className="text-sm text-neutral-400">Loading addresses…</p>
       ) : addresses.length === 0 ? (
@@ -70,13 +70,13 @@ export function AddressesTab() {
         addresses.map((addr) => (
           <div
             key={addr.id}
-            className="flex items-start justify-between gap-3 bg-white border border-[#E8E7E2] rounded-xl p-3.5"
+            className="flex items-start justify-between gap-3 bg-white border border-[#E8E7E2] rounded-xl p-4 md:p-5"
           >
             <div className="flex items-start gap-2.5">
               <MapPin size={15} className="text-[#E3A008] mt-0.5 shrink-0" />
               <div>
-                <p className="text-sm font-medium text-[#17181C]">{addr.label ?? "Address"}</p>
-                <p className="text-xs text-neutral-500 mt-0.5">{addr.fullAddress}</p>
+                <p className="text-base font-medium text-[#17181C]">{addr.label ?? "Address"}</p>
+                <p className="text-sm text-neutral-500 mt-0.5">{addr.fullAddress}</p>
               </div>
             </div>
             <button
@@ -91,12 +91,12 @@ export function AddressesTab() {
       )}
 
       {showForm ? (
-        <div className="bg-white border border-[#E8E7E2] rounded-xl p-3.5 space-y-3">
+        <div className="bg-white border border-[#E8E7E2] rounded-xl p-4 md:p-5 space-y-3">
           <input
             value={label}
             onChange={(e) => setLabel(e.target.value)}
             placeholder="Label (e.g. Home, Office)"
-            className="w-full text-sm border border-[#E8E7E2] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#E3A008]/40"
+            className="w-full text-base border border-[#E8E7E2] rounded-lg px-3.5 py-3 focus:outline-none focus:ring-2 focus:ring-[#E3A008]/40"
           />
           <AddressPicker
             value={location}
@@ -115,11 +115,11 @@ export function AddressesTab() {
             <button
               onClick={() => addMutation.mutate()}
               disabled={!canSave || addMutation.isPending}
-              className="text-xs font-medium bg-[#17181C] text-white px-3.5 py-2 rounded-lg disabled:opacity-50"
+              className="text-sm font-medium bg-[#17181C] text-white px-5 min-h-11 rounded-lg disabled:opacity-50"
             >
               {addMutation.isPending ? "Saving…" : "Save address"}
             </button>
-            <button onClick={closeForm} className="text-xs text-neutral-500 px-3.5 py-2">
+            <button onClick={closeForm} className="text-sm text-neutral-500 px-4 min-h-11">
               Cancel
             </button>
           </div>
@@ -127,7 +127,7 @@ export function AddressesTab() {
       ) : (
         <button
           onClick={() => setShowForm(true)}
-          className="flex items-center gap-1.5 text-sm font-medium text-[#17181C]"
+          className="flex items-center gap-1.5 text-base font-medium text-[#17181C] min-h-11"
         >
           <Plus size={15} />
           Add new address

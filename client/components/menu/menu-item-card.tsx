@@ -65,7 +65,7 @@ export function MenuItemCard({
 
         {isAvailable && (
           quantity > 0 ? (
-            <div className="absolute -bottom-3 right-3 flex items-center gap-1.5 bg-[#2B1410] text-[#FDF6EC] rounded-full px-1 py-1 shadow-md">
+            <div className="absolute -bottom-3 right-3 flex items-center gap-1.5 bg-brand-dark text-[#FDF6EC] rounded-full px-1 py-1 shadow-md">
               <button
                 onClick={(e) => {
                   e.stopPropagation(); // Prevent triggering the card click
@@ -94,7 +94,7 @@ export function MenuItemCard({
                 e.stopPropagation(); // Prevent double-triggering
                 handleAddClick();
               }}
-              className="absolute -bottom-3 right-3 w-8 h-8 rounded-full bg-[#C0392B] text-[#FDF6EC] flex items-center justify-center shadow-md hover:bg-[#A8301F] active:scale-95 transition-all z-10"
+              className="absolute -bottom-3 right-3 w-8 h-8 rounded-full bg-brand-primary text-[var(--brand-on-primary,#FDF6EC)] flex items-center justify-center shadow-md hover:bg-brand-primary-hover active:scale-95 transition-all z-10"
               aria-label={item.hasModifiers ? "Customize" : "Add"}
             >
               <Plus size={16} />

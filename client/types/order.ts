@@ -17,6 +17,8 @@ export interface OrderRestaurant {
   id: string;
   name?: string;
   address?: string | null;
+  phone?: string | null;
+  refundPolicy?: string | null;
   latitude?: number | null;
   longitude?: number | null;
 }

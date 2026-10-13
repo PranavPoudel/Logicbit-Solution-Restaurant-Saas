@@ -10,7 +10,7 @@ export function RestaurantFooter({ restaurant }: { restaurant: DiscoveryRestaura
 
   return (
     // 🆕 Added mt-auto to push it to the bottom of a flex-col parent
-    <footer className="bg-[#2B1410] text-[#FDF6EC] mt-auto">
+    <footer className="bg-brand-dark text-[#FDF6EC] mt-auto">
       <div className="max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 py-10 grid sm:grid-cols-2 gap-8">
         <div>
           <h3 className="font-serif text-lg mb-2">{name}</h3>

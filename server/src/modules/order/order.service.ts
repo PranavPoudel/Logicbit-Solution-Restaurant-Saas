@@ -263,7 +263,7 @@ export class OrderService {
       where: { id: orderId },
       include: {
         items: { include: { menuItem: true } },
-        restaurant: { select: { id: true, name: true, address: true, latitude: true, longitude: true } },
+        restaurant: { select: { id: true, name: true, address: true, phone: true, refundPolicy: true, latitude: true, longitude: true } },
         statusHistory: { orderBy: { createdAt: 'asc' } },
         refund: true,
         delivery: {
@@ -286,7 +286,7 @@ export class OrderService {
     return this.prisma.order.findMany({
       where: { customerId },
       orderBy: { createdAt: 'desc' },
-      include: { items: { include: { menuItem: true } }, restaurant: { select: { id: true, name: true } } },
+      include: { items: { include: { menuItem: true } }, restaurant: { select: { id: true, name: true } }, refund: true },
     });
   }
 

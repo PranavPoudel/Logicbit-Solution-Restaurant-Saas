@@ -37,8 +37,7 @@ export function ItemModifierLinkModal({
         <div className="overflow-y-auto p-4 space-y-2">
           {allGroups.length === 0 ? (
             <p className="text-sm text-neutral-400 text-center py-6">
-              No modifier groups yet — create one first in &quot;Modifier groups&quot;
-              below the menu.
+              No modifiers yet. Create one first in the Modifiers tab.
             </p>
           ) : (
             allGroups.map((group) => {

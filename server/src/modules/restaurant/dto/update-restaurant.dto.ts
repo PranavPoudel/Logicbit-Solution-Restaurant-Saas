@@ -35,6 +35,16 @@ export class UpdateRestaurantDto {
 
   @IsString()
   @IsOptional()
+  @MaxLength(30)
+  phone?: string;
+
+  @IsString()
+  @IsOptional()
+  @MaxLength(1000)
+  refundPolicy?: string;
+
+  @IsString()
+  @IsOptional()
   city?: string;
 
   @IsString()

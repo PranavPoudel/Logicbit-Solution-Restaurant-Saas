@@ -150,6 +150,8 @@ model Restaurant {
   latitude         Float?
   longitude        Float?
   address          String?
+  phone            String?
+  refundPolicy     String?
   city             String?
   state            String?
   country          String?
@@ -902,6 +904,14 @@ model StorefrontConfig {
 // StorefrontPopup — Website खोल्ने बित्तिकै देखिने offer/notification popup।
 // Schedule (startDate/endDate) राखिएको छ ताकि owner ले "यो weekend मात्र
 // यो offer देखाऊ" जस्तो time-bound campaign चलाउन सकून्।
+enum PopupType {
+  DISCOUNT
+  NEW_DISH
+  EVENT
+  ANNOUNCEMENT
+  EXTERNAL_AD
+}
+
 model StorefrontPopup {
   id           String    @id @default(uuid())
   tenantId     String
@@ -911,6 +921,7 @@ model StorefrontPopup {
   imageUrl     String?
   ctaText      String?   // Button को text, जस्तै "Order Now"
   ctaLink      String?
+  type         PopupType @default(ANNOUNCEMENT)
   startDate    DateTime?
   endDate      DateTime?
   isActive     Boolean   @default(true)

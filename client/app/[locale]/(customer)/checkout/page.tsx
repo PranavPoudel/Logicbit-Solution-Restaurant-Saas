@@ -16,6 +16,7 @@ import { useRedirectToLogin } from "@/hooks/use-require-login";
 import { CouponBox } from "@/components/cart/coupon-input";
 import { AllergenNote } from "@/components/cart/allergen-note";
 import { DiscountRow } from "@/components/cart/discount-row";
+import { RefundPolicy } from "@/components/cart/refund-policy";
 
 export default function CheckoutPage() {
   const t = useTranslations("checkout");
@@ -387,6 +388,8 @@ export default function CheckoutPage() {
                 <h2 className="mb-3 font-semibold text-[#17181C]">{t("couponCode")}</h2>
                 <CouponBox />
               </div>
+
+              <RefundPolicy text={restaurantSettingsQuery.data?.refundPolicy} />
             </div>
           </div>
         </div>

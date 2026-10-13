@@ -8,6 +8,9 @@ import { useIsMounted } from "@/hooks/use-is-mounted";
 import { CouponBox } from "@/components/cart/coupon-input";
 import { AllergenNote } from "@/components/cart/allergen-note";
 
+const STEP_BUTTON =
+  "flex h-8 w-8 items-center justify-center rounded-full border border-brand-background/25 hover:bg-brand-background/10";
+
 export function CartSummaryCard() {
   const items = useCartStore((s) => s.items);
   const itemCount = useCartStore((s) => s.itemCount());
@@ -50,54 +53,43 @@ export function CartSummaryCard() {
           <div className="border-t border-brand-background/15 px-5 pt-2 pb-5">
             <ul className="max-h-72 overflow-y-auto divide-y divide-brand-background/10">
               {items.map((item) => (
-                <li
-                  key={`${item.menuItemId}::${item.variantKey}`}
-                  className="flex items-center gap-3 py-3"
-                >
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{item.name}</p>
-                    {item.selectedModifiers && item.selectedModifiers.length > 0 && (
-                      <p className="text-[11px] text-brand-background/60 truncate">
-                        {item.selectedModifiers.map((m) => m.optionName).join(", ")}
-                      </p>
-                    )}
-                    <AllergenNote text={item.allergenInfo} dark />
-                    <p className="font-mono text-xs text-brand-background/60 mt-0.5">Rs {item.price}</p>
+                <li key={`${item.menuItemId}::${item.variantKey}`} className="py-3.5">
+                  <div className="flex items-center gap-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium">{item.name}</p>
+                      {item.selectedModifiers && item.selectedModifiers.length > 0 && (
+                        <p className="mt-0.5 text-xs text-brand-background/60">
+                          {item.selectedModifiers.map((m) => m.optionName).join(", ")}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex shrink-0 items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => removeOneOrAll(item.menuItemId, item.variantKey)}
+                        aria-label={`Remove one ${item.name}`}
+                        className={STEP_BUTTON}
+                      >
+                        <Minus size={14} />
+                      </button>
+                      <span className="w-5 text-center font-mono text-sm">{item.quantity}</span>
+                      <button
+                        type="button"
+                        onClick={() => addItem({ ...item, quantity: 1 })}
+                        aria-label={`Add one more ${item.name}`}
+                        className={STEP_BUTTON}
+                      >
+                        <Plus size={14} />
+                      </button>
+                    </div>
+
+                    <span className="w-[4.5rem] shrink-0 text-right font-mono text-sm font-semibold">
+                      Rs {item.price * item.quantity}
+                    </span>
                   </div>
 
-                  <div className="flex items-center gap-2 shrink-0">
-                    <button
-                      type="button"
-                      onClick={() => removeOneOrAll(item.menuItemId, item.variantKey)}
-                      aria-label={`Remove one ${item.name}`}
-                      className="w-7 h-7 rounded-full border border-brand-background/25 flex items-center justify-center hover:bg-brand-background/10"
-                    >
-                      <Minus size={13} />
-                    </button>
-                    <span className="w-5 text-center font-mono text-sm">{item.quantity}</span>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        addItem({
-                          id: item.id,
-                          menuItemId: item.menuItemId,
-                          restaurantId: item.restaurantId,
-                          name: item.name,
-                          price: item.price,
-                          selectedModifiers: item.selectedModifiers,
-                          variantKey: item.variantKey,
-                        })
-                      }
-                      aria-label={`Add one more ${item.name}`}
-                      className="w-7 h-7 rounded-full border border-brand-background/25 flex items-center justify-center hover:bg-brand-background/10"
-                    >
-                      <Plus size={13} />
-                    </button>
-                  </div>
-
-                  <span className="w-16 text-right font-mono text-sm font-semibold shrink-0">
-                    Rs {item.price * item.quantity}
-                  </span>
+                  <AllergenNote text={item.allergenInfo} dark />
                 </li>
               ))}
             </ul>

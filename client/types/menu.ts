@@ -16,6 +16,9 @@ export interface RestaurantDetail {
   estimatedDeliveryMinutes?: number;
   about?: string;
   primaryColor?: string;
+  secondaryColor?: string;
+  phone?: string;
+  refundPolicy?: string | null;
 }
 
 export interface MenuItem {

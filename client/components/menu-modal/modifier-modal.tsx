@@ -10,6 +10,7 @@ import { getMenuItemDetail } from "@/lib/api/discovery";
 import { useCartStore, type SelectedModifier } from "@/store/cart-store";
 import { AppImage } from "@/components/ui/app-image";
 import { getItemImage } from "@/lib/utils/image";
+import { isSingleModifier } from "@/lib/utils/modifiers";
 
 const SPICE_LEVELS: Record<string, { label: string; level: number }> = {
   NONE: { label: "Not spicy", level: 0 },
@@ -18,6 +19,33 @@ const SPICE_LEVELS: Record<string, { label: string; level: number }> = {
   HOT: { label: "Hot", level: 3 },
   VERY_HOT: { label: "Very hot", level: 4 },
 };
+
+interface OptionRowProps {
+  option: { name?: string; extraPrice?: number; allergenInfo?: string };
+  checked: boolean;
+  type: "radio" | "checkbox";
+  name: string;
+  onChange: () => void;
+}
+
+function OptionRow({ option, checked, type, name, onChange }: OptionRowProps) {
+  return (
+    <label
+      className={`flex min-h-11 cursor-pointer items-center justify-between rounded-xl border px-3 py-2 transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#E3A008] ${
+        checked ? "border-[#E3A008] bg-[#E3A008]/5" : "border-[#E8E7E2] hover:bg-neutral-50"
+      }`}
+    >
+      <span className="flex items-center gap-2.5">
+        <input type={type} name={name} checked={checked} onChange={onChange} className="h-4 w-4 accent-[#17181C]" />
+        <span className="flex flex-col">
+          <span className="text-sm text-[#17181C]">{option.name}</span>
+          {option.allergenInfo && <span className="text-[11px] text-red-600">Allergen: {option.allergenInfo}</span>}
+        </span>
+      </span>
+      {!!option.extraPrice && <span className="font-mono text-xs text-neutral-500">+Rs {option.extraPrice}</span>}
+    </label>
+  );
+}
 
 interface ModifierModalProps {
   restaurantId: string;
@@ -43,6 +71,10 @@ export function ModifierModal({ restaurantId, menuItemId, onClose }: ModifierMod
     setSelections((prev) => {
       const current = prev[groupId] ?? [];
       const maxSelect = group.maxSelect ?? 1;
+
+      if (isSingleModifier(group) && current.includes(optionId)) {
+        return { ...prev, [groupId]: [] };
+      }
 
       if (maxSelect <= 1) {
         return { ...prev, [groupId]: [optionId] };
@@ -228,6 +260,19 @@ export function ModifierModal({ restaurantId, menuItemId, onClose }: ModifierMod
                 ) : (
                   groups.map((group) => {
                     const isSingle = (group.maxSelect ?? 1) <= 1;
+                    if (isSingleModifier(group)) {
+                      const option = group.options[0];
+                      return (
+                        <OptionRow
+                          key={group.id}
+                          option={option}
+                          checked={(selections[group.id] ?? []).includes(option.id)}
+                          type="checkbox"
+                          name={group.id}
+                          onChange={() => toggleOption(group.id, option.id, group)}
+                        />
+                      );
+                    }
                     return (
                       <div key={group.id}>
                         <div className="mb-2 flex items-center justify-between">
@@ -242,36 +287,16 @@ export function ModifierModal({ restaurantId, menuItemId, onClose }: ModifierMod
                           </span>
                         </div>
                         <div className="space-y-2">
-                          {(group.options ?? []).map((option) => {
-                            const checked = (selections[group.id] ?? []).includes(option.id);
-                            return (
-                              <label
-                                key={option.id}
-                                className={`flex min-h-11 cursor-pointer items-center justify-between rounded-xl border px-3 py-2 transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#E3A008] ${
-                                  checked ? "border-[#E3A008] bg-[#E3A008]/5" : "border-[#E8E7E2] hover:bg-neutral-50"
-                                }`}
-                              >
-                                <span className="flex items-center gap-2.5">
-                                  <input
-                                    type={isSingle ? "radio" : "checkbox"}
-                                    name={group.id}
-                                    checked={checked}
-                                    onChange={() => toggleOption(group.id, option.id, group)}
-                                    className="h-4 w-4 accent-[#17181C]"
-                                  />
-                                  <span className="flex flex-col">
-                                    <span className="text-sm text-[#17181C]">{option.name}</span>
-                                    {option.allergenInfo && (
-                                      <span className="text-[11px] text-red-600">Allergen: {option.allergenInfo}</span>
-                                    )}
-                                  </span>
-                                </span>
-                                {!!option.extraPrice && (
-                                  <span className="font-mono text-xs text-neutral-500">+Rs {option.extraPrice}</span>
-                                )}
-                              </label>
-                            );
-                          })}
+                          {(group.options ?? []).map((option) => (
+                            <OptionRow
+                              key={option.id}
+                              option={option}
+                              checked={(selections[group.id] ?? []).includes(option.id)}
+                              type={isSingle ? "radio" : "checkbox"}
+                              name={group.id}
+                              onChange={() => toggleOption(group.id, option.id, group)}
+                            />
+                          ))}
                         </div>
                       </div>
                     );

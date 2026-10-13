@@ -61,18 +61,7 @@ export default function CartPage() {
                 <span className="w-6 text-center text-sm font-medium text-[#17181C]">{item.quantity}</span>
                 <button
                   aria-label={`Add one ${item.name}`}
-                  onClick={() =>
-                    addItem({
-                      id: item.id,
-                      menuItemId: item.menuItemId,
-                      restaurantId: item.restaurantId,
-                      name: item.name,
-                      price: item.price,
-                      selectedModifiers: item.selectedModifiers,
-                      variantKey: item.variantKey,
-                      quantity: 1,
-                    })
-                  }
+                  onClick={() => addItem({ ...item, quantity: 1 })}
                   className="p-1.5 text-neutral-600 hover:text-[#17181C] transition-colors"
                 >
                   <Plus size={14} />

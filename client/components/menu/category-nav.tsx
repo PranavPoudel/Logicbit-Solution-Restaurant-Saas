@@ -32,7 +32,7 @@ export function CategoryNav({ categories, activeId, onSelect }: CategoryNavProps
               onClick={() => onSelect(cat.id)}
               className={`shrink-0 text-sm font-medium px-3.5 py-3 border-b-2 transition-colors ${
                 activeId === cat.id
-                  ? "border-[#C0392B] text-[#2B1410]"
+                  ? "border-brand-primary text-[#2B1410]"
                   : "border-transparent text-[#2B1410]/40 hover:text-[#2B1410]"
               }`}
             >

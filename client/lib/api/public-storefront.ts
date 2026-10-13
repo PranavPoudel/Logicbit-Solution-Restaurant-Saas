@@ -1,5 +1,6 @@
 import { apiClient } from "@/lib/api/client";
 import { API_ORIGIN } from "@/lib/api-config";
+import type { PopupType } from "@/lib/api/storefront";
 
 // Helper to resolve relative image URLs from the backend
 
@@ -35,6 +36,8 @@ export interface PublicStorefrontData {
 
 export interface PublicPopup {
   id: string;
+  restaurantId: string;
+  type?: PopupType;
   title: string;
   message?: string;
   imageUrl?: string;

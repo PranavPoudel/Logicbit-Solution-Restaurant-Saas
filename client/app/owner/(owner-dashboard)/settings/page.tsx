@@ -7,7 +7,7 @@ import { AlertTriangle, CheckCircle2, CreditCard, ExternalLink } from "lucide-re
 import { useOwnerAuthStore } from "@/store/owner-auth-store";
 import { getMyRestaurant, updateMyRestaurant, listMyRestaurants } from "@/lib/api/restaurants";
 import { SettingsTabs } from "@/components/owner-settings/settings-tabs";
-import { SettingsField, SettingsToggle } from "@/components/owner-settings/settings-field";
+import { SettingsField, SettingsTextarea, SettingsToggle } from "@/components/owner-settings/settings-field";
 import { useGeolocation } from "@/hooks/use-geolocation";
 import { DynamicMapPicker } from "@/components/map/dynamic-map-picker";
 import { listCuisines, getRestaurantCuisines, setRestaurantCuisines } from "@/lib/api/cuisines";
@@ -24,6 +24,8 @@ const TABS = [
 interface SettingsForm {
   name: string;
   address: string;
+  phone: string;
+  refundPolicy: string;
   city: string;
   latitude: string;
   longitude: string;
@@ -54,6 +56,8 @@ interface SettingsForm {
 const EMPTY_FORM: SettingsForm = {
   name: "",
   address: "",
+  phone: "",
+  refundPolicy: "",
   city: "",
   latitude: "",
   longitude: "",
@@ -106,6 +110,8 @@ export default function SettingsPage() {
       ...prev,
       name: (r.name as string) ?? prev.name,
       address: (r.address as string) ?? prev.address,
+      phone: (r.phone as string) ?? prev.phone,
+      refundPolicy: (r.refundPolicy as string) ?? prev.refundPolicy,
       city: (r.city as string) ?? prev.city,
       latitude: r.latitude != null ? String(r.latitude) : prev.latitude,
       longitude: r.longitude != null ? String(r.longitude) : prev.longitude,
@@ -141,6 +147,8 @@ export default function SettingsPage() {
       const payload: any = {
         name: form.name,
         address: form.address,
+        phone: form.phone.trim() || undefined,
+        refundPolicy: form.refundPolicy.trim(),
         city: form.city,
         latitude: parseNumber(form.latitude),
         longitude: parseNumber(form.longitude),
@@ -286,9 +294,24 @@ export default function SettingsPage() {
                 onChange={(e) => set("address", e.target.value)}
               />
               <SettingsField
+                label="Phone number"
+                type="tel"
+                value={form.phone}
+                onChange={(e) => set("phone", e.target.value)}
+              />
+              <SettingsField
                 label="City"
                 value={form.city}
                 onChange={(e) => set("city", e.target.value)}
+              />
+              <SettingsTextarea
+                id="refund-policy"
+                label="Refund policy"
+                hint="Shown to customers at checkout and on their order page."
+                maxLength={1000}
+                placeholder="e.g. Full refund if cancelled before the kitchen starts preparing. No refunds once the order is out for delivery."
+                value={form.refundPolicy}
+                onChange={(e) => set("refundPolicy", e.target.value)}
               />
 
               <div className="pt-4 border-t border-neutral-100">

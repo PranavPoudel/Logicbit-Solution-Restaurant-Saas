@@ -29,23 +29,18 @@ export function PopupAd() {
   if (!visible) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-50 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-300"
-      style={{ backgroundColor: `${theme.colors.dark}80` }}
-      onClick={dismiss}
-    >
+    <div className="fixed bottom-20 left-4 z-40 w-[calc(100vw-2rem)] max-w-xs sm:bottom-6 sm:left-6">
       <div
         role="dialog"
-        aria-modal="true"
-        onClick={(e) => e.stopPropagation()}
-        className="rounded-[2rem] w-full max-w-sm overflow-hidden animate-in zoom-in-95 fade-in duration-300 shadow-2xl shadow-black/30"
+        aria-label={theme.content.popupTitle}
+        className="rounded-3xl overflow-hidden animate-slide-in-left shadow-2xl shadow-black/30"
         style={{
           backgroundColor: theme.colors.background,
           border: `1px solid ${theme.colors.dark}0D`,
         }}
       >
         <div
-          className="h-40 flex flex-col items-center justify-center relative overflow-hidden"
+          className="h-28 flex flex-col items-center justify-center relative overflow-hidden"
           style={{ backgroundColor: theme.colors.primary }}
         >
           {/* faint tomato icon for texture, matches hero */}
@@ -73,7 +68,7 @@ export function PopupAd() {
             <X size={14} style={{ color: theme.colors.dark }} />
           </button>
           <div
-            className="flex items-center gap-1 rounded-full px-3 py-1 mb-2 animate-in fade-in slide-in-from-top-2 duration-500 [animation-delay:150ms] [animation-fill-mode:backwards]"
+            className="flex items-center gap-1 rounded-full px-3 py-1 mb-2 animate-fade-up [animation-delay:150ms]"
             style={{ backgroundColor: "rgba(255,255,255,0.15)" }}
           >
             <Percent size={14} style={{ color: theme.colors.background }} />
@@ -82,14 +77,14 @@ export function PopupAd() {
             </span>
           </div>
           <p
-            className="font-serif text-2xl font-semibold text-center px-6 relative animate-in fade-in slide-in-from-top-2 duration-500 [animation-delay:250ms] [animation-fill-mode:backwards]"
+            className="font-serif text-xl font-semibold text-center px-6 relative animate-fade-up [animation-delay:250ms]"
             style={{ color: theme.colors.background }}
           >
             {theme.content.popupTitle}
           </p>
         </div>
-        <div className="p-5 text-center">
-          <p className="text-sm mb-4" style={{ color: `${theme.colors.dark}8C` }}>
+        <div className="p-4 text-center">
+          <p className="text-sm mb-3" style={{ color: `${theme.colors.dark}8C` }}>
             {theme.content.popupSubtext}
           </p>
           <button

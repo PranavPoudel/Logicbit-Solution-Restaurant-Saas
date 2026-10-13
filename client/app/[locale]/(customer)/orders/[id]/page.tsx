@@ -3,12 +3,14 @@
 
 import { use, useState } from "react";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, Phone, Printer, Star } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Phone, Printer, Star } from "lucide-react";
 import { getMyOrder } from "@/lib/api/orders";
 import { StatusTimeline } from "@/components/order/status-timeline";
 import { ThermalReceipt } from "@/components/print/ThermalReceipt";
 import { ReviewModal } from "@/components/review/review-modal";
+import { RefundPolicy } from "@/components/cart/refund-policy";
 
 const DONE_STATUSES = ["DELIVERED", "COMPLETED", "CANCELLED"];
 const CANCELLABLE_STATUSES = ["PENDING", "ACCEPTED"];
@@ -37,6 +39,18 @@ const OrderMap = dynamic(() => import("@/components/delivery/order-map"), {
     </div>
   ),
 });
+
+function BackToOrders() {
+  return (
+    <Link
+      href="/account?tab=orders"
+      className="-ml-2 inline-flex min-h-11 items-center gap-2 rounded-lg px-2 text-sm font-medium text-neutral-500 transition-colors hover:text-[#17181C]"
+    >
+      <ArrowLeft size={16} />
+      Back to orders
+    </Link>
+  );
+}
 
 export default function OrderTrackingPage({
   params,
@@ -68,6 +82,7 @@ export default function OrderTrackingPage({
         <p className="text-sm text-neutral-500">
           Couldn&apos;t load this order. Please check your order history.
         </p>
+        <BackToOrders />
       </div>
     );
   }
@@ -83,7 +98,8 @@ export default function OrderTrackingPage({
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-6 pb-24">
-      <h1 className="font-display font-semibold text-xl text-[#17181C]">
+      <BackToOrders />
+      <h1 className="mt-2 font-display font-semibold text-xl text-[#17181C]">
         Order {order.restaurant?.name ? `from ${order.restaurant.name}` : ""}
       </h1>
       <p className="text-xs text-neutral-400 font-mono mt-1">#{order.id}</p>
@@ -95,8 +111,15 @@ export default function OrderTrackingPage({
 
       {CANCELLABLE_STATUSES.includes(order.status ?? "") && (
         <p className="mt-4 text-center text-xs text-neutral-500">
-          Need to cancel? Please call {restaurantName}.
+          Need to cancel? Please call {restaurantName}
+          {order.restaurant?.phone ? ` on ${order.restaurant.phone}` : ""}.
         </p>
+      )}
+
+      {order.restaurant?.refundPolicy && (
+        <div className="mt-4">
+          <RefundPolicy text={order.restaurant.refundPolicy} />
+        </div>
       )}
 
       <div className="mt-6 grid items-start gap-6 lg:grid-cols-2">

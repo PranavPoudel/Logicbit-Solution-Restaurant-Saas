@@ -50,6 +50,20 @@ export default function MenuPage() {
       queryClient.invalidateQueries({ queryKey: ["owner-modifier-groups", restaurantId] }),
   });
 
+  const addSingleMutation = useMutation({
+    mutationFn: async (input: { name: string; extraPrice: number; allergenInfo?: string }) => {
+      const created = await modifierGroupsApi.create(restaurantId as string, { name: input.name, minSelect: 0, maxSelect: 1, isRequired: false });
+      try {
+        await modifierGroupsApi.addOption(restaurantId as string, created.id, input);
+      } catch (error) {
+        await modifierGroupsApi.remove(restaurantId as string, created.id);
+        throw error;
+      }
+    },
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["owner-modifier-groups", restaurantId] }),
+  });
+
   const deleteGroupMutation = useMutation({
     mutationFn: (id: string) => modifierGroupsApi.remove(restaurantId as string, id),
     onSuccess: () =>
@@ -131,6 +145,7 @@ export default function MenuPage() {
           <ModifierGroupManager
             groups={modifierGroupsQuery.data ?? []}
             onAddGroup={(input) => addGroupMutation.mutate(input)}
+            onAddSingle={(input) => addSingleMutation.mutate(input)}
             onDeleteGroup={(id) => deleteGroupMutation.mutate(id)}
             onAddOption={(groupId, input) => addOptionMutation.mutate({ groupId, input })}
             onDeleteOption={(groupId, optionId) =>
@@ -138,6 +153,7 @@ export default function MenuPage() {
             }
             isMutating={
               addGroupMutation.isPending ||
+              addSingleMutation.isPending ||
               deleteGroupMutation.isPending ||
               addOptionMutation.isPending ||
               deleteOptionMutation.isPending
