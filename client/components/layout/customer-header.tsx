@@ -52,61 +52,63 @@ export function CustomerHeader() {
 
   return (
     <header className="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-brand-dark/8 shadow-sm">
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 h-[72px] flex items-center justify-between gap-4">
-        <Link href="/" className="flex items-center gap-2.5 shrink-0">
-          <div className="w-8 h-8 rounded-full bg-brand-primary flex items-center justify-center">
-            <span className="font-serif font-bold text-brand-background text-sm">L</span>
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 h-20 flex items-center justify-between gap-4">
+        <Link href="/" className="flex items-center gap-3 shrink-0 min-h-[48px]">
+          <div className="w-11 h-11 rounded-full bg-brand-primary flex items-center justify-center">
+            <span className="font-serif font-bold text-brand-background text-lg">L</span>
           </div>
-          <span className="font-serif text-lg font-semibold text-brand-dark tracking-tight">
+          <span className="font-serif text-2xl font-semibold text-brand-dark tracking-tight">
             {t("brandName")}
           </span>
         </Link>
 
-        <div className="flex items-center gap-4 lg:gap-7 shrink-0">
+        <div className="flex items-center gap-3 lg:gap-5 shrink-0">
+          {/* Search: icon + label, bigger target */}
           <button
             type="button"
             onClick={() => setSearchOpenPath(searchOpen ? null : pathname)}
             aria-label="Search"
             aria-expanded={searchOpen}
-            className={`w-10 h-10 rounded-full border border-brand-dark/10 flex items-center justify-center text-brand-dark hover:bg-brand-dark/5 transition-colors ${searchOpen ? "bg-brand-dark/8" : ""}`}
+            className={`min-h-[48px] min-w-[48px] px-3 sm:px-4 rounded-full border-2 border-brand-dark/15 flex items-center justify-center gap-2 text-brand-dark font-medium hover:bg-brand-dark/5 hover:border-brand-dark/30 transition-colors ${searchOpen ? "bg-brand-dark/10 border-brand-dark/30" : ""}`}
           >
-            <span className="relative block w-4 h-4">
+            <span className="relative block w-6 h-6">
               <Search
-                size={16}
+                size={24}
                 className={`absolute inset-0 transition-all duration-300 ${
                   searchOpen ? "opacity-0 rotate-90 scale-50" : "opacity-100 rotate-0 scale-100"
                 }`}
               />
               <X
-                size={16}
+                size={24}
                 className={`absolute inset-0 transition-all duration-300 ${
                   searchOpen ? "opacity-100 rotate-0 scale-100" : "opacity-0 -rotate-90 scale-50"
                 }`}
               />
             </span>
+            <span className="hidden sm:inline text-base">{searchOpen ? "Close" : "Search"}</span>
           </button>
 
           <Link
             href="/for-restaurants"
-            className="hidden md:flex items-center gap-1.5 text-sm font-medium text-brand-dark hover:text-brand-primary transition-colors"
+            className="hidden md:flex items-center gap-2 min-h-[48px] px-3 rounded-full text-base font-medium text-brand-dark hover:text-brand-primary hover:bg-brand-primary/5 transition-colors"
           >
-            <Store size={16} />
+            <Store size={24} />
             <span>{t("forRestaurants")}</span>
           </Link>
 
-          {!mounted && <div className="w-24 h-9" aria-hidden />}
+          {!mounted && <div className="w-24 h-12" aria-hidden />}
 
           {mounted && !signedIn && (
             <>
               <Link
                 href="/login"
-                className="hidden sm:inline-flex text-base font-medium text-brand-dark hover:text-brand-primary transition-colors px-3"
+                className="hidden sm:inline-flex items-center min-h-[48px] text-base font-medium text-brand-dark hover:text-brand-primary transition-colors px-4"
               >
                 Log in
               </Link>
               <Link
                 href="/signup"
-                className="text-base font-medium px-6 py-2.5 rounded-full border border-brand-dark/20 text-brand-dark hover:bg-brand-dark/5 transition-colors"
+                className="inline-flex items-center min-h-[48px] text-base font-semibold px-6 rounded-full bg-brand-primary text-brand-background hover:bg-brand-primary-hover transition-colors"
               >
                 Sign up
               </Link>
@@ -120,43 +122,43 @@ export function CustomerHeader() {
                 onClick={() => setMenuOpen((o) => !o)}
                 aria-haspopup="menu"
                 aria-expanded={menuOpen}
-                className="flex items-center gap-2 rounded-full border border-brand-dark/10 pl-1 pr-2.5 py-1 hover:bg-brand-dark/5 transition-colors"
+                className="flex items-center gap-2.5 min-h-[48px] rounded-full border-2 border-brand-dark/15 pl-1.5 pr-3 py-1 hover:bg-brand-dark/5 hover:border-brand-dark/30 transition-colors"
               >
-                <span className="w-7 h-7 rounded-full bg-brand-primary text-brand-background text-xs font-bold flex items-center justify-center">
+                <span className="w-9 h-9 rounded-full bg-brand-primary text-brand-background text-base font-bold flex items-center justify-center">
                   {initial}
                 </span>
-                <span className="hidden sm:inline text-sm font-medium text-brand-dark max-w-[96px] truncate">
+                <span className="hidden sm:inline text-base font-medium text-brand-dark max-w-[120px] truncate">
                   {firstName}
                 </span>
-                <ChevronDown size={14} className={`text-brand-dark/60 transition-transform ${menuOpen ? "rotate-180" : ""}`} />
+                <ChevronDown size={20} className={`text-brand-dark/60 transition-transform ${menuOpen ? "rotate-180" : ""}`} />
               </button>
 
               {menuOpen && (
                 <div
                   role="menu"
-                  className="absolute right-0 mt-2 w-56 rounded-xl border border-brand-dark/10 bg-white shadow-lg py-1.5 z-40"
+                  className="absolute right-0 mt-2 w-64 rounded-xl border border-brand-dark/10 bg-white shadow-lg py-2 z-40"
                 >
-                  <div className="px-3.5 py-2 border-b border-brand-dark/8">
-                    <p className="text-sm font-semibold text-brand-dark truncate">{displayName}</p>
+                  <div className="px-4 py-3 border-b border-brand-dark/8">
+                    <p className="text-base font-semibold text-brand-dark truncate">{displayName}</p>
                     {customer?.email && (
-                      <p className="text-xs text-brand-dark/50 truncate">{customer.email}</p>
+                      <p className="text-sm text-brand-dark/60 truncate">{customer.email}</p>
                     )}
                   </div>
                   <Link
                     href="/account"
                     role="menuitem"
                     onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-2.5 px-3.5 py-2 text-sm text-brand-dark hover:bg-brand-dark/5"
+                    className="flex items-center gap-3 px-4 min-h-[48px] text-base text-brand-dark hover:bg-brand-dark/5"
                   >
-                    <User size={15} /> My account
+                    <User size={22} /> My account
                   </Link>
                   <button
                     type="button"
                     role="menuitem"
                     onClick={handleLogout}
-                    className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-red-600 hover:bg-red-50 border-t border-brand-dark/8 mt-1.5"
+                    className="w-full flex items-center gap-3 px-4 min-h-[48px] text-base text-red-600 hover:bg-red-50 border-t border-brand-dark/8 mt-1.5"
                   >
-                    <LogOut size={15} /> Log out
+                    <LogOut size={22} /> Log out
                   </button>
                 </div>
               )}
@@ -166,13 +168,13 @@ export function CustomerHeader() {
           {signedIn && (
             <Link
               href="/cart"
-              className="relative flex items-center gap-2 bg-brand-dark text-brand-background text-sm font-medium px-4 py-2 rounded-full hover:bg-brand-dark-hover transition-colors"
+              className="relative flex items-center gap-2.5 min-h-[48px] bg-brand-dark text-brand-background text-base font-semibold px-5 rounded-full hover:bg-brand-dark-hover transition-colors"
             >
-              <ShoppingBag size={16} />
+              <ShoppingBag size={24} />
               <span className="hidden sm:inline">{t("cart")}</span>
 
               {mounted && itemCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-brand-primary text-brand-background text-[11px] font-mono font-bold flex items-center justify-center">
+                <span className="absolute -top-2 -right-2 min-w-[26px] h-[26px] px-1 rounded-full bg-brand-primary text-brand-background text-sm font-mono font-bold flex items-center justify-center ring-2 ring-white">
                   {itemCount}
                 </span>
               )}

@@ -29,6 +29,19 @@
   --color-brand-open-text: var(--brand-open-text);
 }
 
+/* ==========================================
+   LARGER TEXT SIZES (UI/UX feedback)
+   Raises the small Tailwind sizes site-wide.
+   ========================================== */
+@theme {
+  --text-xs: 0.875rem;
+  --text-xs--line-height: 1.35;
+  --text-sm: 1rem;
+  --text-sm--line-height: 1.5;
+  --text-base: 1.0625rem;
+  --text-base--line-height: 1.55;
+}
+
 html,
 body {
   overscroll-behavior: none;
@@ -38,6 +51,46 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Tiny hardcoded sizes used on cards and badges -> 13px */
+.text-\[10px\],
+.text-\[11px\] {
+  font-size: 0.8125rem;
+}
+
+/* ==========================================
+   VISUAL CUES
+   ========================================== */
+/* Tailwind v4 removed the pointer cursor from buttons */
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]),
+summary,
+select {
+  cursor: pointer;
+}
+
+/* Press feedback */
+button:not(:disabled):active,
+[role="button"]:not([aria-disabled="true"]):active {
+  transform: scale(0.97);
+}
+
+/* Clear keyboard focus */
+:focus-visible {
+  outline: 3px solid var(--brand-gold, #e3a008);
+  outline-offset: 2px;
+}
+
+/* ==========================================
+   BIGGER CLICK AREAS (customer pages only)
+   Pages under app/admin and app/owner are not
+   affected, so their tables keep their layout.
+   ========================================== */
+body:not(:has([data-admin-root])) button:not([data-compact]),
+body:not(:has([data-admin-root])) [role="button"]:not([data-compact]),
+body:not(:has([data-admin-root])) select {
+  min-height: 44px;
 }
 
 @keyframes float {
