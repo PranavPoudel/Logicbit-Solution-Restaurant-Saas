@@ -80,6 +80,11 @@ export class CreateMenuItemDto {
   @MaxLength(500)
   allergenInfo?: string;
 
+  @IsString()
+  @IsOptional()
+  @MaxLength(500)
+  ingredients?: string;
+
   @IsInt()
   @Min(0)
   @IsOptional()

@@ -3,6 +3,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useCartStore } from "@/store/cart-store";
+import { useIsMounted } from "@/hooks/use-is-mounted";
+import { getRestaurantThemeStyle } from "@/lib/utils/restaurant-theme";
 import { useQuery } from "@tanstack/react-query";
 import { Phone, Mail, Camera, Globe } from "lucide-react";
 import { theme } from "@/config/theme";
@@ -87,7 +90,12 @@ export function HomepageFooter() {
 
 export function CustomerFooter() {
   const pathname = usePathname();
-  const slug = pathname.match(/(?:^|\/)restaurants\/([^/]+)/)?.[1];
+  const mounted = useIsMounted();
+  const cartRestaurantId = useCartStore((s) => s.activeRestaurantId());
+
+  const urlSlug = pathname.match(/(?:^|\/)restaurants\/([^/]+)/)?.[1];
+  const isCartFlow = /(?:^|\/)(cart|checkout)(\/|$)/.test(pathname);
+  const slug = urlSlug ?? (mounted && isCartFlow ? cartRestaurantId ?? undefined : undefined);
 
   const restaurantQuery = useQuery({
     queryKey: ["restaurant", slug],
@@ -95,9 +103,11 @@ export function CustomerFooter() {
     enabled: !!slug,
   });
 
+  if (isCartFlow && !mounted) return null;
+
   if (slug) {
     return (
-      <div style={{ backgroundColor: theme.colors.dark }} className="mt-auto pb-20 lg:pb-0">
+      <div style={{ ...getRestaurantThemeStyle(restaurantQuery.data), backgroundColor: "var(--brand-dark)" }} className="mt-auto pb-20 lg:pb-0">
         <RestaurantFooter restaurant={restaurantQuery.data ?? { id: "", name: "" }} />
       </div>
     );

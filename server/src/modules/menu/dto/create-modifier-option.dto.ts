@@ -15,6 +15,11 @@ export class CreateModifierOptionDto {
   @IsOptional()
   isAvailable?: boolean;
 
+  @IsString()
+  @IsOptional()
+  @MaxLength(200)
+  allergenInfo?: string;
+
   @IsInt()
   @Min(0)
   @IsOptional()

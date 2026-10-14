@@ -1,7 +1,11 @@
 // src/modules/storefront/storefront.service.ts
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { PopupType } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateBannerDto, UpdateBannerDto, ReorderBannersDto, UpdateStorefrontConfigDto, CreatePopupDto, UpdatePopupDto } from './dto/storefront.dto';
+
+const OWN_POPUP_LIMIT = 3;
+const EXTERNAL_POPUP_LIMIT = 1;
 
 @Injectable()
 export class StorefrontService {
@@ -86,7 +90,26 @@ export class StorefrontService {
 
   // ---------- Popup (Offer/Notification) ----------
 
+  private async assertPopupLimit(tenantId: string, restaurantId: string, type: PopupType, excludeId?: string) {
+    const isExternal = type === PopupType.EXTERNAL_AD;
+    const limit = isExternal ? EXTERNAL_POPUP_LIMIT : OWN_POPUP_LIMIT;
+    const active = await this.prisma.storefrontPopup.count({
+      where: {
+        tenantId,
+        restaurantId,
+        isActive: true,
+        type: isExternal ? PopupType.EXTERNAL_AD : { not: PopupType.EXTERNAL_AD },
+        ...(excludeId ? { id: { not: excludeId } } : {}),
+      },
+    });
+    if (active >= limit) {
+      const kind = isExternal ? 'external ad' : 'promotional popups';
+      throw new BadRequestException(`Limit reached: only ${limit} active ${kind} allowed. Turn one off to activate another.`);
+    }
+  }
+
   async createPopup(tenantId: string, restaurantId: string, dto: CreatePopupDto) {
+    if (dto.isActive ?? true) await this.assertPopupLimit(tenantId, restaurantId, dto.type ?? PopupType.ANNOUNCEMENT);
     return this.prisma.storefrontPopup.create({
       data: {
         tenantId,
@@ -105,6 +128,7 @@ export class StorefrontService {
   async updatePopup(tenantId: string, restaurantId: string, id: string, dto: UpdatePopupDto) {
     const popup = await this.prisma.storefrontPopup.findFirst({ where: { id, tenantId, restaurantId } });
     if (!popup) throw new NotFoundException('Popup not found');
+    if (dto.isActive ?? popup.isActive) await this.assertPopupLimit(tenantId, restaurantId, dto.type ?? popup.type, id);
 
     return this.prisma.storefrontPopup.update({
       where: { id },
@@ -126,15 +150,15 @@ export class StorefrontService {
 
   async getActivePopup(restaurantId: string) {
     const now = new Date();
-    const popup = await this.prisma.storefrontPopup.findFirst({
+    const popups = await this.prisma.storefrontPopup.findMany({
       where: {
         restaurantId,
         isActive: true,
         OR: [{ startDate: null }, { startDate: { lte: now } }],
         AND: [{ OR: [{ endDate: null }, { endDate: { gte: now } }] }],
       },
-      orderBy: { createdAt: 'desc' },
     });
+    const popup = popups.length > 0 ? popups[Math.floor(Math.random() * popups.length)] : null;
     return { success: true, data: popup };
   }
 

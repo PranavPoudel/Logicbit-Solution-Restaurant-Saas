@@ -47,12 +47,25 @@ export const storefrontConfigApi = {
     (await ownerApiClient.patch(`/restaurants/${restaurantId}/storefront/config`, input)).data,
 };
 
+export type PopupType = "DISCOUNT" | "NEW_DISH" | "EVENT" | "ANNOUNCEMENT" | "EXTERNAL_AD";
+
+export const POPUP_TYPES: { value: PopupType; label: string }[] = [
+  { value: "DISCOUNT", label: "Discount" },
+  { value: "NEW_DISH", label: "New dish" },
+  { value: "EVENT", label: "Event" },
+  { value: "ANNOUNCEMENT", label: "Announcement" },
+  { value: "EXTERNAL_AD", label: "External ad" },
+];
+
+export const POPUP_LIMITS = { own: 3, external: 1 };
+
 export interface StorefrontPopupInput {
   title: string;
   message?: string;        
   imageUrl?: string;
   ctaText?: string;
   ctaLink?: string;
+  type?: PopupType;
   startDate?: string;
   endDate?: string;
   isActive?: boolean;

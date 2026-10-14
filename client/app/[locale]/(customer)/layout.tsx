@@ -13,7 +13,7 @@ export default function CustomerLayout({
       <CustomerHeader />
       <main className="flex-1">{children}</main>
       <CustomerFooter />
-      <div className="fixed bottom-4 right-4 z-50">
+      <div className="fixed bottom-4 right-4 z-30">
   <LanguageSwitcherButton />
 </div>
     </div>

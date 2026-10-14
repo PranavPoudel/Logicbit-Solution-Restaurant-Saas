@@ -1,11 +1,13 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import type { CouponPreview } from "@/lib/api/orders";
 
 export interface SelectedModifier {
   modifierGroupId: string;
   modifierOptionId: string;
   groupName?: string;
   optionName?: string;
+  allergenInfo?: string;
   priceDelta: number;
 }
 
@@ -18,6 +20,7 @@ export interface CartItem {
   quantity: number;
   selectedModifiers?: SelectedModifier[];
   notes?: string; // 🆕 ADDED: Per-item special instructions
+  allergenInfo?: string;
   /** Distinguishes variants so they don't merge incorrectly */
   variantKey: string;
 }
@@ -25,8 +28,12 @@ export interface CartItem {
 interface CartState {
   restaurantId: string | null;
   items: CartItem[];
+  coupon: CouponPreview | null;
+  setCoupon: (coupon: CouponPreview | null) => void;
   itemCount: () => number;
   subtotal: () => number;
+  discount: () => number;
+  activeRestaurantId: () => string | null;
   addItem: (item: Omit<CartItem, "quantity" | "variantKey"> & {
     quantity?: number;
     variantKey?: string;
@@ -45,8 +52,15 @@ export const useCartStore = create<CartState>()(
     (set, get) => ({
       restaurantId: null,
       items: [],
+      coupon: null,
+      setCoupon: (coupon) => set({ coupon }),
       itemCount: () => get().items.reduce((sum, i) => sum + i.quantity, 0),
       subtotal: () => get().items.reduce((sum, i) => sum + i.price * i.quantity, 0),
+      activeRestaurantId: () => get().restaurantId || get().items.find((i) => i.restaurantId)?.restaurantId || null,
+      discount: () => {
+        const { coupon, subtotal } = get();
+        return coupon ? Math.min(coupon.discountAmount, subtotal()) : 0;
+      },
 
       addItem: (item) =>
         set((state) => {
@@ -84,7 +98,7 @@ export const useCartStore = create<CartState>()(
           if (!existing) return state;
           if (existing.quantity <= 1) {
             const items = state.items.filter((i) => lineKey(i.menuItemId, i.variantKey) !== key);
-            return { items, restaurantId: items.length ? state.restaurantId : null };
+            return { items, restaurantId: items.length ? state.restaurantId : null, coupon: items.length ? state.coupon : null };
           }
           return {
             items: state.items.map((i) =>
@@ -99,10 +113,10 @@ export const useCartStore = create<CartState>()(
         set((state) => {
           const key = lineKey(menuItemId, variantKey);
           const items = state.items.filter((i) => lineKey(i.menuItemId, i.variantKey) !== key);
-          return { items, restaurantId: items.length ? state.restaurantId : null };
+          return { items, restaurantId: items.length ? state.restaurantId : null, coupon: items.length ? state.coupon : null };
         }),
 
-      clear: () => set({ restaurantId: null, items: [] }),
+      clear: () => set({ restaurantId: null, items: [], coupon: null }),
     }),
     { name: "logicbit-cart" }
   )

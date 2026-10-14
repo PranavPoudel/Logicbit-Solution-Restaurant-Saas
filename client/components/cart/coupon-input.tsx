@@ -1,81 +1,67 @@
-// components/cart/coupon-input.tsx
 "use client";
 
-import { useState } from "react";
-import { Tag, X } from "lucide-react";
+import { AlertCircle, CheckCircle2, Tag, X } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useCoupon } from "@/hooks/use-coupon";
 
-interface CouponInputProps {
-  restaurantId: string;
-  subtotal: number;
-  // Simplified: We just pass the code up. Actual validation & discount calculation 
-  // happens securely on the backend during the final checkout submission.
-  onApplied: (code: string) => void;
-  appliedCode: string | null;
-  onRemove: () => void;
-}
+export function CouponBox({ dark = false }: { dark?: boolean }) {
+  const t = useTranslations("checkout");
+  const { coupon, code, setCode, loading, error, apply, remove } = useCoupon();
 
-export function CouponInput({
-  onApplied,
-  appliedCode,
-  onRemove,
-}: CouponInputProps) {
-  const [code, setCode] = useState("");
-  const [error, setError] = useState("");
+  const inputClass = dark
+    ? "border-brand-background/25 bg-transparent text-brand-background placeholder:text-brand-background/50 focus:border-brand-background"
+    : "border-[#E8E7E2] focus:border-[#E3A008] focus:ring-2 focus:ring-[#E3A008]/40";
+  const buttonClass = dark
+    ? "bg-brand-background text-brand-dark hover:bg-white"
+    : "bg-brand-ink text-white hover:bg-brand-ink-hover";
 
-  // State when a coupon is successfully "applied" (locally)
-  if (appliedCode) {
-    return (
-      <div className="flex items-center justify-between bg-[#0F6B5C]/10 text-[#0F6B5C] text-sm px-3.5 py-2.5 rounded-xl">
-        <span className="flex items-center gap-2 font-medium">
-          <Tag size={14} />
-          {appliedCode} applied
-        </span>
-        <button 
-          onClick={onRemove} 
-          aria-label="Remove coupon" 
-          className="hover:text-red-500 transition-colors"
-        >
-          <X size={15} />
-        </button>
-      </div>
-    );
-  }
-
-  // State when entering a coupon
   return (
     <div>
       <div className="flex gap-2">
-        <input
-          aria-label="Coupon code"
-          value={code}
-          onChange={(e) => {
-            setCode(e.target.value.toUpperCase());
-            setError("");
-          }}
-          placeholder="Coupon code"
-          className="flex-1 bg-white border border-[#E8E7E2] rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#E3A008]/40 focus:border-[#E3A008]"
-        />
-        <button
-          onClick={() => {
-            if (!code.trim()) {
-              setError("Please enter a code");
-              return;
-            }
-            // No API call here. We trust the code for now and let the backend 
-            // validate it during the actual order creation to prevent abuse.
-            onApplied(code);
-          }}
-          className="text-sm font-medium bg-[#17181C] text-white px-4 py-2.5 rounded-xl hover:bg-[#2B2D33] transition-colors"
-        >
-          Apply
-        </button>
+        <div className="relative flex-1">
+          <Tag size={16} className="absolute left-3 top-1/2 -translate-y-1/2 opacity-40" />
+          <input
+            aria-label={t("placeholders.coupon")}
+            type="text"
+            value={coupon ? coupon.code : code}
+            onChange={(e) => setCode(e.target.value.toUpperCase())}
+            onKeyDown={(e) => e.key === "Enter" && !coupon && apply()}
+            disabled={!!coupon}
+            placeholder={t("placeholders.coupon")}
+            className={`w-full rounded-xl border py-2.5 pl-10 pr-3 text-sm outline-none ${inputClass}`}
+          />
+        </div>
+        {coupon ? (
+          <button
+            type="button"
+            onClick={remove}
+            className="flex items-center gap-1.5 rounded-xl border border-current/25 px-4 py-2.5 text-sm font-medium opacity-80 hover:opacity-100"
+          >
+            <X size={14} /> Remove
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={apply}
+            disabled={loading}
+            className={`rounded-xl px-5 py-2.5 text-sm font-medium transition-colors disabled:opacity-50 ${buttonClass}`}
+          >
+            {loading ? "…" : t("apply")}
+          </button>
+        )}
       </div>
       {error && (
-        <p className="text-xs text-red-600 mt-1.5">{error}</p>
+        <div role="alert" className="mt-3 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3.5 py-2.5 text-sm font-medium text-red-700">
+          <AlertCircle size={16} className="shrink-0" />
+          {error}
+        </div>
       )}
-      <p className="text-[11px] text-neutral-400 mt-1.5">
-        * Validity and discount will be verified when you place your order.
-      </p>
+      {coupon && (
+        <div role="status" className="mt-3 flex items-center gap-2 rounded-xl border border-green-200 bg-green-50 px-3.5 py-2.5 text-sm font-medium text-green-700">
+          <CheckCircle2 size={16} className="shrink-0" />
+          {`Coupon ${coupon.code} applied. You save Rs ${coupon.discountAmount}!`}
+        </div>
+      )}
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { apiClient } from "@/lib/api/client";
 import type { DiscoveryRestaurant } from "@/types/restaurant";
 import type { RestaurantDetail, MenuCategory, MenuItemDetail } from "@/types/menu";
 import type { Review } from "@/lib/api/reviews";
+import type { PublicPopup } from "@/lib/api/public-storefront";
 
 export interface NearbyRestaurantsParams {
   lat: number;
@@ -234,14 +235,7 @@ export interface StorefrontBanner {
   displayOrder?: number;
 }
 
-export interface StorefrontPopup {
-  id: string;
-  title: string;
-  message?: string;
-  imageUrl?: string;
-  ctaText?: string;
-  ctaLink?: string;
-}
+export type StorefrontPopup = PublicPopup;
 
 export interface StorefrontData {
   banners: StorefrontBanner[];

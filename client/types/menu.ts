@@ -16,6 +16,9 @@ export interface RestaurantDetail {
   estimatedDeliveryMinutes?: number;
   about?: string;
   primaryColor?: string;
+  secondaryColor?: string;
+  phone?: string;
+  refundPolicy?: string | null;
 }
 
 export interface MenuItem {
@@ -34,6 +37,7 @@ export interface ModifierOption {
   id: string;
   name?: string;
   extraPrice?: number;
+  allergenInfo?: string;
 }
 
 export interface ModifierGroupDetail {
@@ -46,6 +50,10 @@ export interface ModifierGroupDetail {
 }
 
 export interface MenuItemDetail extends MenuItem {
+  ingredients?: string;
+  spiceLevel?: string;
+  isVegetarian?: boolean;
+  isVegan?: boolean;
   modifierGroups?: ModifierGroupDetail[];
 }
 

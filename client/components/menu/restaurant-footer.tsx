@@ -1,6 +1,6 @@
 "use client";
 
-import { Phone, Clock, MapPin } from "lucide-react";
+import { Phone, MapPin } from "lucide-react";
 import type { DiscoveryRestaurant } from "@/types/restaurant";
 
 export function RestaurantFooter({ restaurant }: { restaurant: DiscoveryRestaurant }) {
@@ -10,13 +10,10 @@ export function RestaurantFooter({ restaurant }: { restaurant: DiscoveryRestaura
 
   return (
     // 🆕 Added mt-auto to push it to the bottom of a flex-col parent
-    <footer className="bg-[#2B1410] text-[#FDF6EC] mt-auto">
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 py-10 grid sm:grid-cols-3 gap-8">
+    <footer className="bg-brand-dark text-[#FDF6EC] mt-auto">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 py-10 grid sm:grid-cols-2 gap-8">
         <div>
           <h3 className="font-serif text-lg mb-2">{name}</h3>
-          <p className="text-sm text-[#FDF6EC]/80">
-            Delicious food, delivered to your door.
-          </p>
         </div>
 
         <div>
@@ -36,16 +33,6 @@ export function RestaurantFooter({ restaurant }: { restaurant: DiscoveryRestaura
                 <span>{address}</span>
               </div>
             )}
-          </div>
-        </div>
-
-        <div>
-          <h4 className="text-xs uppercase tracking-wide mb-3 text-[#FDF6EC]/60">
-            Hours
-          </h4>
-          <div className="flex items-center gap-2 text-sm text-[#FDF6EC]/90">
-            <Clock size={14} className="text-[#E3A008]" />
-            <span>Open Daily: 10:00 AM - 10:00 PM</span>
           </div>
         </div>
       </div>

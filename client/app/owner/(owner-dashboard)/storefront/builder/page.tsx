@@ -7,7 +7,8 @@ import { Layout, Image as ImageIcon, Bell, Settings, Save, Loader2, ArrowUp, Arr
 import { useOwnerAuthStore } from "@/store/owner-auth-store";
 import { storefrontConfigApi, type StorefrontConfigInput, type SectionSetting } from "@/lib/api/storefront";
 import { storefrontBannersApi, type BannerInput } from "@/lib/api/storefront";
-import { storefrontPopupsApi, type StorefrontPopupInput } from "@/lib/api/storefront";
+import { storefrontPopupsApi, POPUP_TYPES, POPUP_LIMITS, type StorefrontPopupInput } from "@/lib/api/storefront";
+import { getErrorMessage } from "@/lib/utils/error";
 import { ImageUpload } from "@/components/ui/image-upload";
 
 const TABS = [
@@ -285,11 +286,46 @@ function BannerManager({ restaurantId }: { restaurantId: string }) {
   );
 }
 
+function PopupUsage({ label, hint, used, limit }: { label: string; hint: string; used: number; limit: number }) {
+  const full = used >= limit;
+  return (
+    <div
+      role="meter"
+      aria-label={label}
+      aria-valuemin={0}
+      aria-valuemax={limit}
+      aria-valuenow={used}
+      className={`rounded-xl border p-4 ${full ? "border-amber-300 bg-amber-50" : "border-neutral-200 bg-white"}`}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-sm font-semibold text-neutral-900">{label}</p>
+          <p className="mt-0.5 text-xs text-neutral-500">{hint}</p>
+        </div>
+        <p className="shrink-0 text-2xl font-semibold leading-none text-neutral-900">
+          {used}
+          <span className="text-base font-medium text-neutral-400"> / {limit}</span>
+        </p>
+      </div>
+      <div className="mt-3 flex gap-1.5" aria-hidden="true">
+        {Array.from({ length: limit }, (_, i) => (
+          <span key={i} className={`h-1.5 flex-1 rounded-full ${i < used ? (full ? "bg-amber-500" : "bg-[#1B2333]") : "bg-neutral-200"}`} />
+        ))}
+      </div>
+      <p className={`mt-2 text-xs font-medium ${full ? "text-amber-800" : "text-neutral-500"}`}>
+        {full ? "Limit reached. Turn one off to activate another." : `${limit - used} of ${limit} active slots free`}
+      </p>
+    </div>
+  );
+}
+
+const EMPTY_POPUP: StorefrontPopupInput = { title: "", message: "", imageUrl: "", ctaText: "", ctaLink: "", type: "DISCOUNT", isActive: true };
+
 function PopupManager({ restaurantId }: { restaurantId: string }) {
   const queryClient = useQueryClient();
   const [isCreating, setIsCreating] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [formData, setFormData] = useState<StorefrontPopupInput>({ title: "", message: "", imageUrl: "", ctaText: "", ctaLink: "", isActive: true });
+  const [formData, setFormData] = useState<StorefrontPopupInput>(EMPTY_POPUP);
 
   const { data: popups = [] } = useQuery({ queryKey: ["storefront-popups", restaurantId], queryFn: () => storefrontPopupsApi.list(restaurantId) });
   
@@ -298,9 +334,17 @@ function PopupManager({ restaurantId }: { restaurantId: string }) {
       data.id ? storefrontPopupsApi.update(restaurantId, data.id, data.input) : storefrontPopupsApi.create(restaurantId, data.input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["storefront-popups", restaurantId] });
-      setIsCreating(false); setEditingId(null); setFormData({ title: "", message: "", imageUrl: "", ctaText: "", ctaLink: "", isActive: true });
+      setIsCreating(false); setEditingId(null); setFormData(EMPTY_POPUP);
     }
   });
+
+  const activeCount = (external: boolean, excludeId?: string | null) =>
+    popups.filter((p: any) => p.isActive && p.id !== excludeId && (p.type === "EXTERNAL_AD") === external).length;
+  const ownActive = activeCount(false);
+  const externalActive = activeCount(true);
+  const formIsExternal = formData.type === "EXTERNAL_AD";
+  const atLimit = activeCount(formIsExternal, editingId) >= (formIsExternal ? POPUP_LIMITS.external : POPUP_LIMITS.own);
+  const willBeActive = !!formData.isActive && !atLimit;
 
   const deleteMutation = useMutation({ mutationFn: (id: string) => storefrontPopupsApi.remove(restaurantId, id), onSuccess: () => queryClient.invalidateQueries({ queryKey: ["storefront-popups", restaurantId] }) });
 
@@ -311,8 +355,30 @@ function PopupManager({ restaurantId }: { restaurantId: string }) {
         {!isCreating && <button onClick={() => setIsCreating(true)} className="flex items-center gap-2 px-4 py-2 bg-[#1B2333] text-white rounded-lg text-sm font-medium">Add Popup</button>}
       </div>
 
+      <div className="grid gap-3 sm:grid-cols-2">
+        <PopupUsage label="Your own promotions" hint="Discounts, new dishes, events and announcements" used={ownActive} limit={POPUP_LIMITS.own} />
+        <PopupUsage label="External ads" hint="Third-party promotions, labelled &quot;Ad&quot;" used={externalActive} limit={POPUP_LIMITS.external} />
+      </div>
+
       {isCreating && (
-        <form onSubmit={(e) => { e.preventDefault(); saveMutation.mutate({ id: editingId || undefined, input: formData }); }} className="bg-white border border-neutral-200 rounded-xl p-6 space-y-4">
+        <form onSubmit={(e) => { e.preventDefault(); saveMutation.mutate({ id: editingId || undefined, input: { ...formData, isActive: willBeActive } }); }} className="bg-white border border-neutral-200 rounded-xl p-6 space-y-4">
+          <div>
+            <p className="mb-2 text-sm font-medium text-neutral-700">Type</p>
+            <div className="flex flex-wrap gap-2">
+              {POPUP_TYPES.map((t) => (
+                <button
+                  key={t.value}
+                  type="button"
+                  aria-pressed={formData.type === t.value}
+                  onClick={() => setFormData((p) => ({ ...p, type: t.value }))}
+                  className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${formData.type === t.value ? "border-[#1B2333] bg-[#1B2333] text-white" : "border-neutral-200 bg-white text-neutral-600 hover:border-neutral-300"}`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+            {formIsExternal && <p className="mt-2 text-xs text-neutral-500">Third-party promotions are limited to {POPUP_LIMITS.external} active at a time and are labelled &quot;Ad&quot; for customers.</p>}
+          </div>
           <ImageUpload restaurantId={restaurantId} value={formData.imageUrl} onChange={(url) => setFormData(p => ({ ...p, imageUrl: url }))} className="w-full h-40" label="Popup Image (Optional)" />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <input required value={formData.title} onChange={e => setFormData(p => ({ ...p, title: e.target.value }))} placeholder="Popup Title *" className="px-3 py-2 border border-neutral-300 rounded-lg outline-none focus:ring-2 focus:ring-[#1B2333]" />
@@ -321,9 +387,11 @@ function PopupManager({ restaurantId }: { restaurantId: string }) {
             <input value={formData.ctaLink} onChange={e => setFormData(p => ({ ...p, ctaLink: e.target.value }))} placeholder="Button Link URL" className="md:col-span-2 px-3 py-2 border border-neutral-300 rounded-lg outline-none focus:ring-2 focus:ring-[#1B2333]" />
           </div>
           <div className="md:col-span-2 flex items-center gap-2">
-            <input type="checkbox" id="isActive" checked={formData.isActive} onChange={e => setFormData(p => ({ ...p, isActive: e.target.checked }))} className="w-4 h-4 accent-[#1B2333]" />
+            <input type="checkbox" id="isActive" checked={willBeActive} disabled={atLimit} onChange={e => setFormData(p => ({ ...p, isActive: e.target.checked }))} className="w-4 h-4 accent-[#1B2333]" />
             <label htmlFor="isActive" className="text-sm font-medium text-neutral-700">Active</label>
+            {atLimit && <span className="text-xs text-amber-700">Limit reached. This one will be saved as inactive. Turn another {formIsExternal ? "external ad" : "promotion"} off to activate it.</span>}
           </div>
+          {saveMutation.isError && <p className="text-sm text-red-600">{getErrorMessage(saveMutation.error, "Couldn't save this popup.")}</p>}
           <div className="flex justify-end gap-3 pt-4 border-t">
             <button type="button" onClick={() => { setIsCreating(false); setEditingId(null); }} className="px-4 py-2 text-sm text-neutral-600 hover:bg-neutral-100 rounded-lg">Cancel</button>
             <button type="submit" disabled={saveMutation.isPending} className="px-4 py-2 text-sm text-white bg-[#1B2333] rounded-lg disabled:opacity-50">{editingId ? "Update" : "Add"} Popup</button>
@@ -341,11 +409,12 @@ function PopupManager({ restaurantId }: { restaurantId: string }) {
               <div className="flex items-center gap-2 mb-1">
                 <h4 className="font-semibold text-neutral-900 truncate">{p.title}</h4>
                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${p.isActive ? 'bg-green-100 text-green-700' : 'bg-neutral-100 text-neutral-600'}`}>{p.isActive ? 'Active' : 'Inactive'}</span>
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${p.type === 'EXTERNAL_AD' ? 'bg-amber-100 text-amber-800' : 'bg-blue-50 text-blue-700'}`}>{POPUP_TYPES.find((t) => t.value === p.type)?.label ?? 'Announcement'}</span>
               </div>
               <p className="text-sm text-neutral-500 line-clamp-2">{p.message || "No message"}</p>
             </div>
             <div className="flex gap-2">
-              <button onClick={() => { setEditingId(p.id); setFormData({ title: p.title, message: p.message, imageUrl: p.imageUrl, ctaText: p.ctaText, ctaLink: p.ctaLink, isActive: p.isActive }); setIsCreating(true); }} className="px-3 py-1.5 text-xs font-medium text-[#1B2333] hover:bg-neutral-100 rounded-lg">Edit</button>
+              <button onClick={() => { setEditingId(p.id); setFormData({ title: p.title, message: p.message, imageUrl: p.imageUrl, ctaText: p.ctaText, ctaLink: p.ctaLink, type: p.type, isActive: p.isActive }); setIsCreating(true); }} className="px-3 py-1.5 text-xs font-medium text-[#1B2333] hover:bg-neutral-100 rounded-lg">Edit</button>
               <button onClick={() => confirm("Delete this popup?") && deleteMutation.mutate(p.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg">🗑️</button>
             </div>
           </div>

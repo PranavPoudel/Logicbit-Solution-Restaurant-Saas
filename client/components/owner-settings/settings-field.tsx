@@ -1,4 +1,7 @@
-import type { InputHTMLAttributes } from "react";
+import type { InputHTMLAttributes, TextareaHTMLAttributes } from "react";
+
+const INPUT_CLASS =
+  "w-full bg-white border border-neutral-200 rounded-lg px-3.5 py-2.5 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#E3A008]/40 focus:border-[#E3A008]";
 
 interface SettingsFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
@@ -15,7 +18,30 @@ export function SettingsField({ label, hint, id, ...inputProps }: SettingsFieldP
       <input
         id={fieldId}
         {...inputProps}
-        className="w-full bg-white border border-neutral-200 rounded-lg px-3.5 py-2.5 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#E3A008]/40 focus:border-[#E3A008]"
+        className={INPUT_CLASS}
+      />
+      {hint && <p className="text-xs text-neutral-400 mt-1">{hint}</p>}
+    </div>
+  );
+}
+
+export function SettingsTextarea({
+  label,
+  hint,
+  id,
+  ...textareaProps
+}: TextareaHTMLAttributes<HTMLTextAreaElement> & { label: string; hint?: string }) {
+  const fieldId = id ?? textareaProps.name;
+  return (
+    <div>
+      <label htmlFor={fieldId} className="block text-sm font-medium text-neutral-700 mb-1.5">
+        {label}
+      </label>
+      <textarea
+        id={fieldId}
+        rows={4}
+        {...textareaProps}
+        className={`${INPUT_CLASS} resize-y`}
       />
       {hint && <p className="text-xs text-neutral-400 mt-1">{hint}</p>}
     </div>

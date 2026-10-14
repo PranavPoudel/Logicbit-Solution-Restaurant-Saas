@@ -76,7 +76,7 @@ export function AddressPicker({
       </button>
 
       <div className="mt-5">
-        <p className="mb-3 text-sm font-medium text-[#17181C]">{mapLabel}</p>
+        <p className="mb-3 text-base font-semibold text-[#17181C]">{mapLabel}</p>
         <DynamicMapPicker lat={value.lat ?? startLat} lng={value.lng ?? startLng} onChange={handleMapChange} />
         <p className="mt-2 text-xs text-neutral-500">
           Type your address and press Find, or drag the pin to your exact spot.

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import Link from "next/link";
 import type { PublicPopup } from "@/lib/api/public-storefront";
+import { POPUP_TYPES } from "@/lib/api/storefront";
 import { theme } from "@/config/theme";
 import { AppImage } from "@/components/ui/app-image";
 
@@ -17,32 +18,39 @@ export function StorefrontPopupModal({ popups }: StorefrontPopupModalProps) {
   const [currentPopup, setCurrentPopup] = useState<PublicPopup | null>(null);
 
   useEffect(() => {
-    if (popups.length > 0) {
-      // Show the first active popup after a 1.5 second delay
+    const popup = popups[0];
+    if (popup && !sessionStorage.getItem(`logicbit-storefront-popup-${popup.restaurantId}`)) {
       const timer = setTimeout(() => {
-        setCurrentPopup(popups[0]);
+        setCurrentPopup(popup);
         setIsOpen(true);
       }, 1500);
       return () => clearTimeout(timer);
     }
   }, [popups]);
 
+  function dismiss() {
+    setIsOpen(false);
+    if (currentPopup) sessionStorage.setItem(`logicbit-storefront-popup-${currentPopup.restaurantId}`, "1");
+  }
+
   if (!isOpen || !currentPopup) return null;
 
+  const isExternalAd = currentPopup.type === "EXTERNAL_AD";
+
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm p-4 animate-in fade-in duration-200"
-      style={{ backgroundColor: `${theme.colors.dark}99` }}
-    >
+    <div className="fixed bottom-24 left-4 z-40 w-[calc(100vw-2rem)] max-w-xs sm:left-6 lg:bottom-6">
       <div
-        className="rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden relative"
+        role="dialog"
+        aria-label={currentPopup.title}
+        className="relative w-full overflow-hidden rounded-2xl shadow-2xl animate-slide-in-left"
         style={{
           backgroundColor: theme.colors.background,
           border: `1px solid ${theme.colors.dark}0D`,
         }}
       >
         <button
-          onClick={() => setIsOpen(false)}
+          onClick={dismiss}
+          aria-label="Close"
           className="absolute top-3 right-3 z-10 p-1.5 rounded-full transition-colors"
           style={{ backgroundColor: `${theme.colors.dark}33`, color: theme.colors.background }}
           onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `${theme.colors.dark}66`)}
@@ -56,6 +64,12 @@ export function StorefrontPopupModal({ popups }: StorefrontPopupModalProps) {
         )}
 
         <div className="p-6 text-center space-y-4">
+          <span
+            className="inline-block rounded-full px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide"
+            style={{ backgroundColor: `${theme.colors.dark}0D`, color: `${theme.colors.dark}99` }}
+          >
+            {isExternalAd ? "Ad" : POPUP_TYPES.find((t) => t.value === currentPopup.type)?.label ?? "Announcement"}
+          </span>
           <h3 className="font-serif font-semibold text-xl" style={{ color: theme.colors.dark }}>
             {currentPopup.title}
           </h3>
@@ -68,7 +82,8 @@ export function StorefrontPopupModal({ popups }: StorefrontPopupModalProps) {
           {currentPopup.ctaText && (
             <Link
               href={currentPopup.ctaLink || "#"}
-              onClick={() => setIsOpen(false)}
+              onClick={dismiss}
+              {...(isExternalAd ? { target: "_blank", rel: "noopener noreferrer sponsored" } : {})}
               className="block w-full py-2.5 font-medium rounded-xl transition-colors"
               style={{ backgroundColor: theme.colors.primary, color: theme.colors.background }}
               onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = theme.colors.primaryHover)}
