@@ -7,8 +7,12 @@ import {
   toggleRiderLock, 
   reviewRiderApproval, 
   Delivery, 
-  Rider 
+  Rider,
+  DeliveryPartnerRow,
+  getAllDeliveryPartners
 } from "@/lib/api/platform-admin-delivery";
+import { findProvider, formatPartnerFee } from "@/lib/delivery-partner-providers";
+import { ProviderBadge } from "@/components/delivery-partners/provider-badge";
 import { 
   Truck, 
   UserCheck, 
@@ -21,25 +25,36 @@ import {
   Phone, 
   MapPin, 
   Bike,
+  Handshake,
   RefreshCw
 } from "lucide-react";
 
 export default function DeliveriesPage() {
-  const [activeTab, setActiveTab] = useState<"deliveries" | "pending" | "riders">("deliveries");
+  const [activeTab, setActiveTab] = useState<"deliveries" | "pending" | "riders" | "partners">("deliveries");
   const [deliveries, setDeliveries] = useState<Delivery[]>([]);
   const [riders, setRiders] = useState<Rider[]>([]);
+  const [partners, setPartners] = useState<DeliveryPartnerRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+
+  const partnerGroups = Object.entries(
+    partners.reduce<Record<string, DeliveryPartnerRow[]>>((acc, p) => {
+      (acc[p.name] ||= []).push(p);
+      return acc;
+    }, {}),
+  );
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [deliveriesData, ridersData] = await Promise.all([
+      const [deliveriesData, ridersData, partnersData] = await Promise.all([
         getAllDeliveries(),
         getAllRiders(),
+        getAllDeliveryPartners(),
       ]);
       setDeliveries(deliveriesData || []);
       setRiders(ridersData || []);
+      setPartners(partnersData || []);
     } catch (err) {
       console.error("Failed to load delivery module data", err);
     } finally {
@@ -132,6 +147,17 @@ export default function DeliveriesPage() {
           }`}
         >
           <Bike className="w-4 h-4" /> Riders Directory ({activeRiders.length})
+        </button>
+
+        <button
+          onClick={() => setActiveTab("partners")}
+          className={`flex items-center gap-2 pb-3 font-semibold text-sm border-b-2 transition ${
+            activeTab === "partners"
+              ? "border-emerald-600 text-emerald-600"
+              : "border-transparent text-gray-500 hover:text-gray-700"
+          }`}
+        >
+          <Handshake className="w-4 h-4" /> Delivery Services ({partners.length})
         </button>
       </div>
 
@@ -329,6 +355,82 @@ export default function DeliveriesPage() {
                   )}
                 </tbody>
               </table>
+            </div>
+          )}
+          {/* TAB 4: THIRD-PARTY DELIVERY SERVICES */}
+          {activeTab === "partners" && (
+            <div className="space-y-4">
+              {partnerGroups.length > 0 && (
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                  {partnerGroups.map(([name, rows]) => (
+                    <div key={name} className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                      <ProviderBadge provider={findProvider(name)} size={44} />
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-gray-900">{name}</p>
+                        <p className="text-xs text-gray-500">
+                          {rows.length} restaurant{rows.length > 1 ? "s" : ""} · {rows.filter((r) => r.isActive).length} active
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                {partners.length === 0 ? (
+                  <div className="flex flex-col items-center px-6 py-14 text-center">
+                    <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-100 text-gray-400">
+                      <Handshake className="w-7 h-7" />
+                    </span>
+                    <h3 className="mt-4 text-base font-semibold text-gray-900">No delivery services yet</h3>
+                    <p className="mt-1 max-w-sm text-sm text-gray-500">When restaurants add the delivery companies they work with, they will show up here.</p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-sm text-gray-600">
+                      <thead className="bg-gray-50 border-b border-gray-200 text-xs uppercase font-semibold text-gray-500">
+                        <tr>
+                          <th className="py-3 px-4">Service</th>
+                          <th className="py-3 px-4">Restaurant</th>
+                          <th className="py-3 px-4">Contact</th>
+                          <th className="py-3 px-4">Account ID</th>
+                          <th className="py-3 px-4">Fee</th>
+                          <th className="py-3 px-4">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100">
+                        {partners.map((p) => (
+                          <tr key={p.id} className="hover:bg-gray-50 transition">
+                            <td className="py-3 px-4">
+                              <div className="flex items-center gap-3">
+                                <ProviderBadge provider={findProvider(p.name)} size={36} />
+                                <span className="font-bold text-gray-900">{p.name}</span>
+                              </div>
+                            </td>
+                            <td className="py-3 px-4 font-medium text-gray-800">{p.restaurant.name}</td>
+                            <td className="py-3 px-4">
+                              <div className="text-gray-900">{p.contactName || "N/A"}</div>
+                              {p.contactPhone && (
+                                <div className="text-xs text-gray-400 flex items-center gap-1">
+                                  <Phone className="w-3 h-3" /> {p.contactPhone}
+                                </div>
+                              )}
+                            </td>
+                            <td className="py-3 px-4 text-gray-600">{p.accountId || "N/A"}</td>
+                            <td className="py-3 px-4 text-gray-800 whitespace-nowrap">{formatPartnerFee(p)}</td>
+                            <td className="py-3 px-4">
+                              <span className={`inline-flex items-center gap-1.5 whitespace-nowrap px-2.5 py-1 rounded-full text-xs font-semibold ${p.isActive ? "bg-emerald-50 text-emerald-700" : "bg-gray-100 text-gray-500"}`}>
+                                <span className={`h-1.5 w-1.5 rounded-full ${p.isActive ? "bg-emerald-500" : "bg-gray-400"}`} />
+                                {p.isActive ? "Active" : "Inactive"}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </>

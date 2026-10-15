@@ -103,6 +103,12 @@ export class PlatformAdminController {
     return this.platformAdminService.listAllDeliveries(status);
   }
 
+  @Get('delivery-partners')
+  @RequirePlatformPermission('VIEW_DELIVERIES')
+  listDeliveryPartners() {
+    return this.platformAdminService.listDeliveryPartners();
+  }
+
   @Get('riders')
   @RequirePlatformPermission('VIEW_DELIVERIES')
   listAllRiders(@Query('approvalStatus') approvalStatus?: string) {

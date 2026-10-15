@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { listMyOrders } from "@/lib/api/orders";
 import { AccountRow } from "@/components/account/account-row";
 import { FilterChips } from "@/components/account/filter-chips";
+import { Pager } from "@/components/account/pager";
 
 interface OrderRow {
   id: string;
@@ -15,6 +16,8 @@ interface OrderRow {
   total?: number;
   createdAt?: string;
 }
+
+const PAGE_SIZE = 10;
 
 type Category = "all" | "active" | "completed" | "cancelled";
 
@@ -35,6 +38,7 @@ const statusLabel = (status?: string) =>
 
 export function OrderHistoryTab() {
   const [category, setCategory] = useState<Category>("all");
+  const [page, setPage] = useState(1);
   const { data, isLoading } = useQuery({
     queryKey: ["my-orders"],
     queryFn: () => listMyOrders() as Promise<OrderRow[]>,
@@ -48,18 +52,20 @@ export function OrderHistoryTab() {
     { key: "completed", label: "Completed", count: count("completed") },
     { key: "cancelled", label: "Cancelled", count: count("cancelled") },
   ] as const;
-  const visible = category === "all" ? orders : orders.filter((o) => getCategory(o.status) === category);
+  const filtered = category === "all" ? orders : orders.filter((o) => getCategory(o.status) === category);
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const visible = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
     <div className="max-w-3xl pb-5 space-y-4">
-      <FilterChips filters={filters} active={category} onChange={setCategory} />
+      <FilterChips filters={filters} active={category} onChange={(c) => { setCategory(c); setPage(1); }} />
 
       {isLoading ? (
         <p className="text-sm text-neutral-400">Loading orders…</p>
       ) : visible.length === 0 ? (
         <p className="text-sm text-neutral-400">{orders.length === 0 ? "No orders yet." : "No orders in this category."}</p>
       ) : (
-        <div key={category} className="space-y-3">
+        <div key={`${category}-${page}`} className="space-y-3">
           {visible.map((order, i) => (
             <AccountRow
               key={order.id}
@@ -75,6 +81,8 @@ export function OrderHistoryTab() {
           ))}
         </div>
       )}
+
+      <Pager page={page} pageCount={pageCount} onChange={setPage} />
     </div>
   );
 }

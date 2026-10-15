@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -17,6 +17,8 @@ import { CouponBox } from "@/components/cart/coupon-input";
 import { AllergenNote } from "@/components/cart/allergen-note";
 import { DiscountRow } from "@/components/cart/discount-row";
 import { RefundPolicy } from "@/components/cart/refund-policy";
+
+const MIN_QUOTE_REFRESH_MS = 5000;
 
 export default function CheckoutPage() {
   const t = useTranslations("checkout");
@@ -69,15 +71,34 @@ export default function CheckoutPage() {
     return methods.length > 0 ? methods : (["COD"] as PaymentMethod[]);
   }, [restaurantSettingsQuery.data]);
 
-  type DeliveryCheck = { deliverable?: boolean; deliveryFee?: number; distanceKm?: number };
+  type DeliveryCheck = {
+    deliverable?: boolean;
+    reason?: string;
+    deliveryFee?: number;
+    distanceKm?: number;
+    provider?: string | null;
+    quoteId?: string;
+    quoteExpiresAt?: string;
+  };
   const checkResult = deliveryQuery.data as (DeliveryCheck & { data?: DeliveryCheck }) | undefined;
   const deliveryData: DeliveryCheck | undefined = checkResult?.data ?? checkResult;
   const deliveryCheckLoading = hasLocation && deliveryQuery.isFetching;
+  const quote = hasLocation ? deliveryData : undefined;
+  const refetchQuote = deliveryQuery.refetch;
+  const quoteExpiresAt = quote?.quoteExpiresAt;
+
+  useEffect(() => {
+    if (!quoteExpiresAt) return;
+    const wait = Math.max(new Date(quoteExpiresAt).getTime() - Date.now(), MIN_QUOTE_REFRESH_MS);
+    const timer = setTimeout(() => refetchQuote(), wait);
+    return () => clearTimeout(timer);
+  }, [quoteExpiresAt, refetchQuote]);
   const notDeliverable = hasLocation && deliveryData?.deliverable === false;
   const distanceKm: number | null =
     hasLocation && typeof deliveryData?.distanceKm === "number" ? deliveryData.distanceKm : null;
   const deliveryFee: number | null =
     hasLocation && !notDeliverable && typeof deliveryData?.deliveryFee === "number" ? deliveryData.deliveryFee : null;
+  const notDeliverableMessage = deliveryData?.reason ?? "This restaurant doesn't deliver to your location.";
   const feeUnavailable =
     hasLocation && !notDeliverable && !deliveryCheckLoading && (deliveryQuery.isError || (!!deliveryData && deliveryFee === null));
   const effectiveDeliveryFee = deliveryFee ?? 0;
@@ -90,7 +111,7 @@ export default function CheckoutPage() {
       : !hasLocation
         ? "Confirm your pin on the map to place the order."
         : notDeliverable
-          ? "This restaurant doesn't deliver to your location."
+          ? notDeliverableMessage
           : deliveryCheckLoading
             ? "Checking the delivery fee…"
             : feeUnavailable
@@ -122,6 +143,7 @@ export default function CheckoutPage() {
               deliveryLongitude: deliveryLongitude ?? undefined,
             }
           : {}),
+        ...(quote?.quoteId ? { deliveryQuoteId: quote.quoteId } : {}),
         ...(coupon ? { couponCode: coupon.code } : {}),
         
         // Optional order-level delivery instructions 
@@ -276,7 +298,7 @@ export default function CheckoutPage() {
 
               {notDeliverable && (
                 <p className="mt-3 text-xs text-red-600">
-                  This restaurant doesn&apos;t deliver to your current location.
+                  {notDeliverableMessage}
                 </p>
               )}
               {hasLocation && !notDeliverable && (
@@ -334,6 +356,9 @@ export default function CheckoutPage() {
                         {t("deliveryFee")}
                         {distanceKm != null && (
                           <span className="text-neutral-400"> ({distanceKm.toFixed(1)} km)</span>
+                        )}
+                        {quote?.provider && !deliveryCheckLoading && !feeUnavailable && (
+                          <span className="block text-xs text-neutral-400">Delivered by {quote.provider}</span>
                         )}
                       </span>
                       <span className="font-mono">
