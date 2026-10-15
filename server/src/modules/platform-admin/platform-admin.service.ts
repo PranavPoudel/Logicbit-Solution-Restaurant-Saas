@@ -198,6 +198,14 @@ export class PlatformAdminService {
 
   // --- DELIVERIES & RIDERS SERVICE METHODS ---
 
+  listDeliveryPartners() {
+    return this.prisma.deliveryPartner.findMany({
+      where: { deletedAt: null },
+      include: { restaurant: { select: { id: true, name: true } } },
+      orderBy: [{ name: 'asc' }, { createdAt: 'desc' }],
+    });
+  }
+
   async listAllDeliveries(status?: string) {
     const where = status ? { status: status as any } : {};
     const deliveries = await this.prisma.delivery.findMany({ 

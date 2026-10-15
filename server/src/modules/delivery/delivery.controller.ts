@@ -1,10 +1,12 @@
 // src/modules/delivery/delivery.controller.ts
-import { Controller, Get, Post, Patch, Body, Param, UseGuards, Req, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards, Req, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { DeliveryJwtAuthGuard } from './guards/delivery-jwt-auth.guard';
 import { DeliveryService } from './delivery.service';
+import { DeliveryPartnerService } from './delivery-partner.service';
+import { CreateDeliveryPartnerDto, UpdateDeliveryPartnerDto } from './dto/delivery-partner.dto';
 import { CreateDeliveryPersonDto, LoginDeliveryPersonDto, UpdateLocationDto, UpdateDeliveryStatusDto } from './dto/delivery.dto';
 
 @ApiTags('Delivery - Owner Management')
@@ -22,6 +24,34 @@ export class DeliveryPersonManagementController {
   @Get()
   findAll(@Req() req) {
     return this.deliveryService.findAllForTenant(req.user.tenantId);
+  }
+}
+
+@ApiTags('Delivery - Owner Partners')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
+@Controller('api/v1/restaurants/:restaurantId/delivery-partners')
+export class DeliveryPartnerController {
+  constructor(private readonly partners: DeliveryPartnerService) {}
+
+  @Get()
+  findAll(@Req() req, @Param('restaurantId') restaurantId: string) {
+    return this.partners.findAll(req.user.tenantId, restaurantId);
+  }
+
+  @Post()
+  create(@Req() req, @Param('restaurantId') restaurantId: string, @Body() dto: CreateDeliveryPartnerDto) {
+    return this.partners.create(req.user.tenantId, restaurantId, dto);
+  }
+
+  @Patch(':id')
+  update(@Req() req, @Param('restaurantId') restaurantId: string, @Param('id') id: string, @Body() dto: UpdateDeliveryPartnerDto) {
+    return this.partners.update(req.user.tenantId, restaurantId, id, dto);
+  }
+
+  @Delete(':id')
+  remove(@Req() req, @Param('restaurantId') restaurantId: string, @Param('id') id: string) {
+    return this.partners.remove(req.user.tenantId, restaurantId, id);
   }
 }
 
