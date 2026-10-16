@@ -3,10 +3,13 @@
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Trash2, MapPin } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { addressesApi } from "@/lib/api/customers";
 import { useGeolocation } from "@/hooks/use-geolocation";
 import { getErrorMessage } from "@/lib/utils/error";
+import { Button, Icon, IconButton } from "@/components/ui/primitives";
+import { AuthInput } from "@/components/auth/auth-shell";
+import { Empty } from "@/components/account/empty";
 import { AddressPicker, type AddressValue } from "@/components/map/address-picker";
 
 interface AddressRow {
@@ -18,6 +21,8 @@ interface AddressRow {
 const EMPTY_ADDRESS: AddressValue = { address: "", lat: null, lng: null };
 
 export function AddressesTab() {
+  const t = useTranslations("account");
+  const tc = useTranslations("common");
   const queryClient = useQueryClient();
   const { lat: startLat, lng: startLng } = useGeolocation();
   const [showForm, setShowForm] = useState(false);
@@ -58,46 +63,32 @@ export function AddressesTab() {
 
   const addresses = data ?? [];
   const canSave = !!label.trim() && !!location.address.trim() && location.lat != null && location.lng != null;
-  const error = pickerError || (addMutation.isError ? getErrorMessage(addMutation.error, "Couldn't save this address.") : "");
+  const error = pickerError || (addMutation.isError ? getErrorMessage(addMutation.error, t("addressSaveError")) : "");
 
   return (
-    <div className="animate-fade-up max-w-3xl pb-5 space-y-3">
+    <div className="animate-fade-up max-w-3xl space-y-3 pb-5">
       {isLoading ? (
-        <p className="text-sm text-neutral-400">Loading addresses…</p>
+        <p className="text-lg text-ink/70">{t("loadingAddresses")}</p>
       ) : addresses.length === 0 ? (
-        <p className="text-sm text-neutral-400">No saved addresses yet.</p>
+        <Empty>{t("noAddresses")}</Empty>
       ) : (
         addresses.map((addr) => (
-          <div
-            key={addr.id}
-            className="flex items-start justify-between gap-3 bg-white border border-[#E8E7E2] rounded-xl p-4 md:p-5"
-          >
-            <div className="flex items-start gap-2.5">
-              <MapPin size={15} className="text-[#E3A008] mt-0.5 shrink-0" />
+          <div key={addr.id} className="flex items-start justify-between gap-3 rounded-[24px] bg-paper p-4 shadow-soft md:p-5">
+            <div className="flex items-start gap-3">
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-saffron text-espresso"><Icon name="pin" /></span>
               <div>
-                <p className="text-base font-medium text-[#17181C]">{addr.label ?? "Address"}</p>
-                <p className="text-sm text-neutral-500 mt-0.5">{addr.fullAddress}</p>
+                <p className="font-display text-xl font-extrabold">{addr.label ?? t("addressFallback")}</p>
+                <p className="mt-0.5 text-ink/75">{addr.fullAddress}</p>
               </div>
             </div>
-            <button
-              onClick={() => deleteMutation.mutate(addr.id)}
-              className="text-neutral-300 hover:text-red-500 shrink-0"
-              aria-label="Delete address"
-            >
-              <Trash2 size={15} />
-            </button>
+            <IconButton icon="trash" label={t("deleteAddress")} onClick={() => deleteMutation.mutate(addr.id)} className="text-chili hover:bg-chili/10" />
           </div>
         ))
       )}
 
       {showForm ? (
-        <div className="bg-white border border-[#E8E7E2] rounded-xl p-4 md:p-5 space-y-3">
-          <input
-            value={label}
-            onChange={(e) => setLabel(e.target.value)}
-            placeholder="Label (e.g. Home, Office)"
-            className="w-full text-base border border-[#E8E7E2] rounded-lg px-3.5 py-3 focus:outline-none focus:ring-2 focus:ring-[#E3A008]/40"
-          />
+        <div className="space-y-4 rounded-[28px] bg-paper p-4 shadow-warm md:p-6">
+          <AuthInput id="address-label" label={t("label")} icon="bag" value={label} onChange={(e) => setLabel(e.target.value)} placeholder={t("labelPlaceholder")} />
           <AddressPicker
             value={location}
             onChange={(next) => {
@@ -105,33 +96,27 @@ export function AddressesTab() {
               setPickerError("");
             }}
             onError={setPickerError}
-            placeholder="Full address"
-            mapLabel="Pin the address on the map"
+            placeholder={t("fullAddress")}
+            mapLabel={t("pinAddress")}
             startLat={startLat}
             startLng={startLng}
           />
-          {error && <p className="text-xs text-red-600">{error}</p>}
+          {error && (
+            <p role="alert" className="flex items-center gap-1.5 font-medium text-danger">
+              <Icon name="alert" className="h-4 w-4" />{error}
+            </p>
+          )}
           <div className="flex gap-2">
-            <button
-              onClick={() => addMutation.mutate()}
-              disabled={!canSave || addMutation.isPending}
-              className="text-sm font-medium bg-[#17181C] text-white px-5 min-h-11 rounded-lg disabled:opacity-50"
-            >
-              {addMutation.isPending ? "Saving…" : "Save address"}
-            </button>
-            <button onClick={closeForm} className="text-sm text-neutral-500 px-4 min-h-11">
-              Cancel
-            </button>
+            <Button onClick={() => addMutation.mutate()} disabled={!canSave || addMutation.isPending}>
+              {addMutation.isPending ? t("saving") : t("saveAddress")}
+            </Button>
+            <Button variant="ghost" onClick={closeForm}>{tc("cancel")}</Button>
           </div>
         </div>
       ) : (
-        <button
-          onClick={() => setShowForm(true)}
-          className="flex items-center gap-1.5 text-base font-medium text-[#17181C] min-h-11"
-        >
-          <Plus size={15} />
-          Add new address
-        </button>
+        <Button variant="outline" onClick={() => setShowForm(true)}>
+          <Icon name="plus" className="h-5 w-5" />{t("addAddress")}
+        </Button>
       )}
     </div>
   );

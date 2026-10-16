@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Space_Grotesk, JetBrains_Mono } from "next/font/google";
+import { Geist, Space_Grotesk, JetBrains_Mono, Bricolage_Grotesque, DM_Sans } from "next/font/google";
 import "./globals.css";
 import { QueryProvider } from "@/providers/query-provider";
 import { themeCssVariables } from "@/config/theme";
@@ -13,6 +13,18 @@ const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
   subsets: ["latin"],
   weight: ["500", "600", "700"],
+});
+
+const bricolage = Bricolage_Grotesque({
+  variable: "--font-bricolage",
+  subsets: ["latin"],
+  weight: ["500", "700", "800"],
+});
+
+const dmSans = DM_Sans({
+  variable: "--font-dm-sans",
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
 });
 
 const jetbrainsMono = JetBrains_Mono({
@@ -35,7 +47,7 @@ export default function RootLayout({
     <html
       lang="en"
       style={themeCssVariables}
-      className={`${geistSans.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} ${bricolage.variable} ${dmSans.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-sans">
         {/* QueryProvider now wraps EVERYTHING, including Owner Dashboard */}

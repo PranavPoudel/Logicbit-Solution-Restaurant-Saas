@@ -3,13 +3,15 @@
 
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { CheckCircle2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useCustomerAuthStore } from "@/store/customer-auth-store";
 import { updateMyProfile } from "@/lib/api/customers";
 import { getErrorMessage } from "@/lib/utils/error";
-import { FormField } from "@/components/ui/form-field";
+import { Button, Card, Icon } from "@/components/ui/primitives";
+import { AuthInput } from "@/components/auth/auth-shell";
 
 export function ProfileTab() {
+  const t = useTranslations("account");
   const customer = useCustomerAuthStore((s) => s.customer);
   const setCustomer = useCustomerAuthStore((s) => s.setCustomer);
   const [name, setName] = useState(customer?.name ?? "");
@@ -21,35 +23,32 @@ export function ProfileTab() {
   });
 
   return (
-    <div className="animate-fade-up max-w-3xl rounded-2xl border border-[#E8E7E2] bg-white p-5 md:p-7 [&_input]:py-3.5 [&_input]:text-base [&_label]:text-base">
+    <Card className="animate-fade-up max-w-3xl">
       <div className="grid gap-5 sm:grid-cols-2">
-        <FormField label="Full name" value={name} onChange={(e) => setName(e.target.value)} />
-        <FormField label="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
+        <AuthInput id="name" label={t("fullName")} icon="user" value={name} onChange={(e) => setName(e.target.value)} />
+        <AuthInput id="phone" label={t("phone")} icon="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
         <div className="sm:col-span-2">
-          <FormField label="Email" value={customer?.email ?? ""} disabled />
+          <AuthInput id="email" label={t("email")} icon="mail" value={customer?.email ?? ""} disabled />
         </div>
       </div>
 
-      <div className="mt-6 flex items-center gap-3 border-t border-[#E8E7E2] pt-6">
-        <button
-          onClick={() => mutation.mutate()}
-          disabled={mutation.isPending}
-          className="text-base font-medium bg-[#17181C] text-white px-6 min-h-12 rounded-xl disabled:opacity-50"
-        >
-          {mutation.isPending ? "Saving…" : "Save changes"}
-        </button>
+      <div className="mt-6 flex flex-wrap items-center gap-4 border-t-2 border-ink/10 pt-6">
+        <Button size="lg" onClick={() => mutation.mutate()} disabled={mutation.isPending}>
+          {mutation.isPending ? t("saving") : t("save")}
+        </Button>
         {mutation.isError && (
-          <span className="text-xs text-red-600">
-            {getErrorMessage(mutation.error, "Couldn't save your changes. Please try again.")}
+          <span role="alert" className="flex items-center gap-1.5 font-medium text-danger">
+            <Icon name="alert" className="h-4 w-4" />
+            {getErrorMessage(mutation.error, t("saveError"))}
           </span>
         )}
         {mutation.isSuccess && (
-          <span className="flex items-center gap-1 text-xs text-[#0F6B5C]">
-            <CheckCircle2 size={13} />
-            Saved
+          <span role="status" className="flex items-center gap-1.5 font-bold text-herb-ink">
+            <Icon name="check" className="h-5 w-5" />
+            {t("saved")}
           </span>
         )}
       </div>
-    </div>
+    </Card>
   );
 }

@@ -1,78 +1,49 @@
 // components/home/cuisine-selector.tsx
 "use client";
 
-import { useEffect, useState } from "react";
-import { theme } from "@/config/theme";
+import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { byCuisineOrder, cuisineImage, cuisineSlug } from "@/lib/utils/cuisine";
+import { useCuisineLabel } from "@/hooks/use-cuisine-label";
+import type { Cuisine } from "@/lib/api/cuisines";
 
-interface Cuisine {
-  id: string;
-  name: string;
-  icon?: string;
-}
+const MOODS = [
+  { icon: "✺", bg: "bg-chili text-cream", rot: "-rotate-1" },
+  { icon: "◐", bg: "bg-saffron text-ink", rot: "rotate-1" },
+  { icon: "❀", bg: "bg-blush text-ink", rot: "-rotate-1" },
+  { icon: "➤", bg: "bg-ink text-saffron", rot: "rotate-1" },
+  { icon: "✿", bg: "bg-herb text-cream", rot: "-rotate-1" },
+  { icon: "◉", bg: "bg-tangerine text-ink", rot: "rotate-1" },
+];
 
-export function CuisineSelector({
-  activeId,
-  onSelect,
-}: {
-  activeId: string | null;
-  onSelect: (id: string | null) => void;
-}) {
-  const [cuisines, setCuisines] = useState<Cuisine[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-
-  useEffect(() => {
-    fetch("/discovery/cuisines")
-      .then((res) => res.json())
-      .then((data) => {
-        setCuisines(data);
-        setLoading(false);
-      })
-      .catch(() => {
-        setError(true);
-        setLoading(false);
-      });
-  }, []);
-
-  if (loading) {
-    return <div className="flex gap-2 px-4 py-3 text-sm" style={{ color: `${theme.colors.dark}66` }}>Loading cuisines…</div>;
-  }
-
-  if (error) {
-    return <div className="flex gap-2 px-4 py-3 text-sm" style={{ color: theme.colors.primary }}>Couldn&apos;t load cuisines.</div>;
-  }
-
-  if (cuisines.length === 0) {
-    return null;
-  }
-
+export function CuisineSelector({ cuisines }: { cuisines: Cuisine[] }) {
+  const t = useTranslations("home");
+  const cuisineLabel = useCuisineLabel();
+  if (cuisines.length === 0) return null;
   return (
-    <div className="flex gap-2 overflow-x-auto px-4 py-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-      <button
-        onClick={() => onSelect(null)}
-        className="shrink-0 text-sm font-medium px-4 py-2 rounded-full border transition-colors"
-        style={{
-          backgroundColor: activeId === null ? theme.colors.primary : "transparent",
-          color: activeId === null ? theme.colors.background : theme.colors.dark,
-          borderColor: activeId === null ? theme.colors.primary : `${theme.colors.dark}22`,
-        }}
-      >
-        All
-      </button>
-      {cuisines.map((c) => (
-        <button
-          key={c.id}
-          onClick={() => onSelect(c.id)}
-          className="shrink-0 text-sm font-medium px-4 py-2 rounded-full border transition-colors"
-          style={{
-            backgroundColor: activeId === c.id ? theme.colors.primary : "transparent",
-            color: activeId === c.id ? theme.colors.background : theme.colors.dark,
-            borderColor: activeId === c.id ? theme.colors.primary : `${theme.colors.dark}22`,
-          }}
-        >
-          {c.icon ? `${c.icon} ` : ""}{c.name}
-        </button>
-      ))}
-    </div>
+    <section className="relative py-10" aria-labelledby="mood">
+      <div className="mx-auto w-full max-w-[1440px] px-5 md:px-10">
+        <h2 id="mood" className="font-display text-4xl font-extrabold tracking-tight md:text-6xl">
+          {t("browseCuisine")}<span className="text-chili">.</span>
+        </h2>
+      </div>
+      <div className="no-scrollbar mt-6 flex snap-x gap-4 overflow-x-auto px-5 pb-6 md:px-10">
+        {byCuisineOrder(cuisines).map((c, i) => {
+          const m = MOODS[i % MOODS.length];
+          return (
+            <Link
+              key={c.id}
+              href={`/restaurants?cuisine=${encodeURIComponent(c.slug ?? c.name)}`}
+              className={`${m.bg} ${m.rot} group relative flex min-h-[120px] shrink-0 snap-start items-center gap-4 overflow-hidden rounded-[36px] py-4 pl-6 pr-4 text-left shadow-warm transition hover:-translate-y-1`}
+            >
+              <span className="text-4xl" aria-hidden>{m.icon}</span>
+              <span className="font-display text-4xl font-extrabold md:text-5xl">{cuisineLabel(c)}</span>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={cuisineImage(cuisineSlug(c))} alt="" className="blob h-24 w-24 object-cover transition group-hover:rotate-12" />
+            </Link>
+          );
+        })}
+      </div>
+    </section>
   );
 }

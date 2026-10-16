@@ -11,6 +11,8 @@ import { calculateDeliveryQuote } from '../../common/utils/delivery-fee.util';
 
 @Injectable()
 export class DiscoveryService {
+  private trending?: { value: { success: boolean; data: unknown[] }; expires: number };
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly translation: TranslationService,
@@ -165,6 +167,7 @@ export class DiscoveryService {
         menuItems: {
           where: { deletedAt: null, isAvailable: true },
           orderBy: { displayOrder: 'asc' },
+          include: { _count: { select: { modifierGroups: true } } },
         },
       },
     });
@@ -187,7 +190,12 @@ export class DiscoveryService {
           )
         : categories;
 
-    return { success: true, data: { restaurant: this.toPublicRestaurantShape(restaurant, await this.getCuisineNames(restaurantId)), categories: translatedCategories } };
+    const withModifierFlag = translatedCategories.map((cat) => ({
+      ...cat,
+      menuItems: cat.menuItems.map(({ _count, ...item }) => ({ ...item, hasModifiers: _count.modifierGroups > 0 })),
+    }));
+
+    return { success: true, data: { restaurant: this.toPublicRestaurantShape(restaurant, await this.getCuisineNames(restaurantId)), categories: withModifierFlag } };
   }
 
   private async getCuisineNames(restaurantId: string) {
@@ -252,6 +260,46 @@ export class DiscoveryService {
       orderBy: { displayOrder: 'asc' },
     });
     return { success: true, data: items };
+  }
+
+  /** PUBLIC — Homepage "Trending" section: most ordered dishes in the last 30 days, topped up with featured dishes */
+  async getTrendingItems(limit = 3) {
+    if (this.trending && this.trending.expires > Date.now()) return this.trending.value;
+
+    const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const live = { deletedAt: null, isAvailable: true, restaurant: { isActive: true } };
+    const select = {
+      id: true,
+      name: true,
+      price: true,
+      image: true,
+      restaurant: { select: { id: true, name: true, slug: true } },
+    };
+
+    const top = await this.prisma.orderItem.groupBy({
+      by: ['menuItemId'],
+      where: { order: { createdAt: { gte: since }, status: { not: 'CANCELLED' } }, menuItem: live },
+      _sum: { quantity: true },
+      orderBy: { _sum: { quantity: 'desc' } },
+      take: limit,
+    });
+
+    const ranked = await this.prisma.menuItem.findMany({ where: { id: { in: top.map((t) => t.menuItemId) } }, select });
+    const items = top.flatMap((t) => ranked.filter((m) => m.id === t.menuItemId));
+
+    if (items.length < limit) {
+      const fill = await this.prisma.menuItem.findMany({
+        where: { ...live, isFeatured: true, id: { notIn: items.map((i) => i.id) } },
+        select,
+        orderBy: { displayOrder: 'asc' },
+        take: limit - items.length,
+      });
+      items.push(...fill);
+    }
+
+    const value = { success: true, data: items };
+    this.trending = { value, expires: Date.now() + 5 * 60 * 1000 };
+    return value;
   }
 
   /** PUBLIC — Homepage "Popular Category" section को लागि */

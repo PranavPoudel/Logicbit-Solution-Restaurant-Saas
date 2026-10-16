@@ -21,6 +21,11 @@ export class DiscoveryController {
     return this.discoveryService.findNearby(query);
   }
 
+  @Get('trending-items')
+  getTrendingItems() {
+    return this.discoveryService.getTrendingItems();
+  }
+
   @Get('restaurants/:idOrSlug')
   findOne(@Param('idOrSlug') idOrSlug: string) {
     return this.discoveryService.findPublicOne(idOrSlug);

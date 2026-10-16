@@ -13,6 +13,7 @@ export interface CheckoutInput {
   deliveryAddress?: string;
   deliveryLatitude?: number;
   deliveryLongitude?: number;
+  deliveryQuoteId?: string;
   items: Array<{
     menuItemId: string;
     quantity: number;

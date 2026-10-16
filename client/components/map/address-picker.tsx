@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, MapPin, Search } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { DynamicMapPicker } from "@/components/map/dynamic-map-picker";
 import { geocodeAddress, reverseGeocode } from "@/lib/geocode";
+import { Button, Icon } from "@/components/ui/primitives";
 
 export interface AddressValue {
   address: string;
@@ -30,6 +31,7 @@ export function AddressPicker({
   startLat = 0,
   startLng = 0,
 }: AddressPickerProps) {
+  const t = useTranslations("address");
   const [searching, setSearching] = useState(false);
 
   const handleMapChange = async (lat: number, lng: number) => {
@@ -44,9 +46,9 @@ export function AddressPicker({
     try {
       const result = await geocodeAddress(value.address);
       if (result) onChange({ address: result.address, lat: result.lat, lng: result.lng });
-      else onError("Could not find this address. Try a more specific one or drag the pin.");
+      else onError(t("notFound"));
     } catch {
-      onError("Address search failed. Check your connection or drag the pin instead.");
+      onError(t("searchFailed"));
     } finally {
       setSearching(false);
     }
@@ -55,32 +57,27 @@ export function AddressPicker({
   return (
     <div>
       <div className="relative">
-        <MapPin size={16} className="absolute left-3 top-3 text-neutral-400" />
+        <Icon name="pin" className="pointer-events-none absolute left-4 top-4 h-5 w-5 text-ink/50" />
         <textarea
           aria-label={placeholder}
           value={value.address}
           onChange={(e) => onChange({ ...value, address: e.target.value })}
           placeholder={placeholder}
           rows={3}
-          className="w-full resize-none rounded-xl border border-[#E8E7E2] py-2.5 pl-10 pr-4 text-sm outline-none focus:border-[#E3A008] focus:ring-2 focus:ring-[#E3A008]/40"
+          className="w-full resize-none rounded-2xl border-2 border-ink/15 bg-paper py-3.5 pl-12 pr-4 text-base text-ink outline-none transition placeholder:text-ink/50 focus:border-ink"
         />
       </div>
-      <button
-        type="button"
-        onClick={handleFind}
-        disabled={searching || !value.address.trim()}
-        className="mt-3 inline-flex items-center gap-2 rounded-xl bg-brand-ink px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-ink-hover disabled:opacity-50"
-      >
-        {searching ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
-        Find on map
-      </button>
+      <Button variant="outline" onClick={handleFind} disabled={searching || !value.address.trim()} className="mt-3">
+        {searching ? <span className="h-4 w-4 animate-spin rounded-full border-[3px] border-current border-t-transparent" /> : <Icon name="search" className="h-4 w-4" />}
+        {t("find")}
+      </Button>
 
       <div className="mt-5">
-        <p className="mb-3 text-base font-semibold text-[#17181C]">{mapLabel}</p>
-        <DynamicMapPicker lat={value.lat ?? startLat} lng={value.lng ?? startLng} onChange={handleMapChange} />
-        <p className="mt-2 text-xs text-neutral-500">
-          Type your address and press Find, or drag the pin to your exact spot.
-        </p>
+        <p className="mb-3 font-display text-xl font-extrabold">{mapLabel}</p>
+        <div className="overflow-hidden rounded-[22px] border-2 border-ink/15 [&>div]:!rounded-none [&>div]:!border-0">
+          <DynamicMapPicker lat={value.lat ?? startLat} lng={value.lng ?? startLng} onChange={handleMapChange} />
+        </div>
+        <p className="mt-2 text-ink/70">{t("hint")}</p>
       </div>
     </div>
   );
