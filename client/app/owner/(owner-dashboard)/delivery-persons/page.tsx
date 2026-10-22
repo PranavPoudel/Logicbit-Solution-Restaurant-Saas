@@ -1,12 +1,13 @@
 // app/owner/(owner-dashboard)/delivery-persons/page.tsx
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, Suspense, useEffect, useState } from "react";
 import {
   addDeliveryPerson,
   listDeliveryPersons,
 } from "@/lib/api/delivery-persons";
 import { useOwnerAuthStore } from "@/store/owner-auth-store";
+import { PartnerSection } from "@/components/delivery-partners/partner-section";
 
 interface DeliveryPerson {
   id: string;
@@ -233,6 +234,10 @@ export default function DeliveryPersonsPage() {
           )}
         </div>
       )}
+
+      <Suspense>
+        <PartnerSection />
+      </Suspense>
 
       {/* ✅ Section 2: Freelance Riders */}
       {!loading && (

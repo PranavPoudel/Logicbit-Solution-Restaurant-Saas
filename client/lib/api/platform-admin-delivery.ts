@@ -59,3 +59,21 @@ export async function reviewRiderApproval(id: string, status: 'APPROVED' | 'REJE
   const res = await platformApiClient.patch(`/platform-admin/riders/${id}/approval`, { status });
   return res.data;
 }
+
+export interface DeliveryPartnerRow {
+  id: string;
+  name: string;
+  contactName?: string | null;
+  contactPhone?: string | null;
+  accountId?: string | null;
+  feeType: 'FLAT' | 'PERCENT';
+  feeValue: number;
+  notes?: string | null;
+  isActive: boolean;
+  restaurant: { id: string; name: string };
+}
+
+export async function getAllDeliveryPartners(): Promise<DeliveryPartnerRow[]> {
+  const res = await platformApiClient.get('/platform-admin/delivery-partners');
+  return res.data?.data || res.data;
+}
