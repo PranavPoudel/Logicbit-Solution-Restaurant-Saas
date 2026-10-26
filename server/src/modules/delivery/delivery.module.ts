@@ -4,7 +4,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { DeliveryService } from './delivery.service';
-import { DeliveryPersonManagementController, DeliveryAuthController, DeliveryController } from './delivery.controller';
+import { DeliveryPersonManagementController, DeliveryPartnerController, DeliveryAuthController, DeliveryController } from './delivery.controller';
+import { DeliveryPartnerService } from './delivery-partner.service';
 import { DeliveryJwtStrategy } from './strategies/delivery-jwt.strategy';
 
 @Module({
@@ -20,7 +21,7 @@ import { DeliveryJwtStrategy } from './strategies/delivery-jwt.strategy';
       }),
     }),
   ],
-  controllers: [DeliveryPersonManagementController, DeliveryAuthController, DeliveryController],
-  providers: [DeliveryService, DeliveryJwtStrategy],
+  controllers: [DeliveryPersonManagementController, DeliveryPartnerController, DeliveryAuthController, DeliveryController],
+  providers: [DeliveryService, DeliveryPartnerService, DeliveryJwtStrategy],
 })
 export class DeliveryModule {}

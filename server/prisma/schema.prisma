@@ -26,6 +26,7 @@ model Tenant {
   modifierGroups   ModifierGroup[]
   orders           Order[]
   restaurantTables RestaurantTable[]  // 🆕 Added
+  deliveryPartners DeliveryPartner[]
   reservations     Reservation[]      // 🆕 Added
 }
 
@@ -242,6 +243,7 @@ model Restaurant {
   cuisines       RestaurantCuisine[]
 
   tables         RestaurantTable[]
+  deliveryPartners DeliveryPartner[]
   reservations   Reservation[]
 
   @@index([tenantId])
@@ -1068,4 +1070,31 @@ model Reservation {
   @@index([restaurantId])
   @@index([reservationDate])
   @@index([status])
+}
+
+enum DeliveryPartnerFeeType {
+  FLAT
+  PERCENT
+}
+
+model DeliveryPartner {
+  id           String                 @id @default(uuid())
+  tenantId     String
+  restaurantId String
+  name         String
+  contactName  String?
+  contactPhone String?
+  accountId    String?
+  feeType      DeliveryPartnerFeeType @default(PERCENT)
+  feeValue     Float                  @default(0)
+  notes        String?
+  isActive     Boolean                @default(true)
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
+  deletedAt    DateTime?
+
+  tenant     Tenant     @relation(fields: [tenantId], references: [id])
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+
+  @@index([restaurantId])
 }
