@@ -63,7 +63,7 @@ export function HeroSection({ cuisines, openCount, topRating, city }: { cuisines
           >
             <Icon name="search" className="h-5 w-5 shrink-0 text-ink/60" />
             <label htmlFor="home-search" className="sr-only">{t("searchLabel")}</label>
-            <input id="home-search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("searchPlaceholder")} className="min-h-11 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-ink/60" />
+            <input id="home-search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("searchPlaceholder")} className="min-h-11 min-w-0 flex-1 text-ellipsis bg-transparent text-base outline-none placeholder:text-ink/60" />
             <button type="submit" className="min-h-11 shrink-0 rounded-full bg-chili px-5 font-bold text-cream transition hover:bg-ink">{t("findFood")}</button>
           </form>
           {chips.length > 0 && (

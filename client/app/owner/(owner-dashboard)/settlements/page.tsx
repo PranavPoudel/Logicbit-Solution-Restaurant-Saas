@@ -3,6 +3,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle, Wallet } from "lucide-react";
+import { QueryError } from "@/components/ui/query-error";
 import { useOwnerAuthStore } from "@/store/owner-auth-store";
 import { listRestaurantSettlements, getOutstandingSettlement } from "@/lib/api/settlements";
 
@@ -70,6 +71,8 @@ export default function SettlementsPage() {
         </div>
         {historyQuery.isLoading ? (
           <p className="text-sm text-neutral-400 text-center py-8">Loading…</p>
+        ) : historyQuery.isError ? (
+          <QueryError what="settlement history" error={historyQuery.error} onRetry={() => historyQuery.refetch()} />
         ) : (historyQuery.data ?? []).length === 0 ? (
           <p className="text-sm text-neutral-400 text-center py-8">
             No settlement history yet.

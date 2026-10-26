@@ -29,18 +29,18 @@ export function CuisineSelector({ cuisines }: { cuisines: Cuisine[] }) {
           {t("browseCuisine")}<span className="text-chili">.</span>
         </h2>
       </div>
-      <div className="no-scrollbar mt-6 flex snap-x gap-4 overflow-x-auto px-5 pb-6 md:px-10">
+      <div className="no-scrollbar mt-6 flex snap-x scroll-px-5 gap-4 overflow-x-auto px-5 pb-6 md:scroll-px-10 md:px-10 lg:gap-3 lg:overflow-visible">
         {byCuisineOrder(cuisines).map((c, i, list) => (
           <Link
             key={c.id}
             href={`/restaurants?cuisine=${encodeURIComponent(c.slug ?? c.name)}`}
             style={{ background: shade(i, list.length) }}
-            className={`${ROTS[i % ROTS.length]} group relative flex min-h-[120px] shrink-0 snap-start items-center gap-4 overflow-hidden rounded-[36px] py-4 pl-6 pr-4 text-left text-parchment shadow-warm transition hover:-translate-y-1`}
+            className={`${ROTS[i % ROTS.length]} group relative isolate flex min-h-[96px] md:min-h-[120px] shrink-0 snap-start items-center gap-4 overflow-hidden rounded-[36px] py-3 pl-5 pr-5 md:py-4 md:pl-6 md:pr-4 lg:min-h-[104px] lg:min-w-0 lg:flex-1 lg:shrink lg:justify-center lg:gap-2 lg:rounded-[28px] lg:px-2 xl:px-3 text-left text-parchment shadow-warm transition hover:-translate-y-1`}
           >
-            <span className="text-4xl" aria-hidden>{ICONS[i % ICONS.length]}</span>
-            <span className="font-display text-4xl font-extrabold md:text-5xl">{cuisineLabel(c)}</span>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={cuisineImage(cuisineSlug(c))} alt="" className="h-24 w-24 rounded-2xl object-cover transition group-hover:rotate-6" />
+            <img src={cuisineImage(cuisineSlug(c))} alt="" className="absolute inset-0 -z-10 h-full w-full object-cover opacity-30 transition duration-500 group-hover:scale-110 group-hover:opacity-40" />
+            <span className="text-3xl md:text-4xl lg:hidden 2xl:block 2xl:text-2xl" aria-hidden>{ICONS[i % ICONS.length]}</span>
+            <span className="font-display text-3xl font-extrabold [text-shadow:0_1px_6px_rgba(60,0,15,.6)] md:text-5xl lg:whitespace-nowrap lg:text-[clamp(1.125rem,1.7vw,2rem)]">{cuisineLabel(c)}</span>
           </Link>
         ))}
       </div>

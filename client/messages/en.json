@@ -772,9 +772,9 @@
   },
   "address": {
     "find": "Find on map",
-    "notFound": "Could not find this address. Try a more specific one or drag the pin.",
-    "searchFailed": "Address search failed. Check your connection or drag the pin instead.",
-    "hint": "Type your address and press Find, or drag the pin to your exact spot."
+    "notFound": "Could not find this address. Try a more specific one or move the map under the pin.",
+    "searchFailed": "Address search failed. Check your connection or move the map under the pin instead.",
+    "hint": "Type your address and press Find, or drag the map to put the pin on your exact spot."
   },
   "auth": {
     "copy": {

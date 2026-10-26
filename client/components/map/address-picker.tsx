@@ -75,7 +75,7 @@ export function AddressPicker({
       <div className="mt-5">
         <p className="mb-3 font-display text-xl font-extrabold">{mapLabel}</p>
         <div className="overflow-hidden rounded-[22px] border-2 border-ink/15 [&>div]:!rounded-none [&>div]:!border-0">
-          <DynamicMapPicker lat={value.lat ?? startLat} lng={value.lng ?? startLng} onChange={handleMapChange} />
+          <DynamicMapPicker lat={value.lat ?? startLat} lng={value.lng ?? startLng} onChange={handleMapChange} pinFixed />
         </div>
         <p className="mt-2 text-ink/70">{t("hint")}</p>
       </div>

@@ -76,7 +76,7 @@ export function StorefrontContactSection({ title, restaurant, contact: saved, so
         {title}
         <Squiggle className="absolute -bottom-1 left-0 h-3 w-full text-[var(--accent,var(--brand-chili))]" />
       </h2>
-      <div className="mt-8 grid items-stretch gap-6 md:grid-cols-12">
+      <div className="mt-8 grid grid-cols-1 items-stretch gap-6 md:grid-cols-12">
         {hasMap && (
           <div className="relative aspect-square w-full md:order-2 md:col-span-5">
             {style === "street" ? <DynamicRestaurantLocationMap lat={latitude!} lng={longitude!} initial={name} km={km} /> : <CartoonMap initial={name} km={km} />}

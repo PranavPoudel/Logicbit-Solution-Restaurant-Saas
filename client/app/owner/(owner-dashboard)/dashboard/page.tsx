@@ -4,6 +4,7 @@
 import { ShoppingBag, Wallet, Clock, CheckCircle2, AlertCircle, Link as LinkIcon, Users } from "lucide-react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
+import { QueryError } from "@/components/ui/query-error";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { RevenueChart } from "@/components/dashboard/revenue-chart";
 import { PendingOrdersWidget } from "@/components/dashboard/pending-orders-widget";
@@ -125,6 +126,14 @@ export default function DashboardPage() {
           </p>
         </div>
       ) : null}
+
+      {(analyticsQuery.isError || ordersQuery.isError) && (
+        <QueryError
+          what="some dashboard data"
+          error={analyticsQuery.error ?? ordersQuery.error}
+          onRetry={() => { analyticsQuery.refetch(); ordersQuery.refetch(); }}
+        />
+      )}
 
       {/* Stat Cards Grid (Sakura Style with Color Variants & Real Data) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

@@ -11,7 +11,7 @@ export function CustomerFooter() {
   ];
 
   return (
-    <footer className="relative mt-auto overflow-hidden bg-ink px-5 pt-16 text-cream md:px-10">
+    <footer className="relative mt-auto overflow-hidden bg-footer px-5 pt-16 text-cream md:px-10 dark:text-ink">
       <div className="mx-auto grid max-w-[1440px] gap-10 md:grid-cols-4">
         <div className="md:col-span-2">
           <p className="font-display text-4xl font-bold leading-tight">
@@ -41,7 +41,7 @@ export function CustomerFooter() {
       <p className="font-display mx-auto mt-12 max-w-[1440px] select-none text-[24vw] font-extrabold leading-[0.75] tracking-[-0.06em] text-chili md:text-[300px]" aria-hidden>
         {theme.brand.name}
       </p>
-      <p className="mx-auto max-w-[1440px] py-6 text-sm text-cream/70">
+      <p className="mx-auto max-w-[1440px] py-6 text-sm text-cream/70 dark:text-ink/70">
         © {new Date().getFullYear()} {theme.brand.name} · {theme.content.contactEmail} · {theme.content.contactPhone}
       </p>
     </footer>

@@ -23,6 +23,7 @@ export const theme = {
     // Customer storefront palette (light mode)
     cream: "#FFF4E2",
     warmInk: "#2A120A",
+    footer: "#2A120A",
     paper: "#FFFFFF",
     chili: "#E0301E",
     chiliDeep: "#C92716",
@@ -47,6 +48,7 @@ export const theme = {
   night: {
     cream: "#1D0E08",
     warmInk: "#FFF1DC",
+    footer: "#593B12",
     paper: "#2E1810",
     chiliDeep: "#FF6A55",
     herbInk: "#7FD6A0",
@@ -173,6 +175,7 @@ export const themeCssVariables = {
   "--brand-open-text": theme.colors.openSoftText,
   "--brand-cream": theme.colors.cream,
   "--brand-warm-ink": theme.colors.warmInk,
+  "--brand-footer": theme.colors.footer,
   "--brand-paper": theme.colors.paper,
   "--brand-chili": theme.colors.chili,
   "--brand-chili-deep": theme.colors.chiliDeep,
@@ -192,6 +195,7 @@ export const themeCssVariables = {
   "--brand-map-road": theme.colors.mapRoad,
   "--night-cream": theme.night.cream,
   "--night-warm-ink": theme.night.warmInk,
+  "--night-footer": theme.night.footer,
   "--night-paper": theme.night.paper,
   "--night-chili-deep": theme.night.chiliDeep,
   "--night-herb-ink": theme.night.herbInk,
