@@ -8,6 +8,7 @@ export interface RestaurantDetail {
   coverImageUrl?: string;
   logoUrl?: string;
   avgRating?: number;
+  totalReviews?: number;
   cuisines?: CuisineLike[];
   latitude?: number;
   longitude?: number;
@@ -18,7 +19,17 @@ export interface RestaurantDetail {
   primaryColor?: string;
   secondaryColor?: string;
   phone?: string;
+  address?: string;
+  city?: string;
   refundPolicy?: string | null;
+  currencyCode?: string;
+  supportsCod?: boolean;
+  supportsEsewa?: boolean;
+  supportsKhalti?: boolean;
+  supportsCreditCard?: boolean;
+  supportsIps?: boolean;
+  supportsPhonePay?: boolean;
+  supportsPaypay?: boolean;
 }
 
 export interface MenuItem {
@@ -31,6 +42,10 @@ export interface MenuItem {
   isAvailable?: boolean;
   hasModifiers?: boolean;
   allergenInfo?: string;
+  isFeatured?: boolean;
+  isVegetarian?: boolean;
+  isVegan?: boolean;
+  spiceLevel?: string;
 }
 
 export interface ModifierOption {
@@ -60,5 +75,6 @@ export interface MenuItemDetail extends MenuItem {
 export interface MenuCategory {
   id: string;
   name?: string;
+  image?: string | null;
   items?: MenuItem[];
 }

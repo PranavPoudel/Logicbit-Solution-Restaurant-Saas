@@ -3,8 +3,10 @@
 
 import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Heart } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { favoritesApi } from "@/lib/api/customers";
+import { Icon, IconButton } from "@/components/ui/primitives";
+import { Empty } from "@/components/account/empty";
 
 interface FavoriteRow {
   id: string;
@@ -13,6 +15,8 @@ interface FavoriteRow {
 }
 
 export function FavoritesTab() {
+  const t = useTranslations("account");
+  const tr = useTranslations("restaurant");
   const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({
@@ -28,27 +32,21 @@ export function FavoritesTab() {
   const favorites = data ?? [];
 
   return (
-    <div className="animate-fade-up max-w-3xl pb-5 space-y-3">
+    <div className="animate-fade-up max-w-3xl space-y-3 pb-5">
       {isLoading ? (
-        <p className="text-sm text-neutral-400">Loading favorites…</p>
+        <p className="text-lg text-ink/70">{t("loadingFavorites")}</p>
       ) : favorites.length === 0 ? (
-        <p className="text-sm text-neutral-400">No favorite restaurants yet.</p>
+        <Empty>{t("noFavorites")}</Empty>
       ) : (
         favorites.map((fav) => (
-          <div
-            key={fav.id}
-            className="flex items-center justify-between bg-white border border-[#E8E7E2] rounded-xl p-4 md:p-5"
-          >
-            <Link href={`/restaurants/${fav.restaurant?.slug ?? fav.restaurantId}`} className="text-base font-medium text-[#17181C]">
-              {fav.restaurant?.name ?? "Restaurant"}
-              {fav.restaurant?.city && <span className="block text-sm font-normal text-neutral-400">{fav.restaurant.city}</span>}
+          <div key={fav.id} className="flex items-center justify-between gap-3 rounded-[24px] bg-paper p-4 shadow-soft md:p-5">
+            <Link href={`/restaurants/${fav.restaurant?.slug ?? fav.restaurantId}`} className="min-w-0 font-display text-xl font-extrabold hover:underline">
+              {fav.restaurant?.name ?? tr("fallbackName")}
+              {fav.restaurant?.city && (
+                <span className="flex items-center gap-1.5 font-sans text-base font-normal text-ink/70"><Icon name="pin" className="h-4 w-4" />{fav.restaurant.city}</span>
+              )}
             </Link>
-            <button
-              onClick={() => removeMutation.mutate(fav.restaurantId)}
-              aria-label="Remove from favorites"
-            >
-              <Heart size={16} className="fill-red-500 text-red-500" />
-            </button>
+            <IconButton icon="heart" label={t("removeFavorite")} onClick={() => removeMutation.mutate(fav.restaurantId)} className="bg-chili/10 text-chili [&_svg]:fill-current" />
           </div>
         ))
       )}

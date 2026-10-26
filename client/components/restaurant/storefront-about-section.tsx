@@ -1,93 +1,39 @@
-"use client";
+// components/restaurant/storefront-about-section.tsx
+import { Icon, Squiggle } from "@/components/ui/primitives";
+import { getFullImageUrl } from "@/lib/utils/image";
+import type { RestaurantDetail } from "@/types/menu";
 
-import { Phone, Mail, MapPin, Globe, Camera } from "lucide-react";
-
-interface StorefrontAboutSectionProps {
-  title: string;
-  aboutText?: string;
-  contact?: {
-    phone?: string;
-    email?: string;
-    address?: string;
-  };
-  socialLinks?: Record<string, string>;
-}
-
-export function StorefrontAboutSection({
-  title,
-  aboutText,
-  contact,
-  socialLinks,
-}: StorefrontAboutSectionProps) {
-  // Only render if there is actual content to show
-  if (!aboutText && !contact && !socialLinks) return null;
-
+export function StorefrontAboutSection({ title, aboutText, restaurant }: { title: string; aboutText?: string | null; restaurant: RestaurantDetail }) {
+  if (!aboutText) return null;
+  const rated = (restaurant.avgRating ?? 0) > 0;
   return (
-    <div className="max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12">
-      <h2 className="font-display text-2xl font-bold text-[#2B1410] mb-6">
+    <section aria-labelledby="about" className="mx-auto w-full max-w-[1440px] border-t border-ink/10 px-5 py-10 md:px-10">
+      <h2 id="about" className="relative inline-block font-display text-[32px] font-extrabold tracking-tight md:text-[40px]">
         {title}
+        <Squiggle className="absolute -bottom-1 left-0 h-3 w-full text-[var(--accent,var(--brand-chili))]" />
       </h2>
-      
-      <div className="bg-white border border-[#E8E7E2] rounded-2xl p-6 sm:p-8 space-y-6">
-        {/* About Text */}
-        {aboutText && (
-          <p className="text-[#2B1410]/80 leading-relaxed whitespace-pre-wrap">
-            {aboutText}
-          </p>
-        )}
-
-        {/* Contact Info */}
-        {(contact?.phone || contact?.email || contact?.address) && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-[#E8E7E2]">
-            {contact.phone && (
-              <div className="flex items-center gap-3 text-sm text-[#2B1410]/70">
-                <Phone size={16} className="text-[#E3A008]" />
-                <span>{contact.phone}</span>
-              </div>
-            )}
-            {contact.email && (
-              <div className="flex items-center gap-3 text-sm text-[#2B1410]/70">
-                <Mail size={16} className="text-[#E3A008]" />
-                <span>{contact.email}</span>
-              </div>
-            )}
-            {contact.address && (
-              <div className="flex items-center gap-3 text-sm text-[#2B1410]/70">
-                <MapPin size={16} className="text-[#E3A008]" />
-                <span>{contact.address}</span>
-              </div>
-            )}
+      <div className="shadow-warm relative mt-8 overflow-hidden rounded-[32px] bg-paper p-6 md:p-10">
+        <span aria-hidden className="pointer-events-none absolute right-6 top-2 select-none font-display text-[120px] font-extrabold leading-none text-[var(--accent,var(--brand-chili))] opacity-10 md:right-10 md:text-[140px]">”</span>
+        <div className="relative flex flex-col gap-6 md:flex-row md:items-start md:gap-10">
+          {restaurant.logoUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={getFullImageUrl(restaurant.logoUrl)} alt="" className="h-24 w-24 shrink-0 rounded-3xl border-4 border-cream object-cover shadow-soft md:h-32 md:w-32" />
+          )}
+          <div className="min-w-0 flex-1">
+            <p className="max-w-3xl whitespace-pre-wrap font-display text-2xl font-bold leading-snug md:text-3xl">{aboutText}</p>
+            <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-ink/10 pt-4">
+              <span className="font-bold">{restaurant.name}</span>
+              {rated && (
+                <span className="inline-flex items-center gap-1 font-bold text-ink/75">
+                  <Icon name="star" fill className="h-4 w-4 text-saffron" />{restaurant.avgRating!.toFixed(1)}
+                  {restaurant.totalReviews ? <span className="font-normal">({restaurant.totalReviews})</span> : null}
+                </span>
+              )}
+              {restaurant.city && <span className="inline-flex items-center gap-1 text-ink/75"><Icon name="pin" className="h-4 w-4" />{restaurant.city}</span>}
+            </div>
           </div>
-        )}
-
-        {/* Social Links */}
-        {(socialLinks?.facebook || socialLinks?.instagram) && (
-          <div className="flex items-center gap-4 pt-4 border-t border-[#E8E7E2]">
-            {socialLinks.facebook && (
-              <a
-                href={socialLinks.facebook}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[#2B1410]/50 hover:text-[#1877F2] transition-colors"
-                title="Facebook"
-              >
-                <Globe size={20} />
-              </a>
-            )}
-            {socialLinks.instagram && (
-              <a
-                href={socialLinks.instagram}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[#2B1410]/50 hover:text-[#E1306C] transition-colors"
-                title="Instagram"
-              >
-                <Camera size={20} />
-              </a>
-            )}
-          </div>
-        )}
+        </div>
       </div>
-    </div>
+    </section>
   );
 }

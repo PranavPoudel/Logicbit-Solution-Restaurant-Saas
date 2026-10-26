@@ -4,6 +4,7 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, Trash2 } from "lucide-react";
+import { QueryError } from "@/components/ui/query-error";
 import { useOwnerAuthStore } from "@/store/owner-auth-store";
 import { tablesApi } from "@/lib/api/tables";
 import { TablesList } from "@/components/owner-tables/tables-list";
@@ -65,6 +66,8 @@ export default function TablesPage() {
       {/* Content */}
       {tablesQuery.isLoading ? (
         <p className="text-sm text-neutral-400 py-8 text-center">Loading tables...</p>
+      ) : tablesQuery.isError ? (
+        <QueryError what="tables" error={tablesQuery.error} onRetry={() => tablesQuery.refetch()} />
       ) : activeTab === "TABLES" ? (
         <TablesList
           tables={tablesQuery.data ?? []}

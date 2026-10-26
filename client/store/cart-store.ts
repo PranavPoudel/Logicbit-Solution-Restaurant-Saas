@@ -20,6 +20,7 @@ export interface CartItem {
   quantity: number;
   selectedModifiers?: SelectedModifier[];
   notes?: string; // 🆕 ADDED: Per-item special instructions
+  image?: string;
   allergenInfo?: string;
   /** Distinguishes variants so they don't merge incorrectly */
   variantKey: string;

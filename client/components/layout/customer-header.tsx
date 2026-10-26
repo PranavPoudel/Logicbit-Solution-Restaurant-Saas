@@ -1,187 +1,147 @@
+// components/layout/customer-header.tsx
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter, usePathname } from "next/navigation";
-import { useTranslations } from "next-intl";
-import { ShoppingBag, Store, Search, User, LogOut, ChevronDown, X } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
 import { useCartStore } from "@/store/cart-store";
 import { useCustomerAuthStore } from "@/store/customer-auth-store";
-import { HeaderSearchPanel } from "@/components/layout/header-search-panel";
 import { useIsMounted } from "@/hooks/use-is-mounted";
-import { useEscapeKey } from "@/hooks/use-escape-key";
+import { useTranslations } from "next-intl";
+import { theme } from "@/config/theme";
+import { Button, Icon, IconButton } from "@/components/ui/primitives";
+import { LanguageSwitcherButton } from "@/components/ui/language-switcher-button";
+import { useCustomerTheme } from "@/components/layout/customer-shell";
+
+export function Logo() {
+  const t = useTranslations("header");
+  const [first, second] = theme.brand.name.split(/(?=[A-Z])/);
+  return (
+    <Link href="/" className="font-display flex min-h-11 items-center text-3xl font-extrabold tracking-tight" aria-label={t("home", { brand: theme.brand.name })}>
+      {first}<span className="text-chili">{second}</span>
+      <span className="text-saffron">.</span>
+    </Link>
+  );
+}
+
+const LINKS = [
+  { href: "/restaurants", key: "restaurants", icon: "store" },
+  { href: "/account?tab=orders", key: "myOrders", icon: "bag" },
+  { href: "/for-restaurants", key: "forRestaurants", icon: "flame" },
+] as const;
 
 export function CustomerHeader() {
   const t = useTranslations("header");
   const router = useRouter();
-  const itemCount = useCartStore((s) => s.itemCount());
+  const pathname = usePathname();
+  const mounted = useIsMounted();
+  const { dark, setDark } = useCustomerTheme();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const count = useCartStore((s) => s.itemCount());
   const customer = useCustomerAuthStore((s) => s.customer);
   const isAuthenticated = useCustomerAuthStore((s) => s.isAuthenticated);
   const logout = useCustomerAuthStore((s) => s.logout);
-
-  const mounted = useIsMounted();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  const pathname = usePathname();
-  const [searchOpenPath, setSearchOpenPath] = useState<string | null>(null);
-  const searchOpen = searchOpenPath === pathname;
-  const closeSearch = () => setSearchOpenPath(null);
-
+  const signedIn = mounted && isAuthenticated;
+  const firstName = customer?.name?.split(" ")[0] ?? t("account");
+  const closeMenu = () => setMenuOpen(false);
   useEffect(() => {
     if (!menuOpen) return;
-    const onClick = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
-    };
-    document.addEventListener("mousedown", onClick);
-    return () => document.removeEventListener("mousedown", onClick);
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setMenuOpen(false);
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
   }, [menuOpen]);
-
-  useEscapeKey(() => setMenuOpen(false), menuOpen);
-
-  const signedIn = mounted && isAuthenticated && !!customer;
-  const displayName = customer?.name || customer?.email || "";
-  const firstName = displayName.split(" ")[0];
-  const initial = (displayName.trim()[0] ?? "?").toUpperCase();
-
-  function handleLogout() {
-    setMenuOpen(false);
+  const signOut = () => {
+    closeMenu();
     logout();
     router.push("/");
-  }
+  };
 
   return (
-    <header className="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-brand-dark/8 shadow-sm">
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 h-[72px] flex items-center justify-between gap-4">
-        <Link href="/" className="flex items-center gap-2.5 shrink-0">
-          <div className="w-8 h-8 rounded-full bg-brand-primary flex items-center justify-center">
-            <span className="font-serif font-bold text-brand-background text-sm">L</span>
-          </div>
-          <span className="font-serif text-lg font-semibold text-brand-dark tracking-tight">
-            {t("brandName")}
-          </span>
-        </Link>
-
-        <div className="flex items-center gap-4 lg:gap-7 shrink-0">
-          <button
-            type="button"
-            onClick={() => setSearchOpenPath(searchOpen ? null : pathname)}
-            aria-label="Search"
-            aria-expanded={searchOpen}
-            className={`w-10 h-10 rounded-full border border-brand-dark/10 flex items-center justify-center text-brand-dark hover:bg-brand-dark/5 transition-colors ${searchOpen ? "bg-brand-dark/8" : ""}`}
-          >
-            <span className="relative block w-4 h-4">
-              <Search
-                size={16}
-                className={`absolute inset-0 transition-all duration-300 ${
-                  searchOpen ? "opacity-0 rotate-90 scale-50" : "opacity-100 rotate-0 scale-100"
-                }`}
-              />
-              <X
-                size={16}
-                className={`absolute inset-0 transition-all duration-300 ${
-                  searchOpen ? "opacity-100 rotate-0 scale-100" : "opacity-0 -rotate-90 scale-50"
-                }`}
-              />
-            </span>
-          </button>
-
-          <Link
-            href="/for-restaurants"
-            className="hidden md:flex items-center gap-1.5 text-sm font-medium text-brand-dark hover:text-brand-primary transition-colors"
-          >
-            <Store size={16} />
-            <span>{t("forRestaurants")}</span>
+    <header className="relative z-30 mx-auto flex w-full max-w-[1440px] items-center justify-between gap-3 px-5 py-4 md:px-10">
+      <Logo />
+      <nav className="hidden items-center gap-5 whitespace-nowrap font-medium md:flex lg:gap-8" aria-label={t("main")}>
+        {LINKS.map((l) => (
+          <Link key={l.href} href={l.href} className={`hover:text-chili ${!l.href.includes("?") && pathname.endsWith(l.href) ? "text-chili" : ""}`}>
+            {t(l.key)}
           </Link>
-
-          {!mounted && <div className="w-24 h-9" aria-hidden />}
-
-          {mounted && !signedIn && (
-            <>
-              <Link
-                href="/login"
-                className="hidden sm:inline-flex text-base font-medium text-brand-dark hover:text-brand-primary transition-colors px-3"
-              >
-                Log in
-              </Link>
-              <Link
-                href="/signup"
-                className="text-base font-medium px-6 py-2.5 rounded-full border border-brand-dark/20 text-brand-dark hover:bg-brand-dark/5 transition-colors"
-              >
-                Sign up
-              </Link>
-            </>
-          )}
-
-          {signedIn && (
-            <div className="relative" ref={menuRef}>
-              <button
-                type="button"
-                onClick={() => setMenuOpen((o) => !o)}
-                aria-haspopup="menu"
-                aria-expanded={menuOpen}
-                className="flex items-center gap-2 rounded-full border border-brand-dark/10 pl-1 pr-2.5 py-1 hover:bg-brand-dark/5 transition-colors"
-              >
-                <span className="w-7 h-7 rounded-full bg-brand-primary text-brand-background text-xs font-bold flex items-center justify-center">
-                  {initial}
-                </span>
-                <span className="hidden sm:inline text-sm font-medium text-brand-dark max-w-[96px] truncate">
-                  {firstName}
-                </span>
-                <ChevronDown size={14} className={`text-brand-dark/60 transition-transform ${menuOpen ? "rotate-180" : ""}`} />
-              </button>
-
-              {menuOpen && (
-                <div
-                  role="menu"
-                  className="absolute right-0 mt-2 w-56 rounded-xl border border-brand-dark/10 bg-white shadow-lg py-1.5 z-40"
-                >
-                  <div className="px-3.5 py-2 border-b border-brand-dark/8">
-                    <p className="text-sm font-semibold text-brand-dark truncate">{displayName}</p>
-                    {customer?.email && (
-                      <p className="text-xs text-brand-dark/50 truncate">{customer.email}</p>
-                    )}
-                  </div>
-                  <Link
-                    href="/account"
-                    role="menuitem"
-                    onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-2.5 px-3.5 py-2 text-sm text-brand-dark hover:bg-brand-dark/5"
-                  >
-                    <User size={15} /> My account
-                  </Link>
-                  <button
-                    type="button"
-                    role="menuitem"
-                    onClick={handleLogout}
-                    className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-red-600 hover:bg-red-50 border-t border-brand-dark/8 mt-1.5"
-                  >
-                    <LogOut size={15} /> Log out
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-
-          {signedIn && (
-            <Link
-              href="/cart"
-              className="relative flex items-center gap-2 bg-brand-dark text-brand-background text-sm font-medium px-4 py-2 rounded-full hover:bg-brand-dark-hover transition-colors"
-            >
-              <ShoppingBag size={16} />
-              <span className="hidden sm:inline">{t("cart")}</span>
-
-              {mounted && itemCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-brand-primary text-brand-background text-[11px] font-mono font-bold flex items-center justify-center">
-                  {itemCount}
-                </span>
-              )}
+        ))}
+      </nav>
+      <div className="flex items-center gap-2">
+        <LanguageSwitcherButton className="hidden md:flex" />
+        <IconButton
+          icon={dark ? "sun" : "moon"}
+          label={dark ? t("switchToLight") : t("switchToDark")}
+          onClick={() => setDark(!dark)}
+          className="border-2 border-ink/20 hover:border-ink"
+        />
+        {signedIn ? (
+          <>
+            <Link href="/account" className="hidden min-h-11 items-center gap-2 rounded-full border-2 border-ink/20 px-4 font-bold hover:border-ink md:flex">
+              <Icon name="user" className="h-5 w-5" />
+              <span className="hidden lg:inline">{firstName}</span>
             </Link>
-          )}
-        </div>
+            <IconButton icon="logout" label={t("logOut")} onClick={signOut} className="hidden border-2 border-ink/20 hover:border-ink md:grid" />
+          </>
+        ) : (
+          <Link href="/login" className="hidden min-h-11 items-center gap-2 rounded-full border-2 border-ink/20 px-4 font-bold hover:border-ink md:flex">
+            <Icon name="user" className="h-5 w-5" />
+            <span className="hidden lg:inline">{t("logIn")}</span>
+          </Link>
+        )}
+        <Button
+          variant="ink"
+          onClick={() => {
+            closeMenu();
+            router.push("/cart");
+          }} aria-label={t("cartCount", { count: mounted ? count : 0 })}>
+          <Icon name="bag" />
+          {mounted ? count : 0}
+        </Button>
+        <IconButton
+          icon={menuOpen ? "x" : "menu"}
+          label={menuOpen ? t("closeMenu") : t("openMenu")}
+          aria-expanded={menuOpen}
+          aria-controls="mobile-menu"
+          onClick={() => setMenuOpen(!menuOpen)}
+          className="border-2 border-ink/20 hover:border-ink md:hidden"
+        />
       </div>
 
-      <HeaderSearchPanel open={searchOpen} onClose={closeSearch} />
+      {menuOpen && (
+        <nav id="mobile-menu" aria-label={t("menu")} className="animate-fade-up absolute inset-x-4 top-full rounded-[28px] bg-paper p-3 shadow-warm md:hidden">
+          <ul className="space-y-1">
+            {LINKS.map((l) => (
+              <li key={l.href}>
+                <Link href={l.href} onClick={closeMenu} className="flex min-h-12 items-center gap-3 rounded-full px-4 text-lg font-bold hover:bg-ink/10">
+                  <Icon name={l.icon} className="h-5 w-5 text-chili" />
+                  {t(l.key)}
+                </Link>
+              </li>
+            ))}
+            <li>
+              {signedIn ? (
+                <Link href="/account" onClick={closeMenu} className="flex min-h-12 items-center gap-3 rounded-full px-4 text-lg font-bold hover:bg-ink/10">
+                  <Icon name="user" className="h-5 w-5 text-chili" />
+                  {t("accountOf", { name: firstName })}
+                </Link>
+              ) : (
+                <Link href="/login" onClick={closeMenu} className="flex min-h-12 items-center gap-3 rounded-full px-4 text-lg font-bold hover:bg-ink/10">
+                  <Icon name="user" className="h-5 w-5 text-chili" />
+                  {t("logIn")}
+                </Link>
+              )}
+            </li>
+          </ul>
+          <div className="mt-2 flex gap-2 border-t-2 border-ink/10 pt-3">
+            <LanguageSwitcherButton className="flex flex-1" />
+            {signedIn && (
+              <Button variant="outline" onClick={signOut} className="flex-1">
+                <Icon name="logout" className="h-5 w-5" />{t("logOut")}
+              </Button>
+            )}
+          </div>
+        </nav>
+      )}
     </header>
   );
 }

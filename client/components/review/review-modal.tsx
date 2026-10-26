@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Star, X, Loader2 } from "lucide-react";
 import { createReview, type CreateReviewInput } from "@/lib/api/reviews";
 
@@ -13,6 +14,7 @@ interface ReviewModalProps {
 }
 
 export function ReviewModal({ orderId, restaurantId, isOpen, onClose, onSuccess }: ReviewModalProps) {
+  const t = useTranslations("review");
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [comment, setComment] = useState("");
@@ -24,7 +26,7 @@ export function ReviewModal({ orderId, restaurantId, isOpen, onClose, onSuccess 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (rating === 0) {
-      setError("Please select a star rating.");
+      setError(t("errStars"));
       return;
     }
 
@@ -42,7 +44,7 @@ export function ReviewModal({ orderId, restaurantId, isOpen, onClose, onSuccess 
       await createReview(payload);
       onSuccess(); // Close modal and refresh parent UI
     } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to submit review. Please try again.");
+      setError(err.response?.data?.message || t("errFailed"));
     } finally {
       setIsSubmitting(false);
     }
@@ -53,7 +55,7 @@ export function ReviewModal({ orderId, restaurantId, isOpen, onClose, onSuccess 
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-100">
-          <h2 className="text-lg font-semibold text-[#17181C] font-display">Rate your order</h2>
+          <h2 className="text-lg font-semibold text-[#17181C] font-display">{t("title")}</h2>
           <button onClick={onClose} className="text-neutral-400 hover:text-neutral-600 transition-colors">
             <X size={20} />
           </button>
@@ -62,7 +64,7 @@ export function ReviewModal({ orderId, restaurantId, isOpen, onClose, onSuccess 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           <div className="text-center space-y-2">
-            <p className="text-sm text-neutral-500">How was your experience?</p>
+            <p className="text-sm text-neutral-500">{t("ask")}</p>
             
             {/* Star Rating Input */}
             <div className="flex items-center justify-center gap-2">
@@ -88,11 +90,11 @@ export function ReviewModal({ orderId, restaurantId, isOpen, onClose, onSuccess 
             </div>
             {rating > 0 && (
               <p className="text-xs font-medium text-[#E3A008]">
-                {rating === 1 && "Poor"}
-                {rating === 2 && "Fair"}
-                {rating === 3 && "Good"}
-                {rating === 4 && "Very Good"}
-                {rating === 5 && "Excellent!"}
+                {rating === 1 && t("r1")}
+                {rating === 2 && t("r2")}
+                {rating === 3 && t("r3")}
+                {rating === 4 && t("r4")}
+                {rating === 5 && t("r5")}
               </p>
             )}
           </div>
@@ -100,14 +102,14 @@ export function ReviewModal({ orderId, restaurantId, isOpen, onClose, onSuccess 
           {/* Comment Input */}
           <div>
             <label className="block text-sm font-medium text-[#17181C] mb-1.5">
-              Leave a comment (optional)
+              {t("commentLabel")}
             </label>
             <textarea
               rows={3}
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               className="w-full px-3 py-2.5 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-[#0F6B5C]/40 focus:border-[#0F6B5C] outline-none resize-none text-sm"
-              placeholder="Tell us what you loved (or didn't) about the food and delivery..."
+              placeholder={t("placeholder")}
             />
           </div>
 
@@ -123,7 +125,7 @@ export function ReviewModal({ orderId, restaurantId, isOpen, onClose, onSuccess 
               disabled={isSubmitting}
               className="flex-1 px-4 py-2.5 text-sm font-medium text-neutral-600 bg-neutral-100 hover:bg-neutral-200 rounded-xl transition-colors disabled:opacity-50"
             >
-              Skip for now
+              {t("skip")}
             </button>
             <button
               type="submit"
@@ -133,10 +135,10 @@ export function ReviewModal({ orderId, restaurantId, isOpen, onClose, onSuccess 
               {isSubmitting ? (
                 <>
                   <Loader2 size={16} className="animate-spin" />
-                  Submitting...
+                  {t("submitting")}
                 </>
               ) : (
-                "Submit Review"
+                t("submit")
               )}
             </button>
           </div>

@@ -70,7 +70,7 @@ export function ReservationFormModal({
                 <input
                   value={formData.customerPhone}
                   onChange={(e) => setFormData({ ...formData, customerPhone: e.target.value })}
-                  placeholder="+977 98XXXXXXXX"
+                  placeholder="Phone number"
                   className="w-full border border-neutral-200 rounded-lg pl-10 pr-3 py-2 text-sm focus:ring-2 focus:ring-[#E3A008]/20 focus:border-[#E3A008] outline-none"
                 />
               </div>

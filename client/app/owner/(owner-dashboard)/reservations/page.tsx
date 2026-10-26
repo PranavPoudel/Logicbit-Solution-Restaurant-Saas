@@ -4,6 +4,7 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, Trash2, Calendar } from "lucide-react";
+import { QueryError } from "@/components/ui/query-error";
 import { useOwnerAuthStore } from "@/store/owner-auth-store";
 import { reservationsApi } from "@/lib/api/reservations";
 import { ReservationList } from "@/components/owner-reservations/reservation-list";
@@ -86,6 +87,8 @@ export default function ReservationsPage() {
       {/* Content */}
       {reservationsQuery.isLoading ? (
         <p className="text-sm text-neutral-400 py-8 text-center">Loading reservations...</p>
+      ) : reservationsQuery.isError ? (
+        <QueryError what="reservations" error={reservationsQuery.error} onRetry={() => reservationsQuery.refetch()} />
       ) : activeTab === "TRASH" ? (
         <ReservationTrashBin
           reservations={reservationsQuery.data ?? []}

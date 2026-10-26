@@ -20,6 +20,8 @@ export interface DiscoveryRestaurant {
   avgRating?: number;
   cuisines?: CuisineLike[];
   address?: string;
+  city?: string;
+  logoUrl?: string | null;
   phone?: string;
   distanceKm?: number;
   isOpen?: boolean;
