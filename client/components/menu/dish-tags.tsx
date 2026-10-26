@@ -31,12 +31,14 @@ export function DishTags({ item }: { item: MenuItem }) {
   const t = useTranslations("dish");
   const tm = useTranslations("menu");
   const veg = item.isVegan || item.isVegetarian;
-  const spicy = spiceOf(item).level > 0;
-  if (!veg && !spicy && !item.hasModifiers && !item.allergenInfo) return null;
   return (
-    <div className="mt-3">
+    <div className="mt-3 pb-4">
       <div className="flex flex-wrap gap-2">
-        {veg && <Badge tone="herb"><Icon name="leaf" className="h-4 w-4" />{item.isVegan ? t("vegan") : t("vegetarian")}</Badge>}
+        {veg ? (
+          <Badge tone="herb"><Icon name="leaf" className="h-4 w-4" />{item.isVegan ? t("vegan") : t("vegetarian")}</Badge>
+        ) : (
+          <Badge tone="soft"><span className="h-2 w-2 rounded-full bg-chili" aria-hidden />{tm("nonVeg")}</Badge>
+        )}
         <SpiceBadge item={item} />
         {item.hasModifiers && <Badge tone="soft"><Icon name="plus" className="h-4 w-4" />{tm("customisable")}</Badge>}
       </div>

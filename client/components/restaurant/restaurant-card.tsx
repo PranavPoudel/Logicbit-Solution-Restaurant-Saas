@@ -23,6 +23,7 @@ export function RestaurantCard({ r, index, compact }: { r: DiscoveryRestaurant; 
   const tint = TINTS[index % TINTS.length];
   const open = r.isOpen !== false;
   const rating = r.avgRating ?? 0;
+  const hasOrders = (r.totalOrders ?? 0) > 0;
   const name = r.name ?? t("fallbackName");
   const href = `/restaurants/${r.slug ?? r.id}`;
 
@@ -50,7 +51,7 @@ export function RestaurantCard({ r, index, compact }: { r: DiscoveryRestaurant; 
 
       {r.isSponsored && <span className="absolute -left-3 top-6 z-10 -rotate-12 rounded-xl bg-ink px-3 py-1 font-display text-base font-extrabold text-cream shadow-hard">{t("sponsored")}</span>}
       <div className={`${tint.bg} ${tint.text} absolute -right-4 -top-5 z-10 grid h-20 w-20 rotate-12 place-items-center rounded-full border-4 border-paper font-display text-2xl font-extrabold shadow-hard`}>
-        {rating > 0 ? `★${rating.toFixed(1)}` : t("new")}
+        {hasOrders || rating > 0 ? `★${rating.toFixed(1)}` : t("new")}
       </div>
 
       <div className={`px-2 pt-4 ${open ? "" : "opacity-75"}`}>

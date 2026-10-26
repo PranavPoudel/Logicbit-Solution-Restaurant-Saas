@@ -77,7 +77,17 @@ export class DiscoveryService {
       LIMIT 200;
     `;
 
-    const maxOrdersInArea = Math.max(1, ...rows.map((r) => r.totalOrders ?? 0));
+    const orderCounts = await this.prisma.order.groupBy({
+      by: ['restaurantId'],
+      where: { restaurantId: { in: rows.map((r) => r.id) }, status: { not: 'CANCELLED' } },
+      _count: { _all: true },
+    });
+    const orderCountById = new Map(orderCounts.map((o) => [o.restaurantId, o._count._all]));
+    rows.forEach((r) => {
+      r.totalOrders = orderCountById.get(r.id) ?? 0;
+    });
+
+    const maxOrdersInArea = Math.max(1, ...rows.map((r) => r.totalOrders));
     const sponsoredIds = await this.advertisementService.getSearchBoostedRestaurantIds();
 
     // Sponsored (SEARCH_BOOST ad किनेका) restaurant लाई ranking score मा
@@ -273,7 +283,7 @@ export class DiscoveryService {
       name: true,
       price: true,
       image: true,
-      restaurant: { select: { id: true, name: true, slug: true } },
+      restaurant: { select: { id: true, name: true, slug: true, currencyCode: true } },
     };
 
     const top = await this.prisma.orderItem.groupBy({

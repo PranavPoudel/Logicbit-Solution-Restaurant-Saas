@@ -20,7 +20,7 @@ const pin = (initial: string) =>
     className: "",
     iconSize: [48, 56],
     iconAnchor: [24, 52],
-    html: `<span class="relative grid h-12 w-12 -rotate-45 place-items-center rounded-full rounded-bl-none border-4 border-white bg-[var(--accent,var(--brand-chili))] shadow-lg"><span class="rotate-45 font-display text-lg font-extrabold text-[var(--accent-ink,var(--brand-parchment))]">${initial}</span></span>`,
+    html: `<span class="relative grid h-12 w-12 -rotate-45 place-items-center rounded-full rounded-bl-none border-4 border-white bg-[var(--accent,var(--brand-chili))] shadow-lg"><span class="rotate-45 font-display text-lg font-extrabold text-[var(--accent-ink,var(--brand-parchment))]">${initial.replace(/[&<>"']/g, "•")}</span></span>`,
   });
 
 function WheelZoom({ active }: { active: boolean }) {
@@ -38,7 +38,7 @@ export function RestaurantLocationMap({ lat, lng, initial = "•", km }: Restaur
   if (!lat || !lng) return null;
 
   return (
-    <div className="relative isolate h-full min-h-[260px] overflow-hidden rounded-[32px] rounded-tl-[120px] md:min-h-[380px]" onMouseLeave={() => setActive(false)}>
+    <div className="relative isolate h-full min-h-[260px] overflow-hidden rounded-[32px]" onMouseLeave={() => setActive(false)}>
       <MapContainer center={[lat, lng]} zoom={15} scrollWheelZoom={false} style={{ height: "100%", width: "100%", position: "absolute", inset: 0 }}>
         <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         <Marker position={[lat, lng]} icon={pin(initial.charAt(0).toUpperCase())} />

@@ -3,11 +3,13 @@
 
 import { useTranslations } from "next-intl";
 import { getFullImageUrl, getItemImage } from "@/lib/utils/image";
-import { money } from "@/lib/utils/money";
+import { useMoney } from "@/hooks/use-money";
 import type { MenuCategory, MenuItem } from "@/types/menu";
 import { Icon } from "@/components/ui/primitives";
+import { DishTags } from "@/components/menu/dish-tags";
 
 export function SignatureDishes({ items, onOpen }: { items: MenuItem[]; onOpen: (id: string) => void }) {
+  const money = useMoney();
   const t = useTranslations("menu");
   if (items.length === 0) return null;
   return (
@@ -26,6 +28,7 @@ export function SignatureDishes({ items, onOpen }: { items: MenuItem[]; onOpen: 
               )}
               <h3 className="mt-4 font-display text-[28px] font-extrabold leading-tight">{name}</h3>
               {d.description && <p className="mt-1 line-clamp-1 text-ink/80">{d.description}</p>}
+              <DishTags item={d} />
               <button type="button" onClick={() => onOpen(d.id)} aria-label={t("add", { name })} className="shadow-red mt-4 flex h-12 items-center justify-center gap-2 self-start rounded-full bg-[var(--accent,var(--brand-chili))] px-6 font-bold text-[var(--accent-ink,var(--brand-parchment))] transition hover:-translate-y-0.5">
                 <Icon name="plus" className="h-5 w-5" />{t("addPrice", { price: money(d.price ?? 0) })}
               </button>

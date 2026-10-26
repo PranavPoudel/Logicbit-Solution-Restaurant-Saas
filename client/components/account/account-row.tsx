@@ -1,18 +1,19 @@
 // components/account/account-row.tsx
 import Link from "next/link";
 import { Badge } from "@/components/ui/primitives";
-import { money } from "@/lib/utils/money";
+import { formatMoney } from "@/lib/utils/money";
 
 interface AccountRowProps {
   href: string;
   title: string;
   subtitle: string;
   amount: number;
+  currency?: string;
   badge: { label: string; tone: "ink" | "herb" | "chili" | "saffron" | "soft" };
   index: number;
 }
 
-export function AccountRow({ href, title, subtitle, amount, badge, index }: AccountRowProps) {
+export function AccountRow({ href, title, subtitle, amount, currency, badge, index }: AccountRowProps) {
   return (
     <Link
       href={href}
@@ -24,7 +25,7 @@ export function AccountRow({ href, title, subtitle, amount, badge, index }: Acco
         <p className="mt-0.5 text-ink/70">{subtitle}</p>
       </div>
       <div className="flex shrink-0 flex-col items-end gap-1.5">
-        <p className="font-display text-2xl font-extrabold">{money(amount)}</p>
+        <p className="font-display text-2xl font-extrabold">{formatMoney(amount, currency)}</p>
         <Badge tone={badge.tone}>{badge.label}</Badge>
       </div>
     </Link>

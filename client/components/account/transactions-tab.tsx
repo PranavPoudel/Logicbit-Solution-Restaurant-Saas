@@ -8,12 +8,12 @@ import { listMyOrders } from "@/lib/api/orders";
 import { AccountRow } from "@/components/account/account-row";
 import { FilterChips } from "@/components/account/filter-chips";
 import { Empty } from "@/components/account/empty";
-import { money } from "@/lib/utils/money";
+import { formatMoney } from "@/lib/utils/money";
 
 interface TransactionRow {
   id: string;
   orderNumber?: string;
-  restaurant?: { name?: string };
+  restaurant?: { name?: string; currencyCode?: string };
   status?: string;
   total?: number;
   paymentMethod?: string;
@@ -52,6 +52,7 @@ export function TransactionsTab() {
   const totalRefunded = rows
     .filter((r) => r.state.key === "refunded")
     .reduce((sum, r) => sum + (r.row.refund?.amount ?? r.row.total ?? 0), 0);
+  const currency = rows[0]?.row.restaurant?.currencyCode;
   const visible = filter === "all" ? rows : rows.filter((r) => r.state.key === filter);
 
   return (
@@ -59,11 +60,11 @@ export function TransactionsTab() {
       <div className="grid grid-cols-2 gap-3">
         <div className="rounded-[24px] bg-herb p-4 text-parchment shadow-soft md:p-5">
           <p className="font-bold opacity-90">{t("totalPaid")}</p>
-          <p className="mt-1 font-display text-3xl font-extrabold">{money(totalPaid)}</p>
+          <p className="mt-1 font-display text-3xl font-extrabold">{formatMoney(totalPaid, currency)}</p>
         </div>
         <div className="rounded-[24px] bg-saffron p-4 text-espresso shadow-soft md:p-5">
           <p className="font-bold">{t("totalRefunded")}</p>
-          <p className="mt-1 font-display text-3xl font-extrabold">{money(totalRefunded)}</p>
+          <p className="mt-1 font-display text-3xl font-extrabold">{formatMoney(totalRefunded, currency)}</p>
         </div>
       </div>
 
@@ -82,6 +83,7 @@ export function TransactionsTab() {
               title={row.restaurant?.name ?? t("orderFallback")}
               subtitle={`${t.has(`methods.${row.paymentMethod}`) ? t(`methods.${row.paymentMethod}`) : row.paymentMethod ?? "—"}${row.createdAt ? ` · ${new Date(row.createdAt).toLocaleDateString(locale)}` : ""}`}
               amount={row.total ?? 0}
+              currency={row.restaurant?.currencyCode}
               badge={{ label: t(STATE_LABEL[state.key as keyof typeof STATE_LABEL]), tone: state.tone }}
               index={i}
             />

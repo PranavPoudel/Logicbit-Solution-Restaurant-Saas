@@ -13,7 +13,7 @@ import { Empty } from "@/components/account/empty";
 interface OrderRow {
   id: string;
   orderNumber?: string;
-  restaurant?: { name?: string };
+  restaurant?: { name?: string; currencyCode?: string };
   status?: string;
   total?: number;
   createdAt?: string;
@@ -75,6 +75,7 @@ export function OrderHistoryTab() {
                 .filter(Boolean)
                 .join(" · ")}
               amount={order.total ?? 0}
+              currency={order.restaurant?.currencyCode}
               badge={{ label: statusLabel(order.status), tone: TONES[getCategory(order.status)] }}
               index={i}
             />

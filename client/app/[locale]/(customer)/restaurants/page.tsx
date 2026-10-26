@@ -3,12 +3,14 @@
 import { use, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Pager } from "@/components/ui/pager";
-import { CITIES, CitiesNearMe } from "@/components/home/cities-near-me";
+import { CitiesNearMe } from "@/components/home/cities-near-me";
+import { listCities } from "@/lib/api/cities";
+import { cityLabel, countCities, liveCities, sameCity } from "@/lib/utils/cities";
 import { RestaurantCard } from "@/components/restaurant/restaurant-card";
 import { RestaurantCardSkeleton } from "@/components/restaurant/restaurant-card-skeleton";
-import { Button, Chip, Icon, IconButton, Marquee, Squiggle } from "@/components/ui/primitives";
+import { Button, Chip, Icon, IconButton } from "@/components/ui/primitives";
 import { getAllNearby } from "@/lib/api/discovery";
 import { cuisineImage, cuisineSlug, matchesQuery } from "@/lib/utils/cuisine";
 import { listCuisines } from "@/lib/api/cuisines";
@@ -80,11 +82,17 @@ function SortSelect({ value, onChange, id }: { value: Sort; onChange: (s: Sort) 
   );
 }
 
-export default function RestaurantsPage({ searchParams }: { searchParams: Promise<{ q?: string; cuisine?: string; city?: string }> }) {
-  const t = useTranslations("restaurants");
-  const tc = useTranslations("cities");
-  const cuisineLabel = useCuisineLabel();
+type Params = { q?: string; cuisine?: string; city?: string };
+
+export default function RestaurantsPage({ searchParams }: { searchParams: Promise<Params> }) {
   const params = use(searchParams);
+  return <RestaurantsView key={`${params.q ?? ""}|${params.cuisine ?? ""}|${params.city ?? ""}`} params={params} />;
+}
+
+function RestaurantsView({ params }: { params: Params }) {
+  const t = useTranslations("restaurants");
+  const locale = useLocale();
+  const cuisineLabel = useCuisineLabel();
   const { lat, lng, isResolved } = useGeolocation();
   const [cuisine, setCuisine] = useState(params.cuisine ?? "all");
   const [city, setCity] = useState(params.city ?? "");
@@ -96,6 +104,7 @@ export default function RestaurantsPage({ searchParams }: { searchParams: Promis
   const listTop = useRef<HTMLElement>(null);
 
   const cuisinesQuery = useQuery({ queryKey: ["cuisines"], queryFn: listCuisines });
+  const citiesQuery = useQuery({ queryKey: ["cities"], queryFn: listCities });
   const restaurantsQuery = useQuery({
     queryKey: ["nearby-restaurants", lat, lng, "all"],
     queryFn: () => getAllNearby(lat, lng),
@@ -105,16 +114,18 @@ export default function RestaurantsPage({ searchParams }: { searchParams: Promis
   const rows = useMemo(() => restaurantsQuery.data?.rows ?? [], [restaurantsQuery.data]);
   const capped = (restaurantsQuery.data?.total ?? 0) > rows.length;
   const cuisines = cuisinesQuery.data ?? [];
+  const cities = useMemo(() => citiesQuery.data ?? [], [citiesQuery.data]);
 
   const list = useMemo(() => {
     const needle = q.trim().toLowerCase();
+    const selected = cities.find((c) => sameCity(c, city)) ?? { name: city };
     return rows
       .filter((r) => cuisine === "all" || (r.cuisines ?? []).some((c) => cuisineSlug(c) === cuisine))
-      .filter((r) => !city || r.city === city)
+      .filter((r) => !city || sameCity(selected, r.city))
       .filter((r) => quick.every((f) => pass[f](r)))
       .filter((r) => matchesQuery(r, needle))
       .sort(sorters[sort]);
-  }, [rows, cuisine, city, quick, q, sort]);
+  }, [rows, cities, cuisine, city, quick, q, sort]);
 
   const filterKey = JSON.stringify([cuisine, city, quick, q, sort]);
   const [lastFilterKey, setLastFilterKey] = useState(filterKey);
@@ -129,15 +140,11 @@ export default function RestaurantsPage({ searchParams }: { searchParams: Promis
     listTop.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  const cityCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    rows.forEach((r) => {
-      if (r.city) counts[r.city] = (counts[r.city] ?? 0) + 1;
-    });
-    return counts;
-  }, [rows]);
-
-  const cityLabel = (name: string) => (tc.has(`names.${name}`) ? tc(`names.${name}`) : name);
+  const cityCounts = useMemo(() => countCities(rows), [rows]);
+  const labelFor = (name: string) => {
+    const c = cities.find((x) => sameCity(x, name));
+    return c ? cityLabel(c, locale) : name;
+  };
   const loading = !isResolved || restaurantsQuery.isLoading;
   const active = quick.length + (cuisine !== "all" ? 1 : 0) + (city ? 1 : 0);
   const clear = () => {
@@ -147,25 +154,20 @@ export default function RestaurantsPage({ searchParams }: { searchParams: Promis
     setQ("");
   };
   const toggle = (f: Quick) => setQuick((x) => (x.includes(f) ? x.filter((i) => i !== f) : [...x, f]));
-  const openCount = rows.filter((r) => r.isOpen !== false).length;
+  const openCount = list.filter((r) => r.isOpen !== false).length;
   const cuisineOptions = [{ id: "all", name: t("allCuisines"), slug: "all" }, ...cuisines.map((c) => ({ id: c.id, name: cuisineLabel(c), slug: c.slug ?? cuisineSlug(c.name) }))];
   const bold = (chunks: React.ReactNode) => <b>{chunks}</b>;
 
   return (
     <div>
       <header className="relative mx-auto w-full max-w-[1440px] overflow-hidden px-5 pb-8 md:px-10">
-        <div className="blob absolute -right-32 -top-40 h-[420px] w-[420px] bg-saffron/70 md:h-[560px] md:w-[560px]" aria-hidden />
         <div className="relative">
           <Link href="/" className="flex min-h-11 items-center gap-1 font-bold"><Icon name="back" />{t("backHome")}</Link>
           <h1 className="mt-4 font-display text-[48px] font-extrabold leading-[0.95] tracking-tight md:text-[96px]">
-            {t("titleStart")}{" "}
-            <span className="relative inline-block">
-              {t("titleAccent")}
-              <Squiggle className="absolute -bottom-2 left-0 h-4 w-full text-chili md:-bottom-3 md:h-6" />
-            </span>
+            {t("titleStart")}<span className="text-chili">.</span>
           </h1>
           <p className="mt-6 text-lg text-ink/80">
-            {city ? t.rich("summaryCity", { b: bold, count: rows.length, city: cityLabel(city), open: openCount }) : t.rich("summary", { b: bold, count: rows.length, open: openCount })}
+            {city ? t.rich("summaryCity", { b: bold, count: list.length, city: labelFor(city), open: openCount }) : t.rich("summary", { b: bold, count: list.length, open: openCount })}
           </p>
           <form onSubmit={(e) => e.preventDefault()} className="shadow-warm mt-4 flex max-w-3xl items-center gap-2 rounded-full border-[3px] border-ink bg-paper p-1.5">
             <Icon name="search" className="ml-3 h-6 w-6 shrink-0 text-ink/60" />
@@ -243,8 +245,7 @@ export default function RestaurantsPage({ searchParams }: { searchParams: Promis
         {!loading && <div className="mt-14"><Pager page={page} pageCount={pageCount} onChange={changePage} /></div>}
       </section>
 
-      <div className="py-6"><Marquee /></div>
-      <div className="mt-12"><CitiesNearMe counts={cityCounts} selected={city} loading={loading} /></div>
+      <div className="mt-12"><CitiesNearMe cities={cities} counts={cityCounts} selected={city} loading={loading} /></div>
 
       {sheet && (
         <div className="fixed inset-0 z-50 flex items-end bg-espresso/60 lg:hidden" onClick={() => setSheet(false)}>
@@ -270,7 +271,7 @@ export default function RestaurantsPage({ searchParams }: { searchParams: Promis
               <div>
                 <p className="mb-3 font-bold">{t("city")}</p>
                 <div className="flex flex-wrap gap-2">
-                  {CITIES.filter((c) => (cityCounts[c.name] ?? 0) > 0).map((c) => <Chip key={c.name} active={city === c.name} onClick={() => setCity(city === c.name ? "" : c.name)}>{cityLabel(c.name)}</Chip>)}
+                  {liveCities(cities, cityCounts).map((c) => <Chip key={c.id} active={city === c.name} onClick={() => setCity(city === c.name ? "" : c.name)}>{cityLabel(c, locale)}</Chip>)}
                 </div>
               </div>
               <div>

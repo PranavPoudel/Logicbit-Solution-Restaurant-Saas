@@ -42,7 +42,7 @@ async function main() {
     'VIEW_REVENUE', 'VIEW_RESTAURANTS', 'OVERRIDE_RESTAURANT_SETTINGS',
     'SUSPEND_RESTAURANT', 'MANAGE_COMMISSION', 'MODERATE_CONTENT',
     'MANAGE_PLATFORM_STAFF', 'MANAGE_SETTLEMENTS', 'MANAGE_SUBSCRIPTIONS',
-    'MANAGE_ADVERTISEMENTS', 'MANAGE_CUISINES', 'VIEW_DELIVERIES',
+    'MANAGE_ADVERTISEMENTS', 'MANAGE_CUISINES', 'MANAGE_CITIES', 'VIEW_DELIVERIES',
     'VIEW_ACTIVITY_LOGS', 'PROCESS_REFUNDS',
   ];
 
@@ -86,6 +86,32 @@ async function main() {
         slug: name.toLowerCase().replace(/\s+/g, '-'), 
         isActive: true 
       },
+    });
+  }
+
+  const cities: { name: string; nameJa: string; latitude: number; longitude: number }[] = [
+    { name: 'Kathmandu', nameJa: 'カトマンズ', latitude: 27.7172, longitude: 85.324 },
+    { name: 'Patan', nameJa: 'パタン', latitude: 27.6766, longitude: 85.3142 },
+    { name: 'Bhaktapur', nameJa: 'バクタプル', latitude: 27.671, longitude: 85.4298 },
+    { name: 'Pokhara', nameJa: 'ポカラ', latitude: 28.2096, longitude: 83.9856 },
+    { name: 'Chitwan', nameJa: 'チトワン', latitude: 27.5291, longitude: 84.3542 },
+    { name: 'Biratnagar', nameJa: 'ビラトナガル', latitude: 26.4525, longitude: 87.2718 },
+    { name: 'Butwal', nameJa: 'ブトワル', latitude: 27.7006, longitude: 83.4484 },
+    { name: 'Dharan', nameJa: 'ダラン', latitude: 26.8065, longitude: 87.2846 },
+    { name: 'Birgunj', nameJa: 'ビルガンジ', latitude: 27.0104, longitude: 84.8779 },
+    { name: 'Janakpur', nameJa: 'ジャナクプル', latitude: 26.7288, longitude: 85.9266 },
+    { name: 'Nepalgunj', nameJa: 'ネパールガンジ', latitude: 28.05, longitude: 81.6167 },
+    { name: 'Hetauda', nameJa: 'ヘタウダ', latitude: 27.4287, longitude: 85.0322 },
+    { name: 'Itahari', nameJa: 'イタハリ', latitude: 26.6646, longitude: 87.2718 },
+    { name: 'Dhangadhi', nameJa: 'ダンガディ', latitude: 28.6869, longitude: 80.5986 },
+    { name: 'Bharatpur', nameJa: 'バラトプル', latitude: 27.6833, longitude: 84.4333 },
+    { name: 'Lumbini', nameJa: 'ルンビニ', latitude: 27.4833, longitude: 83.2765 },
+  ];
+  for (const [displayOrder, city] of cities.entries()) {
+    await prisma.city.upsert({
+      where: { name_country: { name: city.name, country: 'NP' } },
+      update: {},
+      create: { ...city, country: 'NP', displayOrder },
     });
   }
 

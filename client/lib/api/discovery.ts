@@ -2,7 +2,6 @@
 import { apiClient } from "@/lib/api/client";
 import type { DiscoveryRestaurant } from "@/types/restaurant";
 import type { RestaurantDetail, MenuCategory, MenuItemDetail } from "@/types/menu";
-import type { Review } from "@/lib/api/reviews";
 import type { PublicPopup } from "@/lib/api/public-storefront";
 
 export interface NearbyRestaurantsParams {
@@ -200,11 +199,6 @@ export async function checkDeliveryAvailability(
   return data;
 }
 
-export async function getRestaurantReviews(restaurantId: string): Promise<Review[]> {
-  const { data } = await apiClient.get(`/discovery/restaurants/${restaurantId}/reviews`);
-  return data;
-}
-
 /*
 export async function getRestaurantStorefront(restaurantId: string) {
   const { data } = await apiClient.get(`/discovery/restaurants/${restaurantId}/storefront`);
@@ -245,8 +239,19 @@ export interface StorefrontBanner {
 
 export type StorefrontPopup = PublicPopup;
 
+export interface StorefrontOffer {
+  id: string;
+  code: string | null;
+  type: "PERCENTAGE" | "FLAT";
+  value: number;
+  maxDiscount?: number | null;
+  minOrderAmount?: number | null;
+  validUntil?: string | null;
+}
+
 export interface StorefrontData {
   banners: StorefrontBanner[];
+  offers?: StorefrontOffer[];
   about?: string;
   contact?: {
     phone?: string;
@@ -259,9 +264,6 @@ export interface StorefrontData {
 
 export async function getRestaurantStorefront(restaurantId: string): Promise<StorefrontData> {
   const { data } = await apiClient.get(`/discovery/restaurants/${restaurantId}/storefront`);
-  if (process.env.NODE_ENV === "development") {
-    console.log("[storefront] unwrapped payload:", data);
-  }
   return data?.data ?? data;
 }
 

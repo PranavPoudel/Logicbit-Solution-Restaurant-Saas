@@ -27,6 +27,7 @@ import { DeliveryModule } from './modules/delivery/delivery.module';
 import { CustomerModule } from './modules/customer/customer.module';
 import { ActivityLogModule } from './modules/activity-log/activity-log.module';
 import { CuisineModule } from './modules/cuisine/cuisine.module';
+import { CityModule } from './modules/city/city.module';
 import { PlatformAuthModule } from './modules/platform-auth/platform-auth.module';
 import { PlatformStaffModule } from './modules/platform-staff/platform-staff.module';
 import { SubscriptionModule } from './modules/subscription/subscription.module';
@@ -71,6 +72,7 @@ import { ReservationsModule } from './modules/reservations/reservations.module';
     DeliveryModule,
     CustomerModule,
     CuisineModule,
+    CityModule,
     PlatformAuthModule,
     PlatformStaffModule,
     SubscriptionModule,

@@ -11,7 +11,7 @@ import { useCartStore, type SelectedModifier } from "@/store/cart-store";
 import { getFullImageUrl, getItemImage } from "@/lib/utils/image";
 import { SpiceBadge } from "@/components/menu/dish-tags";
 import { isSingleModifier } from "@/lib/utils/modifiers";
-import { money } from "@/lib/utils/money";
+import { useMoney } from "@/hooks/use-money";
 import { AllergenAlert, Badge, Button, Choice, Icon, IconButton, Stepper, inputCls } from "@/components/ui/primitives";
 
 const MD = "(min-width: 768px)";
@@ -44,6 +44,7 @@ interface ModifierModalProps {
 }
 
 export function ModifierModal({ restaurantId, menuItemId, onClose }: ModifierModalProps) {
+  const money = useMoney();
   const t = useTranslations("dish");
   const tc = useTranslations("common");
   const { data: item, isLoading, isError, refetch } = useQuery({

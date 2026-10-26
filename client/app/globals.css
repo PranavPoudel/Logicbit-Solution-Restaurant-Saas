@@ -34,6 +34,7 @@
   --color-paper: var(--brand-paper);
   --color-chili: var(--brand-chili);
   --color-chili-deep: var(--brand-chili-deep);
+  --color-crimson: var(--brand-crimson);
   --color-saffron: var(--brand-saffron);
   --color-herb: var(--brand-herb);
   --color-herb-ink: var(--brand-herb-ink);
@@ -147,6 +148,12 @@ body {
   font-size: 16px;
   transition: background 0.3s;
 }
+.customer:lang(ja) {
+  --font-sans: var(--font-noto-jp), var(--font-dm-sans), system-ui, sans-serif;
+}
+.customer:lang(ja) .font-display {
+  font-family: var(--font-noto-jp), var(--font-space-grotesk), sans-serif;
+}
 .customer.dark {
   --brand-cream: var(--night-cream);
   --brand-warm-ink: var(--night-warm-ink);
@@ -194,8 +201,6 @@ body {
 .customer .no-scrollbar::-webkit-scrollbar { display: none; }
 .customer .no-scrollbar { scrollbar-width: none; }
 
-@keyframes customer-marquee { to { transform: translateX(-50%); } }
-.customer .marquee { animation: customer-marquee 22s linear infinite; }
 @keyframes customer-spin { to { transform: rotate(360deg); } }
 .customer .spin-slow { animation: customer-spin 14s linear infinite; }
 @keyframes customer-bob { 50% { transform: translateY(-8px); } }
@@ -218,6 +223,18 @@ body {
 @keyframes customer-fade { from { opacity: 0; } }
 @media (min-width: 768px) { .customer .sheet-in { animation: customer-fade 0.2s ease-out; } }
 @media (prefers-reduced-motion: reduce) {
-  .customer .marquee, .customer .spin-slow, .customer .bob { animation: none; }
+  .customer .spin-slow, .customer .bob { animation: none; }
 }
 
+
+.leaflet-tooltip.city-tip {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  border: 0;
+  border-radius: 9999px;
+  padding: 4px 6px 4px 12px;
+  font-weight: 800;
+  box-shadow: 0 10px 24px -10px rgba(0, 0, 0, 0.5);
+}
+.leaflet-tooltip.city-tip::before { display: none; }
+.customer.dark .cities-map .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) brightness(0.8) contrast(0.9) saturate(0.7); }

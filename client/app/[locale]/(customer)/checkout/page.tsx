@@ -13,7 +13,7 @@ import type { PaymentMethod } from "@/components/checkout/payment-modal";
 import { checkDeliveryAvailability, getPublicRestaurant } from "@/lib/api/discovery";
 import { getErrorMessage } from "@/lib/utils/error";
 import { useRedirectToLogin } from "@/hooks/use-require-login";
-import { money } from "@/lib/utils/money";
+import { CurrencyProvider, useMoney } from "@/hooks/use-money";
 import { restaurantAccentStyle } from "@/lib/utils/restaurant-theme";
 import { CouponInput } from "@/components/cart/coupon-input";
 import { Button, Card, Icon, Progress, SectionTitle } from "@/components/ui/primitives";
@@ -21,7 +21,7 @@ import { Button, Card, Icon, Progress, SectionTitle } from "@/components/ui/prim
 const MIN_QUOTE_REFRESH_MS = 5000;
 
 const PAY_INFO: Record<PaymentMethod, { bg: string; mark: string }> = {
-  COD: { bg: theme.paymentColors.COD, mark: theme.content.currencyPrefix },
+  COD: { bg: theme.paymentColors.COD, mark: "" },
   CREDIT_CARD: { bg: theme.paymentColors.CREDIT_CARD, mark: "C" },
   ESEWA: { bg: theme.paymentColors.ESEWA, mark: "e" },
   KHALTI: { bg: theme.paymentColors.KHALTI, mark: "K" },
@@ -82,8 +82,9 @@ export default function CheckoutPage() {
     enabled: !!restaurantId,
   });
   const restaurant = restaurantSettingsQuery.data as
-    | { name?: string; refundPolicy?: string | null; primaryColor?: string; secondaryColor?: string; [k: string]: unknown }
+    | { name?: string; refundPolicy?: string | null; primaryColor?: string; secondaryColor?: string; currencyCode?: string; [k: string]: unknown }
     | undefined;
+  const money = useMoney(restaurant?.currencyCode);
 
   const enabledMethods = useMemo(() => {
     const r = restaurantSettingsQuery.data as Record<string, unknown> | undefined;
@@ -238,6 +239,7 @@ export default function CheckoutPage() {
   const payName = t(`pay.${payMethod}.name`);
 
   return (
+    <CurrencyProvider code={restaurant?.currencyCode}>
     <div style={restaurantAccentStyle(restaurant)} className="pb-16">
       <div className="mx-auto w-full max-w-[1440px] px-5 md:px-10">
         <Link href="/cart" className="flex min-h-11 items-center gap-1 font-bold"><Icon name="back" />{t("backToCart")}</Link>
@@ -300,7 +302,7 @@ export default function CheckoutPage() {
                   const p = PAY_INFO[m];
                   return (
                     <Selectable key={m} on={payMethod === m} onClick={() => { setPayChoice(m); setError(""); }}>
-                      <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl font-display text-xl font-extrabold text-white" style={{ background: p.bg }}>{p.mark}</span>
+                      <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl font-display text-xl font-extrabold text-white" style={{ background: p.bg }}>{m === "COD" ? <Icon name="bag" className="h-6 w-6" /> : p.mark}</span>
                       <span><b className="block text-lg">{t(`pay.${m}.name`)}</b><span className="text-ink/70">{t(`pay.${m}.sub`)}</span></span>
                     </Selectable>
                   );
@@ -376,5 +378,6 @@ export default function CheckoutPage() {
         </div>
       </div>
     </div>
+    </CurrencyProvider>
   );
 }

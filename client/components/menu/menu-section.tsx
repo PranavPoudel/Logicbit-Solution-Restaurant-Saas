@@ -7,17 +7,19 @@ import { useTranslations } from "next-intl";
 import { useCartStore } from "@/store/cart-store";
 import { useIsMounted } from "@/hooks/use-is-mounted";
 import { useRequireLogin } from "@/hooks/use-require-login";
-import { money } from "@/lib/utils/money";
+import { useMoney } from "@/hooks/use-money";
 import type { MenuCategory, MenuItem } from "@/types/menu";
 import { Badge, Chip, Icon, IconButton, Squiggle } from "@/components/ui/primitives";
 import { DishImage, DishListRow, DishTable, ViewToggle, type MenuView } from "@/components/menu/menu-views";
 import { DishTags } from "@/components/menu/dish-tags";
 import { PopularCategories, SignatureDishes } from "@/components/menu/signature-dishes";
+import { getFullImageUrl } from "@/lib/utils/image";
 
 const PAGE_SIZE = 12;
 const catId = (id: string) => `cat-${id}`;
 
 function DishCard({ item, onOpen }: { item: MenuItem; onOpen: () => void }) {
+  const money = useMoney();
   const t = useTranslations("menu");
   const tc = useTranslations("common");
   const name = item.name ?? t("fallbackItem");
@@ -25,7 +27,7 @@ function DishCard({ item, onOpen }: { item: MenuItem; onOpen: () => void }) {
   const out = item.isAvailable === false;
 
   return (
-    <article className={`group relative flex flex-col overflow-hidden rounded-[28px] bg-paper shadow-soft transition ${out ? "" : "hover:-translate-y-1 hover:shadow-warm"}`}>
+    <article className={`group relative flex h-full flex-col overflow-hidden rounded-[28px] bg-paper shadow-soft transition ${out ? "" : "hover:-translate-y-1 hover:shadow-warm"}`}>
       <button type="button" onClick={onOpen} disabled={out} className="relative block aspect-[4/3] overflow-hidden disabled:cursor-not-allowed" aria-label={`${name}, ${money(price)}${out ? `, ${t("soldOutSuffix")}` : ""}`}>
         <DishImage item={item} className={`h-full w-full object-cover transition duration-500 ${out ? "opacity-60 grayscale" : "group-hover:scale-105"}`} />
         <div className="absolute left-3 top-3 flex flex-wrap gap-2">
@@ -35,9 +37,9 @@ function DishCard({ item, onOpen }: { item: MenuItem; onOpen: () => void }) {
       </button>
       <div className={`flex flex-1 flex-col p-5 ${out ? "opacity-60" : ""}`}>
         <h3 className="font-display text-2xl font-bold leading-tight">{name}</h3>
-        {item.description && <p className="mt-1 line-clamp-2 text-ink/75">{item.description}</p>}
+        <p className="mt-1 line-clamp-2 min-h-[3.25rem] text-ink/75">{item.description}</p>
         <DishTags item={item} />
-        <div className="mt-auto flex items-center justify-between pt-4">
+        <div className="mt-auto flex items-center justify-between border-t border-ink/10 pt-4">
           <span className="text-xl font-extrabold">{item.hasModifiers ? t("priceFrom", { price: money(price) }) : money(price)}</span>
           {out ? (
             <span className="font-medium text-ink/70">{t("unavailable")}</span>
@@ -53,6 +55,7 @@ function DishCard({ item, onOpen }: { item: MenuItem; onOpen: () => void }) {
 }
 
 function CartPanel({ suggestions, onPick }: { suggestions: MenuItem[]; onPick: (id: string) => void }) {
+  const money = useMoney();
   const t = useTranslations("menu");
   const tc = useTranslations("common");
   const mounted = useIsMounted();
@@ -69,7 +72,7 @@ function CartPanel({ suggestions, onPick }: { suggestions: MenuItem[]; onPick: (
   const picks = suggestions.filter((s) => !inCart.has(s.id)).slice(0, 4);
 
   return (
-    <aside className="sticky top-6 hidden space-y-4 lg:block" aria-label={t("yourCart")}>
+    <aside className="no-scrollbar sticky top-6 -m-2 hidden max-h-[calc(100dvh-3rem)] space-y-4 overflow-y-auto p-2 lg:block" aria-label={t("yourCart")}>
       <div className="rounded-[28px] bg-paper p-6 shadow-soft">
         <div className="flex items-baseline justify-between">
           <h2 className="font-display text-2xl font-extrabold">{t("yourCart")}</h2>
@@ -83,7 +86,7 @@ function CartPanel({ suggestions, onPick }: { suggestions: MenuItem[]; onPick: (
               <li key={`${c.menuItemId}::${c.variantKey}`} className="flex items-center gap-3 py-3">
                 {c.image && (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={c.image} alt="" className="h-12 w-12 shrink-0 rounded-xl object-cover" />
+                  <img src={getFullImageUrl(c.image)} alt="" className="h-12 w-12 shrink-0 rounded-xl object-cover" />
                 )}
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-bold">{c.name}</p>
@@ -127,9 +130,9 @@ function CartPanel({ suggestions, onPick }: { suggestions: MenuItem[]; onPick: (
       {picks.length > 0 && (
         <div className="rounded-[28px] bg-paper p-6 shadow-soft">
           <h3 className="font-display text-xl font-extrabold">{t("alsoOrdered")}</h3>
-          <ul className="no-scrollbar -mx-6 mt-4 flex gap-3 overflow-x-auto px-6">
+          <ul className="no-scrollbar -mx-6 mt-4 flex snap-x scroll-px-6 gap-4 overflow-x-auto px-6 pb-1">
             {picks.map((d) => (
-              <li key={d.id} className="w-36 shrink-0">
+              <li key={d.id} className="w-36 shrink-0 snap-start">
                 <button type="button" onClick={() => onPick(d.id)} className="group w-full text-left">
                   <span className="relative block">
                     <DishImage item={d} className="aspect-square w-full rounded-2xl object-cover" />
@@ -148,6 +151,7 @@ function CartPanel({ suggestions, onPick }: { suggestions: MenuItem[]; onPick: (
 }
 
 export function MenuSection({ categories, onOpenModifiers }: { categories: MenuCategory[]; onOpenModifiers: (itemId: string) => void }) {
+  const money = useMoney();
   const t = useTranslations("menu");
   const requireLogin = useRequireLogin();
   const mounted = useIsMounted();
@@ -181,7 +185,7 @@ export function MenuSection({ categories, onOpenModifiers }: { categories: MenuC
   const activeId = active ?? filtered[0]?.id ?? null;
 
   useEffect(() => {
-    const io = new IntersectionObserver((es) => es.forEach((e) => e.isIntersecting && setActive(e.target.id.replace("cat-", ""))), { rootMargin: "-160px 0px -60% 0px" });
+    const io = new IntersectionObserver((es) => es.forEach((e) => e.isIntersecting && setActive(e.target.id.replace("cat-", ""))), { rootMargin: "-120px 0px -60% 0px" });
     filtered.forEach((c) => {
       const el = document.getElementById(catId(c.id));
       if (el) io.observe(el);
@@ -195,40 +199,36 @@ export function MenuSection({ categories, onOpenModifiers }: { categories: MenuC
 
   const jump = (id: string) => {
     const el = document.getElementById(catId(id));
-    if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 150, behavior: "smooth" });
+    if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 100, behavior: "smooth" });
   };
 
   if (categories.length === 0) return null;
 
   return (
     <>
-      <div className="sticky top-0 z-30 mt-8 border-b border-ink/10 bg-cream/95 backdrop-blur">
-        <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-3 px-5 py-3 md:flex-row md:items-center md:px-10">
-          <div className="no-scrollbar flex flex-1 gap-2 overflow-x-auto" role="tablist" aria-label={t("categories")}>
-            {filtered.map((c) => (
-              <Chip key={c.id} id={`tab-${c.id}`} role="tab" aria-selected={activeId === c.id} active={activeId === c.id} onClick={() => jump(c.id)}>
-                {c.name ?? t("fallbackName")}
-              </Chip>
-            ))}
-          </div>
-          <label className="flex min-h-11 items-center gap-2 rounded-full bg-paper px-4 shadow-soft focus-within:ring-2 focus-within:ring-ink md:w-80">
-            <Icon name="search" className="h-5 w-5 text-ink/60" />
-            <span className="sr-only">{t("searchMenu")}</span>
-            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("searchMenu")} className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-ink/55" />
-            {q && (
-              <button type="button" onClick={() => setQ("")} aria-label={t("clearSearch")} className="grid h-11 w-11 place-items-center"><Icon name="x" className="h-5 w-5" /></button>
-            )}
-          </label>
-        </div>
-      </div>
-
       <div className="mx-auto grid w-full max-w-[1440px] items-start gap-8 px-5 pt-8 md:px-10 lg:grid-cols-[1fr_360px]">
         <div className="min-w-0 space-y-12">
           {!q && <SignatureDishes items={signature} onOpen={open} />}
           {!q && <PopularCategories categories={categories} onJump={jump} />}
           <div className="flex flex-wrap items-center justify-between gap-4 border-t border-ink/10 pt-8">
-            <h2 className="font-display text-[32px] font-extrabold tracking-tight md:text-[40px]">{t("fullMenu")}</h2>
+            <h2 className="font-display text-[32px] font-extrabold leading-none tracking-tight md:text-[40px]">{t("fullMenu")}</h2>
             <ViewToggle view={view} onChange={setView} />
+          </div>
+          <div className="sticky top-0 z-30 mb-6 -mt-10 flex items-center gap-3 border-b border-ink/10 bg-cream/95 pb-3 pt-0 backdrop-blur">
+            <div className="no-scrollbar flex flex-1 gap-2 overflow-x-auto py-1" role="tablist" aria-label={t("categories")}>
+              {filtered.map((c) => (
+                <Chip key={c.id} id={`tab-${c.id}`} role="tab" aria-selected={activeId === c.id} active={activeId === c.id} onClick={() => jump(c.id)}>
+                  {c.name ?? t("fallbackName")}
+                </Chip>
+              ))}
+            </div>
+            <label className={`group shadow-soft relative flex h-11 shrink-0 cursor-text items-center overflow-hidden rounded-full bg-paper transition-[width] duration-300 ease-out focus-within:w-56 focus-within:ring-2 focus-within:ring-ink motion-reduce:transition-none md:focus-within:w-72 ${q ? "w-56 md:w-72" : "w-11"}`}>
+              <span className="grid h-11 w-11 shrink-0 place-items-center"><Icon name="search" className="h-5 w-5 text-ink/70" /></span>
+              <input value={q} onChange={(e) => setQ(e.target.value)} aria-label={t("searchMenu")} placeholder={t("searchMenu")} className={`min-w-0 flex-1 bg-transparent pr-3 outline-none transition-opacity duration-200 placeholder:text-ink/55 group-focus-within:opacity-100 group-focus-within:delay-100 ${q ? "opacity-100" : "opacity-0"}`} />
+              {q && (
+                <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => setQ("")} aria-label={t("clearSearch")} className="grid h-11 w-11 shrink-0 place-items-center"><Icon name="x" className="h-5 w-5" /></button>
+              )}
+            </label>
           </div>
           {filtered.length === 0 && (
             <p className="rounded-[28px] bg-paper p-8 text-center text-lg shadow-soft">

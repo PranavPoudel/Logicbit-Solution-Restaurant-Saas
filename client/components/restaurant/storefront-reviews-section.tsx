@@ -5,8 +5,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
-import { getRestaurantReviews } from "@/lib/api/discovery";
-import type { Review } from "@/lib/api/reviews";
+import { getRestaurantReviews, type Review } from "@/lib/api/reviews";
 import { Button, Icon, Squiggle } from "@/components/ui/primitives";
 import { Pager } from "@/components/ui/pager";
 

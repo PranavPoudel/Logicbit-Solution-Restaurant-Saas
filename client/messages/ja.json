@@ -5,7 +5,6 @@
   },
   "header": {
     "brandName": "LogicBit",
-    "location": "キルティプル, カトマンズ",
     "forRestaurants": "レストラン向け",
     "account": "アカウント",
     "cart": "カート",
@@ -32,25 +31,15 @@
     "couldntLoad": "レストランを読み込めませんでした。バックエンドは localhost:3700 で実行されていますか？",
     "openRight": "営業中のお店 {count}件",
     "openSoon": "まもなく営業開始",
-    "heroA": "カトマ",
-    "heroB": "ンズ",
     "heroC": "、",
     "heroD": "お腹すいた",
     "heroE": "？",
-    "heroBody": "モモ、チョイラ、バーガーなど、<b>地元のキッチン</b>の料理を、約30分で熱々のままお届けします。",
+    "heroBody": "{city}の<b>地元のキッチン</b>の料理を、約30分で熱々のままお届けします。",
     "searchLabel": "料理やレストランを検索",
     "searchPlaceholder": "レストランや料理を検索",
     "findFood": "探す",
-    "popularCuisines": "人気のジャンル:",
-    "hotNow": "いま人気 ✺",
-    "liveTracking": "リアルタイム追跡",
-    "followOrder": "ご注文がお手元に届くまで追跡",
     "heroAlt1": "チャツネ添えの湯気の立つモモ",
-    "heroAlt2": "バーガーとフライドポテト",
-    "stamp": "熱々の料理 · 速い配達 · ",
     "browseCuisine": "ジャンルから探す",
-    "openKitchens": "営業中のお店、",
-    "nearYouAccent": "あなたの近く",
     "seeAllKitchens": "すべての店舗を見る",
     "loadKitchensError": "いまは店舗を読み込めませんでした。",
     "tryAgain": "もう一度試す",
@@ -64,7 +53,6 @@
     "ownerBody": "{brand}にお店を登録して、メニューも注文もひとつの管理画面で。盆地じゅうのお客様にお届けしましょう。",
     "listMy": "お店を",
     "listKitchen": "登録 →",
-    "marquee": "地元のキッチンから出来たて ✺ 熱々をお届け ✺ 今すぐ注文 ✺ ",
     "howKicker": "かんたん3ステップ",
     "howTitle": "食べたいから、玄関まで",
     "howStep1": "お店を選ぶ",
@@ -84,7 +72,13 @@
     "why4": "現金・カード・ウォレット払い",
     "whyBody4": "代金引換もオンライン決済も。",
     "whyRating": "地元のお客様の評価",
-    "bannersLabel": "注目のオファー"
+    "bannersLabel": "注目のオファー",
+    "heroNoCity": "お腹すいた？",
+    "yourArea": "お近く",
+    "heroAlt2": "バーガーとフライドポテト",
+    "popularCuisines": "人気のジャンル:",
+    "openKitchens": "営業中のお店",
+    "whyTagline": "あらゆるニーズに応える、清潔で安心のサービスです。"
   },
   "cart": {
     "emptyTitle": "カートは空です",
@@ -230,7 +224,6 @@
     "stepCart": "カート",
     "stepDetails": "詳細",
     "stepPayment": "お支払い",
-    "marquee": "地元のキッチンから出来たて ✺ 熱々をお届け ✺ 今すぐ注文 ✺ ",
     "previous": "前へ",
     "next": "次へ",
     "pagination": "ページ送り",
@@ -248,13 +241,13 @@
     "soldOut": "売り切れ"
   },
   "footer": {
+    "privacy": "プライバシー",
+    "terms": "利用規約",
     "stillScrolling": "まだスクロール中？",
     "stomach": "お腹から電話です。ご立腹のようです。",
     "orderNow": "わかった、注文しよう",
     "eat": "食べる",
-    "search": "検索",
-    "privacy": "プライバシー",
-    "terms": "利用規約"
+    "search": "検索"
   },
   "notFound": {
     "badge": "エラー 404",
@@ -396,6 +389,11 @@
     "sectionContact": "アクセス",
     "sectionAbout": "私たちについて",
     "sectionReviews": "レビュー",
+    "offerPercent": "{value}%オフ",
+    "offerFlat": "{amount}オフ",
+    "offerMin": "{amount}以上のご注文で",
+    "offerAny": "すべてのご注文で",
+    "offerMax": "最大{amount}オフ",
     "sectionOffers": "お得な情報",
     "errSimilar": "似たお店を読み込めませんでした。",
     "callUs": "お電話",
@@ -408,9 +406,13 @@
     "social": "SNS",
     "zoomIn": "拡大",
     "zoomOut": "縮小",
+    "weAccept": "対応のお支払い",
+    "payCod": "代金引換",
+    "payCard": "カード",
     "mapStyle": "地図の表示",
     "mapCartoon": "イラスト",
-    "mapStreet": "地図"
+    "mapStreet": "地図",
+    "mapIllustrative": "イメージ図（縮尺は実際と異なります）"
   },
   "menu": {
     "categories": "メニューカテゴリ",
@@ -487,9 +489,6 @@
     "photoAlt": "メニュー項目"
   },
   "cities": {
-    "titleStart": "配達エリアの",
-    "titleAccent": "都市。",
-    "viewAll": "すべての店舗を見る",
     "loadingMap": "地図を読み込み中",
     "zoomIn": "拡大",
     "zoomOut": "縮小",
@@ -497,35 +496,18 @@
     "deliveringNow": "配達中 · {count}都市",
     "kitchensOpen": "注文できるお店 {count}件",
     "noneYet": "まだお店がありません。またのぞいてください。",
-    "comingSoon": "近日対応",
-    "himalaya": "ヒマラヤ",
-    "terai": "タライ",
-    "names": {
-      "Kathmandu": "カトマンズ",
-      "Patan": "パタン",
-      "Bhaktapur": "バクタプル",
-      "Pokhara": "ポカラ",
-      "Chitwan": "チトワン",
-      "Biratnagar": "ビラトナガル",
-      "Butwal": "ブトワル",
-      "Dharan": "ダラン",
-      "Birgunj": "ビルガンジ",
-      "Janakpur": "ジャナクプル",
-      "Nepalgunj": "ネパールガンジ",
-      "Hetauda": "ヘタウダ",
-      "Itahari": "イタハリ",
-      "Dhangadhi": "ダンガディ",
-      "Bharatpur": "バラトプル",
-      "Lumbini": "ルンビニ"
-    }
+    "exploreMap": "クリックして地図を操作",
+    "viewAll": "すべての店舗を見る",
+    "titleStart": "配達エリアの",
+    "titleAccent": "都市。"
   },
   "promo": {
     "close": "オファーを閉じる",
     "sticker": "お買い得",
     "title": "週末グルメセール",
-    "headline": "20%オフ",
     "body": "今週末、最初の3回のご注文が20%オフ。",
-    "cta": "レストランを探す"
+    "cta": "レストランを探す",
+    "headline": "20%オフ"
   },
   "cuisineNames": {
     "nepali": "ネパール料理",
@@ -538,9 +520,8 @@
   },
   "restaurants": {
     "backHome": "ホームに戻る",
-    "titleStart": "すべてのキッチンを、",
-    "titleAccent": "あなたの近くで。",
-    "summary": "<b>{count}店舗</b>（近くのお店）· 営業中 {open}件",
+    "titleStart": "すべてのキッチン",
+    "summary": "<b>{count}店舗</b>· 営業中 {open}件",
     "summaryCity": "<b>{count}店舗</b>（{city}）· 営業中 {open}件",
     "searchLabel": "レストランやジャンルを検索",
     "clearSearch": "検索をクリア",
@@ -712,7 +693,8 @@
     "refunded": "返金済み",
     "payAtPickup": "受け取り時にお支払い",
     "payOnDelivery": "お届け時にお支払い",
-    "paymentPending": "お支払い待ち"
+    "paymentPending": "お支払い待ち",
+    "itemAllergens": "アレルゲン: {text}"
   },
   "account": {
     "title": "マイアカウント",

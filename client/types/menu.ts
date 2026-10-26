@@ -22,6 +22,7 @@ export interface RestaurantDetail {
   address?: string;
   city?: string;
   refundPolicy?: string | null;
+  currencyCode?: string;
   supportsCod?: boolean;
   supportsEsewa?: boolean;
   supportsKhalti?: boolean;

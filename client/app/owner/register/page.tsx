@@ -235,7 +235,7 @@ export default function OwnerRegisterPage() {
                     value={formData.restaurantAddress}
                     onChange={handleChange}
                     className="flex-1 px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-[#1B2333] focus:border-transparent outline-none transition"
-                    placeholder="e.g. Thamel, Kathmandu"
+                    placeholder="e.g. Street, area, city"
                   />
                   <button
                     type="button"

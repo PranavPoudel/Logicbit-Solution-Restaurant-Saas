@@ -11,9 +11,10 @@ import { useIsMounted } from "@/hooks/use-is-mounted";
 import { getRestaurantByIdOrSlug } from "@/lib/api/discovery";
 import { restaurantAccentStyle } from "@/lib/utils/restaurant-theme";
 import { getFullImageUrl } from "@/lib/utils/image";
-import { money } from "@/lib/utils/money";
+import { CurrencyProvider, useMoney } from "@/hooks/use-money";
 
 function CheckoutButton({ total }: { total: number }) {
+  const money = useMoney();
   const t = useTranslations("cart");
   return (
   <Link
@@ -48,6 +49,7 @@ function Row({ l, v, c = "" }: { l: string; v: ReactNode; c?: string }) {
 }
 
 function Summary({ count, sub, discount, total, children, cta }: { count: number; sub: number; discount: number; total: number; children?: ReactNode; cta?: ReactNode }) {
+  const money = useMoney();
   const t = useTranslations("cart");
   return (
     <Card className="space-y-4 !p-6">
@@ -69,6 +71,7 @@ function Summary({ count, sub, discount, total, children, cta }: { count: number
 }
 
 function ItemRow({ i }: { i: CartItem }) {
+  const money = useMoney();
   const tc = useTranslations("common");
   const addItem = useCartStore((s) => s.addItem);
   const removeOneOrAll = useCartStore((s) => s.removeOneOrAll);
@@ -88,9 +91,11 @@ function ItemRow({ i }: { i: CartItem }) {
         <p className="text-lg font-bold leading-snug">{i.name}</p>
         {mods.length > 0 && <p className="text-ink/70">{mods.join(" · ")}</p>}
         {i.allergenInfo && <AllergenAlert compact text={i.allergenInfo} />}
-        <button type="button" onClick={() => removeItem(i.menuItemId, i.variantKey)} className="mt-1 block min-h-11 font-medium text-ink/70 underline underline-offset-4 hover:text-chili sm:min-h-8">
-          {tc("remove")}
-        </button>
+        <div className="mt-3">
+          <Button variant="ghost" onClick={() => removeItem(i.menuItemId, i.variantKey)} className="shadow-soft border-2 border-ink/15 bg-paper text-chili hover:-translate-y-0.5 hover:border-chili hover:bg-paper active:translate-y-0">
+            <Icon name="trash" className="h-4 w-4" />{tc("remove")}
+          </Button>
+        </div>
       </div>
       <div className="col-start-2 flex items-center justify-between gap-4 sm:col-start-auto">
         <Stepper
@@ -149,8 +154,9 @@ export default function CartPage() {
     enabled: !!restaurantId && mounted,
   });
   const r = restaurantQuery.data;
+  const money = useMoney(r?.currencyCode);
   const total = Math.max(0, subtotal - discount);
-  const methods = [r?.supportsEsewa && "eSewa", r?.supportsKhalti && "Khalti", r?.supportsCod !== false && t("cod")].filter(Boolean) as string[];
+  const methods = [r?.supportsEsewa && "eSewa", r?.supportsKhalti && "Khalti", r?.supportsPaypay && "PayPay", r?.supportsCod !== false && t("cod")].filter(Boolean) as string[];
   const initials = (r?.name ?? "").split(/\s+/).map((w) => w[0]).filter((c) => /[A-Za-z0-9&]/.test(c)).slice(0, 2).join("").toUpperCase();
 
   if (!mounted) {
@@ -167,6 +173,7 @@ export default function CartPage() {
   );
 
   return (
+    <CurrencyProvider code={r?.currencyCode}>
     <div style={restaurantAccentStyle(r)} className="pb-32 lg:pb-16">
       <div className="mx-auto w-full max-w-[1440px] px-5 md:px-10">
         <div className="max-w-md"><Progress step={0} /></div>
@@ -242,5 +249,6 @@ export default function CartPage() {
         </div>
       )}
     </div>
+    </CurrencyProvider>
   );
 }

@@ -7,14 +7,16 @@ import { useGeolocation } from "@/hooks/use-geolocation";
 import { CartoonMap } from "@/components/map/cartoon-map";
 import { DynamicRestaurantLocationMap } from "@/components/map/dynamic-restaurant-location-map";
 import { Button, Icon, Squiggle } from "@/components/ui/primitives";
+import { distanceKm } from "@/lib/utils/geo";
+import { useCopy } from "@/hooks/use-copy";
+import { useCuisineLabel } from "@/hooks/use-cuisine-label";
+import type { RestaurantDetail } from "@/types/menu";
 
 interface StorefrontContactSectionProps {
   title: string;
-  name?: string;
+  restaurant: RestaurantDetail;
   contact?: { phone?: string; email?: string; address?: string };
   socialLinks?: Record<string, string>;
-  latitude?: number;
-  longitude?: number;
 }
 
 const SOCIAL: Record<string, { label: string; path: ReactNode }> = {
@@ -26,16 +28,10 @@ const SOCIAL: Record<string, { label: string; path: ReactNode }> = {
 
 const TINTS = { herb: "bg-herb/15 text-herb", chili: "bg-chili/10 text-chili", saffron: "bg-saffron/30 text-espresso" };
 
-function distanceKm(aLat: number, aLng: number, bLat: number, bLng: number) {
-  const rad = (d: number) => (d * Math.PI) / 180;
-  const h = Math.sin(rad(bLat - aLat) / 2) ** 2 + Math.cos(rad(aLat)) * Math.cos(rad(bLat)) * Math.sin(rad(bLng - aLng) / 2) ** 2;
-  return 12742 * Math.asin(Math.sqrt(h));
-}
-
 function ContactRow({ icon, tint, label, value, href, external }: { icon: string; tint: keyof typeof TINTS; label: string; value?: string; href: string; external?: boolean }) {
   if (!value) return null;
   return (
-    <a href={href} target={external ? "_blank" : undefined} rel={external ? "noreferrer" : undefined} className="group flex min-h-14 items-center gap-4 rounded-[22px] px-3 py-2 transition hover:bg-ink/5 active:scale-[.99]">
+    <a href={href} target={external ? "_blank" : undefined} rel={external ? "noreferrer" : undefined} className="group flex min-h-16 items-center gap-4 rounded-[22px] px-3 py-2 transition hover:bg-ink/5 active:scale-[.99]">
       <span className={`grid h-12 w-12 shrink-0 place-items-center rounded-full ${TINTS[tint]}`}><Icon name={icon} className="h-6 w-6" /></span>
       <span className="min-w-0 flex-1">
         <span className="block text-ink/75">{label}</span>
@@ -46,30 +42,43 @@ function ContactRow({ icon, tint, label, value, href, external }: { icon: string
   );
 }
 
-export function StorefrontContactSection({ title, name, contact, socialLinks, latitude, longitude }: StorefrontContactSectionProps) {
+export function StorefrontContactSection({ title, restaurant, contact: saved, socialLinks }: StorefrontContactSectionProps) {
   const t = useTranslations("restaurant");
+  const tc = useTranslations("common");
+  const cuisineLabel = useCuisineLabel();
+  const { name, latitude, longitude } = restaurant;
+  const contact = { phone: saved?.phone || restaurant.phone, email: saved?.email, address: saved?.address || restaurant.address };
+  const payments = [
+    restaurant.supportsCod && t("payCod"),
+    restaurant.supportsCreditCard && t("payCard"),
+    restaurant.supportsEsewa && "eSewa",
+    restaurant.supportsKhalti && "Khalti",
+    restaurant.supportsPaypay && "PayPay",
+    restaurant.supportsPhonePay && "PhonePay",
+    restaurant.supportsIps && "IPS",
+  ].filter(Boolean) as string[];
   const geo = useGeolocation();
-  const [copied, setCopied] = useState(false);
+  const { copied, copy } = useCopy();
   const [style, setStyle] = useState<"cartoon" | "street">("cartoon");
   const socials = Object.entries(socialLinks ?? {}).filter(([k, v]) => SOCIAL[k] && /^https?:\/\//i.test(v));
   const hasMap = !!(latitude && longitude);
-  if (!contact?.phone && !contact?.email && !contact?.address && socials.length === 0 && !hasMap) return null;
+  if (!contact.phone && !contact.email && !contact?.address && socials.length === 0 && !hasMap) return null;
 
-  const address = contact?.address;
+  const address = contact.address;
   const directions = hasMap
     ? `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`
     : `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address ?? "")}`;
   const km = hasMap && !geo.isUsingFallback ? distanceKm(geo.lat, geo.lng, latitude!, longitude!) : null;
 
   return (
-    <section aria-labelledby="find" className="mx-auto w-full max-w-[1440px] border-t border-ink/10 px-5 pt-10 md:px-10">
+    <section aria-labelledby="find" className="mx-auto w-full max-w-[1440px] border-t border-ink/10 px-5 py-10 md:px-10">
       <h2 id="find" className="relative inline-block font-display text-[32px] font-extrabold tracking-tight md:text-[40px]">
         {title}
         <Squiggle className="absolute -bottom-1 left-0 h-3 w-full text-[var(--accent,var(--brand-chili))]" />
       </h2>
-      <div className="mt-8 grid items-start gap-6 md:grid-cols-12">
+      <div className="mt-8 grid items-stretch gap-6 md:grid-cols-12">
         {hasMap && (
-          <div className="relative h-[320px] md:order-2 md:col-span-7 md:h-[480px]">
+          <div className="relative aspect-square w-full md:order-2 md:col-span-5">
             {style === "street" ? <DynamicRestaurantLocationMap lat={latitude!} lng={longitude!} initial={name} km={km} /> : <CartoonMap initial={name} km={km} />}
             <div role="radiogroup" aria-label={t("mapStyle")} className="shadow-soft absolute right-4 top-4 z-[600] inline-flex rounded-full bg-paper p-1">
               {(["cartoon", "street"] as const).map((s) => (
@@ -80,11 +89,27 @@ export function StorefrontContactSection({ title, name, contact, socialLinks, la
             </div>
           </div>
         )}
-        <div className={`shadow-warm rounded-[32px] bg-paper p-4 md:p-6 ${hasMap ? "md:order-1 md:col-span-5" : "md:col-span-12"}`}>
-          <div className="space-y-1">
-            <ContactRow icon="phone" tint="herb" label={t("callUs")} value={contact?.phone} href={`tel:${contact?.phone?.replace(/\s/g, "")}`} />
+        <div className={`shadow-warm flex flex-col gap-6 rounded-[32px] bg-paper p-4 md:p-8 ${hasMap ? "md:order-1 md:col-span-7" : "md:col-span-12"}`}>
+          <div className="px-3">
+            <div className="flex flex-wrap items-center gap-2">
+              {restaurant.isOpen !== undefined && (
+                <span className={`inline-flex min-h-8 items-center gap-2 rounded-full px-3 text-sm font-bold ${restaurant.isOpen ? "bg-herb/15 text-herb" : "bg-ink/10 text-ink/75"}`}>
+                  <span className={`h-2 w-2 rounded-full ${restaurant.isOpen ? "bg-herb" : "bg-ink/50"}`} />{restaurant.isOpen ? tc("openNow") : tc("closed")}
+                </span>
+              )}
+              {restaurant.city && <span className="inline-flex items-center gap-1 text-ink/75"><Icon name="pin" className="h-4 w-4" />{restaurant.city}</span>}
+            </div>
+            <p className="mt-3 font-display text-3xl font-extrabold leading-tight md:text-4xl">{name}</p>
+            {(restaurant.cuisines?.length ?? 0) > 0 && (
+              <ul className="mt-3 flex flex-wrap gap-2">
+                {restaurant.cuisines!.map((c, i) => <li key={i} className="rounded-full bg-ink/5 px-3 py-1 font-bold">{cuisineLabel(c)}</li>)}
+              </ul>
+            )}
+          </div>
+          <div className="space-y-2">
+            <ContactRow icon="phone" tint="herb" label={t("callUs")} value={contact.phone} href={`tel:${contact.phone?.replace(/\s/g, "")}`} />
             <ContactRow icon="pin" tint="chili" label={t("address")} value={address} href={directions} external />
-            <ContactRow icon="mail" tint="saffron" label={t("emailUs")} value={contact?.email} href={`mailto:${contact?.email}`} />
+            <ContactRow icon="mail" tint="saffron" label={t("emailUs")} value={contact.email} href={`mailto:${contact.email}`} />
           </div>
           {socials.length > 0 && (
             <div className="mt-4 flex flex-wrap gap-2 px-3" role="group" aria-label={t("social")}>
@@ -95,14 +120,22 @@ export function StorefrontContactSection({ title, name, contact, socialLinks, la
               ))}
             </div>
           )}
+          {payments.length > 0 && (
+            <div className="px-3">
+              <p className="font-bold text-ink/75">{t("weAccept")}</p>
+              <ul className="mt-2 flex flex-wrap gap-2">
+                {payments.map((p) => <li key={p} className="inline-flex items-center gap-2 rounded-full border-2 border-ink/10 px-3 py-1 font-bold"><Icon name="check" className="h-4 w-4 text-herb" />{p}</li>)}
+              </ul>
+            </div>
+          )}
           {(address || hasMap) && (
-            <div className="mt-6 flex flex-wrap gap-3 px-3">
+            <div className="mt-auto flex flex-wrap gap-3 border-t border-ink/10 px-3 pt-6">
               <a href={directions} target="_blank" rel="noreferrer" className="shadow-red inline-flex h-12 items-center gap-2 rounded-full bg-[var(--accent,var(--brand-chili))] px-6 font-bold text-[var(--accent-ink,var(--brand-parchment))] transition hover:-translate-y-0.5 active:translate-y-0">
                 <Icon name="arrow" className="h-5 w-5 -rotate-45" />{t("getDirections")}
               </a>
               {address && (
-                <Button variant="ghost" aria-live="polite" onClick={() => { navigator.clipboard?.writeText(address); setCopied(true); setTimeout(() => setCopied(false), 2000); }}>
-                  <Icon name={copied ? "check" : "ticket"} className={`h-5 w-5 ${copied ? "text-herb" : ""}`} />{copied ? t("copied") : t("copyAddress")}
+                <Button variant="ghost" aria-live="polite" onClick={() => copy(address)}>
+                  <Icon name={copied === address ? "check" : "ticket"} className={`h-5 w-5 ${copied === address ? "text-herb" : ""}`} />{copied === address ? t("copied") : t("copyAddress")}
                 </Button>
               )}
             </div>

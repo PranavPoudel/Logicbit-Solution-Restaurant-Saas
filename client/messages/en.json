@@ -5,7 +5,6 @@
   },
   "header": {
     "brandName": "LogicBit",
-    "location": "Kirtipur, Kathmandu",
     "forRestaurants": "For restaurants",
     "account": "Account",
     "cart": "Cart",
@@ -32,25 +31,15 @@
     "couldntLoad": "Couldn't load restaurants. Is the backend running on localhost:3700?",
     "openRight": "{count, plural, one {# kitchen open right now} other {# kitchens open right now}}",
     "openSoon": "Kitchens open soon",
-    "heroA": "Kath",
-    "heroB": "mandu",
     "heroC": ",",
     "heroD": "hungry",
     "heroE": "?",
-    "heroBody": "Momo, choila, burgers and more from <b>local kitchens</b> across the valley, hot at your door in about 30 minutes.",
+    "heroBody": "Fresh food from <b>local kitchens</b> in {city}, hot at your door in about 30 minutes.",
     "searchLabel": "Search dishes or restaurants",
     "searchPlaceholder": "Search restaurants or dishes",
     "findFood": "Find food",
-    "popularCuisines": "Popular cuisines:",
-    "hotNow": "Hot now ✺",
-    "liveTracking": "Live tracking",
-    "followOrder": "Follow your order to your door",
     "heroAlt1": "Steaming plate of momo with chutney",
-    "heroAlt2": "Burger and fries",
-    "stamp": "HOT FOOD · FAST DELIVERY · ",
     "browseCuisine": "Browse by cuisine",
-    "openKitchens": "Open kitchens,",
-    "nearYouAccent": "near you",
     "seeAllKitchens": "See all kitchens",
     "loadKitchensError": "We couldn't load kitchens right now.",
     "tryAgain": "Try again",
@@ -62,9 +51,8 @@
     "ownerKicker": "For restaurant owners",
     "ownerTitle": "Your kitchen deserves a bigger table.",
     "ownerBody": "List your restaurant on {brand}, manage your menu and orders in one dashboard, and reach hungry customers across the valley.",
-    "listMy": "List my",
+    "listMy": "List my ",
     "listKitchen": "kitchen →",
-    "marquee": "Fresh from local kitchens ✺ Hot at your door ✺ Order now ✺ ",
     "howKicker": "Simple as 1-2-3",
     "howTitle": "From craving to doorstep",
     "howStep1": "Pick a kitchen",
@@ -84,7 +72,13 @@
     "why4": "Pay by cash, card or wallet",
     "whyBody4": "Cash on delivery or online.",
     "whyRating": "from local diners",
-    "bannersLabel": "Featured offers"
+    "bannersLabel": "Featured offers",
+    "heroNoCity": "Hungry?",
+    "yourArea": "your area",
+    "heroAlt2": "Burger and fries",
+    "popularCuisines": "Popular cuisines:",
+    "openKitchens": "Open kitchens",
+    "whyTagline": "We are clean and secure for all your needs."
   },
   "cart": {
     "emptyTitle": "Your cart is empty",
@@ -230,7 +224,6 @@
     "stepCart": "Cart",
     "stepDetails": "Details",
     "stepPayment": "Payment",
-    "marquee": "Fresh from local kitchens ✺ Hot at your door ✺ Order now ✺ ",
     "previous": "Previous",
     "next": "Next",
     "pagination": "Pagination",
@@ -248,13 +241,13 @@
     "soldOut": "Sold out"
   },
   "footer": {
+    "privacy": "Privacy",
+    "terms": "Terms",
     "stillScrolling": "Still scrolling?",
     "stomach": "Your stomach called. It's upset.",
     "orderNow": "Okay fine, order now",
     "eat": "Eat",
-    "search": "Search",
-    "privacy": "Privacy",
-    "terms": "Terms"
+    "search": "Search"
   },
   "notFound": {
     "badge": "Error 404",
@@ -396,6 +389,11 @@
     "sectionContact": "Find us",
     "sectionAbout": "About Us",
     "sectionReviews": "Reviews",
+    "offerPercent": "{value}% off",
+    "offerFlat": "{amount} off",
+    "offerMin": "On orders above {amount}",
+    "offerAny": "On any order",
+    "offerMax": "up to {amount} off",
     "sectionOffers": "Offers",
     "errSimilar": "Couldn't load similar kitchens.",
     "callUs": "Call us",
@@ -408,9 +406,13 @@
     "social": "Social links",
     "zoomIn": "Zoom in",
     "zoomOut": "Zoom out",
+    "weAccept": "We accept",
+    "payCod": "Cash on delivery",
+    "payCard": "Card",
     "mapStyle": "Map style",
     "mapCartoon": "Illustrated",
-    "mapStreet": "Street map"
+    "mapStreet": "Street map",
+    "mapIllustrative": "Illustration, not to scale"
   },
   "menu": {
     "categories": "Menu categories",
@@ -487,9 +489,6 @@
     "photoAlt": "Menu item"
   },
   "cities": {
-    "titleStart": "Cities we",
-    "titleAccent": "deliver to.",
-    "viewAll": "View all kitchens",
     "loadingMap": "Loading map",
     "zoomIn": "Zoom in",
     "zoomOut": "Zoom out",
@@ -497,35 +496,18 @@
     "deliveringNow": "Delivering now · {count, plural, one {# city} other {# cities}}",
     "kitchensOpen": "{count, plural, one {# kitchen} other {# kitchens}} open to order",
     "noneYet": "No kitchens yet. Check back soon.",
-    "comingSoon": "Coming soon",
-    "himalaya": "HIMALAYA",
-    "terai": "TERAI",
-    "names": {
-      "Kathmandu": "Kathmandu",
-      "Patan": "Patan",
-      "Bhaktapur": "Bhaktapur",
-      "Pokhara": "Pokhara",
-      "Chitwan": "Chitwan",
-      "Biratnagar": "Biratnagar",
-      "Butwal": "Butwal",
-      "Dharan": "Dharan",
-      "Birgunj": "Birgunj",
-      "Janakpur": "Janakpur",
-      "Nepalgunj": "Nepalgunj",
-      "Hetauda": "Hetauda",
-      "Itahari": "Itahari",
-      "Dhangadhi": "Dhangadhi",
-      "Bharatpur": "Bharatpur",
-      "Lumbini": "Lumbini"
-    }
+    "exploreMap": "Click to explore",
+    "viewAll": "View all kitchens",
+    "titleStart": "Cities we",
+    "titleAccent": "deliver to."
   },
   "promo": {
     "close": "Close offer",
     "sticker": "Hot deal",
     "title": "Weekend Feast Sale",
-    "headline": "20% OFF",
     "body": "Get 20% off on your first 3 orders this weekend.",
-    "cta": "Explore restaurants"
+    "cta": "Explore restaurants",
+    "headline": "20% OFF"
   },
   "cuisineNames": {
     "nepali": "Nepali",
@@ -539,8 +521,7 @@
   "restaurants": {
     "backHome": "Back to home",
     "titleStart": "Every kitchen",
-    "titleAccent": "near you.",
-    "summary": "<b>{count, plural, one {# kitchen} other {# kitchens}}</b> near you · {open} open now",
+    "summary": "<b>{count, plural, one {# kitchen} other {# kitchens}}</b> · {open} open now",
     "summaryCity": "<b>{count, plural, one {# kitchen} other {# kitchens}}</b> in {city} · {open} open now",
     "searchLabel": "Search restaurants or cuisines",
     "clearSearch": "Clear search",
@@ -712,7 +693,8 @@
     "refunded": "Refunded",
     "payAtPickup": "Pay at pickup",
     "payOnDelivery": "Pay on delivery",
-    "paymentPending": "Payment pending"
+    "paymentPending": "Payment pending",
+    "itemAllergens": "Allergens: {text}"
   },
   "account": {
     "title": "Your account",

@@ -26,7 +26,7 @@ export function CartoonMap({ initial = "•", km }: { initial?: string; km?: num
   }, [active]);
 
   return (
-    <div ref={ref} onMouseLeave={() => setActive(false)} className="relative h-full min-h-[260px] overflow-hidden rounded-[32px] rounded-tl-[120px] bg-map-land md:min-h-[380px]">
+    <div ref={ref} onMouseLeave={() => setActive(false)} className="relative h-full min-h-[260px] overflow-hidden rounded-[32px] bg-map-land">
       <div className="absolute inset-0 transition-transform duration-500" style={{ transform: `scale(${ZOOMS[z]})`, transformOrigin: "50% 50%" }}>
         <svg viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 h-full w-full" aria-hidden>
           <g transform="translate(500 250) scale(0.6) translate(-500 -250)">
@@ -62,6 +62,7 @@ export function CartoonMap({ initial = "•", km }: { initial?: string; km?: num
           <Icon name="pin" className="h-5 w-5 text-chili" />{t("kmFromYou", { km: km.toFixed(1) })}
         </span>
       )}
+      <span className="absolute bottom-4 left-4 z-10 rounded-full bg-paper/90 px-3 py-1 text-sm text-ink/70">{t("mapIllustrative")}</span>
       {!active && (
         <button type="button" onClick={() => setActive(true)} className="absolute inset-0 z-[5] hidden items-end justify-center pb-8 md:flex" aria-label={t("exploreMap")}>
           <span className="shadow-soft flex items-center gap-2 rounded-full bg-ink/85 px-4 py-2 font-bold text-cream"><Icon name="search" className="h-5 w-5" />{t("exploreMap")}</span>

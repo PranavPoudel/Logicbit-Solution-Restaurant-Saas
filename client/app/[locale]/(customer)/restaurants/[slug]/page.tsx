@@ -1,7 +1,7 @@
 // app/%5Blocale%5D/%28customer%29/restaurants/%5Bslug%5D/page.tsx
 "use client";
 
-import { use, useMemo, useState } from "react";
+import { Fragment, use, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
@@ -25,9 +25,10 @@ import {
   type SectionSetting,
 } from "@/lib/api/discovery";
 import { restaurantAccentStyle } from "@/lib/utils/restaurant-theme";
+import { CurrencyProvider } from "@/hooks/use-money";
 import { useGeolocation } from "@/hooks/use-geolocation";
 
-const DEFAULT_SECTIONS: SectionSetting[] = ["banner", "contact", "menu", "about", "reviews"].map((id) => ({ id, isVisible: true, titleEn: "", titleJa: "" }));
+const DEFAULT_SECTIONS: SectionSetting[] = ["banner", "menu", "about", "contact", "reviews"].map((id) => ({ id, isVisible: true, titleEn: "", titleJa: "" }));
 
 export default function RestaurantDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const t = useTranslations("restaurant");
@@ -68,7 +69,6 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ slu
   const categories = menuQuery.data ?? [];
   const storefront = storefrontQuery.data;
   const sections = (storefront?.sectionSettings?.length ? storefront.sectionSettings : DEFAULT_SECTIONS).filter((s) => s.isVisible);
-  const has = (id: string) => sections.some((s) => s.id === id);
   const titleOf = (id: string, fallback: string) => {
     const s = sections.find((x) => x.id === id);
     return (locale === "ja" ? s?.titleJa : s?.titleEn) || s?.titleEn || fallback;
@@ -96,21 +96,35 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ slu
     );
   }
 
-  const extra = (id: string) => {
+  const section = (id: string) => {
     switch (id) {
+      case "banner":
+        return banners.length > 0 && (
+          <div className="mx-auto mt-8 w-full max-w-[1440px] px-5 md:px-10">
+            <StorefrontBannerCarousel banners={banners} />
+          </div>
+        );
+      case "menu":
+        return (
+          <>
+            <MenuSection categories={categories} onOpenModifiers={setModifierItemId} />
+            {menuQuery.isLoading && <p className="mx-auto mt-10 w-full max-w-[1440px] px-5 text-lg text-ink/70 md:px-10">{t("loadingMenu")}</p>}
+            {!menuQuery.isLoading && categories.length === 0 && (
+              <p className="mx-auto mt-10 w-full max-w-[1440px] px-5 text-lg text-ink/70 md:px-10">{t("noMenu")}</p>
+            )}
+          </>
+        );
       case "offers":
-        return <StorefrontOffersSection title={titleOf("offers", t("sectionOffers"))} restaurantId={restaurant.id} />;
+        return <StorefrontOffersSection title={titleOf("offers", t("sectionOffers"))} offers={storefront?.offers ?? []} />;
       case "about":
-        return <StorefrontAboutSection title={titleOf("about", t("sectionAbout"))} aboutText={storefront?.about} />;
+        return <StorefrontAboutSection title={titleOf("about", t("sectionAbout"))} aboutText={storefront?.about} restaurant={restaurant} />;
       case "contact":
         return (
           <StorefrontContactSection
             title={titleOf("contact", t("sectionContact"))}
-            name={restaurant.name}
+            restaurant={restaurant}
             contact={storefront?.contact}
             socialLinks={storefront?.socialLinks}
-            latitude={restaurant.latitude}
-            longitude={restaurant.longitude}
           />
         );
       case "reviews":
@@ -120,29 +134,14 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ slu
     }
   };
 
-  const extras = sections.filter((s) => ["offers", "about", "contact", "reviews"].includes(s.id));
-
   return (
+    <CurrencyProvider code={restaurant?.currencyCode}>
     <div style={restaurantAccentStyle(restaurant)} className="pb-28 lg:pb-16">
-      <RestaurantHeader restaurant={restaurant} />
+      <div className={sections[0] && ["offers", "about", "contact", "reviews"].includes(sections[0].id) ? "pb-10" : ""}>
+        <RestaurantHeader restaurant={restaurant} />
+      </div>
 
-      {has("banner") && banners.length > 0 && (
-        <div className="mx-auto mt-8 w-full max-w-[1440px] px-5 md:px-10">
-          <StorefrontBannerCarousel banners={banners} />
-        </div>
-      )}
-
-      {has("menu") && <MenuSection categories={categories} onOpenModifiers={setModifierItemId} />}
-      {has("menu") && menuQuery.isLoading && <p className="mx-auto mt-10 w-full max-w-[1440px] px-5 text-lg text-ink/70 md:px-10">{t("loadingMenu")}</p>}
-      {has("menu") && !menuQuery.isLoading && categories.length === 0 && (
-        <p className="mx-auto mt-10 w-full max-w-[1440px] px-5 text-lg text-ink/70 md:px-10">{t("noMenu")}</p>
-      )}
-
-      {extras.map((s) => (
-        <div key={s.id} className="mx-auto w-full max-w-[1440px] px-0 pt-10 md:px-0">
-          {extra(s.id)}
-        </div>
-      ))}
+      {sections.map((s) => <Fragment key={s.id}>{section(s.id)}</Fragment>)}
 
       <SimilarRestaurants restaurants={similar} loading={nearbyQuery.isLoading || !isResolved} error={nearbyQuery.isError} onRetry={() => nearbyQuery.refetch()} />
 
@@ -150,5 +149,6 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ slu
 
       <StorefrontPopupModal popups={popupQuery.data ? [popupQuery.data] : []} />
     </div>
+    </CurrencyProvider>
   );
 }

@@ -294,13 +294,13 @@ export default function AdminSettingsPage() {
             type="tel"
             value={values.supportPhone}
             onChange={(v) => set("supportPhone", v)}
-            placeholder="+977 1-4000000"
+            placeholder="Support phone number"
           />
           <TextField
             label="Address"
             value={values.supportAddress}
             onChange={(v) => set("supportAddress", v)}
-            placeholder="Kathmandu, Nepal"
+            placeholder="City, Country"
           />
         </Section>
 
@@ -424,7 +424,7 @@ export default function AdminSettingsPage() {
               value={values.seoKeywords}
               onChange={(v) => set("seoKeywords", v)}
               hint="Separate keywords with commas."
-              placeholder="food delivery, restaurants, Kathmandu"
+              placeholder="food delivery, restaurants, your city"
             />
           </Section>
         </div>

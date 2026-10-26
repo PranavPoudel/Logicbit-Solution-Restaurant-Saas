@@ -1,5 +1,6 @@
 import type { CuisineLike, DiscoveryRestaurant } from "@/types/restaurant";
 import { theme } from "@/config/theme";
+import { getFullImageUrl } from "@/lib/utils/image";
 
 export function cuisineList(cuisines: CuisineLike[] | undefined): { key: string; name: string }[] {
   return (cuisines ?? [])
@@ -32,7 +33,7 @@ export const cuisineName = (c: CuisineLike) => (typeof c === "string" ? c : c.na
 export const cuisineImage = (slug?: string) => CUISINE_IMAGES[slug ?? ""] ?? FALLBACK;
 
 export function restaurantImage(r: { coverImageUrl?: string | null; cuisines?: CuisineLike[] }) {
-  return r.coverImageUrl || cuisineImage(cuisineSlug(r.cuisines?.[0]));
+  return (r.coverImageUrl && getFullImageUrl(r.coverImageUrl)) || cuisineImage(cuisineSlug(r.cuisines?.[0]));
 }
 
 export const matchesQuery = (r: DiscoveryRestaurant, needle: string) =>

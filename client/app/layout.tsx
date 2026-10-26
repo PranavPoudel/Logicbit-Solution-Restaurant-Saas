@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Geist, Space_Grotesk, JetBrains_Mono, Bricolage_Grotesque, DM_Sans } from "next/font/google";
+import { Geist, Space_Grotesk, JetBrains_Mono, Bricolage_Grotesque, DM_Sans, Noto_Sans_JP } from "next/font/google";
+import { getLocale } from "next-intl/server";
 import "./globals.css";
 import { QueryProvider } from "@/providers/query-provider";
 import { themeCssVariables } from "@/config/theme";
@@ -27,6 +28,13 @@ const dmSans = DM_Sans({
   weight: ["400", "500", "700"],
 });
 
+const notoSansJP = Noto_Sans_JP({
+  variable: "--font-noto-jp",
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+  preload: false,
+});
+
 const jetbrainsMono = JetBrains_Mono({
   variable: "--font-jetbrains-mono",
   subsets: ["latin"],
@@ -38,16 +46,17 @@ export const metadata: Metadata = {
   description: "Order food from restaurants near you.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
   return (
     <html
-      lang="en"
+      lang={locale}
       style={themeCssVariables}
-      className={`${geistSans.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} ${bricolage.variable} ${dmSans.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} ${bricolage.variable} ${dmSans.variable} ${notoSansJP.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-sans">
         {/* QueryProvider now wraps EVERYTHING, including Owner Dashboard */}

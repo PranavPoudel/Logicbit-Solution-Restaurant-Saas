@@ -10,7 +10,7 @@ import { registerOwner } from "@/lib/api/auth";
 import { geocodeAddress } from "@/lib/geocode";
 import { useOwnerAuthStore } from "@/store/owner-auth-store";
 import { theme } from "@/config/theme";
-import { money } from "@/lib/utils/money";
+import { formatMoney } from "@/lib/utils/money";
 import { Button, Card, Icon, Progress, Squiggle, Stamp } from "@/components/ui/primitives";
 import { AuthError, AuthInput, AuthPassword, PasswordStrength } from "@/components/auth/auth-shell";
 
@@ -71,7 +71,7 @@ function Hero({ onStart }: { onStart: () => void }) {
         <Stamp text={t("stamp")} className="absolute left-6 top-6 h-24 w-24 -rotate-12 bg-ink text-cream md:left-10 md:top-10 md:h-32 md:w-32" />
         <span className="absolute bottom-10 right-6 rotate-6 rounded-2xl bg-paper px-4 py-2 shadow-hard md:bottom-16 md:right-12">
           <span className="block font-bold text-ink/75">{t("setupFee")}</span>
-          <span className="font-display text-3xl font-extrabold text-ink">{money(0)}</span>
+          <span className="font-display text-3xl font-extrabold text-ink">{formatMoney(0)}</span>
         </span>
       </div>
     </section>

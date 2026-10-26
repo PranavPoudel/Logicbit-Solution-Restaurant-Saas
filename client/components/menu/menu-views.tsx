@@ -3,7 +3,7 @@
 
 import { useTranslations } from "next-intl";
 import { getFullImageUrl, getItemImage } from "@/lib/utils/image";
-import { money } from "@/lib/utils/money";
+import { useMoney } from "@/hooks/use-money";
 import type { MenuItem } from "@/types/menu";
 import { AllergenAlert, Icon } from "@/components/ui/primitives";
 import { spiceOf } from "@/components/menu/dish-tags";
@@ -69,6 +69,7 @@ export function ViewToggle({ view, onChange }: { view: MenuView; onChange: (v: M
 }
 
 export function DishListRow({ item, onOpen }: { item: MenuItem; onOpen: () => void }) {
+  const money = useMoney();
   const t = useTranslations("menu");
   const tc = useTranslations("common");
   const out = item.isAvailable === false;
@@ -91,6 +92,7 @@ export function DishListRow({ item, onOpen }: { item: MenuItem; onOpen: () => vo
 }
 
 export function DishTable({ items, onOpen }: { items: MenuItem[]; onOpen: (id: string) => void }) {
+  const money = useMoney();
   const t = useTranslations("menu");
   const tc = useTranslations("common");
   return (

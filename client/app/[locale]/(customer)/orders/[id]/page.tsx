@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { getMyOrder } from "@/lib/api/orders";
-import { money } from "@/lib/utils/money";
+import { useMoney } from "@/hooks/use-money";
 import { ORDER_STATUS_STEPS, PICKUP_STATUS_STEPS } from "@/types/order";
 import { ThermalReceipt } from "@/components/print/ThermalReceipt";
 import { ReviewModal } from "@/components/review/review-modal";
@@ -75,6 +75,7 @@ export default function OrderTrackingPage({
     queryFn: () => getMyOrder(id),
     refetchInterval: (query) => (DONE_STATUSES.includes(query.state.data?.status ?? "") ? false : 10000),
   });
+  const money = useMoney(order?.restaurant?.currencyCode);
 
   if (isLoading) {
     return (
@@ -132,7 +133,6 @@ export default function OrderTrackingPage({
     return (
       <div className="relative grid min-h-[80vh] place-items-center overflow-hidden px-5 py-10">
         <Confetti />
-        <div className="blob absolute h-[520px] w-[520px] bg-saffron md:h-[720px] md:w-[720px]" aria-hidden />
         <div className="relative max-w-lg text-center text-espresso">
           <div className="pop mx-auto grid h-36 w-36 place-items-center rounded-full bg-herb text-parchment shadow-hard"><Icon name="check" className="h-20 w-20" /></div>
           <h1 className="mt-8 font-display text-6xl font-extrabold leading-[0.9] tracking-tight md:text-8xl">{t("orderIn")}</h1>
@@ -258,6 +258,8 @@ export default function OrderTrackingPage({
                     <div className="flex-1">
                       <p className="font-bold">{item.menuItem?.name ?? t("itemFallback", { price: item.unitPrice != null ? money(item.unitPrice) : "?" })}</p>
                       {item.selectedModifiers && item.selectedModifiers.length > 0 && <p className="text-ink/65">{item.selectedModifiers.map((m) => m.name).join(" · ")}</p>}
+                      {item.notes && <p className="text-ink/65">&ldquo;{item.notes}&rdquo;</p>}
+                      {item.menuItem?.allergenInfo && <p className="text-ink/65">{t("itemAllergens", { text: item.menuItem.allergenInfo })}</p>}
                     </div>
                     <span className="font-bold">{money(item.subtotal ?? item.price ?? 0)}</span>
                   </li>

@@ -10,7 +10,7 @@ import { AddressesTab } from "@/components/account/addresses-tab";
 import { OrderHistoryTab } from "@/components/account/order-history-tab";
 import { TransactionsTab } from "@/components/account/transactions-tab";
 import { FavoritesTab } from "@/components/account/favorites-tab";
-import { Button, Icon, Squiggle } from "@/components/ui/primitives";
+import { Button, Icon } from "@/components/ui/primitives";
 import { useCustomerAuthStore } from "@/store/customer-auth-store";
 
 const TABS = [
@@ -40,7 +40,7 @@ export default function AccountPage({ searchParams }: { searchParams: Promise<{ 
             </div>
             <div className="min-w-0">
               <h1 className="font-display text-[32px] font-extrabold leading-none tracking-tight md:text-[48px]">
-                <span className="relative inline-block">{t("title")}<Squiggle className="absolute -bottom-2 left-0 h-3 w-full text-chili" /></span>
+                {t("title")}
               </h1>
               <p className="mt-3 truncate font-medium">
                 {customer?.name}

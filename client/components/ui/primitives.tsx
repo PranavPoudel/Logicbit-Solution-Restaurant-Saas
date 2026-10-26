@@ -172,8 +172,9 @@ export const SectionTitle = ({ n, children, aside }: { n?: number; children: Rea
   </div>
 );
 
-export function AllergenAlert({ text, compact }: { text: string; compact?: boolean }) {
+export function AllergenAlert({ text: raw, compact }: { text: string; compact?: boolean }) {
   const t = useTranslations("common");
+  const text = raw.replace(/^contains:?\s+/i, "");
   return compact ? (
     <span role="note" className="mt-2 inline-flex items-start gap-1.5 rounded-2xl bg-chili/10 px-3 py-1 font-bold text-danger">
       <Icon name="alert" className="mt-0.5 h-4 w-4 shrink-0" />{t("containsCompact", { text })}
@@ -228,18 +229,5 @@ export function Progress({ step, steps }: { step: number; steps?: string[] }) {
         </li>
       ))}
     </ol>
-  );
-}
-
-export function Marquee({ text }: { text?: string }) {
-  const t = useTranslations("common");
-  const label = text ?? t("marquee");
-  return (
-    <section className="relative -my-4 z-10 -rotate-2 overflow-hidden bg-chili py-5 text-cream shadow-warm" aria-label={label.replace(/ ✺ /g, ". ")}>
-      <div className="marquee flex w-max whitespace-nowrap font-display text-5xl font-extrabold md:text-7xl" aria-hidden>
-        <span>{label.repeat(3)}</span>
-        <span>{label.repeat(3)}</span>
-      </div>
-    </section>
   );
 }

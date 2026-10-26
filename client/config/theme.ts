@@ -1,4 +1,6 @@
 // config/theme.ts
+export type HomeSection = "hero" | "offers" | "cuisines" | "restaurants" | "trending" | "howItWorks" | "why" | "owner" | "cities";
+
 export const theme = {
   colors: {
     primary: "#C0392B",
@@ -24,6 +26,8 @@ export const theme = {
     paper: "#FFFFFF",
     chili: "#E0301E",
     chiliDeep: "#C92716",
+    crimson: "#9B1B30",
+    cuisineShades: { edge: "#5A0C1B", center: "#A81F39" },
     saffron: "#FFB81C",
     herb: "#1F8A4C",
     herbInk: "#17703D",
@@ -62,6 +66,10 @@ export const theme = {
     PHONEPAY: "#5F259F",
     PAYPAY: "#FF0033",
   } as Record<string, string>,
+  layout: {
+    homeSections: ["hero", "offers", "cuisines", "restaurants", "trending", "howItWorks", "why", "owner", "cities"] as HomeSection[],
+    guestOnlySections: ["trending", "howItWorks", "why", "owner"] as HomeSection[],
+  },
   brand: {
     name: "LogicBit",
     logoUrl: "/images/logo.png",
@@ -83,14 +91,11 @@ export const theme = {
     heroHeadingPlain: "Order the",
     heroHeadingEmphasis: "good stuff",
     heroHeadingSuffix: ", delivered fast.",
-    heroSubtext: "500+ restaurants across Kathmandu. Fresh, hot, and at your door in 30 minutes.",
     searchPlaceholder: "Search restaurants or dishes",
-    freeDeliveryNote: "Free delivery on orders over Rs. 999",
     footerTagline: "Bringing you fresh, delicious food, made with care.",
     footerHours: "Open daily, 10 AM – 10 PM",
     footerCredit: "Powered by",
     bannerIconOpacity: 0.12,
-    siteTagline: "Order the good stuff, delivered fast, across Kathmandu.",
     contactPhone: "+977 1-4000000",
     contactEmail: "support@logicbit.com",
     copyrightText: "All rights reserved.",
@@ -105,7 +110,7 @@ export const theme = {
     customizeLabel: "Customize",
     addLabel: "Add",
     priceFromPrefix: "From ",
-    currencyPrefix: "Rs",
+    currencyCode: "NPR",
     openNowLabel: "Open now",
     openLabelShort: "Open",
     closedLabel: "Closed",
@@ -127,23 +132,8 @@ export const theme = {
     forRestaurantsBadge: "For Restaurant Owners",
     forRestaurantsHeadingPlain: "The online ordering system for",
     forRestaurantsHeadingEmphasis: "your restaurant",
-    forRestaurantsSubtext: "Reach more customers across Kathmandu and manage every order from one dashboard.",
     registerCtaLabel: "Register your restaurant",
     howItWorksHeading: "How it works",
-    onboardingSteps: [
-      {
-        title: "Register your restaurant",
-        description: "Sign up with your restaurant details and get set up in minutes.",
-      },
-      {
-        title: "Add your menu",
-        description: "Upload dishes, prices, and photos from anywhere, anytime.",
-      },
-      {
-        title: "Start receiving orders",
-        description: "Customers across Kathmandu can now find and order from you.",
-      },
-    ],
     growReachTitle: "Grow your reach",
     growReachDescription: "Get discovered by hundreds of hungry customers across the city.",
     manageRealTimeTitle: "Manage in real time",
@@ -186,6 +176,7 @@ export const themeCssVariables = {
   "--brand-paper": theme.colors.paper,
   "--brand-chili": theme.colors.chili,
   "--brand-chili-deep": theme.colors.chiliDeep,
+  "--brand-crimson": theme.colors.crimson,
   "--brand-saffron": theme.colors.saffron,
   "--brand-herb": theme.colors.herb,
   "--brand-herb-ink": theme.colors.herbInk,

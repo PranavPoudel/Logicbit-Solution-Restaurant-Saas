@@ -3,10 +3,11 @@
 
 import { useTranslations } from "next-intl";
 import { useCoupon } from "@/hooks/use-coupon";
-import { money } from "@/lib/utils/money";
+import { useMoney } from "@/hooks/use-money";
 import { Button, Icon, IconButton, inputCls } from "@/components/ui/primitives";
 
 export function CouponInput({ id = "cp" }: { id?: string }) {
+  const money = useMoney();
   const t = useTranslations("coupon");
   const { coupon, code, setCode, loading, error, apply, remove } = useCoupon();
 
