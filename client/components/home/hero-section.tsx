@@ -23,7 +23,7 @@ export function HeroSection() {
       <div className="absolute inset-0 flex">
         {theme.brand.heroImages.map((src, i) => (
           <div key={i} className="flex-1 relative">
-            <AppImage sizes="50vw" src={src} alt="" className="w-full h-full object-cover" />
+            <AppImage sizes="50vw" src={src} alt="" className="w-full h-full object-cover" priority={i === 0} />
           </div>
         ))}
       </div>
