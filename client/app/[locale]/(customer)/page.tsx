@@ -1,3 +1,4 @@
+// app/[locale]/(customer)/page.tsx
 "use client";
 
 import { useMemo, useState } from "react";
