@@ -31,19 +31,19 @@ Status legend: ✅ Done  |  ⚠️ Partial  |  ❌ Not started
 | 16. Settlement (owner) | ✅ | Outstanding + history | — |
 | 17. Subscription (owner) | ✅ | Dashboard banner, **dedicated management page, auto-renew toggle wired with optimistic UI & error reversion** | — |
 | 20. Analytics (owner) | ✅ | Revenue stats, 7-day trend chart, top-selling items, **real backend API** | — |
-| 5. Roles & Permissions | ❌ | — | Role builder, permission checklist UI |
+| 5. Roles & Permissions | ✅  | — | Role builder, permission checklist UI |
 | 14. Storefront Builder | ✅ | Banner manager, Config page, Popup scheduler, sidebar sub-nav | — |
-| 15. Advertisement (owner) | ❌ | — | "Advertise your restaurant" request form |
+| 15. Advertisement (owner) | ✅  | — | "Advertise your restaurant" request form |
 | 19. Media | ✅ | Reusable ImageUpload component, wired into Menu, Settings, Storefront | — |
 | 8. Cuisine (owner) | ✅ | **Multi-select cuisine checklist** integrated into Settings (General tab) | — |
 
 ## Portal 3 — Delivery App
 
-**Nothing built yet.** Auth + API layer exist (`lib/api/delivery.ts`, `lib/api/delivery-auth.ts`); no pages. Needs: register/login, availability toggle, available-orders list, active-delivery view, earnings.
+**already buit** Auth + API layer exist (`lib/api/delivery.ts`, `lib/api/delivery-auth.ts`); no pages. Needs: register/login, availability toggle, available-orders list, active-delivery view, earnings.
 
 ## Portal 4 — Platform Admin
 
-**Nothing built yet.** Auth + full API layer exist (`lib/api/platform-admin.ts`, `lib/api/platform-auth.ts`); no pages. Needs: login, revenue dashboard, restaurant management, staff/roles, activity log, refunds.
+**already buit** Auth + full API layer exist (`lib/api/platform-admin.ts`, `lib/api/platform-auth.ts`); no pages. Needs: login, revenue dashboard, restaurant management, staff/roles, activity log, refunds.
 
 ---
 
@@ -56,9 +56,9 @@ Status legend: ✅ Done  |  ⚠️ Partial  |  ❌ Not started
 5. ~~Owner: Cuisine checklist~~ ✅ done
 6. ~~Owner: Subscription & Analytics~~ ✅ done
 7. ~~Customer: Coupon & Distance-tiered Delivery~~ ✅ done
-8. **Owner: Advertisement + Roles & Permissions** (Delegated to interns)
-9. **Delivery App** (own portal)
-10. **Platform Admin** (own portal) (delegated to intern)
+8. **Owner: Advertisement + Roles & Permissions** (Delegated to interns) -- done
+9. **Delivery App** (own portal) --done 
+10. **Platform Admin** (own portal) (delegated to intern) -- done
 
 ---
 
