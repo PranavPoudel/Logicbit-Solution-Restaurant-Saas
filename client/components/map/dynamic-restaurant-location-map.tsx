@@ -10,10 +10,6 @@ export const DynamicRestaurantLocationMap = dynamic(
     })),
   {
     ssr: false,
-    loading: () => (
-      <div className="w-full h-56 bg-[#2B1410]/5 rounded-2xl flex items-center justify-center text-sm text-[#2B1410]/40">
-        Loading map...
-      </div>
-    ),
+    loading: () => <div className="h-full min-h-[260px] animate-pulse rounded-[32px] rounded-tl-[120px] bg-ink/10 md:min-h-[380px]" aria-hidden />,
   }
 );

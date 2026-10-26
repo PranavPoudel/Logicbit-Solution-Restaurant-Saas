@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { theme } from "@/config/theme";
 
 const DEFAULT_PRIMARY = "#e3a008";
 const DEFAULT_SECONDARY = "#17181c";
@@ -23,12 +24,22 @@ export function getRestaurantThemeStyle(colors?: {
   if (primary && HEX.test(primary) && primary !== DEFAULT_PRIMARY) {
     style["--brand-primary"] = primary;
     style["--brand-primary-hover"] = `color-mix(in srgb, ${primary} 82%, black)`;
-    style["--brand-on-primary"] = luminance(primary) > 0.45 ? "#17181C" : "#FDF6EC";
+    style["--brand-on-primary"] = luminance(primary) > 0.45 ? theme.colors.ink : theme.colors.background;
   }
   if (secondary && HEX.test(secondary) && secondary !== DEFAULT_SECONDARY && luminance(secondary) < 0.2) {
     style["--brand-dark"] = secondary;
     style["--brand-dark-hover"] = `color-mix(in srgb, ${secondary} 85%, white)`;
   }
 
+  return style as CSSProperties;
+}
+
+export function restaurantAccentStyle(colors?: { primaryColor?: string | null; secondaryColor?: string | null }): CSSProperties {
+  const theme = getRestaurantThemeStyle(colors) as Record<string, string>;
+  const style: Record<string, string> = { ...theme };
+  if (theme["--brand-primary"]) {
+    style["--accent"] = theme["--brand-primary"];
+    style["--accent-ink"] = theme["--brand-on-primary"] ?? "#fff4e2";
+  }
   return style as CSSProperties;
 }

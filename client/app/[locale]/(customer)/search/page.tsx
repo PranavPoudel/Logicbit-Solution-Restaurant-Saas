@@ -1,65 +1,83 @@
 // app/(customer)/search/page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
-import { SearchBar } from "@/components/home/search-bar";
+import { use, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { RestaurantCard } from "@/components/restaurant/restaurant-card";
-import { getNearbyRestaurants } from "@/lib/api/discovery";
-import type { DiscoveryRestaurant } from "@/types/restaurant";
-import { theme } from "@/config/theme";
+import { RestaurantCardSkeleton } from "@/components/restaurant/restaurant-card-skeleton";
+import { Button, Icon, IconButton, Squiggle } from "@/components/ui/primitives";
+import { getAllNearby } from "@/lib/api/discovery";
+import { matchesQuery } from "@/lib/utils/cuisine";
+import { useGeolocation } from "@/hooks/use-geolocation";
 
-export default function SearchPage() {
-  const [query, setQuery] = useState("");
-  const [allRestaurants, setAllRestaurants] = useState<DiscoveryRestaurant[]>([]);
-  const [loading, setLoading] = useState(true);
+export default function SearchPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+  const t = useTranslations("search");
+  const tr = useTranslations("restaurants");
+  const params = use(searchParams);
+  const [query, setQuery] = useState(params.q ?? "");
+  const { lat, lng, isResolved } = useGeolocation();
+  const { data, isLoading, isError, refetch } = useQuery({
+    queryKey: ["nearby-restaurants", lat, lng, "all"],
+    queryFn: () => getAllNearby(lat, lng),
+    enabled: isResolved,
+  });
 
-  // Read ?q=... from the link (coming from the homepage search)
-  useEffect(() => {
-    const q = new URLSearchParams(window.location.search).get("q");
-    if (q) setQuery(q);
-  }, []);
-
-  useEffect(() => {
-    // Default to Kirtipur coordinates used elsewhere on the site;
-    // swap for real geolocation later if available.
-    getNearbyRestaurants({ lat: 27.6766, lng: 85.3253, radiusKm: 20, limit: 50 })
-      .then((res) => setAllRestaurants(res.data))
-      .finally(() => setLoading(false));
-  }, []);
-
-  const filtered = query.trim()
-    ? allRestaurants.filter((r) =>
-        r.name?.toLowerCase().includes(query.trim().toLowerCase())
-      )
-    : allRestaurants;
+  const needle = query.trim().toLowerCase();
+  const results = useMemo(
+    () => (data?.rows ?? []).filter((r) => matchesQuery(r, needle)),
+    [data, needle],
+  );
+  const loading = !isResolved || isLoading;
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-6">
-      <h1 className="font-serif font-semibold text-xl mb-4" style={{ color: theme.colors.dark }}>
-        Search
+    <div className="mx-auto w-full max-w-[1440px] px-5 pb-16 md:px-10">
+      <Link href="/" className="flex min-h-11 items-center gap-1 font-bold"><Icon name="back" />{tr("backHome")}</Link>
+      <h1 className="mt-4 font-display text-[48px] font-extrabold leading-[0.95] tracking-tight md:text-[80px]">
+        {t("title")}{" "}
+        <span className="relative inline-block">
+          {t("accent")}
+          <Squiggle className="absolute -bottom-2 left-0 h-4 w-full text-chili md:-bottom-3 md:h-6" />
+        </span>
       </h1>
 
-      <div className="mb-6 max-w-lg">
-        <SearchBar value={query} onChange={setQuery} autoFocus />
-      </div>
+      <form onSubmit={(e) => e.preventDefault()} className="shadow-warm mt-8 flex max-w-3xl items-center gap-2 rounded-full border-[3px] border-ink bg-paper p-1.5">
+        <Icon name="search" className="ml-3 h-6 w-6 shrink-0 text-ink/60" />
+        <label htmlFor="search-q" className="sr-only">{t("label")}</label>
+        <input
+          id="search-q"
+          autoFocus
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder={t("label")}
+          className="min-h-12 min-w-0 flex-1 bg-transparent text-lg outline-none placeholder:text-ink/55"
+        />
+        {query && <IconButton icon="x" label={tr("clearSearch")} onClick={() => setQuery("")} className="hover:bg-ink/10" />}
+      </form>
 
-      {loading ? (
-        <p className="text-sm" style={{ color: `${theme.colors.dark}66` }}>
-          Loading restaurants…
-        </p>
-      ) : filtered.length === 0 ? (
-        <p className="text-sm" style={{ color: `${theme.colors.dark}66` }}>
-          {query.trim()
-            ? `No restaurants found for "${query}".`
-            : "No restaurants available."}
-        </p>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map((restaurant) => (
-            <RestaurantCard key={restaurant.id} restaurant={restaurant} />
-          ))}
-        </div>
-      )}
+      <p className="mt-8 text-lg text-ink/75" aria-live="polite">
+        {loading ? tr("finding") : isError || results.length === 0 ? "" : needle ? t("countFor", { count: results.length, query: query.trim() }) : t("count", { count: results.length })}
+      </p>
+
+      <div className="mt-6 grid gap-x-8 gap-y-12 md:grid-cols-2 xl:grid-cols-3">
+        {loading && [0, 1, 2].map((i) => <RestaurantCardSkeleton key={i} />)}
+        {!loading && isError && (
+          <div className="col-span-full py-10 text-center" role="alert">
+            <h2 className="font-display text-[32px] font-extrabold">{t("loadError")}</h2>
+            <p className="mt-2 text-lg text-ink/75">{t("loadErrorBody")}</p>
+            <Button size="lg" variant="ink" className="mt-6" onClick={() => refetch()}>{tr("errorRetry")}</Button>
+          </div>
+        )}
+        {!loading && !isError && results.length === 0 && (
+          <div className="col-span-full py-10 text-center" role="status">
+            <h2 className="font-display text-[32px] font-extrabold">{needle ? t("noneFor", { query: query.trim() }) : t("noneYet")}</h2>
+            <p className="mt-2 text-lg text-ink/75">{t("tryAnother")}</p>
+            {needle && <Button size="lg" className="mt-6" onClick={() => setQuery("")}>{tr("clearSearch")}</Button>}
+          </div>
+        )}
+        {!loading && !isError && results.map((r, i) => <RestaurantCard key={r.id} r={r} index={i} />)}
+      </div>
     </div>
   );
 }

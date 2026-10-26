@@ -4,6 +4,7 @@ export interface OrderItemDetail {
   menuItemId?: string;
   menuItem?: {
     name?: string;
+    allergenInfo?: string | null;
   };
   name?: string;
   quantity?: number;
@@ -11,6 +12,7 @@ export interface OrderItemDetail {
   unitPrice?: number;
   subtotal?: number;
   selectedModifiers?: Array<{ name: string; price?: number }>;
+  notes?: string | null;
 }
 
 export interface OrderRestaurant {
@@ -19,6 +21,7 @@ export interface OrderRestaurant {
   address?: string | null;
   phone?: string | null;
   refundPolicy?: string | null;
+  currencyCode?: string;
   latitude?: number | null;
   longitude?: number | null;
 }

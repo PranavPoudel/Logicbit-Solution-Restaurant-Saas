@@ -4,6 +4,8 @@
 import { useState, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { QueryError } from "@/components/ui/query-error";
+import { getErrorMessage } from "@/lib/utils/error";
 import { AlertTriangle, Trash2 } from "lucide-react";
 import { useOwnerAuthStore } from "@/store/owner-auth-store";
 import { useAutoApprove, useAutoRiderStore } from "@/store/auto-rider-store";
@@ -106,7 +108,7 @@ function OrdersPageContent() {
         <AlertTriangle className="text-neutral-300" size={28} />
         <p className="text-sm text-red-500">
           Couldn&apos;t load orders:{" "}
-          {String((allOrdersQuery.error as any)?.response?.data?.message || allOrdersQuery.error)}
+          {getErrorMessage(allOrdersQuery.error, "Unknown error", { includeErrorMessage: true })}
         </p>
       </div>
     );
@@ -148,10 +150,7 @@ function OrdersPageContent() {
       {allOrdersQuery.isLoading ? (
         <p className="text-sm text-neutral-400 text-center py-12">Loading orders…</p>
       ) : allOrdersQuery.isError ? (
-        <div className="flex flex-col items-center text-center gap-2 py-12">
-          <AlertTriangle className="text-neutral-300" size={24} />
-          <p className="text-sm text-neutral-500">Couldn&apos;t load orders.</p>
-        </div>
+        <QueryError what="orders" error={allOrdersQuery.error} onRetry={() => allOrdersQuery.refetch()} />
       ) : orders.length === 0 ? (
         <div className="flex flex-col items-center text-center gap-2 py-12">
           <AlertTriangle className="text-neutral-300" size={24} />

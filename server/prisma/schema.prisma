@@ -120,6 +120,20 @@ enum DeliveryFeeType {
 // list हो, ताकि सबै restaurant मा उही standardized नाम प्रयोग होस्
 // (search/filter/analytics सधैं सही काम गरोस्), र frontend ले dropdown/
 // checklist देखाउन सकोस् (free text input होइन)।
+model City {
+  id           String   @id @default(uuid())
+  name         String
+  nameJa       String?
+  country      String
+  latitude     Float
+  longitude    Float
+  displayOrder Int      @default(0)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  @@unique([name, country])
+}
+
 model Cuisine {
   id       String  @id @default(uuid())
   name     String  @unique

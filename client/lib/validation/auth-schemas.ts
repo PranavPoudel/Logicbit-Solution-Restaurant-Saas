@@ -1,22 +1,23 @@
 // lib/validation/auth-schemas.ts
 import { z } from "zod";
 
+// Customer form messages are translation keys (namespace "auth"); see messages/*.json
 export const customerLoginSchema = z.object({
-  email: z.string().email("Enter a valid email"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  email: z.string().email("validation.email"),
+  password: z.string().min(6, "validation.passwordMin"),
 });
 export type CustomerLoginInput = z.infer<typeof customerLoginSchema>;
 
 export const customerSignupSchema = z
   .object({
-    fullName: z.string().min(2, "Enter your full name"),
-    email: z.string().email("Enter a valid email"),
-    phone: z.string().min(7, "Enter a valid phone number"),
-    password: z.string().min(6, "Password must be at least 6 characters"),
+    fullName: z.string().min(2, "validation.fullName"),
+    email: z.string().email("validation.email"),
+    phone: z.string().min(7, "validation.phone"),
+    password: z.string().min(6, "validation.passwordMin"),
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
+    message: "validation.passwordMatch",
     path: ["confirmPassword"],
   });
 export type CustomerSignupInput = z.infer<typeof customerSignupSchema>;

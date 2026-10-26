@@ -3,14 +3,17 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useLocale, useTranslations } from "next-intl";
 import { listMyOrders } from "@/lib/api/orders";
 import { AccountRow } from "@/components/account/account-row";
 import { FilterChips } from "@/components/account/filter-chips";
+import { Empty } from "@/components/account/empty";
+import { formatMoney } from "@/lib/utils/money";
 
 interface TransactionRow {
   id: string;
   orderNumber?: string;
-  restaurant?: { name?: string };
+  restaurant?: { name?: string; currencyCode?: string };
   status?: string;
   total?: number;
   paymentMethod?: string;
@@ -19,34 +22,25 @@ interface TransactionRow {
   createdAt?: string;
 }
 
-const METHOD_LABELS: Record<string, string> = {
-  COD: "Cash on delivery",
-  CREDIT_CARD: "Card",
-  ESEWA: "eSewa",
-  KHALTI: "Khalti",
-  IPS: "ConnectIPS",
-  PHONEPAY: "PhonePe",
-  PAYPAY: "PayPay",
-};
-
-const FILTERS = [
-  { key: "all", label: "All" },
-  { key: "paid", label: "Paid" },
-  { key: "refunded", label: "Refunded" },
-] as const;
-
-type FilterKey = (typeof FILTERS)[number]["key"];
+type FilterKey = "all" | "paid" | "refunded";
 
 function getState(row: TransactionRow) {
-  if (row.paymentStatus === "REFUNDED" || row.refund?.status === "PROCESSED") {
-    return { key: "refunded", label: "Refunded", style: "bg-blue-50 text-blue-700" };
-  }
-  if (row.paymentStatus === "PAID") return { key: "paid", label: "Paid", style: "bg-emerald-50 text-emerald-700" };
-  if (row.status === "CANCELLED") return { key: "cancelled", label: "Cancelled", style: "bg-neutral-100 text-neutral-500" };
-  return { key: "unpaid", label: "Unpaid", style: "bg-amber-50 text-amber-700" };
+  if (row.paymentStatus === "REFUNDED" || row.refund?.status === "PROCESSED") return { key: "refunded", tone: "ink" as const };
+  if (row.paymentStatus === "PAID") return { key: "paid", tone: "herb" as const };
+  if (row.status === "CANCELLED") return { key: "cancelled", tone: "soft" as const };
+  return { key: "unpaid", tone: "saffron" as const };
 }
 
+const STATE_LABEL = { refunded: "stateRefunded", paid: "statePaid", cancelled: "stateCancelled", unpaid: "stateUnpaid" } as const;
+
 export function TransactionsTab() {
+  const t = useTranslations("account");
+  const locale = useLocale();
+  const filters = [
+    { key: "all", label: t("filterAll") },
+    { key: "paid", label: t("filterPaid") },
+    { key: "refunded", label: t("filterRefunded") },
+  ] as const;
   const [filter, setFilter] = useState<FilterKey>("all");
   const { data, isLoading } = useQuery({
     queryKey: ["my-orders"],
@@ -58,37 +52,39 @@ export function TransactionsTab() {
   const totalRefunded = rows
     .filter((r) => r.state.key === "refunded")
     .reduce((sum, r) => sum + (r.row.refund?.amount ?? r.row.total ?? 0), 0);
+  const currency = rows[0]?.row.restaurant?.currencyCode;
   const visible = filter === "all" ? rows : rows.filter((r) => r.state.key === filter);
 
   return (
-    <div className="max-w-3xl pb-5 space-y-4">
+    <div className="max-w-3xl space-y-4 pb-5">
       <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-xl border border-[#E8E7E2] bg-white p-4 md:p-5">
-          <p className="text-xs text-neutral-400">Total paid</p>
-          <p className="mt-1 font-mono text-xl font-semibold text-[#17181C]">Rs {totalPaid}</p>
+        <div className="rounded-[24px] bg-herb p-4 text-parchment shadow-soft md:p-5">
+          <p className="font-bold opacity-90">{t("totalPaid")}</p>
+          <p className="mt-1 font-display text-3xl font-extrabold">{formatMoney(totalPaid, currency)}</p>
         </div>
-        <div className="rounded-xl border border-[#E8E7E2] bg-white p-4 md:p-5">
-          <p className="text-xs text-neutral-400">Total refunded</p>
-          <p className="mt-1 font-mono text-lg font-semibold text-[#17181C]">Rs {totalRefunded}</p>
+        <div className="rounded-[24px] bg-saffron p-4 text-espresso shadow-soft md:p-5">
+          <p className="font-bold">{t("totalRefunded")}</p>
+          <p className="mt-1 font-display text-3xl font-extrabold">{formatMoney(totalRefunded, currency)}</p>
         </div>
       </div>
 
-      <FilterChips filters={FILTERS} active={filter} onChange={setFilter} />
+      <FilterChips filters={filters} active={filter} onChange={setFilter} />
 
-      <div key={filter} className="space-y-2.5">
+      <div key={filter} className="space-y-3">
         {isLoading ? (
-          <p className="text-sm text-neutral-400">Loading transactions…</p>
+          <p className="text-lg text-ink/70">{t("loadingTransactions")}</p>
         ) : visible.length === 0 ? (
-          <p className="text-sm text-neutral-400">No transactions yet.</p>
+          <Empty>{t("noTransactions")}</Empty>
         ) : (
           visible.map(({ row, state }, i) => (
             <AccountRow
               key={row.id}
               href={`/orders/${row.id}`}
-              title={row.restaurant?.name ?? "Order"}
-              subtitle={`${METHOD_LABELS[row.paymentMethod ?? ""] ?? row.paymentMethod ?? "—"}${row.createdAt ? ` · ${new Date(row.createdAt).toLocaleDateString()}` : ""}`}
+              title={row.restaurant?.name ?? t("orderFallback")}
+              subtitle={`${t.has(`methods.${row.paymentMethod}`) ? t(`methods.${row.paymentMethod}`) : row.paymentMethod ?? "—"}${row.createdAt ? ` · ${new Date(row.createdAt).toLocaleDateString(locale)}` : ""}`}
               amount={row.total ?? 0}
-              badge={{ label: state.label, style: state.style }}
+              currency={row.restaurant?.currencyCode}
+              badge={{ label: t(STATE_LABEL[state.key as keyof typeof STATE_LABEL]), tone: state.tone }}
               index={i}
             />
           ))

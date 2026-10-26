@@ -1,18 +1,16 @@
 // components/restaurant/restaurant-card-skeleton.tsx
-import { theme } from "@/config/theme";
 
-export function RestaurantCardSkeleton() {
-  return (
-    <div
-      className="bg-white rounded-2xl overflow-hidden animate-pulse"
-      style={{ border: `1px solid ${theme.colors.dark}14` }}
-    >
-      <div className="h-56 sm:h-60" style={{ backgroundColor: `${theme.colors.dark}0D` }} />
-      <div className="p-3.5 space-y-2">
-        <div className="h-4 rounded w-3/4" style={{ backgroundColor: `${theme.colors.dark}0D` }} />
-        <div className="h-4 rounded-full w-1/3 mt-1.5" style={{ backgroundColor: `${theme.colors.dark}0D` }} />
-        <div className="h-3 rounded w-2/3 mt-2.5" style={{ backgroundColor: `${theme.colors.dark}0D` }} />
+export const RestaurantCardSkeleton = () => (
+  <div className="rounded-[28px] bg-paper p-3 pb-5 shadow-soft" aria-hidden>
+    <div className="aspect-[4/3] animate-pulse rounded-[20px] bg-ink/10" />
+    <div className="space-y-3 px-2 pt-4">
+      <div className="h-7 w-3/5 animate-pulse rounded-xl bg-ink/10" />
+      <div className="flex gap-2">
+        <div className="h-8 w-20 animate-pulse rounded-full bg-ink/10" />
+        <div className="h-8 w-24 animate-pulse rounded-full bg-ink/10" />
       </div>
+      <div className="h-5 w-4/5 animate-pulse rounded-xl bg-ink/10" />
+      <div className="flex justify-end"><div className="h-11 w-32 animate-pulse rounded-full bg-ink/10" /></div>
     </div>
-  );
-}
+  </div>
+);

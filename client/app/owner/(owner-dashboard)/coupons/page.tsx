@@ -4,6 +4,7 @@
 import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, Plus, Trash2 } from "lucide-react";
+import { QueryError } from "@/components/ui/query-error";
 import { useOwnerAuthStore } from "@/store/owner-auth-store";
 import { couponsApi, type CouponInput } from "@/lib/api/coupons";
 import { CouponCard, type OwnerCoupon } from "@/components/owner-coupons/coupon-card";
@@ -143,6 +144,8 @@ export default function CouponsPage() {
 
       {couponsQuery.isLoading ? (
         <p className="text-sm text-neutral-400 py-8 text-center">Loading coupons…</p>
+      ) : couponsQuery.isError ? (
+        <QueryError what="coupons" error={couponsQuery.error} onRetry={() => couponsQuery.refetch()} />
       ) : displayedCoupons.length === 0 ? (
         <div className="bg-white border border-neutral-200 rounded-xl p-12 text-center">
           <p className="text-sm text-neutral-500">

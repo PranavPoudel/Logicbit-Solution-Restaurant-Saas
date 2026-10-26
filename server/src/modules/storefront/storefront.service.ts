@@ -168,18 +168,42 @@ export class StorefrontService {
     const restaurant = await this.prisma.restaurant.findFirst({ where: { id: restaurantId, isActive: true } });
     if (!restaurant) throw new NotFoundException('Restaurant not found');
 
-    const [banners, config] = await Promise.all([
+    const now = new Date();
+    const [banners, config, coupons] = await Promise.all([
       this.prisma.storefrontBanner.findMany({
         where: { restaurantId, isActive: true },
         orderBy: { displayOrder: 'asc' },
       }),
       this.prisma.storefrontConfig.findFirst({ where: { restaurantId } }),
+      this.prisma.coupon.findMany({
+        where: {
+          tenantId: restaurant.tenantId,
+          OR: [{ restaurantId }, { restaurantId: null }],
+          isActive: true,
+          deletedAt: null,
+          validFrom: { lte: now },
+          AND: [{ OR: [{ validUntil: null }, { validUntil: { gt: now } }] }],
+        },
+        orderBy: { createdAt: 'desc' },
+      }),
     ]);
+    const offers = coupons
+      .filter((c) => c.usageLimit === null || c.usedCount < c.usageLimit)
+      .map((c) => ({
+        id: c.id,
+        code: c.isAutoApply ? null : c.code,
+        type: c.type,
+        value: c.value,
+        maxDiscount: c.maxDiscount,
+        minOrderAmount: c.minOrderAmount,
+        validUntil: c.validUntil,
+      }));
 
     return {
       success: true,
       data: {
         banners,
+        offers,
         about: config?.aboutText ?? null,
         contact: {
           phone: config?.contactPhone ?? restaurant.address,

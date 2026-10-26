@@ -26,6 +26,7 @@ export interface Review {
   rating: number;
   comment?: string;
   customerName?: string;
+  customer?: { name?: string };
   orderNumber?: string;
   createdAt: string;
 }
