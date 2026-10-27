@@ -1,3 +1,4 @@
+// app/[locale]/(customer)/page.tsx
 "use client";
 
 import { Fragment, useMemo, type ReactNode } from "react";

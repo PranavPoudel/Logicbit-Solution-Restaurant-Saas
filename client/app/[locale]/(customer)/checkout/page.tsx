@@ -101,6 +101,7 @@ export default function CheckoutPage() {
 
     return methods.length > 0 ? methods : (["COD"] as PaymentMethod[]);
   }, [restaurantSettingsQuery.data]);
+
   const payMethod = payChoice && enabledMethods.includes(payChoice) ? payChoice : enabledMethods[0];
 
   type DeliveryCheck = {
@@ -125,11 +126,13 @@ export default function CheckoutPage() {
     const timer = setTimeout(() => refetchQuote(), wait);
     return () => clearTimeout(timer);
   }, [quoteExpiresAt, refetchQuote]);
+
   const notDeliverable = hasLocation && deliveryData?.deliverable === false;
   const distanceKm: number | null = hasLocation && typeof deliveryData?.distanceKm === "number" ? deliveryData.distanceKm : null;
   const deliveryFee: number | null = hasLocation && !notDeliverable && typeof deliveryData?.deliveryFee === "number" ? deliveryData.deliveryFee : null;
   const notDeliverableMessage = deliveryData?.reason ?? t("notDeliverable");
   const feeUnavailable = hasLocation && !notDeliverable && !deliveryCheckLoading && (deliveryQuery.isError || (!!deliveryData && deliveryFee === null));
+  
   const effectiveDeliveryFee = deliveryFee ?? 0;
   const total = Math.max(0, sub - discount) + (orderType === "DELIVERY" ? effectiveDeliveryFee : 0);
 
@@ -240,144 +243,205 @@ export default function CheckoutPage() {
 
   return (
     <CurrencyProvider code={restaurant?.currencyCode}>
-    <div style={restaurantAccentStyle(restaurant)} className="pb-16">
-      <div className="mx-auto w-full max-w-[1440px] px-5 md:px-10">
-        <Link href="/cart" className="flex min-h-11 items-center gap-1 font-bold"><Icon name="back" />{t("backToCart")}</Link>
-        <div className="mt-2 max-w-md"><Progress step={1} /></div>
-        <h1 className="mt-6 font-display text-5xl font-extrabold tracking-tight md:text-7xl">
-          {t("almost")} <span className="text-chili">{t("there")}</span>
-        </h1>
-
-        <div className="mt-8 grid items-start gap-8 lg:grid-cols-[1fr_420px]">
-          <div className="space-y-6">
-            <Card>
-              <SectionTitle n={1}>{t("howTitle")}</SectionTitle>
-              <div className="grid gap-4 sm:grid-cols-2" role="radiogroup" aria-label={t("orderType")}>
-                <Selectable on={!isPickup} onClick={() => { setOrderType("DELIVERY"); setError(""); }}>
-                  <Icon name="bike" className="h-8 w-8 text-chili" />
-                  <span><b className="block text-lg">{t("delivery")}</b><span className="text-ink/70">{t("deliveryHint")}</span></span>
-                </Selectable>
-                <Selectable on={isPickup} onClick={() => { setOrderType("PICKUP"); setError(""); }}>
-                  <Icon name="store" className="h-8 w-8 text-herb" />
-                  <span><b className="block text-lg">{t("pickup")}</b><span className="text-ink/70">{t("pickupHint")}</span></span>
-                </Selectable>
-              </div>
-            </Card>
-
-            {!isPickup && (
-              <Card>
-                <SectionTitle n={2}>{t("deliverTo")}</SectionTitle>
-                <p className="mb-4 text-ink/70">{t("deliverHint")}</p>
-                <AddressPicker
-                  value={{ address: deliveryAddress, lat: deliveryLatitude, lng: deliveryLongitude }}
-                  onChange={({ address, lat, lng }) => {
-                    setDeliveryAddress(address);
-                    setDeliveryLatitude(lat);
-                    setDeliveryLongitude(lng);
-                    setError("");
-                  }}
-                  onError={setError}
-                  placeholder={t("addressPlaceholder")}
-                  mapLabel={t("mapLabel")}
-                />
-                {notDeliverable && (
-                  <p role="alert" className="mt-4 flex items-center gap-2 font-bold text-chili"><Icon name="alert" className="h-5 w-5" />{notDeliverableMessage}</p>
-                )}
-                {hasLocation && !notDeliverable && (
-                  <p className="mt-4 text-ink/75">
-                    {deliveryCheckLoading
-                      ? t("checkingPin")
-                      : deliveryFee != null
-                        ? distanceKm != null ? t("deliveringToPinKm", { km: distanceKm.toFixed(1) }) : t("deliveringToPin")
-                        : t("pinSelected")}
-                  </p>
-                )}
-              </Card>
-            )}
-
-            <Card>
-              <SectionTitle n={isPickup ? 2 : 3}>{t("payWith")}</SectionTitle>
-              <div className="grid gap-4 sm:grid-cols-2" role="radiogroup" aria-label={t("paymentMethod")}>
-                {enabledMethods.map((m) => {
-                  const p = PAY_INFO[m];
-                  return (
-                    <Selectable key={m} on={payMethod === m} onClick={() => { setPayChoice(m); setError(""); }}>
-                      <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl font-display text-xl font-extrabold text-white" style={{ background: p.bg }}>{m === "COD" ? <Icon name="bag" className="h-6 w-6" /> : p.mark}</span>
-                      <span><b className="block text-lg">{t(`pay.${m}.name`)}</b><span className="text-ink/70">{t(`pay.${m}.sub`)}</span></span>
-                    </Selectable>
-                  );
-                })}
-              </div>
-            </Card>
+      <div style={restaurantAccentStyle(restaurant)} className="pb-16">
+        <div className="mx-auto w-full max-w-[1440px] px-5 md:px-10">
+          <Link href="/cart" className="flex min-h-11 items-center gap-1 font-bold">
+            <Icon name="back" />
+            {t("backToCart")}
+          </Link>
+          <div className="mt-2 max-w-md">
+            <Progress step={1} />
           </div>
+          <h1 className="mt-6 font-display text-5xl font-extrabold tracking-tight md:text-7xl">
+            {t("almost")} <span className="text-chili">{t("there")}</span>
+          </h1>
 
-          <div className="lg:sticky lg:top-6 lg:self-start">
-            <Card className="space-y-4 !p-6">
-              <h2 className="font-display text-2xl font-extrabold">{t("orderSummary")}</h2>
-              <ul className="max-h-48 space-y-2 overflow-y-auto">
-                {items.map((item) => (
-                  <li key={`${item.menuItemId}::${item.variantKey}`} className="flex justify-between gap-3">
-                    <span className="min-w-0 truncate"><b>{item.quantity}×</b> {item.name}</span>
-                    <span className="shrink-0 font-bold">{money(item.price * item.quantity)}</span>
-                  </li>
-                ))}
-              </ul>
-              <CouponInput id="cp-checkout" />
-              <div className="space-y-2">
-                <div className="flex justify-between"><span>{t("subtotal")}</span><span className="font-bold">{money(sub)}</span></div>
-                {discount > 0 && <div className="flex justify-between text-herb"><span>{t("discount")}</span><span className="font-bold">-{money(discount)}</span></div>}
-                {orderType === "DELIVERY" && (
-                  <div className="flex justify-between">
+          <div className="mt-8 grid items-start gap-8 lg:grid-cols-[1fr_420px]">
+            <div className="space-y-6">
+              <Card>
+                <SectionTitle n={1}>{t("howTitle")}</SectionTitle>
+                <div className="grid gap-4 sm:grid-cols-2" role="radiogroup" aria-label={t("orderType")}>
+                  <Selectable on={!isPickup} onClick={() => { setOrderType("DELIVERY"); setError(""); }}>
+                    <Icon name="bike" className="h-8 w-8 text-chili" />
                     <span>
-                      {distanceKm != null ? t("deliveryFeeKm", { km: distanceKm.toFixed(1) }) : t("deliveryFee")}
-                      {quote?.provider && !deliveryCheckLoading && !feeUnavailable && <span className="block text-sm text-ink/60">{t("deliveredBy", { provider: quote.provider })}</span>}
+                      <b className="block text-lg">{t("delivery")}</b>
+                      <span className="text-ink/70">{t("deliveryHint")}</span>
                     </span>
-                    <span className="font-bold">{deliveryCheckLoading ? "…" : feeUnavailable || !hasLocation ? "—" : effectiveDeliveryFee === 0 ? t("free") : money(effectiveDeliveryFee)}</span>
-                  </div>
-                )}
-              </div>
-              {orderType === "DELIVERY" && feeUnavailable && (
-                <div role="alert" className="flex items-center justify-between gap-2 rounded-2xl border-2 border-chili bg-chili/10 p-3 font-medium">
-                  <span>{t("feeFailed")}</span>
-                  <button type="button" onClick={() => deliveryQuery.refetch()} className="shrink-0 rounded-full border-2 border-chili px-3 py-1 font-bold text-chili hover:bg-chili hover:text-cream">{tc("retry")}</button>
+                  </Selectable>
+                  <Selectable on={isPickup} onClick={() => { setOrderType("PICKUP"); setError(""); }}>
+                    <Icon name="store" className="h-8 w-8 text-herb" />
+                    <span>
+                      <b className="block text-lg">{t("pickup")}</b>
+                      <span className="text-ink/70">{t("pickupHint")}</span>
+                    </span>
+                  </Selectable>
                 </div>
-              )}
-              <div className="flex items-baseline justify-between border-t-2 border-dashed border-ink/15 pt-4">
-                <span className="text-lg font-bold">{t("total")}</span>
-                <span className="font-display text-[32px] font-extrabold leading-none">{money(total)}</span>
-              </div>
+              </Card>
 
-              <div className="space-y-3">
-                {error && (
-                  <div role="alert" className="flex gap-3 rounded-2xl border-2 border-chili bg-chili/10 p-4">
-                    <Icon name="alert" className="h-6 w-6 shrink-0 text-chili" />
-                    <div>
-                      <p className="font-bold text-chili">{mutation.isError ? t("failedTitle", { method: payName }) : t("checkDetails")}</p>
-                      <p>{error}</p>
+              {!isPickup && (
+                <Card>
+                  <SectionTitle n={2}>{t("deliverTo")}</SectionTitle>
+                  <p className="mb-4 text-ink/70">{t("deliverHint")}</p>
+                  <AddressPicker
+                    value={{ address: deliveryAddress, lat: deliveryLatitude, lng: deliveryLongitude }}
+                    onChange={({ address, lat, lng }) => {
+                      setDeliveryAddress(address);
+                      setDeliveryLatitude(lat);
+                      setDeliveryLongitude(lng);
+                      setError("");
+                    }}
+                    onError={setError}
+                    placeholder={t("addressPlaceholder")}
+                    mapLabel={t("mapLabel")}
+                  />
+                  {notDeliverable && (
+                    <p role="alert" className="mt-4 flex items-center gap-2 font-bold text-chili">
+                      <Icon name="alert" className="h-5 w-5" />
+                      {notDeliverableMessage}
+                    </p>
+                  )}
+                  {hasLocation && !notDeliverable && (
+                    <p className="mt-4 text-ink/75">
+                      {deliveryCheckLoading
+                        ? t("checkingPin")
+                        : deliveryFee != null
+                        ? distanceKm != null
+                          ? t("deliveringToPinKm", { km: distanceKm.toFixed(1) })
+                          : t("deliveringToPin")
+                        : t("pinSelected")}
+                    </p>
+                  )}
+                </Card>
+              )}
+
+              <Card>
+                <SectionTitle n={isPickup ? 2 : 3}>{t("payWith")}</SectionTitle>
+                <div className="grid gap-4 sm:grid-cols-2" role="radiogroup" aria-label={t("paymentMethod")}>
+                  {enabledMethods.map((m) => {
+                    const p = PAY_INFO[m];
+                    return (
+                      <Selectable key={m} on={payMethod === m} onClick={() => { setPayChoice(m); setError(""); }}>
+                        <span
+                          className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl font-display text-xl font-extrabold text-white"
+                          style={{ background: p.bg }}
+                        >
+                          {m === "COD" ? <Icon name="bag" className="h-6 w-6" /> : p.mark}
+                        </span>
+                        <span>
+                          <b className="block text-lg">{t(`pay.${m}.name`)}</b>
+                          <span className="text-ink/70">{t(`pay.${m}.sub`)}</span>
+                        </span>
+                      </Selectable>
+                    );
+                  })}
+                </div>
+              </Card>
+            </div>
+
+            <div className="lg:sticky lg:top-6 lg:self-start">
+              <Card className="space-y-4 !p-6">
+                <h2 className="font-display text-2xl font-extrabold">{t("orderSummary")}</h2>
+                <ul className="max-h-48 space-y-2 overflow-y-auto">
+                  {items.map((item) => (
+                    <li key={`${item.menuItemId}::${item.variantKey}`} className="flex justify-between gap-3">
+                      <span className="min-w-0 truncate">
+                        <b>{item.quantity}×</b> {item.name}
+                      </span>
+                      <span className="shrink-0 font-bold">{money(item.price * item.quantity)}</span>
+                    </li>
+                  ))}
+                </ul>
+                <CouponInput id="cp-checkout" />
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span>{t("subtotal")}</span>
+                    <span className="font-bold">{money(sub)}</span>
+                  </div>
+                  {discount > 0 && (
+                    <div className="flex justify-between text-herb">
+                      <span>{t("discount")}</span>
+                      <span className="font-bold">-{money(discount)}</span>
                     </div>
+                  )}
+                  {orderType === "DELIVERY" && (
+                    <div className="flex justify-between">
+                      <span>
+                        {distanceKm != null ? t("deliveryFeeKm", { km: distanceKm.toFixed(1) }) : t("deliveryFee")}
+                        {quote?.provider && !deliveryCheckLoading && !feeUnavailable && (
+                          <span className="block text-sm text-ink/60">{t("deliveredBy", { provider: quote.provider })}</span>
+                        )}
+                      </span>
+                      <span className="font-bold">
+                        {deliveryCheckLoading
+                          ? "…"
+                          : feeUnavailable || !hasLocation
+                          ? "—"
+                          : effectiveDeliveryFee === 0
+                          ? t("free")
+                          : money(effectiveDeliveryFee)}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                {orderType === "DELIVERY" && feeUnavailable && (
+                  <div role="alert" className="flex items-center justify-between gap-2 rounded-2xl border-2 border-chili bg-chili/10 p-3 font-medium">
+                    <span>{t("feeFailed")}</span>
+                    <button
+                      type="button"
+                      onClick={() => deliveryQuery.refetch()}
+                      className="shrink-0 rounded-full border-2 border-chili px-3 py-1 font-bold text-chili hover:bg-chili hover:text-cream"
+                    >
+                      {tc("retry")}
+                    </button>
                   </div>
                 )}
-                <label className="flex cursor-pointer gap-3 rounded-2xl bg-ink/5 p-3">
-                  <input type="checkbox" checked={agree} onChange={() => setAgree(!agree)} className="mt-1 h-5 w-5 shrink-0 accent-chili" />
-                  <span>{restaurant?.refundPolicy ? t("refundAgree") : t("refundAgreeShort")}</span>
-                </label>
-                <Button size="lg" full onClick={place} disabled={!agree || mutation.isPending || !!blockedReason} aria-busy={mutation.isPending}>
-                  {mutation.isPending ? (
-                    <>
-                      <span className="h-5 w-5 animate-spin rounded-full border-[3px] border-current border-t-transparent" />
-                      {t("placing")}
-                    </>
-                  ) : (
-                    t("placeOrder", { total: money(total) })
+                <div className="flex items-baseline justify-between border-t-2 border-dashed border-ink/15 pt-4">
+                  <span className="text-lg font-bold">{t("total")}</span>
+                  <span className="font-display text-[32px] font-extrabold leading-none">{money(total)}</span>
+                </div>
+
+                <div className="space-y-3">
+                  {error && (
+                    <div role="alert" className="flex gap-3 rounded-2xl border-2 border-chili bg-chili/10 p-4">
+                      <Icon name="alert" className="h-6 w-6 shrink-0 text-chili" />
+                      <div>
+                        <p className="font-bold text-chili">{mutation.isError ? t("failedTitle", { method: payName }) : t("checkDetails")}</p>
+                        <p>{error}</p>
+                      </div>
+                    </div>
                   )}
-                </Button>
-                {blockedReason && <p className="text-center text-ink/70">{blockedReason}</p>}
-              </div>
-            </Card>
+                  <label className="flex cursor-pointer gap-3 rounded-2xl bg-ink/5 p-3">
+                    <input
+                      type="checkbox"
+                      checked={agree}
+                      onChange={() => setAgree(!agree)}
+                      className="mt-1 h-5 w-5 shrink-0 accent-chili"
+                    />
+                    <span>{restaurant?.refundPolicy ? t("refundAgree") : t("refundAgreeShort")}</span>
+                  </label>
+                  <Button
+                    size="lg"
+                    full
+                    onClick={place}
+                    disabled={!agree || mutation.isPending || !!blockedReason}
+                    aria-busy={mutation.isPending}
+                  >
+                    {mutation.isPending ? (
+                      <>
+                        <span className="h-5 w-5 animate-spin rounded-full border-[3px] border-current border-t-transparent" />
+                        {t("placing")}
+                      </>
+                    ) : (
+                      t("placeOrder", { total: money(total) })
+                    )}
+                  </Button>
+                  {blockedReason && <p className="text-center text-ink/70">{blockedReason}</p>}
+                </div>
+              </Card>
+            </div>
           </div>
         </div>
       </div>
-    </div>
     </CurrencyProvider>
   );
 }
