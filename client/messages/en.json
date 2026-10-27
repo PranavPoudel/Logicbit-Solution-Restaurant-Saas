@@ -412,14 +412,22 @@
     "mapStyle": "Map style",
     "mapCartoon": "Illustrated",
     "mapStreet": "Street map",
-    "mapIllustrative": "Illustration, not to scale"
+    "mapIllustrative": "Illustration, not to scale",
+    "hours": {
+      "title": "Opening hours",
+      "closesAt": "Closes {time}",
+      "opensToday": "Opens today at {time}",
+      "opensTomorrow": "Opens tomorrow at {time}",
+      "opensOn": "Opens {day} at {time}",
+      "today": "Today",
+      "closedDay": "Closed"
+    }
   },
   "menu": {
     "categories": "Menu categories",
     "searchMenu": "Search this menu",
     "clearSearch": "Clear search",
     "noMatch": "No “{q}” on this menu.",
-    "showMore": "Show more ({count} more in {category})",
     "thisCategory": "this category",
     "fallbackName": "Menu",
     "fallbackItem": "Menu item",
@@ -458,7 +466,12 @@
     "veg": "Vegetarian",
     "nonVeg": "Non-vegetarian",
     "colAdd": "Add to cart",
-    "customisable": "Customisable"
+    "customisable": "Customisable",
+    "pagesOf": "Pages of {category}",
+    "showingRange": "Showing {from}–{to} of {total}",
+    "prevPage": "Previous page",
+    "nextPage": "Next page",
+    "goToPage": "Go to page {n}"
   },
   "dish": {
     "popular": "Popular ★",
@@ -933,7 +946,9 @@
       "deliveryNoEta": "Delivery time depends on how far you are from **{name}**. The exact fee shows at checkout before you pay.",
       "offersHere": "**{name}** has these codes right now: {codes}. Apply one in your cart.",
       "offersNone": "**{name}** has no active offers at the moment.",
-      "fallbackRestaurant": "I can help with **{name}**: the menu, opening hours, location, contact and delivery. Try one of those."
+      "fallbackRestaurant": "I can help with **{name}**: the menu, opening hours, location, contact and delivery. Try one of those.",
+      "hoursOpenUntil": "**{name}** is open right now until {time}.",
+      "hoursClosedOpens": "**{name}** is closed right now. {opens}."
     },
     "action": {
       "orders": "Open my orders",

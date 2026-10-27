@@ -58,13 +58,12 @@ function Hero({ onStart }: { onStart: () => void }) {
         </ul>
       </div>
 
-      <div className="relative h-[380px] overflow-hidden rounded-[36px] bg-saffron md:h-[560px]">
-        <div className="blob absolute -left-20 -top-20 h-72 w-72 bg-tangerine" aria-hidden />
-        <div className="blob shadow-warm absolute -right-12 top-8 h-[280px] w-[280px] overflow-hidden border-8 border-cream md:h-[440px] md:w-[440px]">
+      <div className="relative h-[380px] overflow-hidden rounded-[36px] bg-crimson md:h-[560px]">
+        <div className="shadow-warm absolute right-6 top-10 aspect-square w-[72%] max-w-[420px] rotate-2 overflow-hidden rounded-[32px] border-8 border-cream md:right-10 md:top-12">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/cuisine-nepali.jpg.avif" alt={t("alt1")} className="h-full w-full scale-110 object-cover" />
+          <img src="/images/cuisine-nepali.jpg.avif" alt={t("alt1")} className="h-full w-full object-cover" />
         </div>
-        <div className="arch shadow-warm absolute bottom-6 left-6 h-[180px] w-[130px] -rotate-6 overflow-hidden border-8 border-cream md:bottom-10 md:left-10 md:h-[260px] md:w-[190px]">
+        <div className="shadow-warm absolute bottom-6 left-6 h-[180px] w-[130px] -rotate-6 overflow-hidden rounded-[28px] border-8 border-cream md:bottom-10 md:left-10 md:h-[260px] md:w-[190px]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/images/cuisine-newari.jpg.avif" alt={t("alt2")} className="h-full w-full object-cover" />
         </div>

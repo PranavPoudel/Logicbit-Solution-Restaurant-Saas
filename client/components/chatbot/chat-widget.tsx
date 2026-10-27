@@ -36,11 +36,6 @@ export function ChatWidget() {
     setDraft("");
   };
 
-  const finish = () => {
-    endChat();
-    setConfirmEnd(false);
-  };
-
   const action = (m: ChatMessage) => {
     if (!m.href) return null;
     const cls = "mt-2 inline-flex min-h-9 items-center gap-1.5 font-bold text-crimson hover:underline";
@@ -120,7 +115,7 @@ export function ChatWidget() {
             <p className="font-medium">{t("endConfirm")}</p>
             <div className="flex shrink-0 gap-2">
               <button type="button" onClick={() => setConfirmEnd(false)} className="min-h-11 rounded-full border-2 border-ink/15 px-4 font-bold hover:bg-ink/5">{t("keep")}</button>
-              <button type="button" onClick={finish} className="min-h-11 rounded-full bg-crimson px-4 font-bold text-cream hover:bg-ink">{t("end")}</button>
+              <button type="button" onClick={() => { endChat(); setConfirmEnd(false); }} className="min-h-11 rounded-full bg-crimson px-4 font-bold text-cream hover:bg-ink">{t("end")}</button>
             </div>
           </div>
         )}

@@ -7,6 +7,8 @@ export interface ChatRestaurant {
   address?: string;
   phone?: string;
   isOpen: boolean;
+  closesAt?: string;
+  opensAt?: string;
   deliveryMinutes?: number;
   categories: string[];
   offerCodes: string[];

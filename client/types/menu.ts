@@ -1,5 +1,6 @@
 // types/menu.ts
 import type { CuisineLike } from "@/types/restaurant";
+import type { DayHours, OpenStatus } from "@/types/hours";
 
 export interface RestaurantDetail {
   id: string;
@@ -13,6 +14,9 @@ export interface RestaurantDetail {
   latitude?: number;
   longitude?: number;
   isOpen?: boolean;
+  openStatus?: OpenStatus;
+  openingHours?: DayHours[] | null;
+  timezone?: string;
   distanceKm?: number;
   estimatedDeliveryMinutes?: number;
   about?: string;

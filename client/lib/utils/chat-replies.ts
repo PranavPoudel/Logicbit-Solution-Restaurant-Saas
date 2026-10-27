@@ -36,7 +36,7 @@ const RESTAURANT: Intent[] = [
   { key: "menu", re: /menu|dish|food|eat|order|serve|メニュー|料理/i, href: "#menu" },
 ];
 
-export const GENERAL_QUICK: QuickReply[] = [
+const GENERAL_QUICK: QuickReply[] = [
   { id: "orders", icon: "bag" },
   { id: "restaurants", icon: "search" },
   { id: "offers", icon: "ticket" },
@@ -66,7 +66,9 @@ function restaurantReply(key: string, r: ChatRestaurant, intent?: Intent): ChatR
         ? { key, values: { name, categories: r.categories.slice(0, MENU_PREVIEW).map(chatSafe).join(", ") }, href }
         : { key: "menuEmpty", values: { name } };
     case "hours":
-      return { key: r.isOpen ? "hoursOpen" : "hoursClosed", values: { name } };
+      return r.isOpen
+        ? r.closesAt ? { key: "hoursOpenUntil", values: { name, time: chatSafe(r.closesAt) } } : { key: "hoursOpen", values: { name } }
+        : r.opensAt ? { key: "hoursClosedOpens", values: { name, opens: chatSafe(r.opensAt) } } : { key: "hoursClosed", values: { name } };
     case "location":
       return r.address ? { key, values: { name, address: chatSafe(r.address) }, href } : { key: "locationMissing", values: { name } };
     case "contact":

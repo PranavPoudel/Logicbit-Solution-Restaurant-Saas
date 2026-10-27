@@ -7,7 +7,7 @@ import { useFavorite } from "@/hooks/use-favorite";
 import { cuisineName, restaurantImage } from "@/lib/utils/cuisine";
 import { useCuisineLabel } from "@/hooks/use-cuisine-label";
 import type { DiscoveryRestaurant } from "@/types/restaurant";
-import { Badge, Icon, IconButton } from "@/components/ui/primitives";
+import { Icon, IconButton, OpenBadge } from "@/components/ui/primitives";
 
 const TINTS = [
   { bg: "bg-saffron", text: "text-ink" },
@@ -18,7 +18,6 @@ const ROTS = ["-rotate-2", "rotate-2", "-rotate-1", "rotate-1"];
 
 export function RestaurantCard({ r, index, compact }: { r: DiscoveryRestaurant; index: number; compact?: boolean }) {
   const t = useTranslations("restaurant");
-  const tc = useTranslations("common");
   const cuisineLabel = useCuisineLabel();
   const tint = TINTS[index % TINTS.length];
   const open = r.isOpen !== false;
@@ -35,11 +34,9 @@ export function RestaurantCard({ r, index, compact }: { r: DiscoveryRestaurant; 
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={restaurantImage(r)} alt={t("foodFrom", { name })} className={`h-full w-full object-cover transition duration-500 group-hover:scale-105 ${open ? "" : "opacity-70 grayscale"}`} />
         <div className="absolute left-3 top-3 flex flex-wrap gap-2">
-          <Badge tone={open ? "herb" : "ink"}>
-            <span className={`h-2.5 w-2.5 rounded-full ${open ? "animate-pulse bg-parchment" : "bg-chili"}`} />
-            {open ? tc("openNow") : tc("closed")}
-          </Badge>
+          <OpenBadge open={open} />
         </div>
+        {r.isSponsored && <span className="shadow-hard absolute bottom-3 left-3 -rotate-3 rounded-xl bg-ink px-3 py-1 font-display text-base font-extrabold text-cream">{t("sponsored")}</span>}
         <IconButton
           icon="heart"
           label={fav ? t("removeFav", { name }) : t("saveFav", { name })}
@@ -49,7 +46,6 @@ export function RestaurantCard({ r, index, compact }: { r: DiscoveryRestaurant; 
         />
       </div>
 
-      {r.isSponsored && <span className="absolute -left-3 top-6 z-10 -rotate-12 rounded-xl bg-ink px-3 py-1 font-display text-base font-extrabold text-cream shadow-hard">{t("sponsored")}</span>}
       <div className={`${tint.bg} ${tint.text} absolute -right-4 -top-5 z-10 grid h-20 w-20 rotate-12 place-items-center rounded-full border-4 border-paper font-display text-2xl font-extrabold shadow-hard`}>
         {hasOrders || rating > 0 ? `★${rating.toFixed(1)}` : t("new")}
       </div>

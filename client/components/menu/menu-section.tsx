@@ -12,10 +12,11 @@ import type { MenuCategory, MenuItem } from "@/types/menu";
 import { Badge, Chip, Icon, IconButton, Squiggle } from "@/components/ui/primitives";
 import { DishImage, DishListRow, DishTable, ViewToggle, type MenuView } from "@/components/menu/menu-views";
 import { DishTags } from "@/components/menu/dish-tags";
+import { MenuPager } from "@/components/menu/menu-pager";
 import { PopularCategories, SignatureDishes } from "@/components/menu/signature-dishes";
 import { getFullImageUrl } from "@/lib/utils/image";
 
-const PAGE_SIZE = 12;
+const PAGE_SIZE = 10;
 const catId = (id: string) => `cat-${id}`;
 
 function DishCard({ item, onOpen }: { item: MenuItem; onOpen: () => void }) {
@@ -160,7 +161,7 @@ export function MenuSection({ categories, onOpenModifiers }: { categories: MenuC
   const discount = useCartStore((s) => s.discount());
   const [active, setActive] = useState<string | null>(null);
   const [q, setQ] = useState("");
-  const [shown, setShown] = useState<Record<string, number>>({});
+  const [pages, setPages] = useState<Record<string, number>>({});
   const [view, setView] = useState<MenuView>("cards");
 
   const open = (id: string) => requireLogin() && onOpenModifiers(id);
@@ -224,7 +225,7 @@ export function MenuSection({ categories, onOpenModifiers }: { categories: MenuC
             </div>
             <label className={`group shadow-soft relative flex h-11 shrink-0 cursor-text items-center overflow-hidden rounded-full bg-paper transition-[width] duration-300 ease-out focus-within:w-56 focus-within:ring-2 focus-within:ring-ink motion-reduce:transition-none md:focus-within:w-72 ${q ? "w-56 md:w-72" : "w-11"}`}>
               <span className="grid h-11 w-11 shrink-0 place-items-center"><Icon name="search" className="h-5 w-5 text-ink/70" /></span>
-              <input value={q} onChange={(e) => setQ(e.target.value)} aria-label={t("searchMenu")} placeholder={t("searchMenu")} className={`min-w-0 flex-1 bg-transparent pr-3 outline-none transition-opacity duration-200 placeholder:text-ink/55 group-focus-within:opacity-100 group-focus-within:delay-100 ${q ? "opacity-100" : "opacity-0"}`} />
+              <input value={q} onChange={(e) => { setQ(e.target.value); setPages({}); }} aria-label={t("searchMenu")} placeholder={t("searchMenu")} className={`min-w-0 flex-1 bg-transparent pr-3 outline-none transition-opacity duration-200 placeholder:text-ink/55 group-focus-within:opacity-100 group-focus-within:delay-100 ${q ? "opacity-100" : "opacity-0"}`} />
               {q && (
                 <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => setQ("")} aria-label={t("clearSearch")} className="grid h-11 w-11 shrink-0 place-items-center"><Icon name="x" className="h-5 w-5" /></button>
               )}
@@ -237,8 +238,8 @@ export function MenuSection({ categories, onOpenModifiers }: { categories: MenuC
             </p>
           )}
           {filtered.map((c) => {
-            const visible = shown[c.id] ?? PAGE_SIZE;
-            const remaining = c.items.length - visible;
+            const page = Math.min(pages[c.id] ?? 1, Math.ceil(c.items.length / PAGE_SIZE));
+            const items = c.items.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
             return (
               <section key={c.id} id={catId(c.id)} aria-labelledby={`h-${c.id}`}>
                 <h2 id={`h-${c.id}`} className="relative mb-6 inline-block font-display text-[40px] font-extrabold leading-tight tracking-tight">
@@ -246,23 +247,21 @@ export function MenuSection({ categories, onOpenModifiers }: { categories: MenuC
                   <Squiggle className="absolute -bottom-1 left-0 h-3 w-full text-[var(--accent,var(--brand-chili))]" />
                 </h2>
                 {view === "table" ? (
-                  <DishTable items={c.items.slice(0, visible)} onOpen={open} />
+                  <DishTable items={items} onOpen={open} />
                 ) : (
                   <div className={view === "list" ? "grid gap-4 xl:grid-cols-2" : "grid gap-6 sm:grid-cols-2 xl:grid-cols-3"}>
-                    {c.items.slice(0, visible).map((d) =>
+                    {items.map((d) =>
                       view === "list" ? <DishListRow key={d.id} item={d} onOpen={() => open(d.id)} /> : <DishCard key={d.id} item={d} onOpen={() => open(d.id)} />,
                     )}
                   </div>
                 )}
-                {remaining > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => setShown((s) => ({ ...s, [c.id]: visible + PAGE_SIZE }))}
-                    className="mt-6 min-h-12 w-full rounded-full border-2 border-ink font-bold transition hover:bg-ink hover:text-cream"
-                  >
-                    {t("showMore", { count: remaining, category: c.name ?? t("thisCategory") })}
-                  </button>
-                )}
+                <MenuPager
+                  page={page}
+                  pageSize={PAGE_SIZE}
+                  total={c.items.length}
+                  category={c.name ?? t("thisCategory")}
+                  onChange={(n) => { setPages((s) => ({ ...s, [c.id]: n })); jump(c.id); }}
+                />
               </section>
             );
           })}

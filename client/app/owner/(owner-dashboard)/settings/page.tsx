@@ -10,6 +10,8 @@ import { SettingsTabs } from "@/components/owner-settings/settings-tabs";
 import { SettingsField, SettingsTextarea, SettingsToggle } from "@/components/owner-settings/settings-field";
 import { useGeolocation } from "@/hooks/use-geolocation";
 import { DynamicMapPicker } from "@/components/map/dynamic-map-picker";
+import { DEFAULT_HOURS, OpeningHoursEditor } from "@/components/owner-settings/opening-hours-editor";
+import type { DayHours } from "@/types/hours";
 import { listCuisines, getRestaurantCuisines, setRestaurantCuisines } from "@/lib/api/cuisines";
 
 const TABS = [
@@ -37,6 +39,8 @@ interface SettingsForm {
   supportsPickup: boolean;
   supportsDineIn: boolean;
   isOpen: boolean;
+  openingHours: DayHours[];
+  timezone: string;
   selfDeliveryRadiusKm: string;
   selfDeliveryFlatFee: string;
   maxDeliveryRadiusKm: string;
@@ -69,6 +73,8 @@ const EMPTY_FORM: SettingsForm = {
   supportsPickup: false,
   supportsDineIn: false,
   isOpen: true,
+  openingHours: DEFAULT_HOURS,
+  timezone: "Asia/Kathmandu",
   selfDeliveryRadiusKm: "5",
   selfDeliveryFlatFee: "60",
   maxDeliveryRadiusKm: "10",
@@ -93,6 +99,8 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("general");
   const [form, setForm] = useState<SettingsForm>(EMPTY_FORM);
   const [savedAt, setSavedAt] = useState<number | null>(null);
+  // Only send the schedule once the owner edits it, so saving other settings never creates one by accident.
+  const [hoursEdited, setHoursEdited] = useState(false);
   
   // Track if the user is actively typing a new secret (since we don't send the existing one)
   const [hasNewSecret, setHasNewSecret] = useState(false);
@@ -120,6 +128,8 @@ export default function SettingsPage() {
       heroHeading: (r.heroHeading as string) ?? prev.heroHeading,
       heroSubheading: (r.heroSubheading as string) ?? prev.heroSubheading,
       isOpen: r.isOpen != null ? Boolean(r.isOpen) : prev.isOpen,
+      openingHours: Array.isArray(r.openingHours) ? (r.openingHours as DayHours[]) : prev.openingHours,
+      timezone: (r.timezone as string) ?? prev.timezone,
       paypayMerchantId: (r.paypayMerchantId as string) ?? prev.paypayMerchantId,
       paypayApiKey: (r.paypayApiKey as string) ?? prev.paypayApiKey,
       // NOTE: paypayApiSecret is intentionally NOT seeded from backend for security.
@@ -157,6 +167,8 @@ export default function SettingsPage() {
         heroHeading: form.heroHeading,
         heroSubheading: form.heroSubheading,
         isOpen: form.isOpen,
+        openingHours: hoursEdited ? form.openingHours : undefined,
+        timezone: form.timezone,
         supportsDelivery: form.supportsDelivery,
         supportsPickup: form.supportsPickup,
         supportsDineIn: form.supportsDineIn,
@@ -488,10 +500,20 @@ export default function SettingsPage() {
             <>
               <SettingsToggle
                 label="Open for orders"
-                hint="Turn off to pause new orders temporarily."
+                hint="Turn off to pause new orders temporarily, whatever your opening hours say."
                 checked={form.isOpen}
                 onChange={(v) => set("isOpen", v)}
               />
+              <div className="pt-2">
+                <h3 className="text-sm font-semibold text-neutral-900">Opening hours</h3>
+                <p className="mb-3 mt-1 text-xs text-neutral-500">Customers see these on your page and can only order while you are open.</p>
+                <OpeningHoursEditor
+                  value={form.openingHours}
+                  timezone={form.timezone}
+                  onChange={(hours) => { set("openingHours", hours); setHoursEdited(true); }}
+                  onTimezoneChange={(tz) => set("timezone", tz)}
+                />
+              </div>
               <SettingsToggle
                 label="Delivery"
                 checked={form.supportsDelivery}

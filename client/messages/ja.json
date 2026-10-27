@@ -412,14 +412,22 @@
     "mapStyle": "地図の表示",
     "mapCartoon": "イラスト",
     "mapStreet": "地図",
-    "mapIllustrative": "イメージ図（縮尺は実際と異なります）"
+    "mapIllustrative": "イメージ図（縮尺は実際と異なります）",
+    "hours": {
+      "title": "営業時間",
+      "closesAt": "{time}に閉店",
+      "opensToday": "本日{time}に開店",
+      "opensTomorrow": "明日{time}に開店",
+      "opensOn": "{day}{time}に開店",
+      "today": "本日",
+      "closedDay": "定休日"
+    }
   },
   "menu": {
     "categories": "メニューカテゴリ",
     "searchMenu": "メニューを検索",
     "clearSearch": "検索をクリア",
     "noMatch": "このメニューに「{q}」はありません。",
-    "showMore": "もっと見る（{category}にあと{count}件）",
     "thisCategory": "このカテゴリ",
     "fallbackName": "メニュー",
     "fallbackItem": "メニュー項目",
@@ -458,7 +466,12 @@
     "veg": "ベジタリアン",
     "nonVeg": "非ベジタリアン",
     "colAdd": "カートに追加",
-    "customisable": "カスタム可"
+    "customisable": "カスタム可",
+    "pagesOf": "{category}のページ",
+    "showingRange": "{total}件中 {from}〜{to}件を表示",
+    "prevPage": "前のページ",
+    "nextPage": "次のページ",
+    "goToPage": "{n}ページへ"
   },
   "dish": {
     "popular": "人気 ★",
@@ -933,7 +946,9 @@
       "deliveryNoEta": "配達時間は**{name}**までの距離によります。正確な料金はお支払い前のチェックアウトで分かります。",
       "offersHere": "**{name}**の現在のクーポン:{codes}。カートで適用できます。",
       "offersNone": "**{name}**には現在有効なオファーはありません。",
-      "fallbackRestaurant": "**{name}**について、メニュー・営業時間・場所・連絡先・配達をご案内できます。いずれかをお試しください。"
+      "fallbackRestaurant": "**{name}**について、メニュー・営業時間・場所・連絡先・配達をご案内できます。いずれかをお試しください。",
+      "hoursOpenUntil": "**{name}**は現在営業中で、{time}まで営業しています。",
+      "hoursClosedOpens": "**{name}**は現在営業時間外です。{opens}。"
     },
     "action": {
       "orders": "注文履歴を開く",
