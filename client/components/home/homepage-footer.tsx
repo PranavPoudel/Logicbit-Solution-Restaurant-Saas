@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { theme } from "@/config/theme";
+import { Icon } from "@/components/ui/primitives";
 
 export function CustomerFooter() {
   const t = useTranslations();
@@ -19,8 +20,9 @@ export function CustomerFooter() {
             <br />
             <span className="text-saffron">{t("footer.stomach")}</span>
           </p>
-          <Link href="/restaurants" className="mt-6 inline-flex min-h-12 items-center rounded-full bg-chili px-6 font-bold">
+          <Link href="/restaurants" className="mt-6 inline-flex h-14 items-center gap-2 rounded-full bg-chili px-8 font-display text-lg font-extrabold text-parchment transition hover:-translate-y-0.5 hover:bg-parchment hover:text-espresso active:translate-y-0">
             {t("footer.orderNow")}
+            <Icon name="arrow" className="h-5 w-5" />
           </Link>
         </div>
         {columns.map(([heading, links]) => (
@@ -41,8 +43,10 @@ export function CustomerFooter() {
       <p className="font-display mx-auto mt-12 max-w-[1440px] select-none text-[24vw] font-extrabold leading-[0.75] tracking-[-0.06em] text-chili md:text-[300px]" aria-hidden>
         {theme.brand.name}
       </p>
-      <p className="mx-auto max-w-[1440px] py-6 text-sm text-cream/70 dark:text-ink/70">
-        © {new Date().getFullYear()} {theme.brand.name} · {theme.content.contactEmail} · {theme.content.contactPhone}
+      <p className="relative mx-auto max-w-[1440px] py-6 text-xs text-cream/70 dark:text-ink/70">
+        © {new Date().getFullYear()} {theme.brand.name} ·{" "}
+        <a href={`mailto:${theme.content.contactEmail}`} className="hover:text-saffron hover:underline">{theme.content.contactEmail}</a> ·{" "}
+        <a href={`tel:${theme.content.contactPhone.replace(/[^\d+]/g, "")}`} className="hover:text-saffron hover:underline">{theme.content.contactPhone}</a>
       </p>
     </footer>
   );

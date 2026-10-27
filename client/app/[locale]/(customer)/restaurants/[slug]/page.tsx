@@ -27,6 +27,7 @@ import {
 import { restaurantAccentStyle } from "@/lib/utils/restaurant-theme";
 import { CurrencyProvider } from "@/hooks/use-money";
 import { useGeolocation } from "@/hooks/use-geolocation";
+import { useChatRestaurant } from "@/hooks/use-chat-restaurant";
 
 const DEFAULT_SECTIONS: SectionSetting[] = ["banner", "menu", "about", "contact", "reviews"].map((id) => ({ id, isVisible: true, titleEn: "", titleJa: "" }));
 
@@ -76,6 +77,21 @@ export default function RestaurantDetailPage({ params }: { params: Promise<{ slu
   const banners = storefront?.banners ?? [];
 
   const similar = useMemo(() => (nearbyQuery.data?.data ?? []).filter((r) => r.id !== restaurantId).slice(0, 3), [nearbyQuery.data, restaurantId]);
+
+  useChatRestaurant(
+    restaurant
+      ? {
+          id: restaurant.id,
+          name: restaurant.name ?? t("fallbackName"),
+          address: restaurant.address,
+          phone: restaurant.phone,
+          isOpen: restaurant.isOpen !== false,
+          deliveryMinutes: restaurant.estimatedDeliveryMinutes,
+          categories: categories.map((c) => c.name).filter((n): n is string => !!n),
+          offerCodes: (storefront?.offers ?? []).map((o) => o.code).filter((c): c is string => !!c),
+        }
+      : null,
+  );
 
   if (restaurantQuery.isLoading) {
     return (

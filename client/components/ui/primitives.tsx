@@ -46,6 +46,8 @@ const P: Record<string, ReactNode> = {
   utensils: <><path d="M5 3v6a2 2 0 002 2v10M9 3v6a2 2 0 01-2 2" /><path d="M17 21V3c-2 1.5-3 4-3 7h3" /></>,
   grid: <><rect x="3" y="3" width="8" height="8" rx="2" /><rect x="13" y="3" width="8" height="8" rx="2" /><rect x="3" y="13" width="8" height="8" rx="2" /><rect x="13" y="13" width="8" height="8" rx="2" /></>,
   rows: <><rect x="3" y="4" width="6" height="6" rx="2" /><rect x="3" y="14" width="6" height="6" rx="2" /><path d="M12 7h9M12 17h9" /></>,
+  chat: <><path d="M4 5h16v11H10l-5 4v-4H4V5z" /><path d="M8.5 10.5h.01M12 10.5h.01M15.5 10.5h.01" /></>,
+  send: <path d="M21 3L10 14M21 3l-7 18-4-7-7-4 18-7z" />,
   store: <><path d="M4 9l1.5-5h13L20 9" /><path d="M4 9a2.7 2.7 0 005.3 0 2.7 2.7 0 005.4 0A2.7 2.7 0 0020 9" /><path d="M5 12v8h14v-8" /></>,
 };
 

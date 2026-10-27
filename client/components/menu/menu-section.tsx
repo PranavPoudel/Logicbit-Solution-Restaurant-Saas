@@ -211,7 +211,7 @@ export function MenuSection({ categories, onOpenModifiers }: { categories: MenuC
           {!q && <SignatureDishes items={signature} onOpen={open} />}
           {!q && <PopularCategories categories={categories} onJump={jump} />}
           <div className="flex flex-wrap items-center justify-between gap-4 border-t border-ink/10 pt-8">
-            <h2 className="font-display text-[32px] font-extrabold leading-none tracking-tight md:text-[40px]">{t("fullMenu")}</h2>
+            <h2 id="menu" className="scroll-mt-28 font-display text-[32px] font-extrabold leading-none tracking-tight md:text-[40px]">{t("fullMenu")}</h2>
             <ViewToggle view={view} onChange={setView} />
           </div>
           <div className="sticky top-0 z-30 mb-6 -mt-10 flex items-center gap-3 border-b border-ink/10 bg-cream/95 pb-3 pt-0 backdrop-blur">

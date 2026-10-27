@@ -39,14 +39,14 @@ export function FavoritesTab() {
         <Empty>{t("noFavorites")}</Empty>
       ) : (
         favorites.map((fav) => (
-          <div key={fav.id} className="flex items-center justify-between gap-3 rounded-[24px] bg-paper p-4 shadow-soft md:p-5">
-            <Link href={`/restaurants/${fav.restaurant?.slug ?? fav.restaurantId}`} className="min-w-0 font-display text-xl font-extrabold hover:underline">
+          <div key={fav.id} className="group relative flex items-center justify-between gap-3 rounded-[24px] bg-paper p-4 shadow-soft transition hover:-translate-y-0.5 md:p-5">
+            <Link href={`/restaurants/${fav.restaurant?.slug ?? fav.restaurantId}`} className="min-w-0 font-display text-xl font-extrabold after:absolute after:inset-0 after:rounded-[24px] group-hover:underline">
               {fav.restaurant?.name ?? tr("fallbackName")}
               {fav.restaurant?.city && (
                 <span className="flex items-center gap-1.5 font-sans text-base font-normal text-ink/70"><Icon name="pin" className="h-4 w-4" />{fav.restaurant.city}</span>
               )}
             </Link>
-            <IconButton icon="heart" label={t("removeFavorite")} onClick={() => removeMutation.mutate(fav.restaurantId)} className="bg-chili/10 text-chili [&_svg]:fill-current" />
+            <IconButton icon="heart" label={t("removeFavorite")} onClick={() => removeMutation.mutate(fav.restaurantId)} className="relative z-10 bg-chili/10 text-chili [&_svg]:fill-current" />
           </div>
         ))
       )}

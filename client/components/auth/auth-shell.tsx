@@ -107,32 +107,38 @@ const PERKS = [
 function Visual({ mode }: { mode: Mode }) {
   const t = useTranslations("auth");
   return (
-    <div className="relative hidden min-h-[760px] overflow-hidden rounded-[36px] bg-saffron lg:block">
-      <div className="blob absolute -left-24 -top-24 h-[420px] w-[420px] bg-chili" aria-hidden />
-      <div className="blob absolute -bottom-24 -right-16 h-[260px] w-[260px] bg-tangerine" aria-hidden />
-      <div className="absolute left-10 top-10 grid max-w-[260px]">
-        {MODES.map((m) => (
-          <p key={m} aria-hidden={mode !== m} className={`col-start-1 row-start-1 font-display text-[52px] font-extrabold leading-[0.92] tracking-tight text-parchment ${fade(mode === m)}`}>{t(`copy.${m}.line`)}</p>
-        ))}
+    <div className="hidden min-h-[760px] flex-col gap-6 overflow-hidden rounded-[36px] bg-crimson p-8 lg:flex xl:p-10">
+      <div className="flex items-start justify-between gap-4">
+        <div className="grid max-w-[260px]">
+          {MODES.map((m) => (
+            <p key={m} aria-hidden={mode !== m} className={`col-start-1 row-start-1 font-display text-[52px] font-extrabold leading-[0.92] tracking-tight text-parchment ${fade(mode === m)}`}>{t(`copy.${m}.line`)}</p>
+          ))}
+        </div>
+        <Stamp text={t("stamp")} className="h-28 w-28 shrink-0 rotate-12 bg-ink text-cream" />
       </div>
-      <Stamp text={t("stamp")} className="absolute right-8 top-8 h-28 w-28 rotate-12 bg-ink text-cream" />
-      <div className="blob shadow-warm absolute right-[-48px] top-[28%] aspect-square w-[68%] overflow-hidden border-8 border-cream">
-        {MODES.map((m) => (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img key={m} src={COPY[m].img} alt="" className={`absolute inset-0 h-full w-full scale-110 object-cover ${fade(mode === m)}`} />
-        ))}
+      <div className="relative min-h-[320px] flex-1">
+        <div className="absolute right-2 top-1/2 aspect-square w-[68%] -translate-y-1/2">
+          <div className="shadow-warm relative h-full w-full rotate-2 overflow-hidden rounded-[32px] border-8 border-cream">
+            {MODES.map((m) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img key={m} src={COPY[m].img} alt="" className={`absolute inset-0 h-full w-full object-cover ${fade(mode === m)}`} />
+            ))}
+          </div>
+        </div>
+        <div className="absolute bottom-[8%] left-0 aspect-[3/4] w-[30%]">
+          <div className="shadow-warm relative h-full w-full -rotate-6 overflow-hidden rounded-[28px] border-8 border-cream">
+            {MODES.map((m) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img key={m} src={COPY[m].img2} alt="" className={`absolute inset-0 h-full w-full object-cover ${fade(mode === m)}`} />
+            ))}
+          </div>
+        </div>
+        <span className="absolute bottom-[10%] left-[34%] rotate-6 rounded-xl bg-herb px-3 py-1 font-display text-lg font-bold text-parchment shadow-hard">{t("loved")}</span>
       </div>
-      <div className="arch shadow-warm absolute bottom-[30%] left-10 aspect-[3/4] w-[30%] -rotate-6 overflow-hidden border-8 border-cream">
-        {MODES.map((m) => (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img key={m} src={COPY[m].img2} alt="" className={`absolute inset-0 h-full w-full object-cover ${fade(mode === m)}`} />
-        ))}
-      </div>
-      <span className="absolute left-[38%] top-[58%] rotate-6 rounded-xl bg-herb px-3 py-1 font-display text-lg font-bold text-parchment shadow-hard">{t("loved")}</span>
-      <ul className="absolute inset-x-8 bottom-8 grid gap-3 rounded-[28px] bg-cream/95 p-5 text-ink shadow-warm">
+      <ul className="grid gap-3 rounded-[28px] bg-cream/95 p-5 text-ink shadow-warm">
         {PERKS.map((p) => (
           <li key={p.key} className="flex items-center gap-4">
-            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-saffron text-espresso"><Icon name={p.icon} /></span>
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-crimson text-cream"><Icon name={p.icon} /></span>
             <span className="leading-tight"><b className="block font-display text-lg font-extrabold">{t(`perks.${p.key}.title`)}</b><span className="text-ink/75">{t(`perks.${p.key}.body`)}</span></span>
           </li>
         ))}
@@ -147,10 +153,10 @@ export function AuthShell({ mode, children, footer }: { mode: Mode; children: Re
   return (
     <div className="mx-auto grid max-w-[1440px] gap-8 p-4 md:p-6 lg:grid-cols-2">
       <div className="flex flex-col px-1 md:px-10">
-        <div className="relative mt-2 h-40 overflow-hidden rounded-[28px] bg-saffron lg:hidden">
+        <div className="relative mt-2 h-40 overflow-hidden rounded-[28px] bg-crimson lg:hidden">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={c.img} alt="" className="blob absolute -right-10 -top-6 h-52 w-52 border-[6px] border-cream object-cover" />
-          <p className="absolute bottom-5 left-5 max-w-[180px] font-display text-[32px] font-extrabold leading-[0.95] text-espresso">{t(`copy.${mode}.line`)}</p>
+          <img src={c.img} alt="" className="absolute -right-4 top-4 h-36 w-36 rotate-6 rounded-[24px] border-[6px] border-cream object-cover" />
+          <p className="absolute bottom-5 left-5 max-w-[180px] font-display text-[32px] font-extrabold leading-[0.95] text-cream">{t(`copy.${mode}.line`)}</p>
         </div>
 
         <div className="mx-auto flex w-full max-w-[460px] flex-1 flex-col justify-center py-10">

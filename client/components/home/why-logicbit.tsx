@@ -17,8 +17,6 @@ function Backdrop() {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0">
       <div className="absolute inset-0 opacity-50 [background-image:radial-gradient(var(--color-saffron)_1.6px,transparent_1.6px)] [background-size:22px_22px] [mask-image:linear-gradient(90deg,#000_0%,transparent_55%)]" />
-      <div className="blob absolute -left-40 top-1/2 h-[520px] w-[520px] -translate-y-1/2 bg-saffron md:-left-24 md:h-[680px] md:w-[680px]" />
-      <div className="absolute left-[28%] top-10 hidden h-40 w-40 rounded-full bg-chili md:block" />
       <div className="absolute -bottom-16 left-[18%] h-44 w-44 rounded-full border-[14px] border-herb md:h-56 md:w-56" />
       <div className="blob absolute -right-24 -top-20 h-72 w-72 bg-chili/15 md:h-96 md:w-96" />
       <p className="absolute -bottom-6 right-0 select-none font-display text-[120px] font-extrabold leading-none tracking-[-0.05em] text-transparent [-webkit-text-stroke:2px_color-mix(in_srgb,var(--color-chili)_25%,transparent)] md:text-[260px]">KHAJA</p>
@@ -39,7 +37,7 @@ export function WhyLogicBit({ rating }: { rating: number }) {
       <div className="relative mx-auto grid w-full max-w-[1440px] items-center gap-10 px-5 py-16 md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] md:gap-16 md:px-10 md:py-24">
         <div className="relative mx-auto w-full max-w-[440px]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={theme.brand.whyImage} alt="" className="arch shadow-warm aspect-[3/4] w-full border-8 border-cream object-cover" />
+          <img src={theme.brand.whyImage} alt="" className="shadow-warm aspect-square w-full rounded-[40px] border-8 border-cream object-cover" />
           <span className="shadow-hard absolute -right-2 top-10 rotate-12 rounded-2xl border-4 border-cream bg-saffron px-4 py-2 font-display text-xl font-extrabold text-espresso md:-right-8">{t("whyHot")}</span>
         </div>
         <div>
