@@ -49,7 +49,7 @@ const REQUEST_TIMEOUT_MS = 8000;
 const DEFAULT_MODELS: Record<Provider, string> = {
   anthropic: 'claude-haiku-5-5',
   openai: 'gpt-4o-mini',
-  groq: 'llama-3.3-70b-versatile',
+  groq: 'openai/gpt-oss-20b',
 };
 
 @Injectable()
