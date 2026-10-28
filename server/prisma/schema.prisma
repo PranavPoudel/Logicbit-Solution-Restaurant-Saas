@@ -763,6 +763,34 @@ model RestaurantSubscription {
   plan SubscriptionPlan @relation(fields: [planId], references: [id])
 }
 
+enum SubscriptionPaymentMethod {
+  PAYPAY
+  CARD
+}
+
+enum SubscriptionPaymentStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
+model SubscriptionPayment {
+  id                String                    @id @default(uuid())
+  tenantId          String
+  restaurantId      String
+  planId            String
+  method            SubscriptionPaymentMethod
+  amount            Float
+  currencyCode      String
+  status            SubscriptionPaymentStatus @default(PENDING)
+  providerReference String?
+  paidAt            DateTime?
+  createdAt         DateTime                  @default(now())
+
+  @@index([restaurantId, createdAt])
+  @@index([providerReference])
+}
+
 // =========================================================
 // PLATFORM STAFF RBAC (Super Admin को आफ्नै team management)
 // =========================================================
@@ -999,6 +1027,26 @@ enum NotificationStatus {
   PENDING
   SENT
   FAILED
+}
+
+enum CustomerEmailAudience {
+  ALL
+  ONE
+}
+
+model CustomerEmail {
+  id             String                @id @default(uuid())
+  tenantId       String
+  restaurantId   String
+  audience       CustomerEmailAudience
+  customerId     String?
+  orderId        String?
+  subject        String
+  body           String
+  recipientCount Int
+  createdAt      DateTime              @default(now())
+
+  @@index([restaurantId, createdAt])
 }
 
 model Notification {

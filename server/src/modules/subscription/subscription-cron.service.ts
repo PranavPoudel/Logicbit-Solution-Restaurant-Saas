@@ -57,7 +57,7 @@ export class SubscriptionCronService {
           tenantId: restaurant.tenantId,
           channel: 'EMAIL',
           recipient: owner.email,
-          subject: `Your LogicBit membership expires in ${matchedThreshold} day(s)`,
+          subject: `Your ${process.env.BRAND_NAME ?? 'LogicBit'} membership expires in ${matchedThreshold} day(s)`,
           body: `Restaurant "${restaurant.name}"'s subscription (${sub.plan.name}) will expire in ${matchedThreshold} day(s). Please renew to avoid service interruption.${sub.autoRenew ? ' Auto-renew is enabled.' : ''}`,
         });
       }

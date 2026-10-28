@@ -9,7 +9,6 @@ import { useOwnerAuthStore } from "@/store/owner-auth-store";
 import { tablesApi } from "@/lib/api/tables";
 import { TablesList } from "@/components/owner-tables/tables-list";
 import { TablesTrashBin } from "@/components/owner-tables/tables-trash-bin";
-import { SubscriptionUpgradeBanner } from "@/components/ui/subscription-upgrade-banner";
 
 const TABS = [
   { key: "TABLES", label: "Tables" },
@@ -40,8 +39,6 @@ export default function TablesPage() {
     <div className="max-w-7xl">
       <h1 className="text-xl font-semibold text-neutral-900 mb-1">Tables</h1>
       <p className="text-sm text-neutral-500 mb-6">Manage your restaurant's floor plan and table capacity.</p>
-      <SubscriptionUpgradeBanner />
-
       {/* Tabs */}
       <div className="flex gap-1 border-b border-neutral-200 mb-6 overflow-x-auto">
         {TABS.map((tab) => {

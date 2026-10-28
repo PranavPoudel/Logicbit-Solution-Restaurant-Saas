@@ -1,10 +1,8 @@
 {
   "metadata": {
-    "title": "LogicBit",
     "description": "近くのレストランから 음식을 주문하세요."
   },
   "header": {
-    "brandName": "LogicBit",
     "forRestaurants": "レストラン向け",
     "account": "アカウント",
     "cart": "カート",
@@ -61,7 +59,7 @@
     "howBody2": "ジョルを多めに？辛さ控えめ？お好みで。",
     "howStep3": "配達をリアルタイムで追跡",
     "howBody3": "ご注文が街を渡る様子を確認。",
-    "whyTitle": "Logic<b>Bit</b>が選ばれる理由",
+    "whyTitle": "{first}<b>{second}</b>が選ばれる理由",
     "whyHot": "熱々をお届け",
     "why1": "リアルタイム配達追跡",
     "whyBody1": "地図で配達状況をすべて確認。",
@@ -901,7 +899,7 @@
     "you": "現在地"
   },
   "chatbot": {
-    "title": "LogicBitヘルパー",
+    "title": "{brand}ヘルパー",
     "status": "すぐに返信します",
     "launcher": "相談する",
     "open": "チャットを開く",
@@ -922,7 +920,7 @@
       "offersHere": "このお店のお得情報"
     },
     "reply": {
-      "greeting": "こんにちは、LogicBitヘルパーです。ご注文、近くのキッチン、今日のお得情報についてお答えします。",
+      "greeting": "こんにちは、{brand}ヘルパーです。ご注文、近くのキッチン、今日のお得情報についてお答えします。",
       "hello": "こんにちは!今日は何を食べたいですか?",
       "orders": "「注文履歴」から、地図上のライダーも含めて注文をリアルタイムで確認できます。",
       "restaurants": "近くの営業中キッチンはレストランページにあります。料理の種類で絞り込めます。",

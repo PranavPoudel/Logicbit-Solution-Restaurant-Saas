@@ -8,9 +8,11 @@ import { Icon } from "@/components/ui/primitives";
 import { useEscapeKey } from "@/hooks/use-escape-key";
 import { useChatbot, type ChatMessage } from "@/hooks/use-chatbot";
 import { renderChatText } from "@/lib/utils/chat-text";
+import { theme } from "@/config/theme";
 
 export function ChatWidget() {
   const t = useTranslations("chatbot");
+  const brand = theme.brand.name;
   const [open, setOpen] = useState(false);
   const { messages, typing, send, endChat, canEnd, ended, takenOver, restaurant, askName, visitorName, setVisitorName, quickReplies } = useChatbot(open);
   const [confirmEnd, setConfirmEnd] = useState(false);
@@ -36,6 +38,11 @@ export function ChatWidget() {
     setDraft("");
   };
 
+  const finish = () => {
+    endChat();
+    setConfirmEnd(false);
+  };
+
   const action = (m: ChatMessage) => {
     if (!m.href) return null;
     const cls = "mt-2 inline-flex min-h-9 items-center gap-1.5 font-bold text-crimson hover:underline";
@@ -53,7 +60,7 @@ export function ChatWidget() {
     <>
       <section
         role="dialog"
-        aria-label={t("title")}
+        aria-label={t("title", { brand })}
         aria-hidden={!open}
         inert={!open}
         className={`fixed inset-x-3 bottom-24 z-40 flex h-[min(560px,calc(100dvh-7.5rem))] origin-bottom-right flex-col overflow-hidden rounded-[28px] border-2 border-ink/10 bg-cream shadow-warm transition-[opacity,transform,visibility] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none sm:inset-x-auto sm:right-6 sm:w-[390px] ${open ? "visible translate-y-0 scale-100 opacity-100" : "invisible translate-y-4 scale-90 opacity-0"}`}
@@ -61,7 +68,7 @@ export function ChatWidget() {
         <header className="flex items-center gap-3 bg-crimson px-5 py-4 text-cream">
           <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-cream text-crimson"><Icon name="bowl" className="h-6 w-6" /></span>
           <div className="min-w-0 flex-1 leading-tight">
-            <h2 className="font-display text-xl font-extrabold">{t("title")}</h2>
+            <h2 className="font-display text-xl font-extrabold">{t("title", { brand })}</h2>
             <p className="flex items-center gap-1.5 truncate text-sm text-cream/85">
               <span className="h-2 w-2 shrink-0 rounded-full bg-herb" />
               <span className="truncate">{takenOver ? t("humanStatus") : restaurant ? t("asking", { name: restaurant.name }) : t("status")}</span>
@@ -79,7 +86,7 @@ export function ChatWidget() {
           {messages.map((m) => {
             const human = m.from === "owner" || m.from === "admin";
             // user + owner/admin text is shown as plain text; only bot text may use **bold** / links.
-            const body = m.from === "bot" ? renderChatText(m.text ?? t(`reply.${m.key}`, m.values)) : m.text;
+            const body = m.from === "bot" ? renderChatText(m.text ?? t(`reply.${m.key}`, { brand, ...m.values })) : m.text;
             return (
               <div key={m.id} className={`animate-fade-up flex ${m.from === "user" ? "justify-end" : "justify-start"}`}>
                 <div className={`max-w-[85%] rounded-2xl px-4 py-3 text-base leading-snug ${m.from === "user" ? "rounded-br-md bg-crimson text-cream" : human ? "rounded-bl-md border-2 border-crimson/30 bg-paper text-ink" : "shadow-soft rounded-bl-md bg-paper text-ink"}`}>
@@ -121,7 +128,7 @@ export function ChatWidget() {
             <p className="font-medium">{t("endConfirm")}</p>
             <div className="flex shrink-0 gap-2">
               <button type="button" onClick={() => setConfirmEnd(false)} className="min-h-11 rounded-full border-2 border-ink/15 px-4 font-bold hover:bg-ink/5">{t("keep")}</button>
-              <button type="button" onClick={() => { endChat(); setConfirmEnd(false); }} className="min-h-11 rounded-full bg-crimson px-4 font-bold text-cream hover:bg-ink">{t("end")}</button>
+              <button type="button" onClick={finish} className="min-h-11 rounded-full bg-crimson px-4 font-bold text-cream hover:bg-ink">{t("end")}</button>
             </div>
           </div>
         )}

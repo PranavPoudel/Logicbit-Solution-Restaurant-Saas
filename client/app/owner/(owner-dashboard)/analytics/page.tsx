@@ -7,7 +7,6 @@ import { DollarSign, ShoppingBag, Users, AlertCircle, Loader2 } from "lucide-rea
 import { useOwnerAuthStore } from "@/store/owner-auth-store";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { RevenueChart } from "@/components/dashboard/revenue-chart";
-import { SubscriptionUpgradeBanner } from "@/components/ui/subscription-upgrade-banner";
 import { getRestaurantAnalytics } from "@/lib/api/analytics";
 
 export default function AnalyticsPage() {
@@ -58,9 +57,6 @@ export default function AnalyticsPage() {
           Track your restaurant&apos;s performance, revenue, and top-selling items.
         </p>
       </div>
-
-      {/* Subscription Guard */}
-      <SubscriptionUpgradeBanner />
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

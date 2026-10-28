@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { theme } from '@/config/theme';
 
 interface NavItem {
   name: string;
@@ -191,8 +192,8 @@ export default function AdminSidebar() {
     <aside className="w-64 bg-white border-r border-gray-200 flex flex-col shadow-sm z-10 shrink-0 select-none">
       <div className="p-6 border-b border-gray-100 flex items-center h-16">
         <h3 className="text-lg font-bold text-gray-900 tracking-tight flex items-center gap-2">
-          <span className="bg-blue-600 text-white p-1.5 rounded-lg text-xs font-black">LB</span>
-          LogicBit Admin
+          <span className="bg-blue-600 text-white p-1.5 rounded-lg text-xs font-black">{theme.brand.name.slice(0, 2).toUpperCase()}</span>
+          {theme.brand.name} Admin
         </h3>
       </div>
       

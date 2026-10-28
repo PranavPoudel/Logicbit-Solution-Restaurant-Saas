@@ -1,5 +1,5 @@
 //src/modules/order/order.service.ts
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CouponService } from '../coupon/coupon.service';
 import { PaymentService } from '../payment/payment.service';
@@ -16,6 +16,8 @@ const TERMINAL_STATUSES = ['DELIVERED', 'COMPLETED', 'CANCELLED'];
 
 @Injectable()
 export class OrderService {
+  private readonly logger = new Logger(OrderService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly couponService: CouponService,
@@ -319,6 +321,12 @@ export class OrderService {
     return order;
   }
 
+  async emailPreview(tenantId: string, restaurantId: string, orderId: string) {
+    await this.findOneForRestaurant(tenantId, restaurantId, orderId);
+    const built = await this.notificationService.buildOrderConfirmation(orderId);
+    return { to: built?.recipient, ...built?.email };
+  }
+
   /** Owner-facing — status update (Accept/Preparing/Ready/Delivered...) */
   async updateStatus(tenantId: string, restaurantId: string, orderId: string, dto: UpdateOrderStatusDto, changedBy: string) {
     const order = await this.findOneForRestaurant(tenantId, restaurantId, orderId);
@@ -344,7 +352,13 @@ export class OrderService {
       return result;
     });
 
-    await this.notificationService.notifyOrderStatusChange(order.customerId, tenantId, order.orderNumber, dto.status);
+    if (dto.status === 'ACCEPTED') {
+      if (order.status !== 'ACCEPTED') {
+        void this.notificationService.notifyOrderAccepted(orderId).catch((err) => this.logger.error(`Order confirmation email failed for ${order.orderNumber}`, err as Error));
+      }
+    } else {
+      await this.notificationService.notifyOrderStatusChange(order.customerId, tenantId, order.orderNumber, dto.status);
+    }
 
     await this.activityLog.log({
       tenantId,

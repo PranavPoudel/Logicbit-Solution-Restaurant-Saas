@@ -3,7 +3,7 @@ import { Geist, Space_Grotesk, JetBrains_Mono, Bricolage_Grotesque, DM_Sans, Not
 import { getLocale } from "next-intl/server";
 import "./globals.css";
 import { QueryProvider } from "@/providers/query-provider";
-import { themeCssVariables } from "@/config/theme";
+import { theme, themeCssVariables } from "@/config/theme";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -42,7 +42,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "LogicBit",
+  title: theme.brand.name,
   description: "Order food from restaurants near you.",
 };
 

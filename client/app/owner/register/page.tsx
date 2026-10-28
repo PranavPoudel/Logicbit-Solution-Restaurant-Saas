@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { registerOwner, type OwnerRegisterInput } from "@/lib/api/auth";
 import { useOwnerAuthStore } from "@/store/owner-auth-store"; 
+import { theme } from "@/config/theme";
 import { DynamicMapPicker } from "@/components/map/dynamic-map-picker";
 
 export default function OwnerRegisterPage() {
@@ -143,7 +144,7 @@ export default function OwnerRegisterPage() {
             Create your Restaurant Account
           </h1>
           <p className="text-sm text-neutral-500 mt-2">
-            Join LogicBit and start managing your orders today.
+            Join {theme.brand.name} and start managing your orders today.
           </p>
         </div>
 

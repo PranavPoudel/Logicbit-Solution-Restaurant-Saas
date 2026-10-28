@@ -1,10 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { AlertCircle, CheckCircle2, CreditCard, Calendar, RefreshCw, Mail } from "lucide-react";
 import { useOwnerAuthStore } from "@/store/owner-auth-store";
 import { getRestaurantSubscription, setSubscriptionAutoRenew } from "@/lib/api/subscriptions";
+import { getSubscriptionState } from "@/lib/utils/subscription";
+import { PlanPicker } from "@/components/owner-subscription/plan-picker";
+import { PaymentHistory } from "@/components/owner-subscription/payment-history";
+import { PaymentReturnStatus } from "@/components/owner-subscription/payment-return-status";
 
 export default function SubscriptionPage() {
   const queryClient = useQueryClient();
@@ -79,30 +83,27 @@ export default function SubscriptionPage() {
               {subscription?.message || "Your restaurant doesn't have an active subscription."}
             </p>
           </div>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-4">
-            <button
-              onClick={() => alert("Upgrade flow (Payment Gateway) coming in Phase 4! For now, please contact support.")}
-              className="w-full sm:w-auto px-6 py-2.5 bg-[#E3A008] text-[#17181C] font-bold rounded-lg hover:bg-[#d49207] transition-colors flex items-center justify-center gap-2"
-            >
-              <CreditCard size={18} />
-              Upgrade to Pro Plan
-            </button>
-            <a
-              href="mailto:support@logicbit.com"
-              className="w-full sm:w-auto px-6 py-2.5 bg-white border border-red-200 text-red-700 font-medium rounded-lg hover:bg-red-50 transition-colors flex items-center justify-center gap-2"
-            >
-              <Mail size={16} />
-              Contact Support
-            </a>
-          </div>
+          <a
+            href="mailto:support@logicbit.com"
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-red-200 bg-white px-6 py-2.5 font-medium text-red-700 transition-colors hover:bg-red-50"
+          >
+            <Mail size={16} />
+            Contact Support
+          </a>
         </div>
+
+        <Suspense fallback={null}>
+          <PaymentReturnStatus restaurantId={restaurantId} />
+        </Suspense>
+        <PlanPicker restaurantId={restaurantId} title="Choose a plan" />
+        <PaymentHistory restaurantId={restaurantId} />
       </div>
     );
   }
 
-  const isExpiring = subscription?.status === "expiring";
-  const isExpired = subscription?.status === "expired";
-  const isTrial = subscription?.status === "trial";
+  const state = getSubscriptionState(subscription);
+  const isExpiring = state === "expiring";
+  const isExpired = state === "expired";
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -120,28 +121,21 @@ export default function SubscriptionPage() {
           <div>
             <div className="flex items-center gap-3">
               <h2 className="text-2xl font-bold text-neutral-900">
-                {subscription?.planName || "Standard Plan"}
+                {subscription?.plan?.name || "Standard Plan"}
               </h2>
-              {isTrial && (
-                <span className="px-2.5 py-1 bg-blue-100 text-blue-700 text-xs font-bold uppercase rounded-full">
-                  Trial
-                </span>
-              )}
               {isExpiring && (
                 <span className="px-2.5 py-1 bg-yellow-100 text-yellow-700 text-xs font-bold uppercase rounded-full">
                   Expiring Soon
                 </span>
               )}
-              {subscription?.status === "active" && (
+              {state === "active" && (
                 <span className="px-2.5 py-1 bg-green-100 text-green-700 text-xs font-bold uppercase rounded-full">
                   Active
                 </span>
               )}
             </div>
             <p className="text-sm text-neutral-500 mt-1">
-              {isTrial
-                ? "You're on a trial period."
-                : isExpiring
+              {isExpiring
                 ? "Your subscription is expiring soon."
                 : isExpired
                 ? "Your subscription has expired."
@@ -239,7 +233,7 @@ export default function SubscriptionPage() {
                     day: "numeric",
                     year: "numeric",
                   })}
-                . Please contact support to renew your plan.
+                . Renew below to avoid any interruption.
               </p>
             </div>
           </div>
@@ -251,13 +245,23 @@ export default function SubscriptionPage() {
             <div>
               <p className="text-sm font-medium text-red-700">Subscription Expired</p>
               <p className="text-xs text-red-600 mt-1">
-                Your subscription has expired. Please contact support to renew your plan and
-                restore access to premium features.
+                Your subscription has expired. Renew below to restore access to your restaurant.
               </p>
             </div>
           </div>
         )}
       </div>
+
+      <Suspense fallback={null}>
+        <PaymentReturnStatus restaurantId={restaurantId} />
+      </Suspense>
+      <PlanPicker
+        restaurantId={restaurantId}
+        title={isExpired || isExpiring ? "Renew your plan" : "Change your plan"}
+        currentPlanId={subscription?.planId}
+        currentExpiry={subscription?.expiryDate}
+      />
+      <PaymentHistory restaurantId={restaurantId} />
 
       {/* Plan Features */}
       <div className="bg-white rounded-xl border border-neutral-200 p-6">

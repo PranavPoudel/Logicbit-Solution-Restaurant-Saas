@@ -6,5 +6,6 @@ import { RestaurantSubscriptionController, PlatformSubscriptionController } from
 @Module({
   controllers: [RestaurantSubscriptionController, PlatformSubscriptionController],
   providers: [SubscriptionService, SubscriptionCronService],
+  exports: [SubscriptionService],
 })
 export class SubscriptionModule {}

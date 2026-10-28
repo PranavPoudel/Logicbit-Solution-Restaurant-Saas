@@ -14,6 +14,7 @@ import {
 import { ownerLogin } from "@/lib/api/owner-auth";
 import { listMyRestaurants } from "@/lib/api/restaurants";
 import { useOwnerAuthStore } from "@/store/owner-auth-store";
+import { theme } from "@/config/theme";
 import { FormField } from "@/components/ui/form-field";
 
 export default function OwnerLoginPage() {
@@ -73,12 +74,12 @@ export default function OwnerLoginPage() {
         <div className="flex items-center gap-2 mb-6">
           <div className="w-8 h-8 rounded-lg bg-[#1B2333] flex items-center justify-center">
             <span className="font-mono text-[#E3A008] text-sm font-bold">
-              L
+              {theme.brand.name[0]}
             </span>
           </div>
 
           <span className="font-semibold text-[#1B2333] text-lg">
-            LogicBit
+            {theme.brand.name}
           </span>
         </div>
 

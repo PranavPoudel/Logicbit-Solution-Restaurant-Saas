@@ -1,15 +1,13 @@
 {
   "metadata": {
-    "title": "LogicBit",
     "description": "Order food from restaurants near you."
   },
   "header": {
-    "brandName": "LogicBit",
     "forRestaurants": "For restaurants",
     "account": "Account",
     "cart": "Cart",
     "restaurants": "Restaurants",
-    "myOrders": "My orders",
+    "myOrders": "Order history",
     "logIn": "Log in",
     "logOut": "Log out",
     "switchToLight": "Switch to light mode",
@@ -61,7 +59,7 @@
     "howBody2": "Extra jhol? Less chilli? Your call.",
     "howStep3": "Track your rider live",
     "howBody3": "Watch your order cross town.",
-    "whyTitle": "Why Logic<b>Bit</b><q>?</q>",
+    "whyTitle": "Why {first}<b>{second}</b><q>?</q>",
     "whyHot": "Hot at your door",
     "why1": "Live rider tracking",
     "whyBody1": "See every turn on the map.",
@@ -876,7 +874,7 @@
     "favourite": "Diner favourite",
     "breakdown": "Rating breakdown",
     "showStars": "Show {stars}-star reviews, {count}",
-    "rateFromOrders": "Ordered here? Rate it from My orders",
+    "rateFromOrders": "Ordered here? Rate it from Order history",
     "filterLabel": "Filter reviews",
     "fAll": "All",
     "f5": "5★",
@@ -901,7 +899,7 @@
     "you": "You are here"
   },
   "chatbot": {
-    "title": "LogicBit helper",
+    "title": "{brand} helper",
     "status": "Replies instantly",
     "launcher": "Ask us",
     "open": "Open chat",
@@ -922,9 +920,9 @@
       "offersHere": "Offers here"
     },
     "reply": {
-      "greeting": "Hi, I'm the LogicBit helper. Ask me about your order, kitchens near you or today's deals.",
+      "greeting": "Hi, I'm the {brand} helper. Ask me about your order, kitchens near you or today's deals.",
       "hello": "Hello! What are you hungry for today?",
-      "orders": "You can follow every order live from My orders, including the rider on the map.",
+      "orders": "You can follow every order live from Order history, including the rider on the map.",
       "restaurants": "Open kitchens near you are on the restaurants page. Filter by cuisine to find a favourite.",
       "offers": "Kitchens post coupons and first-order offers on their pages. Open one to see what is live today.",
       "refund": "Wrong, missing or spoiled item? Tell us within 2 hours and we refund your original payment in 3-5 working days.",
