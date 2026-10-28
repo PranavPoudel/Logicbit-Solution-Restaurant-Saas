@@ -13,6 +13,7 @@ import { RestaurantModule } from './modules/restaurant/restaurant.module';
 import { DiscoveryModule } from './modules/discovery/discovery.module';
 import { MenuModule } from './modules/menu/menu.module';
 import { CouponModule } from './modules/coupon/coupon.module';
+import { CustomerEmailModule } from './modules/customer-email/customer-email.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { OrderModule } from './modules/order/order.module';
 import { ReviewModule } from './modules/review/review.module';
@@ -31,9 +32,11 @@ import { CityModule } from './modules/city/city.module';
 import { PlatformAuthModule } from './modules/platform-auth/platform-auth.module';
 import { PlatformStaffModule } from './modules/platform-staff/platform-staff.module';
 import { SubscriptionModule } from './modules/subscription/subscription.module';
+import { SubscriptionPaymentModule } from './modules/subscription-payment/subscription-payment.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { TablesModule } from './modules/tables/tables.module';
 import { ReservationsModule } from './modules/reservations/reservations.module';
+import { ChatsModule } from './modules/chats/chats.module';
 
 
 
@@ -61,6 +64,7 @@ import { ReservationsModule } from './modules/reservations/reservations.module';
     DiscoveryModule,
     MenuModule,
     CouponModule,
+    CustomerEmailModule,
     PaymentModule,
     OrderModule,
     ReviewModule,
@@ -76,9 +80,11 @@ import { ReservationsModule } from './modules/reservations/reservations.module';
     PlatformAuthModule,
     PlatformStaffModule,
     SubscriptionModule,
+    SubscriptionPaymentModule,
     AnalyticsModule,
     TablesModule,
     ReservationsModule,
+    ChatsModule,
   ],
   providers: [
     {

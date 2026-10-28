@@ -30,6 +30,7 @@ function Backdrop() {
 
 export function WhyLogicBit({ rating }: { rating: number }) {
   const t = useTranslations("home");
+  const [first, ...rest] = theme.brand.name.split(/(?=[A-Z])/);
   const tr = useTranslations("restaurant");
   return (
     <section aria-labelledby="why" className="relative overflow-hidden">
@@ -42,7 +43,7 @@ export function WhyLogicBit({ rating }: { rating: number }) {
         </div>
         <div>
           <h2 id="why" className="font-display text-[40px] font-extrabold leading-[1.05] tracking-tight md:text-[64px]">
-            {t.rich("whyTitle", { b: (c) => <span className="text-chili">{c}</span>, q: (c) => <span className="text-saffron">{c}</span> })}
+            {t.rich("whyTitle", { first, second: rest.join(""), b: (c) => <span className="text-chili">{c}</span>, q: (c) => <span className="text-saffron">{c}</span> })}
           </h2>
           <p className="mt-4 text-xl font-medium text-ink/80">{t("whyTagline")}</p>
           <ul className="shadow-warm mt-8 divide-y-2 divide-dashed divide-ink/10 rounded-[32px] bg-paper/90 px-6 backdrop-blur-sm">

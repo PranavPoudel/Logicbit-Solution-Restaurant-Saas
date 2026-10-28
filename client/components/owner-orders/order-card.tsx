@@ -2,7 +2,7 @@
 "use client";
 
 import { Clock } from "lucide-react";
-import type { OwnerOrderSummary } from "@/types/order";
+import type { OwnerOrderSummary } from "@/types/order";  
 
 const NEXT_STATUS: Record<string, { label: string; next: string } | undefined> = {
   ACCEPTED: { label: "Start preparing", next: "PREPARING" },

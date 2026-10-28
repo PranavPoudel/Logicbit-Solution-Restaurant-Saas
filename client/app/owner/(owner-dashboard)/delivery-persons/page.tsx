@@ -7,6 +7,7 @@ import {
   listDeliveryPersons,
 } from "@/lib/api/delivery-persons";
 import { useOwnerAuthStore } from "@/store/owner-auth-store";
+import { theme } from "@/config/theme";
 import { PartnerSection } from "@/components/delivery-partners/partner-section";
 
 interface DeliveryPerson {
@@ -247,7 +248,7 @@ export default function DeliveryPersonsPage() {
               Available Freelance Riders
             </h2>
             <p className="text-xs text-teal-700 mt-1">
-              Independent delivery persons registered on LogicBit who are currently online and available for gig work.
+              Independent delivery persons registered on {theme.brand.name} who are currently online and available for gig work.
             </p>
           </div>
 

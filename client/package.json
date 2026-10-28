@@ -6,7 +6,8 @@
     "dev": "next dev -p 3701",
     "build": "next build",
     "start": "next start -p 3701",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "node --test \"lib/**/*.spec.ts\""
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",

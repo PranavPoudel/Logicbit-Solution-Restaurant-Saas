@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { theme } from '@/config/theme';
 
 interface NavItem {
   name: string;
@@ -56,6 +57,15 @@ const NAV_SECTIONS: NavSection[] = [
         icon: (props) => (
           <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+        ),
+      },
+      {
+        name: "Chats",
+        path: "/admin/chats",
+        icon: (props) => (
+          <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
           </svg>
         ),
       },
@@ -182,8 +192,8 @@ export default function AdminSidebar() {
     <aside className="w-64 bg-white border-r border-gray-200 flex flex-col shadow-sm z-10 shrink-0 select-none">
       <div className="p-6 border-b border-gray-100 flex items-center h-16">
         <h3 className="text-lg font-bold text-gray-900 tracking-tight flex items-center gap-2">
-          <span className="bg-blue-600 text-white p-1.5 rounded-lg text-xs font-black">LB</span>
-          LogicBit Admin
+          <span className="bg-blue-600 text-white p-1.5 rounded-lg text-xs font-black">{theme.brand.name.slice(0, 2).toUpperCase()}</span>
+          {theme.brand.name} Admin
         </h3>
       </div>
       
