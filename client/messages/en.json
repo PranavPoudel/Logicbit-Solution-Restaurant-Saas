@@ -949,6 +949,11 @@
     "endConfirm": "End this chat and start over?",
     "keep": "Keep chatting",
     "nameLabel": "Your name (optional)",
-    "namePlaceholder": "e.g. Sita"
+    "namePlaceholder": "e.g. Sita",
+    "owner": "Restaurant",
+    "admin": "Support team",
+    "humanStatus": "A team member is replying",
+    "endedNote": "This chat has ended.",
+    "newChat": "Start new chat"
   }
 }

@@ -949,6 +949,11 @@
     "endConfirm": "このチャットを終了して最初からやり直しますか?",
     "keep": "続ける",
     "nameLabel": "お名前(任意)",
-    "namePlaceholder": "例:サイタ"
+    "namePlaceholder": "例:サイタ",
+    "owner": "レストラン",
+    "admin": "サポートチーム",
+    "humanStatus": "スタッフが対応しています",
+    "endedNote": "このチャットは終了しました。",
+    "newChat": "新しいチャットを始める"
   }
 }

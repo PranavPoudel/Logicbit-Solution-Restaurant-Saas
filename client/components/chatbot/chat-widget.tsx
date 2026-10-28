@@ -11,8 +11,8 @@ import { renderChatText } from "@/lib/utils/chat-text";
 
 export function ChatWidget() {
   const t = useTranslations("chatbot");
-  const { messages, typing, send, endChat, canEnd, restaurant, askName, visitorName, setVisitorName, quickReplies } = useChatbot();
   const [open, setOpen] = useState(false);
+  const { messages, typing, send, endChat, canEnd, ended, takenOver, restaurant, askName, visitorName, setVisitorName, quickReplies } = useChatbot(open);
   const [confirmEnd, setConfirmEnd] = useState(false);
   const [draft, setDraft] = useState("");
   const log = useRef<HTMLDivElement>(null);
@@ -32,7 +32,7 @@ export function ChatWidget() {
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    send(draft);
+    void send(draft);
     setDraft("");
   };
 
@@ -69,10 +69,10 @@ export function ChatWidget() {
             <h2 className="font-display text-xl font-extrabold">{t("title")}</h2>
             <p className="flex items-center gap-1.5 truncate text-sm text-cream/85">
               <span className="h-2 w-2 shrink-0 rounded-full bg-herb" />
-              <span className="truncate">{restaurant ? t("asking", { name: restaurant.name }) : t("status")}</span>
+              <span className="truncate">{takenOver ? t("humanStatus") : restaurant ? t("asking", { name: restaurant.name }) : t("status")}</span>
             </p>
           </div>
-          {canEnd && (
+          {canEnd && !ended && (
             <button type="button" onClick={() => setConfirmEnd(true)} className="min-h-11 shrink-0 rounded-full px-3 text-sm font-bold hover:bg-cream/15">{t("end")}</button>
           )}
           <button type="button" onClick={() => setOpen(false)} aria-label={t("close")} className="grid h-11 w-11 shrink-0 place-items-center rounded-full hover:bg-cream/15">
@@ -81,14 +81,20 @@ export function ChatWidget() {
         </header>
 
         <div ref={log} role="log" aria-live="polite" className="no-scrollbar flex-1 space-y-3 overflow-y-auto px-4 py-5">
-          {messages.map((m) => (
-            <div key={m.id} className={`animate-fade-up flex ${m.from === "user" ? "justify-end" : "justify-start"}`}>
-              <div className={`max-w-[85%] rounded-2xl px-4 py-3 text-base leading-snug ${m.from === "user" ? "rounded-br-md bg-crimson text-cream" : "shadow-soft rounded-bl-md bg-paper text-ink"}`}>
-                <p>{m.from === "user" ? m.text : renderChatText(t(`reply.${m.key}`, m.values))}</p>
-                {action(m)}
+          {messages.map((m) => {
+            const human = m.from === "owner" || m.from === "admin";
+            // user + owner/admin text is shown as plain text; only bot text may use **bold** / links.
+            const body = m.from === "bot" ? renderChatText(m.text ?? t(`reply.${m.key}`, m.values)) : m.text;
+            return (
+              <div key={m.id} className={`animate-fade-up flex ${m.from === "user" ? "justify-end" : "justify-start"}`}>
+                <div className={`max-w-[85%] rounded-2xl px-4 py-3 text-base leading-snug ${m.from === "user" ? "rounded-br-md bg-crimson text-cream" : human ? "rounded-bl-md border-2 border-crimson/30 bg-paper text-ink" : "shadow-soft rounded-bl-md bg-paper text-ink"}`}>
+                  {human && <p className="mb-1 text-xs font-bold text-crimson">{t(m.from === "admin" ? "admin" : "owner")}</p>}
+                  <p className="whitespace-pre-line break-words">{body}</p>
+                  {action(m)}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
           {typing && (
             <div className="animate-fade-up flex justify-start" aria-label={t("typing")}>
               <div className="shadow-soft flex gap-1.5 rounded-2xl rounded-bl-md bg-paper px-4 py-4">
@@ -107,7 +113,7 @@ export function ChatWidget() {
           {lastIsBot && !typing && (
             <div className="flex flex-wrap gap-2 pt-1">
               {quickReplies.map((q, i) => (
-                <button key={q.id} type="button" onClick={() => send(t(`suggest.${q.id}`), q.id)} style={{ animationDelay: `${i * 70}ms` }} className="animate-fade-up inline-flex min-h-11 items-center gap-2 rounded-full border-2 border-crimson/40 bg-paper px-4 font-bold text-crimson hover:border-crimson hover:bg-crimson hover:text-cream">
+                <button key={q.id} type="button" onClick={() => void send(t(`suggest.${q.id}`), q.id)} style={{ animationDelay: `${i * 70}ms` }} className="animate-fade-up inline-flex min-h-11 items-center gap-2 rounded-full border-2 border-crimson/40 bg-paper px-4 font-bold text-crimson hover:border-crimson hover:bg-crimson hover:text-cream">
                   <Icon name={q.icon} className="h-4 w-4" />{t(`suggest.${q.id}`)}
                 </button>
               ))}
@@ -125,6 +131,12 @@ export function ChatWidget() {
           </div>
         )}
 
+        {ended ? (
+          <div className="flex items-center justify-between gap-3 border-t-2 border-ink/10 bg-paper px-4 py-3">
+            <p className="font-medium">{t("endedNote")}</p>
+            <button type="button" onClick={finish} className="min-h-11 shrink-0 rounded-full bg-crimson px-4 font-bold text-cream hover:bg-ink">{t("newChat")}</button>
+          </div>
+        ) : (
         <form onSubmit={submit} className="border-t-2 border-ink/10 bg-paper p-3">
           <div className="flex items-center gap-2 rounded-full border-2 border-ink/15 bg-cream p-1.5 pl-4 focus-within:border-ink">
             <label htmlFor="chat-input" className="sr-only">{t("placeholder")}</label>
@@ -134,6 +146,7 @@ export function ChatWidget() {
             </button>
           </div>
         </form>
+        )}
       </section>
 
       <button
