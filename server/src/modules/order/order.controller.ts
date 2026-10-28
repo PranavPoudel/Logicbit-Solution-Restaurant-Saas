@@ -49,8 +49,8 @@ export class RestaurantOrderController {
   constructor(private readonly orderService: OrderService) {}
 
   @Get()
-  findAll(@Req() req, @Param('restaurantId') restaurantId: string, @Query('status') status?: string) {
-    return this.orderService.findAllForRestaurant(req.user.tenantId, restaurantId, status);
+  findAll(@Req() req, @Param('restaurantId') restaurantId: string, @Query('status') status?: string, @Query('startDate') startDate?: string, @Query('endDate') endDate?: string) {
+    return this.orderService.findAllForRestaurant(req.user.tenantId, restaurantId, status, startDate, endDate);
   }
 
   @Get('unprinted') // 🆕 Fetch only orders that haven't been printed

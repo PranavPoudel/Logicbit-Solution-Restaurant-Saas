@@ -46,7 +46,7 @@ export default function DashboardPage() {
   // 2. Pending Orders Query
   const ordersQuery = useQuery({
     queryKey: ["dashboard-pending-orders", restaurantId],
-    queryFn: () => listRestaurantOrders(restaurantId as string, "PENDING") as Promise<OwnerOrderRow[]>,
+    queryFn: () => listRestaurantOrders(restaurantId as string, { status: "PENDING" }) as Promise<OwnerOrderRow[]>,
     enabled: !!restaurantId,
   });
 

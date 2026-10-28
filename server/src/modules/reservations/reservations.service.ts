@@ -1,3 +1,4 @@
+// src/modules/reservations/reservations.service.ts
 import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
@@ -88,7 +89,14 @@ export class ReservationsService {
   }
 
   // ... (keep findAll, findOne, update, remove, restore, permanentDelete exactly as they were) ...
-  async findAll(tenantId: string, restaurantId: string, includeDeleted = false, status?: string, date?: string) {
+  async findAll(
+    tenantId: string, 
+    restaurantId: string, 
+    includeDeleted = false, 
+    status?: string, 
+    startDate?: string, 
+    endDate?: string
+  ) {
     const whereClause: any = {
       tenantId,
       restaurantId,
@@ -98,19 +106,23 @@ export class ReservationsService {
     if (status && status !== 'ALL') {
       whereClause.status = status;
     }
-    if (date) {
-      const startOfDay = new Date(`${date}T00:00:00.000Z`);
-      const endOfDay = new Date(`${date}T23:59:59.999Z`);
-      whereClause.reservationDate = { gte: startOfDay, lte: endOfDay };
+    
+    if (startDate || endDate) {
+      whereClause.reservationDate = {};
+      if (startDate) whereClause.reservationDate.gte = new Date(startDate);
+      if (endDate) {
+        const endOfDay = new Date(endDate);
+        endOfDay.setHours(23, 59, 59, 999);
+        whereClause.reservationDate.lte = endOfDay;
+      }
     }
 
     return this.prisma.reservation.findMany({
       where: whereClause,
       include: { table: { select: { name: true, capacity: true } } },
-      orderBy: [{ reservationDate: 'asc' }, { reservationTime: 'asc' }],
+      orderBy: [{ reservationDate: 'desc' }, { reservationTime: 'desc' }],
     });
   }
-
   async findOne(tenantId: string, restaurantId: string, id: string) {
     const reservation = await this.prisma.reservation.findFirst({ 
       where: { id, tenantId, restaurantId, deletedAt: null },

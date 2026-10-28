@@ -45,16 +45,12 @@ export async function getMyOrder(id: string): Promise<OrderDetail> {
 }
 
 // --- Owner side ---
-export async function listRestaurantOrders(restaurantId: string, status?: string) {
-  const { data } = await ownerApiClient.get(`/restaurants/${restaurantId}/orders`, {
-    params: status ? { status } : undefined,
-  });
-  if (process.env.NODE_ENV === "development") {
-    // eslint-disable-next-line no-console
-    console.log("[restaurants/:id/orders] unwrapped payload:", data);
-  }
-  if (Array.isArray(data)) return data;
-  return data?.orders ?? data?.data ?? [];
+export async function listRestaurantOrders(
+  restaurantId: string, 
+  params?: { status?: string; startDate?: string; endDate?: string }
+) {
+  const { data } = await ownerApiClient.get(`/restaurants/${restaurantId}/orders`, { params });
+  return Array.isArray(data) ? data : data?.orders ?? data?.data ?? [];
 }
 
 export async function getRestaurantOrder(restaurantId: string, orderId: string) {
