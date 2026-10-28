@@ -13,7 +13,7 @@ export type MenuView = "cards" | "list" | "table";
 export function DishImage({ item, className }: { item: MenuItem; className: string }) {
   const src = getItemImage(item);
   if (!src) {
-    return <div className={`grid place-items-center bg-saffron font-display text-6xl font-extrabold text-ink/30 ${className}`}>{(item.name ?? "").charAt(0)}</div>;
+    return <div className={`grid place-items-center bg-tangerine/50 font-display text-6xl font-extrabold text-espresso/25 ${className}`}>{(item.name ?? "").charAt(0)}</div>;
   }
   // eslint-disable-next-line @next/next/no-img-element
   return <img src={getFullImageUrl(src)} alt="" className={className} />;

@@ -178,6 +178,9 @@ model Restaurant {
   totalReviews Int      @default(0)
   totalOrders  Int      @default(0)
   isOpen       Boolean  @default(true)
+  // Weekly schedule: [{ day: 0-6 (Sun-Sat), closed, shifts: [{ open: "HH:mm", close: "HH:mm" }] }]. Null means no schedule, only isOpen applies.
+  openingHours Json?
+  timezone     String   @default("Asia/Kathmandu")
   supportsDelivery Boolean @default(true)
   supportsPickup   Boolean @default(true)
   supportsDineIn   Boolean @default(false)

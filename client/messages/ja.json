@@ -412,14 +412,22 @@
     "mapStyle": "地図の表示",
     "mapCartoon": "イラスト",
     "mapStreet": "地図",
-    "mapIllustrative": "イメージ図（縮尺は実際と異なります）"
+    "mapIllustrative": "イメージ図（縮尺は実際と異なります）",
+    "hours": {
+      "title": "営業時間",
+      "closesAt": "{time}に閉店",
+      "opensToday": "本日{time}に開店",
+      "opensTomorrow": "明日{time}に開店",
+      "opensOn": "{day}{time}に開店",
+      "today": "本日",
+      "closedDay": "定休日"
+    }
   },
   "menu": {
     "categories": "メニューカテゴリ",
     "searchMenu": "メニューを検索",
     "clearSearch": "検索をクリア",
     "noMatch": "このメニューに「{q}」はありません。",
-    "showMore": "もっと見る（{category}にあと{count}件）",
     "thisCategory": "このカテゴリ",
     "fallbackName": "メニュー",
     "fallbackItem": "メニュー項目",
@@ -458,7 +466,12 @@
     "veg": "ベジタリアン",
     "nonVeg": "非ベジタリアン",
     "colAdd": "カートに追加",
-    "customisable": "カスタム可"
+    "customisable": "カスタム可",
+    "pagesOf": "{category}のページ",
+    "showingRange": "{total}件中 {from}〜{to}件を表示",
+    "prevPage": "前のページ",
+    "nextPage": "次のページ",
+    "goToPage": "{n}ページへ"
   },
   "dish": {
     "popular": "人気 ★",
@@ -886,5 +899,71 @@
     "pickup": "受け取り",
     "dropoff": "お届け先",
     "you": "現在地"
+  },
+  "chatbot": {
+    "title": "LogicBitヘルパー",
+    "status": "すぐに返信します",
+    "launcher": "相談する",
+    "open": "チャットを開く",
+    "close": "チャットを閉じる",
+    "typing": "入力中",
+    "placeholder": "注文・料理・クーポンについて質問",
+    "send": "送信",
+    "suggest": {
+      "orders": "注文を追跡",
+      "restaurants": "料理を探す",
+      "offers": "今日のお得情報",
+      "refund": "返金について",
+      "menu": "メニューを見る",
+      "hours": "営業時間",
+      "location": "場所はどこ?",
+      "contact": "連絡先は?",
+      "delivery": "配達時間",
+      "offersHere": "このお店のお得情報"
+    },
+    "reply": {
+      "greeting": "こんにちは、LogicBitヘルパーです。ご注文、近くのキッチン、今日のお得情報についてお答えします。",
+      "hello": "こんにちは!今日は何を食べたいですか?",
+      "orders": "「注文履歴」から、地図上のライダーも含めて注文をリアルタイムで確認できます。",
+      "restaurants": "近くの営業中キッチンはレストランページにあります。料理の種類で絞り込めます。",
+      "offers": "各キッチンのページにクーポンや初回限定オファーが載っています。今日の内容を確認してください。",
+      "refund": "商品の間違い・不足・傷みは2時間以内にご連絡ください。3〜5営業日で元の支払い方法に返金します。",
+      "delivery": "配達料はキッチンまでの距離で決まります。お支払い前にチェックアウトで正確な料金が分かります。",
+      "fallback": "その内容はまだ勉強中です。注文、料理、クーポン、配達、返金についてお尋ねください。",
+      "help": "下の質問を選ぶか、自由に入力してください。",
+      "greetingRestaurant": "こんにちは!**{name}**について何でも聞いてください。",
+      "helloNamed": "こんにちは、{name}さん!今日は何を食べたいですか?",
+      "named": "{name}さん、はじめまして。",
+      "menu": "**{name}**には次のカテゴリのメニューがあります:{categories}。下のボタンで全メニューへ移動できます。",
+      "menuEmpty": "**{name}**はまだメニューを追加していません。またご確認ください。",
+      "hoursOpen": "**{name}**は現在営業中です。すぐに注文できます。",
+      "hoursClosed": "**{name}**は現在営業時間外です。メニューを見て、開店後にまたお越しください。",
+      "location": "**{name}**の住所は{address}です。",
+      "locationMissing": "**{name}**はまだ住所を登録していません。",
+      "contact": "**{name}**には{phone}でお電話いただけます。",
+      "contactMissing": "**{name}**はまだ電話番号を登録していません。このページの連絡先セクションをご確認ください。",
+      "deliveryHere": "**{name}**の配達は通常約{minutes}分です。正確な料金はお支払い前のチェックアウトで分かります。",
+      "deliveryNoEta": "配達時間は**{name}**までの距離によります。正確な料金はお支払い前のチェックアウトで分かります。",
+      "offersHere": "**{name}**の現在のクーポン:{codes}。カートで適用できます。",
+      "offersNone": "**{name}**には現在有効なオファーはありません。",
+      "fallbackRestaurant": "**{name}**について、メニュー・営業時間・場所・連絡先・配達をご案内できます。いずれかをお試しください。",
+      "hoursOpenUntil": "**{name}**は現在営業中で、{time}まで営業しています。",
+      "hoursClosedOpens": "**{name}**は現在営業時間外です。{opens}。"
+    },
+    "action": {
+      "orders": "注文履歴を開く",
+      "restaurants": "キッチンを探す",
+      "offers": "オファーのあるキッチン",
+      "menu": "メニューへ移動",
+      "location": "場所を見る",
+      "contact": "連絡先を見る",
+      "offersHere": "オファーを見る"
+    },
+    "asking": "{name}について質問中",
+    "end": "チャットを終了",
+    "endConfirm": "このチャットを終了して最初からやり直しますか?",
+    "keep": "続ける",
+    "nameLabel": "お名前(任意)",
+    "namePlaceholder": "例:サイタ"
   }
 }

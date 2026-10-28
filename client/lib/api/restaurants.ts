@@ -1,6 +1,7 @@
 // lib/api/restaurants.ts — Module 6: Restaurant (owner-facing)
 import { ownerApiClient } from "@/lib/api/owner-client";
 import type { Restaurant } from "@/types/owner";
+import type { DayHours } from "@/types/hours";
 
 export async function listMyRestaurants(): Promise<Restaurant[]> {
   const { data } = await ownerApiClient.get<Restaurant[]>("/restaurants");
@@ -23,6 +24,8 @@ export interface UpdateRestaurantInput {
   heroHeading?: string;
   heroSubheading?: string;
   isOpen?: boolean;
+  openingHours?: DayHours[];
+  timezone?: string;
   supportsDelivery?: boolean;
   supportsPickup?: boolean;
   supportsDineIn?: boolean;

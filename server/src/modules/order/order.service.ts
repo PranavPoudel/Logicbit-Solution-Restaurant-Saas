@@ -9,6 +9,7 @@ import { haversineDistanceKm } from '../../common/utils/haversine.util';
 import { calculateDeliveryQuote } from '../../common/utils/delivery-fee.util';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto, CancelOrderDto } from './dto/update-order-status.dto';
+import { computeOpenStatus } from '../../common/utils/opening-hours.util';
 
 const CANCELLABLE_STATUSES = ['PENDING', 'ACCEPTED'];
 const TERMINAL_STATUSES = ['DELIVERED', 'COMPLETED', 'CANCELLED'];
@@ -42,7 +43,7 @@ export class OrderService {
       where: { id: dto.restaurantId, isActive: true },
     });
     if (!restaurant) throw new NotFoundException('Restaurant not found');
-    if (!restaurant.isOpen) throw new BadRequestException('This restaurant is currently closed');
+    if (!computeOpenStatus(restaurant).isOpen) throw new BadRequestException('This restaurant is currently closed');
 
     // --- 1. हरेक item को price DB बाट taजा निकालेर calculate गर्ने ---
     let subtotal = 0;

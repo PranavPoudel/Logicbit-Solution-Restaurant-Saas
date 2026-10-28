@@ -73,6 +73,19 @@ async function clearDatabase() {
 // =========================================================
 // MAIN SEED FUNCTION
 // =========================================================
+// Weekly schedule per restaurant: most open 10:00-22:00 (weekends longer), some split shifts or a closed day.
+function randomWeek() {
+  const closedDay = Math.random() < 0.25 ? randomInt(0, 6) : -1;
+  const split = Math.random() < 0.25;
+  return Array.from({ length: 7 }, (_, day) => {
+    const weekend = day === 0 || day === 6;
+    const shifts = split && !weekend
+      ? [{ open: '10:00', close: '14:00' }, { open: '17:00', close: '22:00' }]
+      : [{ open: weekend ? '09:00' : '10:00', close: weekend ? '23:00' : '22:00' }];
+    return day === closedDay ? { day, closed: true, shifts: [] } : { day, closed: false, shifts };
+  });
+}
+
 async function main() {
   console.log('🌱 Starting database seed with realistic data volume...');
 
@@ -191,7 +204,7 @@ async function main() {
       data: {
         tenantId: tenant.id, name: restName, slug, latitude: lat, longitude: lng,
         address: `${randomInt(1, 99)} Main Street, ${city.name}`, city: city.name, country: 'Nepal',
-        isOpen: true, supportsDelivery: true, supportsPickup: true, supportsDineIn: Math.random() > 0.3,
+        isOpen: true, openingHours: randomWeek(), supportsDelivery: true, supportsPickup: true, supportsDineIn: Math.random() > 0.3,
         selfDeliveryRadiusKm: randomInt(3, 7), maxDeliveryRadiusKm: randomInt(8, 15),
         selfDeliveryFlatFee: randomInt(50, 100), platformCommissionPercent: randomInt(8, 15),
         primaryColor: '#E3A008', secondaryColor: '#17181C',

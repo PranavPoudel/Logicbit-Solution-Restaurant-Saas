@@ -164,7 +164,7 @@ export function ModifierModal({ restaurantId, menuItemId, onClose }: ModifierMod
           {photo ? (
             <div role="img" aria-label={item?.name ?? t("photoAlt")} style={imageFill(getFullImageUrl(photo))} />
           ) : (
-            <div className="grid h-full w-full place-items-center bg-saffron font-display text-8xl font-extrabold text-ink/30">{(item?.name ?? "").charAt(0)}</div>
+            <div className="grid h-full w-full place-items-center bg-tangerine/50 font-display text-8xl font-extrabold text-espresso/25">{(item?.name ?? "").charAt(0)}</div>
           )}
           {item?.isFeatured && <span className="absolute bottom-4 left-4 -rotate-6 rounded-xl bg-saffron px-3 py-1 font-display text-lg font-extrabold text-espresso shadow-hard">{t("popular")}</span>}
         </div>

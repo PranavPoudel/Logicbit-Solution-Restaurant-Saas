@@ -8,6 +8,7 @@ import { TranslationService } from '../translation/translation.service';
 import { AdvertisementService } from '../advertisement/advertisement.service';
 
 import { calculateDeliveryQuote } from '../../common/utils/delivery-fee.util';
+import { computeOpenStatus } from '../../common/utils/opening-hours.util';
 
 @Injectable()
 export class DiscoveryService {
@@ -52,7 +53,6 @@ export class DiscoveryService {
     ];
     if (minRating !== undefined) conditions.push(Prisma.sql`"avgRating" >= ${minRating}`);
     if (priceRange) conditions.push(Prisma.sql`"priceRange" = ${priceRange}`);
-    if (isOpenNow) conditions.push(Prisma.sql`"isOpen" = true`);
     if (cuisineType) {
       // GAP FIX: पहिले `cuisineTypes` free-text array column थियो, अब
       // managed Cuisine relation प्रयोग हुन्छ — cuisine को slug ले filter गर्ने।
@@ -123,7 +123,8 @@ export class DiscoveryService {
         return b.score - a.score; // 'recommended' — ranking algorithm (default)
       });
 
-    const paginated = ranked.slice(offset, offset + limit);
+    const visible = isOpenNow ? ranked.filter((r) => computeOpenStatus(r).isOpen) : ranked;
+    const paginated = visible.slice(offset, offset + limit);
 
     // Raw SQL बाट आएको result मा cuisine names हुँदैन (त्यो अर्कै table मा
     // छ) — यहाँ separate query ले fetch गरेर merge गरिन्छ।
@@ -143,7 +144,7 @@ export class DiscoveryService {
       success: true,
       data: {
         restaurants: paginated.map((r) => this.toPublicRestaurantShape(r, cuisineMap.get(r.id) ?? [])),
-        pagination: { page, limit, total: ranked.length },
+        pagination: { page, limit, total: visible.length },
       },
     };
   }
@@ -358,6 +359,7 @@ export class DiscoveryService {
   }
 
   private toPublicRestaurantShape(r: any, cuisines: { name: string; slug: string }[] = []) {
+    const openStatus = computeOpenStatus(r);
     return {
       id: r.id,
       name: r.name,
@@ -366,7 +368,10 @@ export class DiscoveryService {
       avgRating: r.avgRating,
       priceRange: r.priceRange,
       distanceKm: r.distanceKm,
-      isOpen: r.isOpen,
+      isOpen: openStatus.isOpen,
+      openStatus,
+      openingHours: r.openingHours ?? null,
+      timezone: r.timezone,
       isSponsored: r.isSponsored ?? false,
       logoUrl: r.logoUrl,
       coverImageUrl: r.coverImageUrl,

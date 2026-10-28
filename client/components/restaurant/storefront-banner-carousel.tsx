@@ -43,7 +43,7 @@ export function StorefrontBannerCarousel({ banners }: StorefrontBannerCarouselPr
         {banners.map((banner) => {
           // ✅ Extract content so we can conditionally wrap it in a Link
           const Content = (
-            <div className="w-full flex-shrink-0 relative aspect-[16/9] sm:aspect-[21/9]">
+            <div className="w-full flex-shrink-0 relative h-[200px] sm:h-[260px] lg:h-[320px]">
               <AppImage
                 sizes="100vw"
                 src={banner.imageUrl}
@@ -88,14 +88,14 @@ export function StorefrontBannerCarousel({ banners }: StorefrontBannerCarouselPr
         <>
           <button
             onClick={() => goToSlide(currentIndex - 1)}
-            className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/40 flex items-center justify-center text-white transition-colors"
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/40 flex items-center justify-center text-white transition-colors"
             aria-label="Previous banner"
           >
             <ChevronLeft size={20} />
           </button>
           <button
             onClick={() => goToSlide(currentIndex + 1)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/40 flex items-center justify-center text-white transition-colors"
+            className="absolute right-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/40 flex items-center justify-center text-white transition-colors"
             aria-label="Next banner"
           >
             <ChevronRight size={20} />

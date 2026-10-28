@@ -2,6 +2,7 @@
 import { CustomerShell } from "@/components/layout/customer-shell";
 import { CustomerHeader } from "@/components/layout/customer-header";
 import { CustomerFooter } from "@/components/home/homepage-footer";
+import { ChatWidget } from "@/components/chatbot/chat-widget";
 
 export default function CustomerLayout({
   children,
@@ -13,6 +14,7 @@ export default function CustomerLayout({
       <CustomerHeader />
       <main className="flex-1">{children}</main>
       <CustomerFooter />
+      <ChatWidget />
     </CustomerShell>
   );
 }
