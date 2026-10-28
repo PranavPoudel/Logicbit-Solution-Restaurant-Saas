@@ -4,7 +4,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { AlertCircle, ArrowRight, Bike, Check, ChevronRight, Clock, Loader2, MapPin, Package, Phone, UtensilsCrossed, Wallet, type LucideIcon } from "lucide-react";
-import type { OwnerOrderSummary } from "@/types/owner-order";
+import type { OwnerOrderSummary } from "@/types/order";
 import { formatMoney } from "@/lib/utils/money";
 import { ageLabel, flowFor, minutesSince, nextStep, shortNumber, stepIndex } from "@/lib/utils/order-flow";
 

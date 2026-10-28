@@ -16,7 +16,7 @@ import { shortNumber, stageLabel } from "@/lib/utils/order-flow";
 import { OrderTabs, ORDERS_PANEL_ID } from "@/components/owner-orders/order-tabs";
 import { OrderList, type OrderGroup } from "@/components/owner-orders/order-list";
 import { OrderDetail, DETAIL_TITLE_ID, PRIMARY_ACTION_ID } from "@/components/owner-orders/order-detail";
-import type { OwnerOrderSummary } from "@/types/owner-order";
+import type { OwnerOrderSummary } from "@/types/order";
 
 const ACTIVE_KEY = "ACTIVE";
 const SPLIT_MIN_WIDTH = 760;
