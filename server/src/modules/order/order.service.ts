@@ -292,12 +292,30 @@ export class OrderService {
   }
 
   /** Owner-facing — आफ्नो restaurant का मात्र order */
-  async findAllForRestaurant(tenantId: string, restaurantId: string, status?: string) {
+   async findAllForRestaurant(
+    tenantId: string, 
+    restaurantId: string, 
+    status?: string, 
+    startDate?: string, 
+    endDate?: string
+  ) {
+    const whereClause: any = { tenantId, restaurantId };
+    
+    if (status) {
+      whereClause.status = status;
+    }
+    
+    if (startDate || endDate) {
+      whereClause.createdAt = {};
+      if (startDate) whereClause.createdAt.gte = new Date(startDate);
+      if (endDate) whereClause.createdAt.lte = new Date(endDate); // End of day handled by frontend or we can add 23:59:59
+    }
+
     return this.prisma.order.findMany({
-      where: { tenantId, restaurantId, ...(status ? { status: status as any } : {}) },
+      where: whereClause,
       orderBy: { createdAt: 'desc' },
       include: {
-        items: { include: { menuItem: true } },
+        items: { include: { menuItem: { select: { name: true } } } },
         customer: { select: { name: true, phone: true } },
       },
     });

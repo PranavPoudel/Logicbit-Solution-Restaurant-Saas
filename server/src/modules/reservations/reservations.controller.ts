@@ -25,10 +25,11 @@ export class ReservationsController {
     @Param('restaurantId') restaurantId: string,
     @Query('includeDeleted') includeDeleted?: string | boolean,
     @Query('status') status?: string,
-    @Query('date') date?: string
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string
   ) {
     const isDeletedIncluded = includeDeleted === 'true' || includeDeleted === true;
-    return this.reservationsService.findAll(req.user.tenantId, restaurantId, isDeletedIncluded, status, date);
+    return this.reservationsService.findAll(req.user.tenantId, restaurantId, isDeletedIncluded, status, startDate, endDate);
   }
 
   @Get(':id')
