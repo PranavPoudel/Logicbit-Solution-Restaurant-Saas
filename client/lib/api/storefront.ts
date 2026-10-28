@@ -11,6 +11,30 @@ export interface BannerInput {
   [key: string]: unknown;
 }
 
+
+export interface Banner {
+  id: string;
+  imageUrl: string;
+  title?: string;
+  subtitle?: string;
+  linkUrl?: string;
+  displayOrder?: number;
+  isActive?: boolean;
+}
+
+export interface StorefrontPopup {
+  id: string;
+  title: string;
+  message?: string;
+  imageUrl?: string;
+  ctaText?: string;
+  ctaLink?: string;
+  type: PopupType;
+  isActive: boolean;
+  startDate?: string;
+  endDate?: string;
+}
+
 export const storefrontBannersApi = {
   create: async (restaurantId: string, input: BannerInput) =>
     (await ownerApiClient.post(`/restaurants/${restaurantId}/storefront/banners`, input)).data,
