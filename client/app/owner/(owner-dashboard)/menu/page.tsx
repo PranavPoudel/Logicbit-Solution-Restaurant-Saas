@@ -10,7 +10,6 @@ import { CategoryManager } from "@/components/owner-menu/category-manager";
 import { MenuItemManager } from "@/components/owner-menu/menu-item-manager";
 import { ModifierGroupManager } from "@/components/owner-menu/modifier-group-manager";
 import { MenuTrashBin } from "@/components/owner-menu/menu-trash-bin";
-import { SubscriptionUpgradeBanner } from "@/components/ui/subscription-upgrade-banner";
 
 const TABS = [
   { key: "ITEMS", label: "Menu Items" },
@@ -97,8 +96,6 @@ export default function MenuPage() {
     <div className="max-w-7xl">
       <h1 className="text-xl font-semibold text-neutral-900 mb-1">Menu Management</h1>
       <p className="text-sm text-neutral-500 mb-6">Manage your categories, menu items, modifiers, and trashed items.</p>
-      <SubscriptionUpgradeBanner />
-
       {/* Top Tabs */}
       <div className="flex gap-1 border-b border-neutral-200 mb-6 overflow-x-auto">
         {TABS.map((tab) => {

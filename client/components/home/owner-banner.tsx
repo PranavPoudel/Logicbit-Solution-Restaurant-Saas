@@ -8,7 +8,7 @@ import { theme } from "@/config/theme";
 export function OwnerBanner() {
   const t = useTranslations("home");
   return (
-    <section id="partner" className="relative mx-5 mb-16 mt-16 overflow-hidden rounded-[40px] bg-crimson px-6 py-10 text-cream md:mx-10 md:mt-24 md:min-h-[400px] md:px-14 md:py-14">
+    <section id="partner" className="relative mx-5 mb-16 mt-16 overflow-hidden rounded-[40px] bg-crimson px-6 py-10 text-cream dark:text-white md:mx-10 md:mt-24 md:min-h-[400px] md:px-14 md:py-14">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src="/images/cuisine-indian.jpg.avif" alt="" className="absolute -bottom-10 right-[4%] hidden h-[400px] w-[400px] rotate-3 rounded-[32px] border-8 border-cream object-cover shadow-warm md:block" />
       {/* eslint-disable-next-line @next/next/no-img-element */}

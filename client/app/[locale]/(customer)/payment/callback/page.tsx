@@ -47,8 +47,8 @@ export default function PaymentCallbackPage() {
   if (status === "loading" || isLoading) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 px-4 text-center">
-        <Loader2 className="h-10 w-10 animate-spin text-[#E3A008]" />
-        <h2 className="text-lg font-semibold text-[#17181C]">Verifying Payment...</h2>
+        <Loader2 className="h-10 w-10 animate-spin text-brand-gold" />
+        <h2 className="text-lg font-semibold text-brand-ink">Verifying Payment...</h2>
         <p className="text-sm text-neutral-500">
           Please wait while we confirm your {provider === "paypay" ? "PayPay" : "payment"} status.
         </p>
@@ -61,7 +61,7 @@ export default function PaymentCallbackPage() {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 px-4 text-center">
         <CheckCircle2 className="h-12 w-12 text-green-600" />
-        <h2 className="text-lg font-semibold text-[#17181C]">Payment Successful!</h2>
+        <h2 className="text-lg font-semibold text-brand-ink">Payment Successful!</h2>
         <p className="text-sm text-neutral-500">Redirecting you to your order tracking page...</p>
       </div>
     );
@@ -70,13 +70,13 @@ export default function PaymentCallbackPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-4 px-4 text-center">
       <AlertCircle className="h-12 w-12 text-red-600" />
-      <h2 className="text-lg font-semibold text-[#17181C]">Payment Verification Failed</h2>
+      <h2 className="text-lg font-semibold text-brand-ink">Payment Verification Failed</h2>
       <p className="text-sm text-neutral-500">
         We could not verify your payment. Please check your order history or contact support.
       </p>
       <button
         onClick={() => router.push(`/orders/${orderId}`)}
-        className="mt-4 rounded-xl bg-[#17181C] px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2B2D33]"
+        className="mt-4 rounded-xl bg-brand-ink px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-brand-ink-hover"
       >
         View Order History
       </button>

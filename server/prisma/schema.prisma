@@ -28,6 +28,7 @@ model Tenant {
   restaurantTables RestaurantTable[]  // 🆕 Added
   deliveryPartners DeliveryPartner[]
   reservations     Reservation[]      // 🆕 Added
+  chatSessions     ChatSession[]
 }
 
 model User {
@@ -248,6 +249,7 @@ model Restaurant {
   tables         RestaurantTable[]
   deliveryPartners DeliveryPartner[]
   reservations   Reservation[]
+  chatSessions   ChatSession[]
 
   @@index([tenantId])
   @@index([latitude, longitude])
@@ -387,6 +389,7 @@ model Customer {
   orders    Order[]
   reviews   Review[]
   favorites CustomerFavorite[]
+  chatSessions ChatSession[]
 }
 
 model CustomerAddress {
@@ -760,6 +763,34 @@ model RestaurantSubscription {
   plan SubscriptionPlan @relation(fields: [planId], references: [id])
 }
 
+enum SubscriptionPaymentMethod {
+  PAYPAY
+  CARD
+}
+
+enum SubscriptionPaymentStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
+model SubscriptionPayment {
+  id                String                    @id @default(uuid())
+  tenantId          String
+  restaurantId      String
+  planId            String
+  method            SubscriptionPaymentMethod
+  amount            Float
+  currencyCode      String
+  status            SubscriptionPaymentStatus @default(PENDING)
+  providerReference String?
+  paidAt            DateTime?
+  createdAt         DateTime                  @default(now())
+
+  @@index([restaurantId, createdAt])
+  @@index([providerReference])
+}
+
 // =========================================================
 // PLATFORM STAFF RBAC (Super Admin को आफ्नै team management)
 // =========================================================
@@ -998,6 +1029,26 @@ enum NotificationStatus {
   FAILED
 }
 
+enum CustomerEmailAudience {
+  ALL
+  ONE
+}
+
+model CustomerEmail {
+  id             String                @id @default(uuid())
+  tenantId       String
+  restaurantId   String
+  audience       CustomerEmailAudience
+  customerId     String?
+  orderId        String?
+  subject        String
+  body           String
+  recipientCount Int
+  createdAt      DateTime              @default(now())
+
+  @@index([restaurantId, createdAt])
+}
+
 model Notification {
   id         String              @id @default(uuid())
   tenantId   String?
@@ -1100,4 +1151,44 @@ model DeliveryPartner {
   restaurant Restaurant @relation(fields: [restaurantId], references: [id])
 
   @@index([restaurantId])
+}
+
+// =========================================================
+// CHATBOT
+// =========================================================
+
+// One visitor conversation on one restaurant's storefront. tenantId is copied
+// from the restaurant when the chat starts so owners can be filtered cheaply.
+// The unguessable session id doubles as the visitor's access token.
+model ChatSession {
+  id           String    @id @default(uuid())
+  tenantId     String
+  restaurantId String
+  customerId   String?              // null for guests
+  visitorName  String?
+  takenOver    Boolean   @default(false) // true once an owner/admin replied -> bot stays quiet
+  endedAt      DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  tenant     Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  restaurant Restaurant    @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  customer   Customer?     @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  messages   ChatMessage[]
+
+  @@index([tenantId, updatedAt])
+  @@index([restaurantId])
+  @@index([customerId])
+}
+
+model ChatMessage {
+  id        String   @id @default(uuid())
+  sessionId String
+  from      String   // "user" | "bot" | "owner" | "admin" (set by the server, never the client)
+  text      String
+  createdAt DateTime @default(now())
+
+  session ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, createdAt])
 }

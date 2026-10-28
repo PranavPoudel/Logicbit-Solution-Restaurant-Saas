@@ -1,5 +1,3 @@
-// owner-dashboard/analytics/page.tsx
-// This is the analytics page for the owner dashboard. It displays various statistics and charts related to the restaurant's performance.
 "use client";
 
 import { useState } from "react";
@@ -16,9 +14,12 @@ import {
 import { useOwnerAuthStore } from "@/store/owner-auth-store";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { RevenueChart } from "@/components/dashboard/revenue-chart";
-import { SubscriptionUpgradeBanner } from "@/components/ui/subscription-upgrade-banner";
-import { getRestaurantAnalytics } from "@/lib/api/analytics";
 import { ReportsTab } from "@/components/dashboard/reports-tab"; 
+import { getRestaurantAnalytics } from "@/lib/api/analytics";
+
+// TODO: Re-enable SubscriptionBanner once subscription data is wired 
+// into either the analytics API response or the owner-auth-store.
+// import { SubscriptionBanner } from "@/components/dashboard/subscription-banner"; 
 
 export default function AnalyticsPage() {
   const restaurantId = useOwnerAuthStore((s) => s.activeRestaurantId);
@@ -98,8 +99,10 @@ export default function AnalyticsPage() {
         </div>
       </div>
 
-      {/* Subscription Guard */}
-      <SubscriptionUpgradeBanner />
+      {/* 
+        TODO: Re-enable this once `subscription` data is properly available.
+        Example: {analytics.subscription && <SubscriptionBanner subscription={analytics.subscription} />}
+      */}
 
       {activeTab === "overview" ? (
         <>
@@ -120,10 +123,9 @@ export default function AnalyticsPage() {
               value={analytics.newCustomers.toString()} 
               icon={Users} 
             />
-            {/* Placeholder for LogicBit AI Core Metric (Blueprint 16.2) */}
+            {/* LogicBit AI Core Metric (Blueprint 16.2) */}
             <StatCard 
               label="AI Chats Handled" 
-              // Graceful fallback so it doesn't crash until backend chat module is wired
               value={(analytics as any).totalChats?.toString() || "0"} 
               icon={MessageSquare} 
             />

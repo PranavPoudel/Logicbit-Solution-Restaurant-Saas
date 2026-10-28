@@ -9,7 +9,6 @@ import { useOwnerAuthStore } from "@/store/owner-auth-store";
 import { reservationsApi } from "@/lib/api/reservations";
 import { ReservationList } from "@/components/owner-reservations/reservation-list";
 import { ReservationTrashBin } from "@/components/owner-reservations/reservation-trash-bin";
-import { SubscriptionUpgradeBanner } from "@/components/ui/subscription-upgrade-banner";
 
 const TABS = [
   { key: "ALL", label: "All Reservations" },
@@ -61,8 +60,6 @@ export default function ReservationsPage() {
         )}
       </div>
       <p className="text-sm text-neutral-500 mb-6">Manage your restaurant's table bookings and guest requests.</p>
-      <SubscriptionUpgradeBanner />
-
       {/* Tabs */}
       <div className="flex gap-1 border-b border-neutral-200 mb-6 overflow-x-auto">
         {TABS.map((tab) => {

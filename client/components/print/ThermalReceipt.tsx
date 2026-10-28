@@ -1,5 +1,6 @@
 //components/print/ThermalReceipt.tsx
 'use client';
+import { theme } from '@/config/theme';
 
 interface ThermalReceiptProps {
   order: any;
@@ -106,7 +107,7 @@ export function ThermalReceipt({ order }: ThermalReceiptProps) {
       {/* Footer */}
       <div className="text-center mt-6 pt-3 border-t border-black text-xs">
         <p className="font-bold">Thank you for your order!</p>
-        <p className="mt-1 text-gray-500">Powered by LogicBit</p>
+        <p className="mt-1 text-gray-500">Powered by {theme.brand.name}</p>
       </div>
     </div>
   );

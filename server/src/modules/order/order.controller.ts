@@ -63,6 +63,11 @@ export class RestaurantOrderController {
     return this.orderService.findOneForRestaurant(req.user.tenantId, restaurantId, id);
   }
 
+  @Get(':id/email-preview')
+  emailPreview(@Req() req, @Param('restaurantId') restaurantId: string, @Param('id') id: string) {
+    return this.orderService.emailPreview(req.user.tenantId, restaurantId, id);
+  }
+
   @Patch(':id/status')
   updateStatus(
     @Req() req,

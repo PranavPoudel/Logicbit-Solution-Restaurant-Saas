@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { getNearbyRestaurants } from "@/lib/api/discovery";
+import { theme } from "@/config/theme";
 import { AppImage } from "@/components/ui/app-image";
 
 const FALLBACK_IMAGE =
@@ -11,7 +12,7 @@ const FALLBACK_IMAGE =
 
 const TITLES: Record<string, string> = {
   trending: "Trending now",
-  new: "New on LogicBit",
+  new: `New on ${theme.brand.name}`,
   popular: "Popular this week",
 };
 
@@ -47,17 +48,17 @@ export default function ExploreTagPage() {
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-8">
-      <Link href="/" className="text-sm text-[#17181C]/60 hover:underline">
+      <Link href="/" className="text-sm text-brand-ink/60 hover:underline">
         ← Back to home
       </Link>
-      <h1 className="mt-3 mb-6 text-2xl font-semibold text-[#17181C]">{title}</h1>
+      <h1 className="mt-3 mb-6 text-2xl font-semibold text-brand-ink">{title}</h1>
 
-      {isLoading && <p className="text-sm text-[#17181C]/60">Loading...</p>}
+      {isLoading && <p className="text-sm text-brand-ink/60">Loading...</p>}
       {isError && (
         <p className="text-sm text-red-600">Could not load restaurants.</p>
       )}
       {!isLoading && !isError && restaurants.length === 0 && (
-        <p className="text-sm text-[#17181C]/60">No restaurants found.</p>
+        <p className="text-sm text-brand-ink/60">No restaurants found.</p>
       )}
 
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -65,9 +66,9 @@ export default function ExploreTagPage() {
           <Link
             key={r.id}
             href={`/restaurants/${r.slug ?? r.id}`}
-            className="overflow-hidden rounded-2xl border border-[#E8E7E2] bg-white transition hover:border-[#E3A008] hover:shadow-md"
+            className="overflow-hidden rounded-2xl border border-brand-line bg-white transition hover:border-brand-gold hover:shadow-md"
           >
-            <div className="h-40 w-full bg-[#F4F3EE]">
+            <div className="h-40 w-full bg-brand-surface">
               <AppImage
                 src={r.coverImageUrl ?? r.coverImage ?? r.imageUrl ?? FALLBACK_IMAGE}
                 alt={r.name}
@@ -76,8 +77,8 @@ export default function ExploreTagPage() {
               />
             </div>
             <div className="p-4">
-              <h2 className="font-medium text-[#17181C]">{r.name}</h2>
-              <p className="mt-1 text-xs text-[#17181C]/60">
+              <h2 className="font-medium text-brand-ink">{r.name}</h2>
+              <p className="mt-1 text-xs text-brand-ink/60">
                 ★ {Number(r.rating ?? r.averageRating ?? 0).toFixed(1)}
               </p>
             </div>
