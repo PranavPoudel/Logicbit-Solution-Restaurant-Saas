@@ -18,6 +18,7 @@ import {
   BarChart3,
   LayoutGrid,
   Calendar,
+  MessageSquare,
   type LucideIcon,
 } from "lucide-react";
 
@@ -49,7 +50,8 @@ const navGroups: NavGroup[] = [
       { label: "Orders", href: "/owner/orders", icon: Package },
       { label: "Menu", href: "/owner/menu", icon: UtensilsCrossed },
       { label: "Tables", href: "/owner/tables", icon: LayoutGrid }, 
-      { label: "Reservations", href: "/owner/reservations", icon: Calendar }, 
+      { label: "Reservations", href: "/owner/reservations", icon: Calendar },
+      { label: "Chats", href: "/owner/chats", icon: MessageSquare }, 
       { label: "Analytics", href: "/owner/analytics", icon: BarChart3 },
       {
         label: "Storefront Builder",
