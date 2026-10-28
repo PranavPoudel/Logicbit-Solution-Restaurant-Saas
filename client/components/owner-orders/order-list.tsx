@@ -3,7 +3,7 @@
 
 import { useRef } from "react";
 import { Clock, MapPin, Package, UtensilsCrossed, type LucideIcon } from "lucide-react";
-import type { OwnerOrderSummary } from "@/types/owner-order";
+import type { OwnerOrderSummary } from "@/types/order";
 import { formatMoney } from "@/lib/utils/money";
 import { ageLabel, minutesSince, shortNumber, stageLabel, urgency } from "@/lib/utils/order-flow";
 

@@ -97,6 +97,8 @@ export interface OrderSummary {
   status?: string;
   orderType?: string;
   paymentMethod?: string;
+  paymentStatus?: string;
+  cancellationReason?: string;
   deliveryAddress?: string | null;
   deliveryHandledBy?: string;
   delivery?: {
