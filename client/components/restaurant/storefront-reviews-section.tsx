@@ -8,6 +8,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { getRestaurantReviews, type Review } from "@/lib/api/reviews";
 import { Button, Icon, Squiggle } from "@/components/ui/primitives";
 import { Pager } from "@/components/ui/pager";
+import { SortMenu } from "@/components/ui/sort-menu";
 
 const PAGE_SIZE = 4;
 const AVATARS = ["bg-chili text-parchment", "bg-saffron text-espresso", "bg-herb text-parchment", "bg-ink text-cream"];
@@ -138,14 +139,12 @@ export function StorefrontReviewsSection({ title, restaurantId, rating, total }:
                 <button key={String(k)} type="button" onClick={() => setF(k)} aria-pressed={filter === k} className={`min-h-11 shrink-0 rounded-full border-2 px-4 font-bold transition ${filter === k ? "border-[var(--accent,var(--brand-chili))] bg-[var(--accent,var(--brand-chili))] text-[var(--accent-ink,var(--brand-parchment))]" : "border-ink/15 bg-paper hover:border-ink"}`}>{label}</button>
               ))}
             </div>
-            <label className="shadow-soft flex min-h-11 items-center gap-2 rounded-full bg-paper pl-4 pr-2">
-              <span className="text-ink/75">{t("sort")}</span>
-              <select value={sort} onChange={(e) => { setSort(e.target.value as Sort); setPage(1); }} className="min-h-11 cursor-pointer bg-transparent font-bold text-ink outline-none">
-                <option value="newest" className="bg-paper">{t("sortNewest")}</option>
-                <option value="high" className="bg-paper">{t("sortHigh")}</option>
-                <option value="low" className="bg-paper">{t("sortLow")}</option>
-              </select>
-            </label>
+            <SortMenu
+              label={t("sort")}
+              value={sort}
+              options={[{ value: "newest", label: t("sortNewest") }, { value: "high", label: t("sortHigh") }, { value: "low", label: t("sortLow") }]}
+              onChange={(s: Sort) => { setSort(s); setPage(1); }}
+            />
           </div>
 
           <div className="mt-8">

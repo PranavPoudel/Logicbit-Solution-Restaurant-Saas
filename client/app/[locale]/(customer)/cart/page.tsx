@@ -10,6 +10,7 @@ import { useCartStore, type CartItem } from "@/store/cart-store";
 import { useIsMounted } from "@/hooks/use-is-mounted";
 import { getRestaurantByIdOrSlug } from "@/lib/api/discovery";
 import { restaurantAccentStyle } from "@/lib/utils/restaurant-theme";
+import { playSound } from "@/lib/utils/sound";
 import { getFullImageUrl } from "@/lib/utils/image";
 import { CurrencyProvider, useMoney } from "@/hooks/use-money";
 
@@ -19,6 +20,7 @@ function CheckoutButton({ total }: { total: number }) {
   return (
   <Link
     href="/checkout"
+    onClick={() => playSound("tap")}
     className="shadow-red flex h-14 w-full items-center justify-between gap-3 rounded-full bg-[var(--accent,var(--brand-chili))] px-6 text-lg font-bold text-[var(--accent-ink,var(--brand-parchment))] transition hover:-translate-y-0.5"
   >
     <span>{t("checkout")} - {money(total)}</span>
@@ -110,6 +112,12 @@ function ItemRow({ i }: { i: CartItem }) {
 
 function EmptyCart() {
   const t = useTranslations("cart");
+  const lastRestaurantId = useCartStore((s) => s.lastRestaurantId);
+  const lastRestaurant = useQuery({
+    queryKey: ["restaurant", lastRestaurantId],
+    queryFn: () => getRestaurantByIdOrSlug(lastRestaurantId as string),
+    enabled: !!lastRestaurantId,
+  }).data;
   return (
     <div className="mx-auto max-w-xl px-5 py-16 text-center">
       <svg viewBox="0 0 240 200" className="mx-auto w-56" aria-hidden>
@@ -130,7 +138,14 @@ function EmptyCart() {
         </span>
       </h1>
       <p className="mt-3 text-lg text-ink/75">{t("emptyBody")}</p>
-      <Link href="/restaurants"><Button size="lg" className="mt-8">{t("browseRestaurants")}</Button></Link>
+      <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+        {lastRestaurant?.name && (
+          <Link href={`/restaurants/${lastRestaurant.slug ?? lastRestaurant.id}`}>
+            <Button size="lg"><Icon name="arrow" className="h-5 w-5 rotate-180" />{t("backToRestaurant", { restaurant: lastRestaurant.name })}</Button>
+          </Link>
+        )}
+        <Link href="/restaurants"><Button size="lg" variant={lastRestaurant?.name ? "outline" : "accent"}>{t("browseRestaurants")}</Button></Link>
+      </div>
     </div>
   );
 }

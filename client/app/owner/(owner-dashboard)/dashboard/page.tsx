@@ -13,16 +13,6 @@ import { getSubscriptionState } from "@/lib/utils/subscription";
 import { getRestaurantAnalytics } from "@/lib/api/analytics";
 import { listRestaurantOrders } from "@/lib/api/orders";
 
-const mockRevenueTrend = [
-  { date: "Mon", revenue: 12500 },
-  { date: "Tue", revenue: 15800 },
-  { date: "Wed", revenue: 11200 },
-  { date: "Thu", revenue: 18900 },
-  { date: "Fri", revenue: 24100 },
-  { date: "Sat", revenue: 29800 },
-  { date: "Sun", revenue: 21400 },
-];
-
 interface OwnerOrderRow {
   id: string;
   orderNumber?: string;
@@ -58,6 +48,7 @@ export default function DashboardPage() {
   });
 
   const analytics = analyticsQuery.data;
+  const stat = (value: string) => (analyticsQuery.isLoading ? "…" : analyticsQuery.isError ? "—" : value);
 
   // ✅ Map orders safely, ensuring 'id' is always present and valid
   const pendingOrders = (ordersQuery.data ?? []).map((o) => ({
@@ -107,25 +98,25 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           label="Today's Orders"
-          value={analyticsQuery.isLoading ? "…" : (analytics?.totalOrders ?? 0).toString()}
+          value={stat(String(analytics?.totalOrders ?? 0))}
           icon={ShoppingBag}
           colorVariant="amber"
         />
         <StatCard
           label="Today's Revenue"
-          value={analyticsQuery.isLoading ? "…" : `Rs. ${(analytics?.totalRevenue ?? 0).toLocaleString()}`}
+          value={stat(`Rs. ${(analytics?.totalRevenue ?? 0).toLocaleString()}`)}
           icon={Wallet}
           colorVariant="teal"
         />
         <StatCard
           label="Pending Action"
-          value={ordersQuery.isLoading ? "…" : String(pendingOrders.length)}
+          value={ordersQuery.isLoading ? "…" : ordersQuery.isError ? "—" : String(pendingOrders.length)}
           icon={Clock}
           colorVariant="blue"
         />
         <StatCard
           label="New Customers"
-          value={analyticsQuery.isLoading ? "…" : (analytics?.newCustomers ?? 0).toString()}
+          value={stat(String(analytics?.newCustomers ?? 0))}
           icon={Users}
           colorVariant="purple"
         />
@@ -136,7 +127,15 @@ export default function DashboardPage() {
         {/* Revenue Chart */}
         <div className="lg:col-span-3 bg-white border border-neutral-200 rounded-xl p-5 shadow-sm">
           <h3 className="text-sm font-semibold text-neutral-800 mb-4">Revenue Overview (Last 7 Days)</h3>
-          <RevenueChart data={analytics?.revenueTrend ?? mockRevenueTrend} />
+          {analyticsQuery.isLoading ? (
+            <div className="h-[260px] animate-pulse rounded-lg bg-neutral-100 motion-reduce:animate-none" />
+          ) : analytics?.revenueTrend?.length ? (
+            <RevenueChart data={analytics.revenueTrend} />
+          ) : (
+            <p className="flex h-[260px] items-center justify-center text-sm text-neutral-500">
+              {analyticsQuery.isError ? "Revenue is unavailable right now." : "No sales in the last 7 days yet."}
+            </p>
+          )}
         </div>
 
         {/* Recent / Pending Orders Widget */}

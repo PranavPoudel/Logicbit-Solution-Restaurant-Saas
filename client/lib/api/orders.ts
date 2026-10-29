@@ -88,6 +88,14 @@ export async function cancelRestaurantOrder(restaurantId: string, orderId: strin
   return data;
 }
 
+export async function issueOrderRefund(restaurantId: string, orderId: string, body: { amount: number; reason: string }) {
+  const { data } = await ownerApiClient.post(
+    `/restaurants/${restaurantId}/orders/${orderId}/refund`,
+    body
+  );
+  return data;
+}
+
 export interface CouponPreview {
   code: string;
   discountAmount: number;

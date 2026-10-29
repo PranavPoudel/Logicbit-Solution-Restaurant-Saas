@@ -682,6 +682,12 @@ model Delivery {
   pickedUpAt       DateTime?
   deliveredAt      DateTime?
   failureReason    String?
+  provider         String?
+  externalRef      String?
+  driverName       String?
+  driverPhone      String?
+  driverVehicle    String?
+  trackingUrl      String?
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
 
@@ -689,6 +695,7 @@ model Delivery {
   deliveryPerson DeliveryPerson? @relation(fields: [deliveryPersonId], references: [id])
 
   @@index([deliveryPersonId])
+  @@index([provider, externalRef])
 }
 
 // =========================================================

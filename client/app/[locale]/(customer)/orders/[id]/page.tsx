@@ -1,7 +1,7 @@
 // app/%28customer%29/orders/%5Bid%5D/page.tsx
 "use client";
 
-import { use, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -9,6 +9,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { getMyOrder } from "@/lib/api/orders";
 import { useMoney } from "@/hooks/use-money";
+import { playSound } from "@/lib/utils/sound";
 import { ORDER_STATUS_STEPS, PICKUP_STATUS_STEPS } from "@/types/order";
 import { ThermalReceipt } from "@/components/print/ThermalReceipt";
 import { ReviewModal } from "@/components/review/review-modal";
@@ -76,6 +77,13 @@ export default function OrderTrackingPage({
     refetchInterval: (query) => (DONE_STATUSES.includes(query.state.data?.status ?? "") ? false : 10000),
   });
   const money = useMoney(order?.restaurant?.currencyCode);
+
+  const orderStatus = order?.status;
+  const lastStatus = useRef<string>(undefined);
+  useEffect(() => {
+    if (orderStatus && lastStatus.current && lastStatus.current !== orderStatus) playSound("status");
+    lastStatus.current = orderStatus;
+  }, [orderStatus]);
 
   if (isLoading) {
     return (

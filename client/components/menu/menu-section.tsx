@@ -8,6 +8,7 @@ import { useCartStore } from "@/store/cart-store";
 import { useIsMounted } from "@/hooks/use-is-mounted";
 import { useRequireLogin } from "@/hooks/use-require-login";
 import { useMoney } from "@/hooks/use-money";
+import { playSound } from "@/lib/utils/sound";
 import type { MenuCategory, MenuItem } from "@/types/menu";
 import { Badge, Chip, Icon, IconButton, Squiggle } from "@/components/ui/primitives";
 import { DishImage, DishListRow, DishTable, ViewToggle, type MenuView } from "@/components/menu/menu-views";
@@ -119,7 +120,7 @@ function CartPanel({ suggestions, onPick }: { suggestions: MenuItem[]; onPick: (
         </div>
         {count > 0 && (
           <div className="mt-4 space-y-2">
-            <Link href="/checkout" className="shadow-red flex h-14 w-full items-center gap-2 rounded-full bg-[var(--accent,var(--brand-chili))] px-6 text-lg font-bold text-[var(--accent-ink,var(--brand-parchment))] transition hover:-translate-y-0.5">
+            <Link href="/checkout" onClick={() => playSound("tap")} className="shadow-red flex h-14 w-full items-center gap-2 rounded-full bg-[var(--accent,var(--brand-chili))] px-6 text-lg font-bold text-[var(--accent-ink,var(--brand-parchment))] transition hover:-translate-y-0.5">
               {t("checkout")}
               <Icon name="arrow" className="ml-auto h-5 w-5" />
             </Link>

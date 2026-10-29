@@ -7,6 +7,8 @@ import { DeliveryService } from './delivery.service';
 import { DeliveryPersonManagementController, DeliveryPartnerController, DeliveryAuthController, DeliveryController } from './delivery.controller';
 import { DeliveryPartnerService } from './delivery-partner.service';
 import { DeliveryJwtStrategy } from './strategies/delivery-jwt.strategy';
+import { DeliveryIntegrationService } from './integration/delivery-integration.service';
+import { DeliveryWebhookController } from './integration/delivery-webhook.controller';
 
 @Module({
   imports: [
@@ -21,7 +23,8 @@ import { DeliveryJwtStrategy } from './strategies/delivery-jwt.strategy';
       }),
     }),
   ],
-  controllers: [DeliveryPersonManagementController, DeliveryPartnerController, DeliveryAuthController, DeliveryController],
-  providers: [DeliveryService, DeliveryPartnerService, DeliveryJwtStrategy],
+  controllers: [DeliveryPersonManagementController, DeliveryPartnerController, DeliveryAuthController, DeliveryController, DeliveryWebhookController],
+  providers: [DeliveryService, DeliveryPartnerService, DeliveryJwtStrategy, DeliveryIntegrationService],
+  exports: [DeliveryIntegrationService],
 })
 export class DeliveryModule {}

@@ -99,13 +99,20 @@ export interface OrderSummary {
   paymentMethod?: string;
   paymentStatus?: string;
   cancellationReason?: string;
+  refund?: { amount?: number; status?: string; reason?: string | null; createdAt?: string; processedAt?: string | null } | null;
   deliveryAddress?: string | null;
   deliveryHandledBy?: string;
   delivery?: {
     status?: string;
     assignedAt?: string;
+    pickedUpAt?: string;
     deliveredAt?: string;
-    deliveryPerson?: { name?: string; phone?: string };
+    provider?: string | null;
+    driverName?: string | null;
+    driverPhone?: string | null;
+    driverVehicle?: string | null;
+    trackingUrl?: string | null;
+    deliveryPerson?: { name?: string; phone?: string; vehicleType?: string | null };
   };
   customer?: { name?: string; phone?: string };
   items?: Array<{

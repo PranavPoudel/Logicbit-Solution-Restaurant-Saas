@@ -112,6 +112,20 @@ export class NotificationService {
     });
   }
 
+  async notifyRefundIssued(customerId: string, tenantId: string, orderNumber: string, amount: number, reason: string) {
+    const customer = await this.prisma.customer.findUnique({ where: { id: customerId } });
+    if (!customer) return;
+
+    return this.send({
+      tenantId,
+      customerId,
+      channel: 'EMAIL',
+      recipient: customer.email,
+      subject: `Refund for order ${orderNumber}`,
+      body: `The restaurant refunded ${amount.toFixed(2)} for your order ${orderNumber}. Reason: ${reason}`,
+    });
+  }
+
   /** Order status बदलिँदा customer लाई सूचना पठाउने shortcut */
   async notifyOrderStatusChange(customerId: string, tenantId: string, orderNumber: string, status: string) {
     const customer = await this.prisma.customer.findUnique({ where: { id: customerId } });

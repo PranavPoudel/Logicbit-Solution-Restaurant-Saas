@@ -12,6 +12,7 @@ import { AddressPicker } from "@/components/map/address-picker";
 import type { PaymentMethod } from "@/components/checkout/payment-modal";
 import { checkDeliveryAvailability, getPublicRestaurant } from "@/lib/api/discovery";
 import { getErrorMessage } from "@/lib/utils/error";
+import { playSound } from "@/lib/utils/sound";
 import { useRedirectToLogin } from "@/hooks/use-require-login";
 import { CurrencyProvider, useMoney } from "@/hooks/use-money";
 import { restaurantAccentStyle } from "@/lib/utils/restaurant-theme";
@@ -188,12 +189,14 @@ export default function CheckoutPage() {
         return;
       }
       clear();
+      playSound("placed");
       const orderId = data?.id || data?.orderId;
       router.push(`/orders/${orderId}?placed=1`);
     },
 
     onError: (err: unknown) => {
       console.error("Checkout failed:", err);
+      playSound("error");
       setError(getErrorMessage(err, t("errGeneric"), { includeErrorMessage: true }));
     },
   });

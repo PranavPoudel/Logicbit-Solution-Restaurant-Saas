@@ -15,6 +15,8 @@ import {
   updateOrderStatus,
 } from "@/lib/api/orders";
 import type { OwnerOrderSummary } from "@/types/order";
+import { playSound } from "@/lib/utils/sound";
+import { riderOf } from "@/lib/utils/order-rider";
 import { useEscapeKey } from "@/hooks/use-escape-key";
 import { useDialogFocus } from "@/hooks/use-dialog-focus";
 import { useIsMounted } from "@/hooks/use-is-mounted";
@@ -39,23 +41,6 @@ const orderHref = (orderId: string) => `/owner/orders/${orderId}`;
 const timeOf = (iso?: string) =>
   iso ? new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "—";
 
-function playChime() {
-  try {
-    const audio = new AudioContext();
-    [660, 880].forEach((frequency, i) => {
-      const tone = audio.createOscillator();
-      const volume = audio.createGain();
-      const start = audio.currentTime + i * 0.15;
-      tone.frequency.value = frequency;
-      volume.gain.setValueAtTime(0.15, start);
-      volume.gain.exponentialRampToValueAtTime(0.001, start + 0.3);
-      tone.connect(volume).connect(audio.destination);
-      tone.start(start);
-      tone.stop(start + 0.3);
-    });
-  } catch {}
-}
-
 function readSeen(restaurantId: string) {
   try {
     return Number(localStorage.getItem(seenKey(restaurantId))) || 0;
@@ -75,7 +60,7 @@ function itemsSummary(order: OwnerOrderSummary) {
 
 function NoticeText({ notice }: { notice: Notice }) {
   const { order } = notice;
-  const rider = order.delivery?.deliveryPerson;
+  const rider = riderOf(order);
 
   return (
     <span className="min-w-0">
@@ -169,7 +154,7 @@ function NoticeActions({
 }
 
 export function RiderCard({ order }: { order: OwnerOrderSummary }) {
-  const rider = order.delivery?.deliveryPerson;
+  const rider = riderOf(order);
   const delivered = order.delivery?.status === "DELIVERED";
 
   return (
@@ -446,7 +431,7 @@ export function OwnerNotifications() {
     if (fresh.length) {
       setToasts((current) => [...current, ...fresh].slice(-MAX_TOASTS));
       fresh.forEach((n) => setTimeout(() => dismissToast(n.key), TOAST_MS));
-      playChime();
+      playSound(fresh.some((n) => n.kind === "rider") ? "rider" : "chime");
     }
   }, [ready, notices]);
 

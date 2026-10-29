@@ -9,10 +9,44 @@ import { haversineDistanceKm } from '../../common/utils/haversine.util';
 import { calculateDeliveryQuote } from '../../common/utils/delivery-fee.util';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto, CancelOrderDto } from './dto/update-order-status.dto';
+import { IssueRefundDto } from './dto/issue-refund.dto';
+import { DeliveryIntegrationService } from '../delivery/integration/delivery-integration.service';
 import { computeOpenStatus } from '../../common/utils/opening-hours.util';
 
 const CANCELLABLE_STATUSES = ['PENDING', 'ACCEPTED'];
 const TERMINAL_STATUSES = ['DELIVERED', 'COMPLETED', 'CANCELLED'];
+
+const NEXT_STATUSES: Record<string, string[]> = {
+  PENDING: ['ACCEPTED'],
+  ACCEPTED: ['PREPARING'],
+  PREPARING: ['READY'],
+  READY: ['OUT_FOR_DELIVERY', 'DELIVERED', 'COMPLETED'],
+  OUT_FOR_DELIVERY: ['DELIVERED', 'COMPLETED'],
+};
+
+export function canMoveOrderStatus(from: string, to: string) {
+  return from === to || (NEXT_STATUSES[from] ?? []).includes(to);
+}
+
+export function deliveryBlockedReason(
+  order: { orderType: string; deliveryHandledBy?: string | null; delivery?: { deliveryPersonId?: string | null; provider?: string | null; status?: string } | null },
+  to: string,
+) {
+  if (order.orderType !== 'DELIVERY' || order.deliveryHandledBy !== 'THIRD_PARTY') return null;
+  const assigned = !!(order.delivery?.deliveryPersonId || order.delivery?.provider);
+  if (to === 'OUT_FOR_DELIVERY' && !assigned) return 'A delivery partner must accept this order before it can go out';
+  if ((to === 'DELIVERED' || to === 'COMPLETED') && order.delivery?.status !== 'DELIVERED') {
+    return assigned ? 'The delivery partner has not marked this order as delivered yet' : 'A delivery partner must accept this order before it can go out';
+  }
+  return null;
+}
+
+export function refundBlockedReason(order: { paymentStatus: string; total: number; refund?: { status: string } | null }, amount: number) {
+  if (order.refund?.status === 'PROCESSED' || order.paymentStatus === 'REFUNDED') return 'This order has already been refunded';
+  if (order.paymentStatus !== 'PAID') return 'Only paid orders can be refunded';
+  if (amount > order.total) return 'The refund cannot be more than the order total';
+  return null;
+}
 
 @Injectable()
 export class OrderService {
@@ -24,6 +58,7 @@ export class OrderService {
     private readonly paymentService: PaymentService,
     private readonly notificationService: NotificationService,
     private readonly activityLog: ActivityLogService,
+    private readonly deliveryIntegration: DeliveryIntegrationService,
   ) {}
 
   async previewCoupon(customerId: string, restaurantId: string, code: string, subtotal: number) {
@@ -319,6 +354,8 @@ export class OrderService {
       include: {
         items: { include: { menuItem: { select: { name: true } } } },
         customer: { select: { name: true, phone: true } },
+        refund: true,
+        delivery: { include: { deliveryPerson: { select: { id: true, name: true, phone: true, vehicleType: true } } } },
       },
     });
   }
@@ -330,6 +367,7 @@ export class OrderService {
         items: { include: { menuItem: true } },
         customer: { select: { name: true, phone: true } },
         statusHistory: { orderBy: { createdAt: 'asc' } },
+        refund: true,
         delivery: {
           include: { deliveryPerson: { select: { id: true, name: true, phone: true, currentLatitude: true, currentLongitude: true } } },
         },
@@ -337,6 +375,39 @@ export class OrderService {
     });
     if (!order) throw new NotFoundException('Order not found');
     return order;
+  }
+
+  /** Owner-facing — records a refund the restaurant has paid back to the customer */
+  async issueRefund(tenantId: string, restaurantId: string, orderId: string, dto: IssueRefundDto, issuedBy: string) {
+    const order = await this.findOneForRestaurant(tenantId, restaurantId, orderId);
+    const blocked = refundBlockedReason(order, dto.amount);
+    if (blocked) throw new BadRequestException(blocked);
+
+    const refund = await this.prisma.$transaction(async (tx) => {
+      const data = { amount: dto.amount, status: 'PROCESSED' as const, reason: dto.reason, processedAt: new Date() };
+      const saved = await tx.refund.upsert({ where: { orderId }, create: { orderId, ...data }, update: data });
+      await tx.order.update({ where: { id: orderId }, data: { paymentStatus: 'REFUNDED' } });
+      await tx.orderStatusHistory.create({
+        data: { orderId, status: order.status, note: `Refund issued: ${dto.reason}`, changedBy: issuedBy },
+      });
+      return saved;
+    });
+
+    void this.notificationService
+      .notifyRefundIssued(order.customerId, tenantId, order.orderNumber, dto.amount, dto.reason)
+      .catch((err) => this.logger.error(`Refund email failed for ${order.orderNumber}`, err as Error));
+
+    await this.activityLog.log({
+      tenantId,
+      restaurantId,
+      actorType: 'OWNER',
+      actorId: issuedBy,
+      action: 'ORDER_REFUNDED',
+      description: `Order ${order.orderNumber} refunded ${dto.amount}: ${dto.reason}`,
+      metadata: { orderId, amount: dto.amount },
+    });
+
+    return { success: true, data: refund };
   }
 
   async emailPreview(tenantId: string, restaurantId: string, orderId: string) {
@@ -351,6 +422,11 @@ export class OrderService {
     if (TERMINAL_STATUSES.includes(order.status)) {
       throw new BadRequestException(`Order is already ${order.status}, status cannot be changed further`);
     }
+    if (!canMoveOrderStatus(order.status, dto.status)) {
+      throw new BadRequestException(`Order cannot move from ${order.status} to ${dto.status}`);
+    }
+    const waiting = deliveryBlockedReason(order, dto.status);
+    if (waiting) throw new BadRequestException(waiting);
 
     const updated = await this.prisma.$transaction(async (tx) => {
       const shouldMarkPaid = order.paymentMethod === 'COD' && ['DELIVERED', 'COMPLETED'].includes(dto.status);
@@ -424,6 +500,17 @@ export class OrderService {
       update: { earningAmount: order.deliveryFee },
     });
 
+    const booked = await this.deliveryIntegration.requestCourier({
+      id: order.id,
+      orderNumber: order.orderNumber,
+      deliveryAddress: order.deliveryAddress,
+      notes: order.notes,
+      restaurant: { name: restaurant.name, address: restaurant.address, phone: restaurant.phone },
+      customer: { name: order.customer?.name ?? 'Customer', phone: order.customer?.phone ?? null },
+      items: (order.items ?? []).map((i: any) => ({ quantity: i.quantity, name: i.menuItem?.name ?? 'Item' })),
+    });
+    if (booked) return;
+
     if (restaurant.latitude == null || restaurant.longitude == null) return;
 
     const candidates = await this.prisma.deliveryPerson.findMany({
@@ -476,9 +563,13 @@ export class OrderService {
     requesterId: string,
     orderId: string,
     dto: CancelOrderDto,
+    scope?: { tenantId: string; restaurantId: string },
   ) {
     const order = await this.prisma.order.findUnique({ where: { id: orderId } });
     if (!order) throw new NotFoundException('Order not found');
+    if (scope && (order.tenantId !== scope.tenantId || order.restaurantId !== scope.restaurantId)) {
+      throw new NotFoundException('Order not found');
+    }
 
     if (TERMINAL_STATUSES.includes(order.status)) {
       throw new BadRequestException(`Order is already ${order.status}, it cannot be cancelled`);
@@ -515,13 +606,6 @@ export class OrderService {
       await tx.orderStatusHistory.create({
         data: { orderId, status: 'CANCELLED', note: dto.reason ?? 'Order cancelled', changedBy: requesterId },
       });
-
-      // पैसा पहिले नै तिरिसकेको भए (Online payment) मात्र Refund record बन्छ; COD/UNPAID मा फिर्ता गर्ने कुरै छैन
-      if (order.paymentStatus === 'PAID') {
-        await tx.refund.create({
-          data: { orderId, amount: order.total, status: 'PENDING', reason: 'Order cancelled after payment' },
-        });
-      }
 
       return result;
     });

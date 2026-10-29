@@ -201,7 +201,7 @@ export function MenuItemManager({ items, categories, restaurantId, isLoading }: 
   const handleOpenLinkModal = (item: any) => {
     setLinkingItemId(item.id);
     // Safely extract linked group IDs (handles both Prisma relation shapes)
-    const linked = new Set(
+    const linked = new Set<string>(
       (item.modifierGroups || []).map((mg: any) => mg.modifierGroupId || mg.id)
     );
     setLinkedGroupIds(linked);

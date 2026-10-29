@@ -23,13 +23,15 @@ export default function ReservationsPage() {
   const [activeTab, setActiveTab] = useState("ALL");
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
 
+  const day = activeTab === "ALL" || activeTab === "TRASH" ? undefined : selectedDate;
   const reservationsQuery = useQuery({
     queryKey: ["owner-reservations", restaurantId, activeTab, selectedDate],
     queryFn: () =>
       reservationsApi.list(restaurantId as string, {
         includeDeleted: activeTab === "TRASH",
         status: activeTab === "TRASH" ? undefined : activeTab,
-        date: activeTab === "ALL" || activeTab === "TRASH" ? undefined : selectedDate,
+        startDate: day,
+        endDate: day,
       }),
     enabled: !!restaurantId,
   });

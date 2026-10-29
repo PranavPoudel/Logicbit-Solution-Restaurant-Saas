@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { CouponPreview } from "@/lib/api/orders";
+import { playSound } from "@/lib/utils/sound";
 
 export interface SelectedModifier {
   modifierGroupId: string;
@@ -34,6 +35,7 @@ interface CartState {
   itemCount: () => number;
   subtotal: () => number;
   discount: () => number;
+  lastRestaurantId: string | null;
   activeRestaurantId: () => string | null;
   addItem: (item: Omit<CartItem, "quantity" | "variantKey"> & {
     quantity?: number;
@@ -48,10 +50,16 @@ function lineKey(menuItemId: string, variantKey: string) {
   return `${menuItemId}::${variantKey}`;
 }
 
+function afterRemove(state: CartState, items: CartItem[]) {
+  if (items.length) return { items };
+  return { items, restaurantId: null, coupon: null, lastRestaurantId: state.activeRestaurantId() ?? state.lastRestaurantId };
+}
+
 export const useCartStore = create<CartState>()(
   persist(
     (set, get) => ({
       restaurantId: null,
+      lastRestaurantId: null,
       items: [],
       coupon: null,
       setCoupon: (coupon) => set({ coupon }),
@@ -63,7 +71,8 @@ export const useCartStore = create<CartState>()(
         return coupon ? Math.min(coupon.discountAmount, subtotal()) : 0;
       },
 
-      addItem: (item) =>
+      addItem: (item) => {
+        playSound("added");
         set((state) => {
           // 🆕 Include notes in variantKey so different notes create separate cart lines
           const variantKey = item.variantKey ?? (item.notes ? `notes:${item.notes}` : "");
@@ -90,16 +99,17 @@ export const useCartStore = create<CartState>()(
               { ...item, quantity: item.quantity ?? 1, variantKey },
             ],
           };
-        }),
+        });
+      },
 
-      removeOneOrAll: (menuItemId, variantKey = "") =>
+      removeOneOrAll: (menuItemId, variantKey = "") => {
+        const key = lineKey(menuItemId, variantKey);
+        if (get().items.some((i) => lineKey(i.menuItemId, i.variantKey) === key)) playSound("removed");
         set((state) => {
-          const key = lineKey(menuItemId, variantKey);
           const existing = state.items.find((i) => lineKey(i.menuItemId, i.variantKey) === key);
           if (!existing) return state;
           if (existing.quantity <= 1) {
-            const items = state.items.filter((i) => lineKey(i.menuItemId, i.variantKey) !== key);
-            return { items, restaurantId: items.length ? state.restaurantId : null, coupon: items.length ? state.coupon : null };
+            return afterRemove(state, state.items.filter((i) => lineKey(i.menuItemId, i.variantKey) !== key));
           }
           return {
             items: state.items.map((i) =>
@@ -108,16 +118,18 @@ export const useCartStore = create<CartState>()(
                 : i
             ),
           };
-        }),
+        });
+      },
 
-      removeItem: (menuItemId, variantKey = "") =>
+      removeItem: (menuItemId, variantKey = "") => {
+        playSound("removed");
         set((state) => {
           const key = lineKey(menuItemId, variantKey);
-          const items = state.items.filter((i) => lineKey(i.menuItemId, i.variantKey) !== key);
-          return { items, restaurantId: items.length ? state.restaurantId : null, coupon: items.length ? state.coupon : null };
-        }),
+          return afterRemove(state, state.items.filter((i) => lineKey(i.menuItemId, i.variantKey) !== key));
+        });
+      },
 
-      clear: () => set({ restaurantId: null, items: [], coupon: null }),
+      clear: () => set((state) => afterRemove(state, [])),
     }),
     { name: "logicbit-cart" }
   )

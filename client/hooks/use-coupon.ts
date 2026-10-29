@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { useCartStore } from "@/store/cart-store";
 import { validateCoupon } from "@/lib/api/orders";
 import { getErrorMessage } from "@/lib/utils/error";
+import { playSound } from "@/lib/utils/sound";
 
 export function useCoupon() {
   const t = useTranslations("coupon");
@@ -29,8 +30,10 @@ export function useCoupon() {
     setLoading(true);
     try {
       setCoupon(await validateCoupon(restaurantId, trimmed.toUpperCase(), sub));
+      playSound("success");
     } catch (err) {
       setCoupon(null);
+      playSound("error");
       const response = isAxiosError(err) ? err.response : undefined;
       setError(
         response?.status === 401

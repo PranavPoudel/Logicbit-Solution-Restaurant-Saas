@@ -1,9 +1,12 @@
 // components/layout/owner-sidebar.tsx
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { theme } from "@/config/theme";
+import { useOwnerNavStore } from "@/store/owner-nav-store";
+import { useEscapeKey } from "@/hooks/use-escape-key";
 import {
   LayoutDashboard,
   Package,
@@ -17,8 +20,6 @@ import {
   Bike,
   Settings,
   BarChart3,
-  LayoutGrid,
-  Calendar,
   MessageSquare,
   Mail,
   type LucideIcon,
@@ -51,8 +52,6 @@ const navGroups: NavGroup[] = [
     items: [
       { label: "Orders", href: "/owner/orders", icon: Package },
       { label: "Menu", href: "/owner/menu", icon: UtensilsCrossed },
-      { label: "Tables", href: "/owner/tables", icon: LayoutGrid }, 
-      { label: "Reservations", href: "/owner/reservations", icon: Calendar },
       { label: "Chats", href: "/owner/chats", icon: MessageSquare }, 
       { label: "Analytics", href: "/owner/analytics", icon: BarChart3 },
       {
@@ -87,12 +86,28 @@ const navGroups: NavGroup[] = [
   },
 ];
 
+export const OWNER_SIDEBAR_ID = "owner-sidebar";
+
 export function OwnerSidebar() {
   const pathname = usePathname();
   const isStorefrontActive = pathname?.startsWith("/owner/storefront");
+  const open = useOwnerNavStore((s) => s.open);
+  const setOpen = useOwnerNavStore((s) => s.setOpen);
+
+  useEffect(() => setOpen(false), [pathname, setOpen]);
+  useEscapeKey(() => setOpen(false), open);
 
   return (
-    <aside className="w-64 shrink-0 bg-[#111827] text-slate-300 flex flex-col h-full border-r border-white/5">
+    <>
+      <div
+        aria-hidden="true"
+        onClick={() => setOpen(false)}
+        className={`fixed inset-0 z-30 bg-black/50 transition-opacity duration-200 motion-reduce:transition-none lg:hidden ${open ? "opacity-100" : "pointer-events-none opacity-0"}`}
+      />
+    <aside
+      id={OWNER_SIDEBAR_ID}
+      className={`fixed inset-y-0 left-0 z-40 w-64 shrink-0 bg-[#111827] text-slate-300 flex flex-col border-r border-white/5 transition-[transform,visibility] duration-200 motion-reduce:transition-none lg:static lg:z-auto lg:h-full lg:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full max-lg:invisible"}`}
+    >
       {/* Logo Area */}
       <div className="h-16 flex items-center gap-2.5 px-5 border-b border-white/5">
         <div className="w-8 h-8 rounded-lg bg-[#E3A008] flex items-center justify-center text-[#111827] font-bold text-base shadow-sm">
@@ -187,5 +202,6 @@ export function OwnerSidebar() {
         </Link>
       </div>
     </aside>
+    </>
   );
 }
