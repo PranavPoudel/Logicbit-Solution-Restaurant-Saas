@@ -68,11 +68,13 @@ export function StorefrontSectionRenderer({
           case "menu":
             return (
               <div key={section.id} className="py-8">
-                <StorefrontMenuSection
+                   <StorefrontMenuSection
                   title={title}
+                  restaurantId={restaurantId}
                   categories={categories}
                   onOpenModifiers={onOpenModifiers}
                 />
+                
               </div>
             );
 

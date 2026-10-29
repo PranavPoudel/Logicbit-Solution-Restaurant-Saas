@@ -3,7 +3,7 @@ import { ownerApiClient } from "@/lib/api/owner-client";
 
 // --- Categories ---
 export interface CategoryInput {
-  name: string;
+  name: string; 
   nameJa?: string;
   description?: string;
   descriptionJa?: string;
@@ -11,6 +11,7 @@ export interface CategoryInput {
   displayOrder?: number;
   isFeatured?: boolean;
   isOnHomepage?: boolean;
+  parentId?: string | null;
   [key: string]: unknown;
 }
 

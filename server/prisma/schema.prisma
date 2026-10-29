@@ -12,11 +12,11 @@ datasource db {
 // =========================================================
 
 model Tenant {
-  id               String    @id @default(uuid())
-  name             String
-  isActive         Boolean   @default(true)
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  id        String   @id @default(uuid())
+  name      String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   users            User[]
   restaurants      Restaurant[]
@@ -25,8 +25,8 @@ model Tenant {
   menuItems        MenuItem[]
   modifierGroups   ModifierGroup[]
   orders           Order[]
-  restaurantTables RestaurantTable[]  // 🆕 Added
-  reservations     Reservation[]      // 🆕 Added
+  restaurantTables RestaurantTable[] // 🆕 Added
+  reservations     Reservation[] // 🆕 Added
 }
 
 model User {
@@ -147,20 +147,20 @@ model Restaurant {
   slug     String @unique
 
   // Geolocation — Near-Me feature को लागि
-  latitude         Float?
-  longitude        Float?
-  address          String?
-  city             String?
-  state            String?
-  country          String?
-  postalCode       String?
+  latitude   Float?
+  longitude  Float?
+  address    String?
+  city       String?
+  state      String?
+  country    String?
+  postalCode String?
 
   // Discovery / Filter fields
-  priceRange   String?
-  avgRating    Float    @default(0)
-  totalReviews Int      @default(0)
-  totalOrders  Int      @default(0)
-  isOpen       Boolean  @default(true)
+  priceRange       String?
+  avgRating        Float   @default(0)
+  totalReviews     Int     @default(0)
+  totalOrders      Int     @default(0)
+  isOpen           Boolean @default(true)
   supportsDelivery Boolean @default(true)
   supportsPickup   Boolean @default(true)
   supportsDineIn   Boolean @default(false)
@@ -169,18 +169,18 @@ model Restaurant {
   // 0 → selfDeliveryRadiusKm         : Restaurant आफैंले deliver गर्छ
   // selfDeliveryRadiusKm → maxDeliveryRadiusKm : Third-party delivery person
   // maxDeliveryRadiusKm भन्दा बाहिर  : Delivery नै उपलब्ध छैन
-  selfDeliveryRadiusKm   Float @default(0)   // 0 राख्दा "आफैं कहिल्यै deliver गर्दैन" भन्ने अर्थ हुन्छ
-  maxDeliveryRadiusKm    Float @default(5)   // यो भन्दा टाढा भए order नै लिइँदैन
+  selfDeliveryRadiusKm Float @default(0) // 0 राख्दा "आफैं कहिल्यै deliver गर्दैन" भन्ने अर्थ हुन्छ
+  maxDeliveryRadiusKm  Float @default(5) // यो भन्दा टाढा भए order नै लिइँदैन
 
-  selfDeliveryFeeType    DeliveryFeeType @default(FREE)
-  selfDeliveryFlatFee    Float @default(0)
-  selfDeliveryPerKmFee   Float @default(0)
+  selfDeliveryFeeType  DeliveryFeeType @default(FREE)
+  selfDeliveryFlatFee  Float           @default(0)
+  selfDeliveryPerKmFee Float           @default(0)
 
-  thirdPartyFeeType      DeliveryFeeType @default(PER_KM)
-  thirdPartyBaseFee      Float @default(30)  // Base/pickup fee (जति टाढा भए पनि यति त लाग्छ)
-  thirdPartyPerKmFee     Float @default(15)  // प्रति km थप शुल्क
-  cancellationWindowMinutes Int @default(5)
-  platformCommissionPercent Float @default(10) // यो restaurant सँग सम्झौता भएको commission दर — तपाईं (platform owner) को आम्दानी यहीँबाट calculate हुन्छ
+  thirdPartyFeeType         DeliveryFeeType @default(PER_KM)
+  thirdPartyBaseFee         Float           @default(30) // Base/pickup fee (जति टाढा भए पनि यति त लाग्छ)
+  thirdPartyPerKmFee        Float           @default(15) // प्रति km थप शुल्क
+  cancellationWindowMinutes Int             @default(5)
+  platformCommissionPercent Float           @default(10) // यो restaurant सँग सम्झौता भएको commission दर — तपाईं (platform owner) को आम्दानी यहीँबाट calculate हुन्छ
 
   // Branding / SEO
   logoUrl        String?
@@ -201,7 +201,7 @@ model Restaurant {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  tenant         Tenant                 @relation(fields: [tenantId], references: [id])
+  tenant         Tenant              @relation(fields: [tenantId], references: [id])
   categories     Category[]
   menuItems      MenuItem[]
   modifierGroups ModifierGroup[]
@@ -210,8 +210,8 @@ model Restaurant {
   favoritedBy    CustomerFavorite[]
   cuisines       RestaurantCuisine[]
 
-  tables         RestaurantTable[]
-  reservations   Reservation[]
+  tables       RestaurantTable[]
+  reservations Reservation[]
 
   @@index([tenantId])
   @@index([latitude, longitude])
@@ -223,27 +223,32 @@ model Restaurant {
 // =========================================================
 
 model Category {
-  id              String    @id @default(uuid())
-  tenantId        String
-  restaurantId    String
-  name            String
-  nameJa          String?   // 🆕 Japanese Name
-  description     String?
-  descriptionJa   String?   // 🆕 Japanese Description
-  image           String?
-  displayOrder    Int       @default(0)
-  isFeatured      Boolean   @default(false)
-  isOnHomepage    Boolean   @default(false) // 🆕 Show on homepage
-  isActive        Boolean   @default(true)
-  deletedAt       DateTime? // 🆕 Soft delete for Trash
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id            String    @id @default(uuid())
+  tenantId      String
+  restaurantId  String
+  name          String
+  nameJa        String?
+  description   String?
+  descriptionJa String?
+  image         String?
+  displayOrder  Int       @default(0)
+  isFeatured    Boolean   @default(false)
+  isOnHomepage  Boolean   @default(false)
+  isActive      Boolean   @default(true)
+  deletedAt     DateTime?
+  parentId      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   tenant     Tenant     @relation(fields: [tenantId], references: [id])
   restaurant Restaurant @relation(fields: [restaurantId], references: [id])
   menuItems  MenuItem[]
 
+  parent   Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children Category[] @relation("CategoryHierarchy")
+
   @@index([restaurantId])
+  @@index([parentId])
 }
 
 model MenuItem {
@@ -252,30 +257,30 @@ model MenuItem {
   restaurantId           String
   categoryId             String
   name                   String
-  nameJa                 String?   // 🆕 Japanese Name
+  nameJa                 String? // 🆕 Japanese Name
   description            String?
-  descriptionJa          String?   // 🆕 Japanese Description
+  descriptionJa          String? // 🆕 Japanese Description
   price                  Float
   costPrice              Float?
   image                  String?
-  galleryImages          Json?     // 🆕 Array of image URLs
+  galleryImages          Json? // 🆕 Array of image URLs
   isAvailable            Boolean   @default(true)
   isFeatured             Boolean   @default(false)
   isVegetarian           Boolean   @default(false)
   isVegan                Boolean   @default(false)
-  spiceLevel             String?   // e.g., "MILD", "MEDIUM", "HOT"
+  spiceLevel             String? // e.g., "MILD", "MEDIUM", "HOT"
   allergenInfo           String?
   calories               Int?
   displayOrder           Int       @default(0)
   preparationTimeMinutes Int?
-  homepageSections       Json?     // 🆕 e.g., ["TODAYS_SPECIAL", "BEST_SELLER"]
+  homepageSections       Json? // 🆕 e.g., ["TODAYS_SPECIAL", "BEST_SELLER"]
   createdAt              DateTime  @default(now())
   updatedAt              DateTime  @updatedAt
   deletedAt              DateTime? // 🆕 Soft delete for Trash
 
-  tenant         Tenant                   @relation(fields: [tenantId], references: [id])
-  restaurant     Restaurant               @relation(fields: [restaurantId], references: [id])
-  category       Category                 @relation(fields: [categoryId], references: [id])
+  tenant         Tenant                  @relation(fields: [tenantId], references: [id])
+  restaurant     Restaurant              @relation(fields: [restaurantId], references: [id])
+  category       Category                @relation(fields: [categoryId], references: [id])
   modifierGroups MenuItemModifierGroup[]
   orderItems     OrderItem[]
 
@@ -295,8 +300,8 @@ model ModifierGroup {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  tenant     Tenant                   @relation(fields: [tenantId], references: [id])
-  restaurant Restaurant               @relation(fields: [restaurantId], references: [id])
+  tenant     Tenant                  @relation(fields: [tenantId], references: [id])
+  restaurant Restaurant              @relation(fields: [restaurantId], references: [id])
   options    ModifierOption[]
   menuItems  MenuItemModifierGroup[]
 
@@ -426,7 +431,7 @@ enum RefundStatus {
 }
 
 model Order {
-  id           String   @id @default(uuid())
+  id           String @id @default(uuid())
   tenantId     String
   restaurantId String
   customerId   String
@@ -435,34 +440,34 @@ model Order {
   status      OrderStatus @default(PENDING)
   orderType   OrderType
 
-  subtotal       Float
-  deliveryFee    Float  @default(0)
-  tax            Float  @default(0)
-  discountAmount Float  @default(0)
-  couponCode     String?
-  total          Float
-  platformCommissionAmount Float @default(0) // तपाईंको (platform owner) कमाई — यही order बाट कति कमिशन बन्यो
+  subtotal                 Float
+  deliveryFee              Float   @default(0)
+  tax                      Float   @default(0)
+  discountAmount           Float   @default(0)
+  couponCode               String?
+  total                    Float
+  platformCommissionAmount Float   @default(0) // तपाईंको (platform owner) कमाई — यही order बाट कति कमिशन बन्यो
 
-  deliveryLatitude  Float?
-  deliveryLongitude Float?
-  deliveryAddress   String?
+  deliveryLatitude   Float?
+  deliveryLongitude  Float?
+  deliveryAddress    String?
   deliveryDistanceKm Float?
-  deliveryHandledBy DeliveryMode? // यही specific order को लागि Self हो कि Third-party हो भनेर checkout बेला नै तय भएर record हुन्छ
+  deliveryHandledBy  DeliveryMode? // यही specific order को लागि Self हो कि Third-party हो भनेर checkout बेला नै तय भएर record हुन्छ
 
   paymentStatus PaymentStatus @default(UNPAID)
   paymentMethod PaymentMethod @default(COD)
 
   // --- Cancellation tracking ---
-  cancelledBy     CancelledBy?
+  cancelledBy        CancelledBy?
   cancellationReason String?
-  cancelledAt     DateTime?
+  cancelledAt        DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  tenant        Tenant             @relation(fields: [tenantId], references: [id])
-  restaurant    Restaurant         @relation(fields: [restaurantId], references: [id])
-  customer      Customer           @relation(fields: [customerId], references: [id])
+  tenant        Tenant               @relation(fields: [tenantId], references: [id])
+  restaurant    Restaurant           @relation(fields: [restaurantId], references: [id])
+  customer      Customer             @relation(fields: [customerId], references: [id])
   items         OrderItem[]
   review        Review?
   statusHistory OrderStatusHistory[]
@@ -481,7 +486,7 @@ model OrderStatusHistory {
   orderId   String
   status    OrderStatus
   note      String?
-  changedBy String?        // userId वा customerId, जसले बदल्यो
+  changedBy String? // userId वा customerId, जसले बदल्यो
   createdAt DateTime    @default(now())
 
   order Order @relation(fields: [orderId], references: [id])
@@ -529,26 +534,26 @@ enum CouponType {
 }
 
 model Coupon {
-  id                  String     @id @default(uuid())
-  tenantId            String
-  restaurantId        String?
-  code                String?
-  type                CouponType
-  value               Float
-  maxDiscount         Float?
-  minOrderAmount      Float?     @default(0)
-  usageLimit          Int?
-  usageLimitPerCustomer Int?     @default(1)
-  usedCount           Int        @default(0)
-  validFrom           DateTime   @default(now())
-  validUntil          DateTime?
-  isActive            Boolean    @default(true)
-  isAutoApply         Boolean    @default(false)
+  id                    String     @id @default(uuid())
+  tenantId              String
+  restaurantId          String?
+  code                  String?
+  type                  CouponType
+  value                 Float
+  maxDiscount           Float?
+  minOrderAmount        Float?     @default(0)
+  usageLimit            Int?
+  usageLimitPerCustomer Int?       @default(1)
+  usedCount             Int        @default(0)
+  validFrom             DateTime   @default(now())
+  validUntil            DateTime?
+  isActive              Boolean    @default(true)
+  isAutoApply           Boolean    @default(false)
 
-  deletedAt           DateTime?  // 🆕 Added for Trash functionality
-  createdAt           DateTime   @default(now())
-  updatedAt           DateTime   @updatedAt
-  usages CouponUsage[]
+  deletedAt DateTime? // 🆕 Added for Trash functionality
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  usages    CouponUsage[]
 
   @@unique([tenantId, code])
   @@index([restaurantId])
@@ -601,19 +606,19 @@ enum DeliveryStatus {
 }
 
 model DeliveryPerson {
-  id           String   @id @default(uuid())
-  tenantId     String?  // null भए platform-wide independent delivery person (एकभन्दा बढी restaurant को लागि काम गर्न सक्ने)
-  name         String
-  phone        String   @unique
-  email        String?  @unique
-  passwordHash String
-  vehicleType  String?
-  isAvailable  Boolean  @default(true)
-  isActive     Boolean  @default(true)
+  id               String   @id @default(uuid())
+  tenantId         String? // null भए platform-wide independent delivery person (एकभन्दा बढी restaurant को लागि काम गर्न सक्ने)
+  name             String
+  phone            String   @unique
+  email            String?  @unique
+  passwordHash     String
+  vehicleType      String?
+  isAvailable      Boolean  @default(true)
+  isActive         Boolean  @default(true)
   currentLatitude  Float?
   currentLongitude Float?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   deliveries Delivery[]
 }
@@ -642,8 +647,8 @@ model Delivery {
 // =========================================================
 
 enum SettlementStatus {
-  PENDING   // Invoice बनियो, restaurant ले अझै तिरेको छैन
-  PAID      // Restaurant ले platform लाई commission तिरिसक्यो
+  PENDING // Invoice बनियो, restaurant ले अझै तिरेको छैन
+  PAID // Restaurant ले platform लाई commission तिरिसक्यो
   OVERDUE
 }
 
@@ -653,18 +658,18 @@ enum SettlementStatus {
 // यति commission तिर्नुपर्छ" भन्ने invoice/statement बनाइन्छ, र restaurant
 // ले त्यो अलग्गै (bank transfer/manual) तिर्छन्।
 model Settlement {
-  id             String           @id @default(uuid())
-  tenantId       String
-  restaurantId   String
-  periodStart    DateTime
-  periodEnd      DateTime
-  totalOrders    Int
-  totalCodAmount Float            // COD बाट collect भएको कुल पैसा (restaurant ले लिएको)
-  commissionDue  Float            // तपाईंलाई तिर्नुपर्ने commission
-  status         SettlementStatus @default(PENDING)
-  paidAt         DateTime?
+  id               String           @id @default(uuid())
+  tenantId         String
+  restaurantId     String
+  periodStart      DateTime
+  periodEnd        DateTime
+  totalOrders      Int
+  totalCodAmount   Float // COD बाट collect भएको कुल पैसा (restaurant ले लिएको)
+  commissionDue    Float // तपाईंलाई तिर्नुपर्ने commission
+  status           SettlementStatus @default(PENDING)
+  paidAt           DateTime?
   paymentReference String?
-  createdAt      DateTime         @default(now())
+  createdAt        DateTime         @default(now())
 
   @@index([restaurantId])
 }
@@ -682,11 +687,11 @@ enum SubscriptionStatus {
 // SubscriptionPlan — "Free", "Monthly", "Quarterly", "1 Year"... जस्ता
 // membership plan। Platform Admin ले यी बनाउँछन्।
 model SubscriptionPlan {
-  id              String  @id @default(uuid())
-  name            String  @unique
-  durationMonths  Int     // 0 = Free/lifetime (कहिल्यै expire नहुने)
-  price           Float   @default(0)
-  isActive        Boolean @default(true)
+  id             String  @id @default(uuid())
+  name           String  @unique
+  durationMonths Int // 0 = Free/lifetime (कहिल्यै expire नहुने)
+  price          Float   @default(0)
+  isActive       Boolean @default(true)
 
   subscriptions RestaurantSubscription[]
 }
@@ -695,16 +700,16 @@ model SubscriptionPlan {
 // Domain renewal जस्तै — expiryDate नजिकिँदा notification जान्छ,
 // auto-renew भए आफैं renew हुन्छ, नभए expire भएर restaurant suspend हुन्छ।
 model RestaurantSubscription {
-  id               String             @id @default(uuid())
-  restaurantId     String             @unique
-  planId           String
-  startDate        DateTime           @default(now())
-  expiryDate       DateTime?          // null = Free/lifetime plan, कहिल्यै expire हुँदैन
-  status           SubscriptionStatus @default(ACTIVE)
-  autoRenew        Boolean            @default(false)
-  lastReminderSentDaysBefore Int?     // 30/15/7/3/1 मध्ये कुनसम्म पठाइसक्यो (duplicate notification रोक्न)
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
+  id                         String             @id @default(uuid())
+  restaurantId               String             @unique
+  planId                     String
+  startDate                  DateTime           @default(now())
+  expiryDate                 DateTime? // null = Free/lifetime plan, कहिल्यै expire हुँदैन
+  status                     SubscriptionStatus @default(ACTIVE)
+  autoRenew                  Boolean            @default(false)
+  lastReminderSentDaysBefore Int? // 30/15/7/3/1 मध्ये कुनसम्म पठाइसक्यो (duplicate notification रोक्न)
+  createdAt                  DateTime           @default(now())
+  updatedAt                  DateTime           @updatedAt
 
   plan SubscriptionPlan @relation(fields: [planId], references: [id])
 }
@@ -717,8 +722,8 @@ model RestaurantSubscription {
 // "restaurant suspend गर्ने", "commission बदल्ने")। यो tenant-level
 // Permission भन्दा फरक हो — यो LogicBit को आफ्नै internal team को लागि हो।
 model PlatformPermission {
-  id          String @id @default(uuid())
-  name        String @unique
+  id          String  @id @default(uuid())
+  name        String  @unique
   description String?
 
   roles PlatformRolePermission[]
@@ -771,9 +776,9 @@ model ActivityLog {
   id           String   @id @default(uuid())
   tenantId     String?
   restaurantId String?
-  actorType    String   // "OWNER" | "CUSTOMER" | "DELIVERY" | "PLATFORM_ADMIN" | "SYSTEM"
+  actorType    String // "OWNER" | "CUSTOMER" | "DELIVERY" | "PLATFORM_ADMIN" | "SYSTEM"
   actorId      String?
-  action       String   // जस्तै "ORDER_CREATED", "MENU_ITEM_UPDATED", "COMMISSION_CHANGED"
+  action       String // जस्तै "ORDER_CREATED", "MENU_ITEM_UPDATED", "COMMISSION_CHANGED"
   description  String
   metadata     Json?
   createdAt    DateTime @default(now())
@@ -789,13 +794,13 @@ model ActivityLog {
 
 enum AdPlacementType {
   HOMEPAGE_BANNER // Discovery homepage (सबै customer ले देख्ने, restaurant-specific होइन) मा banner
-  SEARCH_BOOST    // Near-me ranking मा माथि देखिने ("Sponsored" tag सहित)
-  POPUP           // Website खोल्नेबित्तिकै platform-wide popup ad
+  SEARCH_BOOST // Near-me ranking मा माथि देखिने ("Sponsored" tag सहित)
+  POPUP // Website खोल्नेबित्तिकै platform-wide popup ad
 }
 
 enum AdStatus {
-  PENDING   // Owner ले request गर्यो, payment/approval बाँकी
-  ACTIVE    // Platform Admin ले payment confirm गरेर activate गर्यो
+  PENDING // Owner ले request गर्यो, payment/approval बाँकी
+  ACTIVE // Platform Admin ले payment confirm गरेर activate गर्यो
   REJECTED
   EXPIRED
 }
@@ -808,21 +813,21 @@ enum AdStatus {
 // Workflow: Owner request गर्छ (PENDING) → Platform Admin ले payment
 // confirm गरेर ACTIVE बनाउँछ → endDate cross भएपछि EXPIRED।
 model Advertisement {
-  id            String          @id @default(uuid())
-  tenantId      String
-  restaurantId  String
-  placementType AdPlacementType
-  title         String
-  imageUrl      String?
-  linkUrl       String?
-  startDate     DateTime
-  endDate       DateTime
-  amountPaid    Float           @default(0)
-  priority      Int             @default(0) // धेरै ad एकैचोटि भए, यसले क्रम तोक्छ
-  status        AdStatus        @default(PENDING)
+  id              String          @id @default(uuid())
+  tenantId        String
+  restaurantId    String
+  placementType   AdPlacementType
+  title           String
+  imageUrl        String?
+  linkUrl         String?
+  startDate       DateTime
+  endDate         DateTime
+  amountPaid      Float           @default(0)
+  priority        Int             @default(0) // धेरै ad एकैचोटि भए, यसले क्रम तोक्छ
+  status          AdStatus        @default(PENDING)
   rejectionReason String?
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
 
   @@index([restaurantId])
   @@index([status, placementType])
@@ -842,7 +847,7 @@ model StorefrontBanner {
   imageUrl     String
   title        String?
   subtitle     String?
-  linkUrl      String?  // Click गर्दा कहाँ जाने (menu item, coupon, external URL)
+  linkUrl      String? // Click गर्दा कहाँ जाने (menu item, coupon, external URL)
   displayOrder Int      @default(0)
   isActive     Boolean  @default(true)
   createdAt    DateTime @default(now())
@@ -855,20 +860,21 @@ model StorefrontBanner {
 // क्रममा देखिने (drag-and-drop से owner ले तोकेको) भन्ने layout config।
 // एउटा restaurant मा एउटै मात्र config हुन्छ (@@unique)।
 model StorefrontConfig {
-  id             String   @id @default(uuid())
+  id             String  @id @default(uuid())
   tenantId       String
-  restaurantId   String   @unique
+  restaurantId   String  @unique
   aboutText      String?
   contactPhone   String?
   contactEmail   String?
   contactAddress String?
   socialLinks    Json?
-  
+
   // Example: [{ "id": "menu", "isVisible": true, "titleEn": "Our Menu", "titleJa": "メニュー" }]
-  sectionSettings Json @default("[]") 
-  
-  updatedAt      DateTime @updatedAt
+  sectionSettings Json @default("[]")
+
+  updatedAt DateTime @updatedAt
 }
+
 // StorefrontPopup — Website खोल्ने बित्तिकै देखिने offer/notification popup।
 // Schedule (startDate/endDate) राखिएको छ ताकि owner ले "यो weekend मात्र
 // यो offer देखाऊ" जस्तो time-bound campaign चलाउन सकून्।
@@ -879,7 +885,7 @@ model StorefrontPopup {
   title        String
   message      String?
   imageUrl     String?
-  ctaText      String?   // Button को text, जस्तै "Order Now"
+  ctaText      String? // Button को text, जस्तै "Order Now"
   ctaLink      String?
   startDate    DateTime?
   endDate      DateTime?
@@ -896,9 +902,9 @@ model StorefrontPopup {
 
 model TranslationCache {
   id             String   @id @default(uuid())
-  sourceTextHash String   // SHA-256 hash of original text (fast lookup को लागि)
+  sourceTextHash String // SHA-256 hash of original text (fast lookup को लागि)
   sourceText     String
-  targetLang     String   // "ja", "ne", "en"...
+  targetLang     String // "ja", "ne", "en"...
   translatedText String
   createdAt      DateTime @default(now())
 
@@ -959,20 +965,20 @@ model Notification {
 // =========================================================
 
 model RestaurantTable {
-  id           String   @id @default(uuid())
+  id           String    @id @default(uuid())
   tenantId     String
   restaurantId String
-  name         String              // e.g., "Table 01", "T-01", "Bar Seat 3"
-  capacity     Int                 // max guests
-  zone         String?             // e.g., "Indoor", "Outdoor", "Patio"
-  isActive     Boolean  @default(true)
-  displayOrder Int      @default(0)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  deletedAt    DateTime?           // soft delete
+  name         String // e.g., "Table 01", "T-01", "Bar Seat 3"
+  capacity     Int // max guests
+  zone         String? // e.g., "Indoor", "Outdoor", "Patio"
+  isActive     Boolean   @default(true)
+  displayOrder Int       @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime? // soft delete
 
-  tenant       Tenant       @relation(fields: [tenantId], references: [id])
-  restaurant   Restaurant   @relation(fields: [restaurantId], references: [id])
+  tenant       Tenant        @relation(fields: [tenantId], references: [id])
+  restaurant   Restaurant    @relation(fields: [restaurantId], references: [id])
   reservations Reservation[]
 
   @@index([restaurantId])
@@ -991,23 +997,23 @@ model Reservation {
   id              String            @id @default(uuid())
   tenantId        String
   restaurantId    String
-  tableId         String?           // nullable — can be unassigned initially
+  tableId         String? // nullable — can be unassigned initially
   customerName    String?
   customerPhone   String?
   customerEmail   String?
   partySize       Int
-  reservationDate DateTime          // the date of the reservation
-  reservationTime String            // e.g., "13:00"
-  durationMinutes Int      @default(60)
+  reservationDate DateTime // the date of the reservation
+  reservationTime String // e.g., "13:00"
+  durationMinutes Int               @default(60)
   status          ReservationStatus @default(PENDING)
-  notes           String?           // customer message / special request
+  notes           String? // customer message / special request
   cancelledAt     DateTime?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  deletedAt       DateTime?         // soft delete (Trash)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  deletedAt       DateTime? // soft delete (Trash)
 
-  tenant     Tenant          @relation(fields: [tenantId], references: [id])
-  restaurant Restaurant      @relation(fields: [restaurantId], references: [id])
+  tenant     Tenant           @relation(fields: [tenantId], references: [id])
+  restaurant Restaurant       @relation(fields: [restaurantId], references: [id])
   table      RestaurantTable? @relation(fields: [tableId], references: [id])
 
   @@index([restaurantId])

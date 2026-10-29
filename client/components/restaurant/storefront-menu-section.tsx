@@ -7,10 +7,17 @@ import { useState } from "react";
 
 interface StorefrontMenuSectionProps {
   title: string;
+  restaurantId: string;
   categories: any[];
-  onOpenModifiers?: (itemId: string) => void; 
+  onOpenModifiers?: (itemId: string) => void;
 }
-export function StorefrontMenuSection({ title, categories, onOpenModifiers }: StorefrontMenuSectionProps) {
+
+export function StorefrontMenuSection({
+  title,
+  restaurantId,
+  categories,
+  onOpenModifiers,
+}: StorefrontMenuSectionProps) {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const activeCategoryId = selectedCategoryId ?? categories[0]?.id ?? null;
 
@@ -27,7 +34,7 @@ export function StorefrontMenuSection({ title, categories, onOpenModifiers }: St
   return (
     <div className="max-w-4xl mx-auto px-4">
       <h2 className="font-display text-2xl font-bold text-[#2B1410] mb-6">{title}</h2>
-      
+
       <CategoryNav
         categories={categories}
         activeId={activeCategoryId}
@@ -45,8 +52,9 @@ export function StorefrontMenuSection({ title, categories, onOpenModifiers }: St
                 <MenuItemCard
                   key={item.id}
                   item={item}
-                  restaurantId=""
-onOpenModifiers={onOpenModifiers ?? (() => {})}                />
+                  restaurantId={restaurantId}
+                  onOpenModifiers={onOpenModifiers ?? (() => {})}
+                />
               ))}
             </div>
             {(category.items ?? []).length === 0 && (

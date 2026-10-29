@@ -1,5 +1,9 @@
-// modules/menu/category.service.ts
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
@@ -8,20 +12,139 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 export class CategoryService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(tenantId: string, restaurantId: string, dto: CreateCategoryDto) {
-    const restaurant = await this.prisma.restaurant.findFirst({ where: { id: restaurantId, tenantId } });
-    if (!restaurant) throw new NotFoundException('Restaurant not found for this tenant');
+  /**
+   * Validate a parent category.
+   * Supports two levels:
+   * Parent category -> Subcategory.
+   */
+  private async validateParentCategory(
+    tenantId: string,
+    restaurantId: string,
+    parentId?: string | null,
+    currentCategoryId?: string,
+  ) {
+    // No parent means this is a top-level category.
+    if (!parentId) {
+      return;
+    }
 
-    // Only check for duplicates among active (non-deleted) categories
-    const existing = await this.prisma.category.findFirst({ 
-      where: { tenantId, restaurantId, name: dto.name, deletedAt: null } 
+    // A category cannot be its own parent.
+    if (parentId === currentCategoryId) {
+      throw new ConflictException(
+        'A category cannot be its own parent',
+      );
+    }
+
+    // Parent must belong to the same tenant and restaurant.
+    // Deleted categories cannot be selected as parents.
+    const parent = await this.prisma.category.findFirst({
+      where: {
+        id: parentId,
+        tenantId,
+        restaurantId,
+        deletedAt: null,
+      },
+      select: {
+        id: true,
+        parentId: true,
+      },
     });
-    if (existing) throw new ConflictException(`Category "${dto.name}" already exists in this restaurant`);
 
-    return this.prisma.category.create({ data: { ...dto, tenantId, restaurantId } });
+    if (!parent) {
+      throw new NotFoundException(
+        'Parent category not found in this restaurant',
+      );
+    }
+
+    // Prevent nesting a subcategory inside another subcategory.
+    if (parent.parentId) {
+      throw new ConflictException(
+        'A subcategory cannot contain another subcategory',
+      );
+    }
+
+    // Prevent moving a parent category under one of its descendants.
+    const children = await this.prisma.category.findMany({
+      where: {
+        tenantId,
+        restaurantId,
+        deletedAt: null,
+        parentId: currentCategoryId ?? '__no_current_category__',
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (currentCategoryId && children.some((child) => child.id === parentId)) {
+      throw new ConflictException(
+        'A category cannot be moved under its own subcategory',
+      );
+    }
   }
 
-  async findAll(tenantId: string, restaurantId: string, includeDeleted = false) {
+  async create(
+    tenantId: string,
+    restaurantId: string,
+    dto: CreateCategoryDto,
+  ) {
+    const restaurant = await this.prisma.restaurant.findFirst({
+      where: {
+        id: restaurantId,
+        tenantId,
+      },
+    });
+
+    if (!restaurant) {
+      throw new NotFoundException(
+        'Restaurant not found for this tenant',
+      );
+    }
+
+    await this.validateParentCategory(
+      tenantId,
+      restaurantId,
+      dto.parentId,
+    );
+
+    // Check for duplicate active category names.
+    const existing = await this.prisma.category.findFirst({
+      where: {
+        tenantId,
+        restaurantId,
+        name: dto.name,
+        deletedAt: null,
+      },
+    });
+
+    if (existing) {
+      throw new ConflictException(
+        `Category "${dto.name}" already exists in this restaurant`,
+      );
+    }
+
+    return this.prisma.category.create({
+      data: {
+        ...dto,
+        tenantId,
+        restaurantId,
+      },
+      include: {
+        parent: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+  }
+
+  async findAll(
+    tenantId: string,
+    restaurantId: string,
+    includeDeleted = false,
+  ) {
     return this.prisma.category.findMany({
       where: {
         tenantId,
@@ -29,66 +152,238 @@ export class CategoryService {
         deletedAt: includeDeleted ? { not: null } : null,
       },
       include: {
-        // Include active menu items so the frontend can display the count (cat.menuItems?.length)
+        // Active menu items let the frontend display item counts.
         menuItems: {
-          where: { deletedAt: null },
-          select: { id: true },
+          where: {
+            deletedAt: null,
+          },
+          select: {
+            id: true,
+          },
+        },
+
+        // Parent category details.
+        parent: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+
+        // Active subcategories.
+        children: {
+          where: {
+            deletedAt: null,
+          },
+          select: {
+            id: true,
+            name: true,
+            parentId: true,
+            displayOrder: true,
+          },
+          orderBy: {
+            displayOrder: 'asc',
+          },
         },
       },
-      orderBy: { displayOrder: 'asc' },
+      orderBy: {
+        displayOrder: 'asc',
+      },
     });
   }
 
-  async findOne(tenantId: string, restaurantId: string, id: string) {
-    const category = await this.prisma.category.findFirst({ where: { id, tenantId, restaurantId } });
-    if (!category) throw new NotFoundException('Category not found');
+  async findOne(
+    tenantId: string,
+    restaurantId: string,
+    id: string,
+  ) {
+    const category = await this.prisma.category.findFirst({
+      where: {
+        id,
+        tenantId,
+        restaurantId,
+      },
+      include: {
+        parent: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        children: {
+          where: {
+            deletedAt: null,
+          },
+          select: {
+            id: true,
+            name: true,
+            parentId: true,
+            displayOrder: true,
+          },
+          orderBy: {
+            displayOrder: 'asc',
+          },
+        },
+      },
+    });
+
+    if (!category) {
+      throw new NotFoundException('Category not found');
+    }
+
     return category;
   }
 
-  async update(tenantId: string, restaurantId: string, id: string, dto: UpdateCategoryDto) {
+  async update(
+    tenantId: string,
+    restaurantId: string,
+    id: string,
+    dto: UpdateCategoryDto,
+  ) {
     await this.findOne(tenantId, restaurantId, id);
+
+    await this.validateParentCategory(
+      tenantId,
+      restaurantId,
+      dto.parentId,
+      id,
+    );
 
     if (dto.name) {
       const duplicate = await this.prisma.category.findFirst({
-        where: { tenantId, restaurantId, name: dto.name, NOT: { id }, deletedAt: null },
+        where: {
+          tenantId,
+          restaurantId,
+          name: dto.name,
+          NOT: {
+            id,
+          },
+          deletedAt: null,
+        },
       });
-      if (duplicate) throw new ConflictException(`Category "${dto.name}" already exists in this restaurant`);
+
+      if (duplicate) {
+        throw new ConflictException(
+          `Category "${dto.name}" already exists in this restaurant`,
+        );
+      }
     }
 
-    return this.prisma.category.update({ 
-      where: { id, tenantId, restaurantId }, 
-      data: dto 
+    return this.prisma.category.update({
+      where: {
+        id,
+        tenantId,
+        restaurantId,
+      },
+      data: dto,
+      include: {
+        parent: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        children: {
+          where: {
+            deletedAt: null,
+          },
+          select: {
+            id: true,
+            name: true,
+            parentId: true,
+            displayOrder: true,
+          },
+          orderBy: {
+            displayOrder: 'asc',
+          },
+        },
+      },
     });
   }
 
-  async remove(tenantId: string, restaurantId: string, id: string) {
+  async remove(
+    tenantId: string,
+    restaurantId: string,
+    id: string,
+  ) {
     await this.findOne(tenantId, restaurantId, id);
 
-    // Soft delete: set deletedAt timestamp instead of permanently deleting
+    // Soft delete: retain the category and its data in the database.
     return this.prisma.category.update({
-      where: { id, tenantId, restaurantId },
-      data: { deletedAt: new Date() },
+      where: {
+        id,
+        tenantId,
+        restaurantId,
+      },
+      data: {
+        deletedAt: new Date(),
+      },
     });
   }
 
-  async restore(tenantId: string, restaurantId: string, id: string) {
-    // Ensure we only restore items that are actually in the trash
-    const category = await this.prisma.category.findFirst({ 
-      where: { id, tenantId, restaurantId, deletedAt: { not: null } } 
+  async restore(
+    tenantId: string,
+    restaurantId: string,
+    id: string,
+  ) {
+    const category = await this.prisma.category.findFirst({
+      where: {
+        id,
+        tenantId,
+        restaurantId,
+        deletedAt: {
+          not: null,
+        },
+      },
     });
-    if (!category) throw new NotFoundException('Category not found in trash');
 
+    if (!category) {
+      throw new NotFoundException(
+        'Category not found in trash',
+      );
+    }
+
+    // Restore the category.
     return this.prisma.category.update({
-      where: { id, tenantId, restaurantId },
-      data: { deletedAt: null },
+      where: {
+        id,
+        tenantId,
+        restaurantId,
+      },
+      data: {
+        deletedAt: null,
+      },
     });
   }
 
-  async permanentDelete(tenantId: string, restaurantId: string, id: string) {
-    // Optional: You could add logic here to delete associated media files from storage
-    
+  async permanentDelete(
+    tenantId: string,
+    restaurantId: string,
+    id: string,
+  ) {
+    const category = await this.prisma.category.findFirst({
+      where: {
+        id,
+        tenantId,
+        restaurantId,
+        deletedAt: {
+          not: null,
+        },
+      },
+    });
+
+    if (!category) {
+      throw new NotFoundException(
+        'Deleted category not found in trash',
+      );
+    }
+
     return this.prisma.category.delete({
-      where: { id, tenantId, restaurantId },
+      where: {
+        id,
+        tenantId,
+        restaurantId,
+      },
     });
   }
 }

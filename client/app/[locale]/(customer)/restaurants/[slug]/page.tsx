@@ -58,7 +58,10 @@ export default function RestaurantDetailPage({
   const [modifierItemId, setModifierItemId] = useState<string | null>(null);
 
   const storefrontData = storefrontQuery.data;
-  const sectionSettings = storefrontData?.sectionSettings ?? [];
+  const rawSettings = storefrontData?.sectionSettings ?? [];
+const sectionSettings = rawSettings.length > 0
+  ? rawSettings
+  : [{ id: "menu", isVisible: true, titleEn: "Our Menu", titleJa: "メニュー" }];
   const banners = storefrontData?.banners ?? [];
   const aboutText = storefrontData?.about;
   const contact = storefrontData?.contact;
