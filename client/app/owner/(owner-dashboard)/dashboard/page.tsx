@@ -8,6 +8,7 @@ import { StatCard } from "@/components/dashboard/stat-card";
 import { RevenueChart } from "@/components/dashboard/revenue-chart";
 import { PendingOrdersWidget } from "@/components/dashboard/pending-orders-widget";
 import { useOwnerAuthStore } from "@/store/owner-auth-store";
+import { useMoney } from "@/hooks/use-money";
 import { getRestaurantSubscription } from "@/lib/api/subscriptions";
 import { getSubscriptionState } from "@/lib/utils/subscription";
 import { getRestaurantAnalytics } from "@/lib/api/analytics";
@@ -25,6 +26,7 @@ interface OwnerOrderRow {
 
 export default function DashboardPage() {
   const restaurantId = useOwnerAuthStore((s) => s.activeRestaurantId);
+  const money = useMoney();
 
   // 1. Subscription Query
   const subscriptionQuery = useQuery({
@@ -104,7 +106,7 @@ export default function DashboardPage() {
         />
         <StatCard
           label="Today's Revenue"
-          value={stat(`Rs. ${(analytics?.totalRevenue ?? 0).toLocaleString()}`)}
+          value={stat(money(analytics?.totalRevenue ?? 0))}
           icon={Wallet}
           colorVariant="teal"
         />

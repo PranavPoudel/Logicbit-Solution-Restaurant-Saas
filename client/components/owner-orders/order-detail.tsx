@@ -164,7 +164,7 @@ function RiderDialog({ order, onClose }: { order: OwnerOrderSummary; onClose: ()
   );
 }
 
-function RefundAction({ total, disabled, refunding, onRefund }: { total: number; disabled: boolean; refunding: boolean; onRefund: (amount: number, reason: string) => void }) {
+function RefundAction({ total, currency, disabled, refunding, onRefund }: { total: number; currency?: string; disabled: boolean; refunding: boolean; onRefund: (amount: number, reason: string) => void }) {
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState(String(total));
   const [reason, setReason] = useState("");
@@ -196,7 +196,7 @@ function RefundAction({ total, disabled, refunding, onRefund }: { total: number;
       <p className="text-sm text-neutral-600">Record the money you paid back to the customer. They are told by email. An order can be refunded once.</p>
       <div className="grid gap-3 sm:grid-cols-[10rem_minmax(0,1fr)]">
         <label className="text-xs font-medium text-neutral-700">
-          Amount (max {formatMoney(total)})
+          Amount (max {formatMoney(total, currency)})
           <input type="number" inputMode="decimal" min="0.01" max={total} step="0.01" value={amount} disabled={refunding} onChange={(e) => setAmount(e.target.value)} className={field} />
         </label>
         <label className="text-xs font-medium text-neutral-700">
@@ -226,10 +226,12 @@ interface OrderDetailProps {
   onAdvance: (next: string) => void;
   onCancel: () => void;
   onRefund: (amount: number, reason: string) => void;
+  onOwnDelivery: () => void;
 }
 
-export function OrderDetail({ order, now, disabled, pending, refunding, onAdvance, onCancel, onRefund }: OrderDetailProps) {
+export function OrderDetail({ order, now, disabled, pending, refunding, onAdvance, onCancel, onRefund, onOwnDelivery }: OrderDetailProps) {
   const [confirming, setConfirming] = useState(false);
+  const [ownConfirming, setOwnConfirming] = useState(false);
   const [riderOpen, setRiderOpen] = useState(false);
   const status = (order.status ?? "PENDING").toUpperCase();
   const isNew = status === "PENDING";
@@ -302,7 +304,7 @@ export function OrderDetail({ order, now, disabled, pending, refunding, onAdvanc
           </div>
           <div className="text-right">
             <p className="text-xs text-neutral-500">Total</p>
-            <p className="text-3xl font-semibold tabular-nums tracking-tight text-neutral-900">{formatMoney(order.total ?? 0)}</p>
+            <p className="text-3xl font-semibold tabular-nums tracking-tight text-neutral-900">{formatMoney(order.total ?? 0, order.currencyCode)}</p>
             {!cancelled && !finished && <p className="text-xs text-neutral-500">Placed {ageLabel(minutesSince(order.createdAt, now))} ago</p>}
           </div>
         </header>
@@ -325,7 +327,7 @@ export function OrderDetail({ order, now, disabled, pending, refunding, onAdvanc
                   <h3 id="detail-refund" className="text-sm font-semibold">
                     {refund.label}
                   </h3>
-                  <p className="text-sm font-semibold tabular-nums">{formatMoney(order.refund?.amount ?? order.total ?? 0)}</p>
+                  <p className="text-sm font-semibold tabular-nums">{formatMoney(order.refund?.amount ?? order.total ?? 0, order.currencyCode)}</p>
                 </div>
                 <p className="mt-1 text-sm">{refund.note}</p>
                 {order.refund?.reason && <p className="mt-1 text-sm">Reason: {order.refund.reason}</p>}
@@ -360,7 +362,7 @@ export function OrderDetail({ order, now, disabled, pending, refunding, onAdvanc
                     </span>
                   )}
                 </span>
-                <span className="text-sm font-medium tabular-nums text-neutral-700">{formatMoney(item.subtotal ?? (item.unitPrice ?? 0) * (item.quantity ?? 1))}</span>
+                <span className="text-sm font-medium tabular-nums text-neutral-700">{formatMoney(item.subtotal ?? (item.unitPrice ?? 0) * (item.quantity ?? 1), order.currencyCode)}</span>
               </li>
             ))}
             {items.length === 0 && <li className="py-3 text-sm text-neutral-500">No items on this order.</li>}
@@ -369,23 +371,23 @@ export function OrderDetail({ order, now, disabled, pending, refunding, onAdvanc
           <dl className="mt-4 space-y-1.5 rounded-xl bg-neutral-50 p-4 text-sm sm:ml-auto sm:max-w-xs">
             <div className="flex justify-between gap-4 text-neutral-600">
               <dt>Subtotal</dt>
-              <dd className="tabular-nums">{formatMoney(order.subtotal ?? 0)}</dd>
+              <dd className="tabular-nums">{formatMoney(order.subtotal ?? 0, order.currencyCode)}</dd>
             </div>
             {delivery > 0 && (
               <div className="flex justify-between gap-4 text-neutral-600">
                 <dt>Delivery fee</dt>
-                <dd className="tabular-nums">{formatMoney(delivery)}</dd>
+                <dd className="tabular-nums">{formatMoney(delivery, order.currencyCode)}</dd>
               </div>
             )}
             {discount > 0 && (
               <div className="flex justify-between gap-4 text-emerald-700">
                 <dt>Discount{order.couponCode ? ` (${order.couponCode})` : ""}</dt>
-                <dd className="tabular-nums">-{formatMoney(discount)}</dd>
+                <dd className="tabular-nums">-{formatMoney(discount, order.currencyCode)}</dd>
               </div>
             )}
             <div className="flex items-baseline justify-between gap-4 border-t border-neutral-200 pt-2 text-neutral-900">
               <dt className="font-semibold">Total</dt>
-              <dd className="text-lg font-semibold tabular-nums">{formatMoney(order.total ?? 0)}</dd>
+              <dd className="text-lg font-semibold tabular-nums">{formatMoney(order.total ?? 0, order.currencyCode)}</dd>
             </div>
           </dl>
         </section>
@@ -413,7 +415,7 @@ export function OrderDetail({ order, now, disabled, pending, refunding, onAdvanc
           </dl>
         </div>
 
-        {order.paymentStatus === "PAID" && <RefundAction total={order.total ?? 0} disabled={disabled} refunding={refunding} onRefund={onRefund} />}
+        {order.paymentStatus === "PAID" && <RefundAction total={order.total ?? 0} currency={order.currencyCode} disabled={disabled} refunding={refunding} onRefund={onRefund} />}
       </div>
 
       {step && (
@@ -439,6 +441,36 @@ export function OrderDetail({ order, now, disabled, pending, refunding, onAdvanc
           ) : (
             <div className="space-y-3">
               {hold && <p className="text-sm text-neutral-600">{hold.hint}</p>}
+              {partnerDelivery && !rider && !provider &&
+                (ownConfirming ? (
+                  <div role="group" aria-label="Confirm own delivery" className="flex flex-wrap items-center gap-3 rounded-xl bg-neutral-50 p-3">
+                    <p className="min-w-[14rem] flex-1 text-sm text-neutral-700">Deliver this order with your own riders? Delivery partners will no longer see it.</p>
+                    <button type="button" onClick={() => setOwnConfirming(false)} className={`${button} border border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-50`}>
+                      Keep waiting
+                    </button>
+                    <button
+                      type="button"
+                      disabled={disabled}
+                      onClick={() => {
+                        setOwnConfirming(false);
+                        onOwnDelivery();
+                      }}
+                      className={`${button} bg-[#111827] text-white hover:bg-[#1f2937]`}
+                    >
+                      Use my own riders
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    disabled={disabled}
+                    onClick={() => setOwnConfirming(true)}
+                    className="flex min-h-11 items-center gap-2 rounded-lg text-sm font-semibold text-neutral-800 underline underline-offset-4 outline-none hover:text-neutral-950 focus-visible:ring-2 focus-visible:ring-[#E3A008] disabled:opacity-50"
+                  >
+                    <Bike size={16} aria-hidden="true" />
+                    Deliver with your own riders instead
+                  </button>
+                ))}
               <div className="flex gap-3">
                 <button type="button" disabled={disabled} onClick={() => setConfirming(true)} className={`${button} border border-neutral-300 bg-white text-neutral-700 hover:border-red-200 hover:bg-red-50 hover:text-red-700`}>
                   {isNew ? "Reject" : "Cancel order"}

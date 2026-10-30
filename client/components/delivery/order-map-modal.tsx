@@ -2,6 +2,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { formatMoney } from "@/lib/utils/money";
 
 const OrderMap = dynamic(
   () => import("@/components/delivery/order-map"),
@@ -23,6 +24,7 @@ export interface RiderOrder {
   deliveryStatus?: string;
 
   deliveryFee?: number;
+  currencyCode?: string;
 
   deliveryAddress?: string | null;
   deliveryLatitude?: number | null;
@@ -204,7 +206,7 @@ export function OrderMapModal({
               <span className="text-gray-500">
                 Your earning:{" "}
               </span>
-              Rs. {order.deliveryFee}
+              {formatMoney(order.deliveryFee, order.currencyCode)}
             </p>
           )}
         </div>

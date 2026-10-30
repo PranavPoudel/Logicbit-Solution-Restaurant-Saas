@@ -41,6 +41,15 @@ export function deliveryBlockedReason(
   return null;
 }
 
+export function ownDeliveryBlockedReason(
+  order: { orderType: string; deliveryHandledBy?: string | null; delivery?: { deliveryPersonId?: string | null; provider?: string | null } | null },
+) {
+  if (order.orderType !== 'DELIVERY') return 'Only delivery orders have a delivery partner';
+  if (order.deliveryHandledBy !== 'THIRD_PARTY') return 'This order is already delivered by your own riders';
+  if (order.delivery?.deliveryPersonId || order.delivery?.provider) return 'A delivery partner has already accepted this order';
+  return null;
+}
+
 export function refundBlockedReason(order: { paymentStatus: string; total: number; refund?: { status: string } | null }, amount: number) {
   if (order.refund?.status === 'PROCESSED' || order.paymentStatus === 'REFUNDED') return 'This order has already been refunded';
   if (order.paymentStatus !== 'PAID') return 'Only paid orders can be refunded';
@@ -237,6 +246,7 @@ export class OrderService {
           discountAmount,
           couponCode: appliedCoupon?.code,
           total,
+          currencyCode: restaurant.currencyCode,
           platformCommissionAmount,
           deliveryAddress: dto.deliveryAddress,
           deliveryLatitude: dto.deliveryLatitude,
@@ -549,6 +559,36 @@ export class OrderService {
       where: { orderId },
       data: { status: 'UNASSIGNED', deliveryPersonId: null, assignedAt: null },
     });
+  }
+
+  async switchToOwnDelivery(tenantId: string, restaurantId: string, orderId: string, changedBy: string) {
+    const order = await this.findOneForRestaurant(tenantId, restaurantId, orderId);
+    if (TERMINAL_STATUSES.includes(order.status)) {
+      throw new BadRequestException(`Order is already ${order.status}, delivery cannot be changed`);
+    }
+    const blocked = ownDeliveryBlockedReason(order);
+    if (blocked) throw new BadRequestException(blocked);
+
+    const updated = await this.prisma.$transaction(async (tx) => {
+      await tx.delivery.deleteMany({ where: { orderId, deliveryPersonId: null, provider: null } });
+      const result = await tx.order.update({ where: { id: orderId }, data: { deliveryHandledBy: 'SELF_DELIVERY' } });
+      await tx.orderStatusHistory.create({
+        data: { orderId, status: order.status, note: "Switched to the restaurant's own riders", changedBy },
+      });
+      return result;
+    });
+
+    await this.activityLog.log({
+      tenantId,
+      restaurantId,
+      actorType: 'OWNER',
+      actorId: changedBy,
+      action: 'ORDER_DELIVERY_CHANGED',
+      description: `Order ${order.orderNumber} switched to the restaurant's own riders`,
+      metadata: { orderId },
+    });
+
+    return { success: true, data: updated };
   }
 
   /**

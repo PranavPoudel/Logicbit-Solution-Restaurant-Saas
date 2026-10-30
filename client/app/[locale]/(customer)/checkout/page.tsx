@@ -17,6 +17,8 @@ import { useRedirectToLogin } from "@/hooks/use-require-login";
 import { CurrencyProvider, useMoney } from "@/hooks/use-money";
 import { restaurantAccentStyle } from "@/lib/utils/restaurant-theme";
 import { CouponInput } from "@/components/cart/coupon-input";
+import { ClosedNotice } from "@/components/restaurant/closed-notice";
+import type { OpenStatus } from "@/types/hours";
 import { Button, Card, Icon, Progress, SectionTitle } from "@/components/ui/primitives";
 
 const MIN_QUOTE_REFRESH_MS = 5000;
@@ -83,8 +85,9 @@ export default function CheckoutPage() {
     enabled: !!restaurantId,
   });
   const restaurant = restaurantSettingsQuery.data as
-    | { name?: string; refundPolicy?: string | null; primaryColor?: string; secondaryColor?: string; currencyCode?: string; [k: string]: unknown }
+    | { name?: string; refundPolicy?: string | null; primaryColor?: string; secondaryColor?: string; currencyCode?: string; isOpen?: boolean; openStatus?: OpenStatus; [k: string]: unknown }
     | undefined;
+  const closed = restaurant?.isOpen === false;
   const money = useMoney(restaurant?.currencyCode);
 
   const enabledMethods = useMemo(() => {
@@ -137,7 +140,9 @@ export default function CheckoutPage() {
   const effectiveDeliveryFee = deliveryFee ?? 0;
   const total = Math.max(0, sub - discount) + (orderType === "DELIVERY" ? effectiveDeliveryFee : 0);
 
-  const blockedReason = isPickup
+  const blockedReason = closed
+    ? t("closedBlocked")
+    : isPickup
     ? ""
     : !deliveryAddress.trim()
       ? t("needAddress")
@@ -258,6 +263,8 @@ export default function CheckoutPage() {
           <h1 className="mt-6 font-display text-5xl font-extrabold tracking-tight md:text-7xl">
             {t("almost")} <span className="text-chili">{t("there")}</span>
           </h1>
+
+          {closed && <div className="mt-6"><ClosedNotice restaurant={restaurant} /></div>}
 
           <div className="mt-8 grid items-start gap-8 lg:grid-cols-[1fr_420px]">
             <div className="space-y-6">

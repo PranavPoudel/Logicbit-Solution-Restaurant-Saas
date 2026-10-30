@@ -483,6 +483,7 @@ model Order {
   discountAmount Float  @default(0)
   couponCode     String?
   total          Float
+  currencyCode   String @default("NPR") // the restaurant's currency when the order was placed
   platformCommissionAmount Float @default(0) // तपाईंको (platform owner) कमाई — यही order बाट कति कमिशन बन्यो
 
   deliveryLatitude  Float?
@@ -1051,9 +1052,49 @@ model CustomerEmail {
   subject        String
   body           String
   recipientCount Int
+  sentCount      Int                   @default(0)
+  failedCount    Int                   @default(0)
   createdAt      DateTime              @default(now())
 
+  recipients CustomerEmailRecipient[]
+
   @@index([restaurantId, createdAt])
+}
+
+enum CustomerEmailRecipientStatus {
+  PENDING
+  SENDING
+  SENT
+  FAILED
+}
+
+// One row per customer of a broadcast. A worker sends PENDING rows a few at a time,
+// so a long list survives a restart and shows progress in the history.
+model CustomerEmailRecipient {
+  id         String                       @id @default(uuid())
+  emailId    String
+  customerId String
+  email      String
+  status     CustomerEmailRecipientStatus @default(PENDING)
+  attempts   Int                          @default(0)
+  createdAt  DateTime                     @default(now())
+  sentAt     DateTime?
+
+  customerEmail CustomerEmail @relation(fields: [emailId], references: [id], onDelete: Cascade)
+
+  @@index([status, createdAt])
+  @@index([emailId])
+}
+
+// A customer who unsubscribed from one restaurant's emails.
+model EmailUnsubscribe {
+  id           String   @id @default(uuid())
+  customerId   String
+  restaurantId String
+  createdAt    DateTime @default(now())
+
+  @@unique([customerId, restaurantId])
+  @@index([restaurantId])
 }
 
 model Notification {

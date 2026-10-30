@@ -94,6 +94,11 @@ export class RestaurantOrderController {
     return this.orderService.markAsPrinted(req.user.tenantId, restaurantId, id);
   }
 
+  @Patch(':id/own-delivery')
+  switchToOwnDelivery(@Req() req, @Param('restaurantId') restaurantId: string, @Param('id') id: string) {
+    return this.orderService.switchToOwnDelivery(req.user.tenantId, restaurantId, id, req.user.id);
+  }
+
   @Patch(':id/reject-rider')
   rejectRider(@Req() req, @Param('restaurantId') restaurantId: string, @Param('id') id: string) {
     return this.orderService.rejectRider(req.user.tenantId, restaurantId, id);

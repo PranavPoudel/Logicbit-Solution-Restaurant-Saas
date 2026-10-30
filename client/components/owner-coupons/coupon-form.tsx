@@ -4,6 +4,7 @@
 import { useState, useEffect } from "react";
 import { X, Tag, Percent, Banknote, Calendar, Users, Shield, Zap } from "lucide-react";
 import { FormField } from "@/components/ui/form-field";
+import { useCurrencyCode } from "@/hooks/use-money";
 
 export interface CouponFormData {
   code?: string;
@@ -26,6 +27,7 @@ interface CouponFormProps {
 }
 
 export function CouponForm({ coupon, onSubmit, onCancel, isLoading }: CouponFormProps) {
+  const currency = useCurrencyCode();
   const [formData, setFormData] = useState<CouponFormData>({
     code: "",
     discountType: "PERCENTAGE",
@@ -164,7 +166,7 @@ export function CouponForm({ coupon, onSubmit, onCancel, isLoading }: CouponForm
               </div>
             </div>
             <FormField
-              label={`Discount ${formData.discountType === "PERCENTAGE" ? "(%)" : "(Rs.)"} *`}
+              label={`Discount ${formData.discountType === "PERCENTAGE" ? "(%)" : `(${currency})`} *`}
               type="number"
               min="0"
               required
@@ -178,7 +180,7 @@ export function CouponForm({ coupon, onSubmit, onCancel, isLoading }: CouponForm
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {formData.discountType === "PERCENTAGE" && (
               <FormField
-                label="Max Discount Cap (Rs.)"
+                label={`Max Discount Cap (${currency})`}
                 type="number"
                 min="0"
                 value={formData.maxDiscount}
@@ -187,7 +189,7 @@ export function CouponForm({ coupon, onSubmit, onCancel, isLoading }: CouponForm
               />
             )}
             <FormField
-              label={`Min. Order Amount (Rs.) ${formData.isAutoApply ? "*" : ""}`}
+              label={`Min. Order Amount (${currency}) ${formData.isAutoApply ? "*" : ""}`}
               type="number"
               min="0"
               required={formData.isAutoApply}

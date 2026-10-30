@@ -94,6 +94,7 @@
     "emptyTitleB": "空っぽです",
     "emptyBody": "さみしそうです。地元のキッチンはすぐそこです。",
     "backToRestaurant": "{restaurant}に戻る",
+    "checkoutClosed": "現在営業時間外です",
     "subtitle": "{count}点",
     "subtitleFrom": "{restaurant}から {count}点",
     "emptyCartBtn": "カートを空にする",
@@ -198,6 +199,7 @@
     "refundAgree": "返金ポリシーを読みました。",
     "refundAgreeShort": "返金ポリシーを読みました：問題は2時間以内にご連絡ください。",
     "placing": "注文を送信中…",
+    "closedBlocked": "現在営業時間外のため、まだご注文を受け付けられません。",
     "needAddress": "注文するにはお届け先の住所を入力してください。",
     "needPin": "注文するには地図でピンを確認してください。",
     "checkingFee": "配達料を確認中…",
@@ -422,7 +424,9 @@
       "opensOn": "{day}{time}に開店",
       "today": "本日",
       "closedDay": "定休日"
-    }
+    },
+    "closedNoticeTitle": "{name}は現在営業時間外です",
+    "closedNoticeBody": "カートは保存されていますが、営業が始まるまでご注文は受け付けられません。"
   },
   "menu": {
     "categories": "メニューカテゴリ",
@@ -971,5 +975,20 @@
     "humanStatus": "スタッフが対応しています",
     "endedNote": "このチャットは終了しました。",
     "newChat": "新しいチャットを始める"
+  },
+  "unsubscribe": {
+    "askTitle": "{restaurant}のメールを解除しますか?",
+    "askBody": "{restaurant}からのお得情報やお知らせが届かなくなります。ご自身の注文に関するメールは引き続き届きます。",
+    "confirm": "配信を解除する",
+    "keep": "メールを受け取り続ける",
+    "doneTitle": "配信を解除しました",
+    "doneBody": "{restaurant}からのお得情報やお知らせは届かなくなります。",
+    "undo": "間違えた場合は再登録",
+    "backAgainTitle": "再び登録しました",
+    "backAgainBody": "{restaurant}からのメールが再び届きます。",
+    "invalidTitle": "このリンクは使えません",
+    "invalidBody": "リンクが不完全か、期限切れの可能性があります。メールからもう一度開いてください。",
+    "failed": "処理できませんでした。もう一度お試しください。",
+    "browse": "レストランを探す"
   }
 }

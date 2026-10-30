@@ -2,8 +2,12 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Star, X, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import { useEscapeKey } from "@/hooks/use-escape-key";
+import { useDialogFocus } from "@/hooks/use-dialog-focus";
 import { createReview, type CreateReviewInput } from "@/lib/api/reviews";
+import { getErrorMessage } from "@/lib/utils/error";
+import { Button, Icon, IconButton, inputCls } from "@/components/ui/primitives";
 
 interface ReviewModalProps {
   orderId: string;
@@ -13,15 +17,23 @@ interface ReviewModalProps {
   onSuccess: () => void;
 }
 
-export function ReviewModal({ orderId, restaurantId, isOpen, onClose, onSuccess }: ReviewModalProps) {
+export function ReviewModal({ isOpen, ...props }: ReviewModalProps) {
+  return isOpen ? <ReviewDialog {...props} /> : null;
+}
+
+function ReviewDialog({ orderId, restaurantId, onClose, onSuccess }: Omit<ReviewModalProps, "isOpen">) {
   const t = useTranslations("review");
+  const tc = useTranslations("common");
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const panelRef = useDialogFocus<HTMLDivElement>();
+  useEscapeKey(onClose, !isSubmitting);
 
-  if (!isOpen) return null;
+  const labels = [t("r1"), t("r2"), t("r3"), t("r4"), t("r5")];
+  const shown = hoverRating || rating;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,107 +52,81 @@ export function ReviewModal({ orderId, restaurantId, isOpen, onClose, onSuccess 
         rating,
         comment: comment.trim() || undefined,
       };
-      
+
       await createReview(payload);
-      onSuccess(); // Close modal and refresh parent UI
-    } catch (err: any) {
-      setError(err.response?.data?.message || t("errFailed"));
+      onSuccess();
+    } catch (err) {
+      setError(getErrorMessage(err, t("errFailed")));
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-100">
-          <h2 className="text-lg font-semibold text-[#17181C] font-display">{t("title")}</h2>
-          <button onClick={onClose} className="text-neutral-400 hover:text-neutral-600 transition-colors">
-            <X size={20} />
-          </button>
-        </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-espresso/70 p-4" onClick={onClose}>
+      <div
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="review-title"
+        onClick={(e) => e.stopPropagation()}
+        className="shadow-warm animate-fade-up relative w-full max-w-xl rounded-[36px] bg-cream p-6 text-ink md:p-8"
+      >
+        <IconButton icon="x" label={tc("close")} onClick={onClose} className="absolute right-4 top-4 bg-paper text-ink shadow-hard" />
+        <h2 id="review-title" className="pr-12 font-display text-[28px] font-extrabold leading-tight tracking-tight">{t("title")}</h2>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-5">
-          <div className="text-center space-y-2">
-            <p className="text-sm text-neutral-500">{t("ask")}</p>
-            
-            {/* Star Rating Input */}
-            <div className="flex items-center justify-center gap-2">
+        <form onSubmit={handleSubmit} className="mt-6 space-y-6">
+          <div className="text-center">
+            <p className="text-lg text-ink/80">{t("ask")}</p>
+            <div className="mt-3 flex items-center justify-center gap-1" role="radiogroup" aria-label={t("ask")}>
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
                   key={star}
                   type="button"
+                  role="radio"
+                  aria-checked={rating === star}
+                  aria-label={labels[star - 1]}
                   onClick={() => setRating(star)}
                   onMouseEnter={() => setHoverRating(star)}
                   onMouseLeave={() => setHoverRating(0)}
-                  className="transition-transform hover:scale-110 focus:outline-none"
+                  className="grid h-12 w-12 place-items-center rounded-full outline-none transition hover:scale-110 focus-visible:ring-2 focus-visible:ring-ink"
                 >
-                  <Star
-                    size={32}
-                    className={`transition-colors ${
-                      star <= (hoverRating || rating)
-                        ? "fill-[#E3A008] text-[#E3A008]"
-                        : "text-neutral-200"
-                    }`}
-                  />
+                  <Icon name="star" fill className={`h-9 w-9 transition-colors ${star <= shown ? "text-saffron" : "text-ink/15"}`} />
                 </button>
               ))}
             </div>
-            {rating > 0 && (
-              <p className="text-xs font-medium text-[#E3A008]">
-                {rating === 1 && t("r1")}
-                {rating === 2 && t("r2")}
-                {rating === 3 && t("r3")}
-                {rating === 4 && t("r4")}
-                {rating === 5 && t("r5")}
-              </p>
-            )}
+            <p className="mt-1 h-7 font-display text-xl font-extrabold text-[var(--accent,var(--brand-chili))]" aria-live="polite">
+              {shown > 0 ? labels[shown - 1] : ""}
+            </p>
           </div>
 
-          {/* Comment Input */}
-          <div>
-            <label className="block text-sm font-medium text-[#17181C] mb-1.5">
-              {t("commentLabel")}
-            </label>
+          <label className="block">
+            <span className="mb-2 block font-display text-xl font-extrabold">{t("commentLabel")}</span>
             <textarea
               rows={3}
               value={comment}
               onChange={(e) => setComment(e.target.value)}
-              className="w-full px-3 py-2.5 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-[#0F6B5C]/40 focus:border-[#0F6B5C] outline-none resize-none text-sm"
+              className={`${inputCls} resize-none py-3`}
               placeholder={t("placeholder")}
             />
-          </div>
+          </label>
 
           {error && (
-            <p className="text-xs text-red-500 text-center bg-red-50 py-2 rounded-lg">{error}</p>
+            <p role="alert" className="rounded-2xl border-2 border-dashed border-chili/50 bg-chili/5 px-4 py-3 font-bold text-chili">{error}</p>
           )}
 
-          {/* Actions */}
-          <div className="flex gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={isSubmitting}
-              className="flex-1 px-4 py-2.5 text-sm font-medium text-neutral-600 bg-neutral-100 hover:bg-neutral-200 rounded-xl transition-colors disabled:opacity-50"
-            >
-              {t("skip")}
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting || rating === 0}
-              className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-[#17181C] hover:bg-[#2B2D33] rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
+          <div className="flex gap-3">
+            <Button variant="outline" onClick={onClose} disabled={isSubmitting} className="min-h-14 flex-1 px-4">{t("skip")}</Button>
+            <Button type="submit" disabled={isSubmitting || rating === 0} className="min-h-14 flex-1 whitespace-nowrap px-4">
               {isSubmitting ? (
                 <>
-                  <Loader2 size={16} className="animate-spin" />
+                  <Loader2 className="h-5 w-5 animate-spin" />
                   {t("submitting")}
                 </>
               ) : (
                 t("submit")
               )}
-            </button>
+            </Button>
           </div>
         </form>
       </div>

@@ -3,6 +3,7 @@
 
 import { useState } from "react";
 import { Plus, Trash2, SlidersHorizontal, Pencil } from "lucide-react";
+import { useCurrencyCode, useMoney } from "@/hooks/use-money";
 import { ImageUpload } from "@/components/ui/image-upload";
 
 export interface OwnerMenuItem {
@@ -52,6 +53,8 @@ export function MenuItemTable({
   isUpdating,
   categoryName,
 }: MenuItemTableProps) {
+  const money = useMoney();
+  const currency = useCurrencyCode();
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [name, setName] = useState("");
@@ -143,7 +146,7 @@ export function MenuItemTable({
               <input
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
-                placeholder="Price (Rs)"
+                placeholder={`Price (${currency})`}
                 type="number"
                 className="w-full text-sm border border-neutral-200 rounded-md px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#E3A008]/40"
               />
@@ -222,7 +225,7 @@ export function MenuItemTable({
                 </div>
               </div>
               <div className="flex items-center gap-3 shrink-0">
-                <span className="text-sm font-mono text-neutral-700">Rs {item.price ?? 0}</span>
+                <span className="text-sm font-mono text-neutral-700">{money(item.price ?? 0)}</span>
                 <button
                   onClick={() => startEdit(item)}
                   className="text-neutral-400 hover:text-[#E3A008]"

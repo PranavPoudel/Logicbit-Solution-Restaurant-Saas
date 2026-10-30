@@ -81,6 +81,7 @@ export default function OwnerEmailCustomersPage() {
     queryKey: ["owner-email-history", restaurantId],
     queryFn: () => ownerEmailsApi.history(restaurantId as string),
     enabled: !!restaurantId,
+    refetchInterval: (query) => (query.state.data?.some((h) => h.state === "SENDING") ? 3000 : false),
   });
 
   const sendMutation = useMutation({
@@ -123,10 +124,11 @@ export default function OwnerEmailCustomersPage() {
   const selected = customers.find((c) => c.id === customerId);
   const customerOrders = ordersQuery.data ?? [];
   const selectedOrder = audience === "ONE" ? customerOrders.find((o) => o.id === orderId) : undefined;
-  const recipientCount = audience === "ALL" ? customers.length : selected ? 1 : 0;
+  const reachable = customers.filter((c) => !c.unsubscribed).length;
+  const recipientCount = audience === "ALL" ? reachable : selected ? 1 : 0;
   const recipientLabel =
     audience === "ALL"
-      ? `All customers (${customers.length})`
+      ? `All customers (${reachable})`
       : selected
         ? `${selected.name} <${selected.email}>`
         : "Choose a customer";
@@ -204,9 +206,19 @@ export default function OwnerEmailCustomersPage() {
             <CheckCircle2 size={20} aria-hidden="true" className="mt-0.5 shrink-0 text-green-600" />
             <div>
               <p className="text-sm font-semibold text-green-900">
-                Email sent to {sent.audience === "ALL" ? `${sent.recipientCount} customers` : sent.recipientLabel}
+                {sent.audience === "ALL"
+                  ? `Sending to ${sent.recipientCount} customers`
+                  : sent.failedCount > 0
+                    ? `Couldn't deliver to ${sent.recipientLabel}`
+                    : `Email sent to ${sent.recipientLabel}`}
               </p>
-              <p className="text-sm text-green-800">&ldquo;{sent.subject}&rdquo; is on its way.</p>
+              <p className="text-sm text-green-800">
+                {sent.audience === "ALL"
+                  ? `“${sent.subject}” is going out a few at a time. Watch the progress under Recently sent.`
+                  : sent.failedCount > 0
+                    ? `“${sent.subject}” could not be delivered.`
+                    : `“${sent.subject}” is on its way.`}
+              </p>
             </div>
           </div>
         )}
@@ -414,6 +426,7 @@ export default function OwnerEmailCustomersPage() {
                     <p className="mt-0.5 text-xs text-neutral-500">
                       {h.recipientLabel}
                       {h.audience === "ALL" ? ` (${h.recipientCount})` : ""}
+                      {h.state === "SENDING" ? ` · Sending ${h.sentCount + h.failedCount} of ${h.recipientCount}` : h.failedCount > 0 ? ` · ${h.sentCount} sent, ${h.failedCount} failed` : ""}
                       {h.orderNumber ? ` · Order ${h.orderNumber}` : ""} ·{" "}
                       {new Date(h.sentAt).toLocaleString("en-US", {
                         month: "short",

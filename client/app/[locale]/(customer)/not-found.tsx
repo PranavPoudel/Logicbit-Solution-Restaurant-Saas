@@ -15,7 +15,7 @@ export default function NotFound() {
         <h1 className="mt-6 font-display text-[56px] font-extrabold leading-[0.92] tracking-tight md:text-[88px]">
           {t("titleStart")}{" "}
           <span className="relative inline-block text-chili">
-            {t("titleAccent")}<Squiggle className="absolute -bottom-2 left-0 h-4 w-full text-saffron md:-bottom-3 md:h-6" />
+            {t("titleAccent")}<Squiggle className="absolute -bottom-2 left-0 h-4 w-full text-crimson md:-bottom-3 md:h-6" />
           </span>
         </h1>
         <p className="mt-6 max-w-md text-lg text-ink/80">{t("body")}</p>
@@ -25,11 +25,10 @@ export default function NotFound() {
         </div>
       </div>
 
-      <div className="relative h-[320px] overflow-hidden rounded-[36px] bg-saffron md:h-[440px]" aria-hidden>
-        <div className="blob absolute -left-16 -top-16 h-64 w-64 bg-chili" />
-        <div className="blob shadow-warm absolute -right-10 top-10 h-[260px] w-[260px] overflow-hidden border-8 border-cream md:h-[340px] md:w-[340px]">
+      <div className="relative h-[320px] overflow-hidden rounded-[36px] bg-crimson md:h-[440px]" aria-hidden>
+        <div className="shadow-warm absolute right-6 top-8 aspect-square w-[62%] max-w-[320px] rotate-2 overflow-hidden rounded-[32px] border-8 border-cream md:right-10 md:top-10">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/cuisine-chinese.jpg.avif" alt="" className="h-full w-full scale-110 object-cover" />
+          <img src="/images/cuisine-chinese.jpg.avif" alt="" className="h-full w-full object-cover" />
         </div>
         <span className="absolute bottom-8 left-8 -rotate-6 rounded-2xl bg-paper px-5 py-3 font-display text-5xl font-extrabold shadow-hard md:text-7xl">404</span>
       </div>

@@ -6,6 +6,7 @@ export interface EmailCustomer {
   name: string;
   email: string;
   orders: number;
+  unsubscribed: boolean;
 }
 
 export type EmailOrderStatus =
@@ -43,6 +44,9 @@ export interface SentEmail {
   audience: "ALL" | "ONE";
   recipientLabel: string;
   recipientCount: number;
+  sentCount: number;
+  failedCount: number;
+  state: "SENDING" | "DONE";
   orderNumber?: string;
   sentAt: string;
 }

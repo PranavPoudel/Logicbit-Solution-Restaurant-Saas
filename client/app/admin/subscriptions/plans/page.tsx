@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useMoney } from "@/hooks/use-money";
 import Link from "next/link";
 import { listSubscriptionPlans, SubscriptionPlan } from "@/lib/api/subscriptions";
 
 export default function PlansPage() {
+  const money = useMoney();
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -68,7 +70,7 @@ export default function PlansPage() {
                     </td>
                     <td className="p-4 text-sm text-gray-600">
                 
-                      Rs. {Number(plan.price || 0).toFixed(2)}
+                      {money(Number(plan.price || 0))}
                     </td>
                     <td className="p-4 text-sm text-gray-600">
                       {plan.durationMonths || "30 (Default)"}

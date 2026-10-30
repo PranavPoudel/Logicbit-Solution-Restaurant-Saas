@@ -96,6 +96,11 @@ export async function issueOrderRefund(restaurantId: string, orderId: string, bo
   return data;
 }
 
+export async function switchOrderToOwnDelivery(restaurantId: string, orderId: string) {
+  const { data } = await ownerApiClient.patch(`/restaurants/${restaurantId}/orders/${orderId}/own-delivery`);
+  return data;
+}
+
 export interface CouponPreview {
   code: string;
   discountAmount: number;

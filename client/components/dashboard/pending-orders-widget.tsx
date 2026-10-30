@@ -3,6 +3,7 @@
 
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
+import { useMoney } from "@/hooks/use-money";
 
 interface PendingOrder {
   id: string;
@@ -14,6 +15,7 @@ interface PendingOrder {
 }
 
 export function PendingOrdersWidget({ orders }: { orders: PendingOrder[] }) {
+  const money = useMoney();
   return (
     <div className="bg-white border border-neutral-200 rounded-xl p-5">
       <div className="flex items-center justify-between mb-4">
@@ -23,7 +25,7 @@ export function PendingOrdersWidget({ orders }: { orders: PendingOrder[] }) {
         {/* ✅ FIX: Point "View all" to the owner orders page */}
         <Link
           href="/owner/orders"
-          className="text-xs text-neutral-500 hover:text-neutral-800 flex items-center gap-1"
+          className="flex min-h-11 items-center gap-1 text-xs text-neutral-500 hover:text-neutral-800"
         >
           View all <ArrowUpRight size={12} />
         </Link>
@@ -42,7 +44,7 @@ export function PendingOrdersWidget({ orders }: { orders: PendingOrder[] }) {
                   #{order.code} — {order.customerName}
                 </p>
                 <p className="text-xs text-neutral-400">
-                  {order.itemCount} items · Rs {order.total} · {order.placedMinutesAgo}m ago
+                  {order.itemCount} items · {money(order.total)} · {order.placedMinutesAgo}m ago
                 </p>
               </div>
               {/* ✅ FIX: Point "Review" to the specific owner order page */}

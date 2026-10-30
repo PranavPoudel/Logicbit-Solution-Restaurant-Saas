@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useMoney } from "@/hooks/use-money";
 import { 
   getAllDeliveries, 
   getAllRiders, 
@@ -30,6 +31,7 @@ import {
 } from "lucide-react";
 
 export default function DeliveriesPage() {
+  const money = useMoney();
   const [activeTab, setActiveTab] = useState<"deliveries" | "pending" | "riders" | "partners">("deliveries");
   const [deliveries, setDeliveries] = useState<Delivery[]>([]);
   const [riders, setRiders] = useState<Rider[]>([]);
@@ -229,7 +231,7 @@ export default function DeliveriesPage() {
                           </span>
                         </td>
                         <td className="py-3 px-4 font-semibold text-gray-900">
-                          Rs. {delivery.earningAmount}
+                          {money(delivery.earningAmount)}
                         </td>
                       </tr>
                     ))

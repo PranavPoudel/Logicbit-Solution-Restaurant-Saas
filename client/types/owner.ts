@@ -25,6 +25,7 @@ export interface Restaurant {
   isActive?: boolean;
   openingHours?: DayHours[] | null;
   timezone?: string;
+  currencyCode?: string;
 }
 
 export interface RestaurantSubscription {

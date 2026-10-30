@@ -1,6 +1,7 @@
 "use client";
 
 import { Edit2, Trash2, Tag, Percent } from "lucide-react";
+import { useCurrencyCode, useMoney } from "@/hooks/use-money";
 
 export interface OwnerCoupon {
   id: string;
@@ -25,11 +26,13 @@ interface CouponTableProps {
 }
 
 export function CouponTable({ coupons, onEdit, onDelete, isLoading }: CouponTableProps) {
+  const money = useMoney();
+  const currencyCode = useCurrencyCode();
   const formatDiscount = (coupon: OwnerCoupon) => {
     if (coupon.discountType === "PERCENTAGE") {
       return `${coupon.discountValue}%`;
     }
-    return `NPR ${coupon.discountValue}`;
+    return money(coupon.discountValue);
   };
 
   const formatDate = (dateStr?: string) => {
@@ -100,7 +103,7 @@ export function CouponTable({ coupons, onEdit, onDelete, isLoading }: CouponTabl
                       {coupon.discountType === "PERCENTAGE" ? (
                         <Percent size={16} className="text-[#E3A008]" />
                       ) : (
-                        <span className="text-xs text-neutral-400">NPR</span>
+                        <span className="text-xs text-neutral-400">{currencyCode}</span>
                       )}
                       <span className="text-sm font-medium text-neutral-900">
                         {formatDiscount(coupon)}
@@ -114,7 +117,7 @@ export function CouponTable({ coupons, onEdit, onDelete, isLoading }: CouponTabl
                   </td>
                   <td className="px-4 py-3">
                     <span className="text-sm text-neutral-600">
-                      {coupon.minSubtotal ? `NPR ${coupon.minSubtotal}` : "—"}
+                      {coupon.minSubtotal ? money(coupon.minSubtotal) : "—"}
                     </span>
                   </td>
                   <td className="px-4 py-3">
@@ -138,16 +141,18 @@ export function CouponTable({ coupons, onEdit, onDelete, isLoading }: CouponTabl
                     <div className="flex items-center justify-end gap-2">
                       <button
                         onClick={() => onEdit(coupon)}
-                        className="p-2 text-neutral-600 hover:text-[#E3A008] hover:bg-[#E3A008]/10 rounded-lg transition-colors"
+                        className="grid h-11 w-11 place-items-center text-neutral-600 hover:text-[#E3A008] hover:bg-[#E3A008]/10 rounded-lg transition-colors"
                         title="Edit coupon"
+                        aria-label="Edit coupon"
                       >
                         <Edit2 size={16} />
                       </button>
                       <button
                         onClick={() => onDelete(coupon.id)}
                         disabled={isLoading}
-                        className="p-2 text-neutral-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                        className="grid h-11 w-11 place-items-center text-neutral-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
                         title="Delete coupon"
+                        aria-label="Delete coupon"
                       >
                         <Trash2 size={16} />
                       </button>

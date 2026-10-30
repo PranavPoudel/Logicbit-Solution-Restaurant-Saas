@@ -1,13 +1,13 @@
 "use client";
 
 import { Fragment, useEffect, useState } from "react";
+import { useMoney } from "@/hooks/use-money";
 import { getOwnersOverview, OwnerOverview, OwnerStats } from "@/lib/api/platform-admin";
-
-const rs = (n: number) => `Rs. ${n.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
 
 const th = "p-4 text-xs font-semibold text-gray-500 uppercase tracking-wider";
 
 function StatCells({ stats, className = "p-4" }: { stats: OwnerStats; className?: string }) {
+  const rs = useMoney();
   return (
     <>
       <td className={`${className} text-right`}>{stats.orders}</td>
@@ -30,6 +30,7 @@ function StatHeaders() {
 }
 
 export default function OwnersPage() {
+  const rs = useMoney();
   const [owners, setOwners] = useState<OwnerOverview[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<"owners" | "restaurants">("owners");

@@ -71,6 +71,7 @@ export interface OrderDetail {
   deliveryFee?: number;
   discountAmount?: number;
   total?: number;
+  currencyCode?: string;
 
   paymentStatus?: "UNPAID" | "PAID" | "REFUNDED";
   paymentMethod?: "COD" | "CREDIT_CARD" | "ESEWA" | "KHALTI" | "IPS" | "PHONEPAY" | "PAYPAY";
@@ -128,6 +129,7 @@ export interface OrderSummary {
   discountAmount?: number;
   couponCode?: string;
   total?: number;
+  currencyCode?: string;
   createdAt?: string;
   notes?: string | null;
 }

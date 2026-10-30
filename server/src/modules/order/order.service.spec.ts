@@ -1,7 +1,26 @@
 import { describe, it } from 'node:test';
 import { strict as assert } from 'node:assert';
 import { NotFoundException } from '@nestjs/common';
-import { canMoveOrderStatus, deliveryBlockedReason, OrderService, refundBlockedReason } from './order.service';
+import { canMoveOrderStatus, deliveryBlockedReason, OrderService, ownDeliveryBlockedReason, refundBlockedReason } from './order.service';
+
+describe('ownDeliveryBlockedReason', () => {
+  const waiting = { orderType: 'DELIVERY', deliveryHandledBy: 'THIRD_PARTY', delivery: null };
+
+  it('allows switching a partner order nobody has accepted', () => {
+    assert.equal(ownDeliveryBlockedReason(waiting), null);
+    assert.equal(ownDeliveryBlockedReason({ ...waiting, delivery: { deliveryPersonId: null, provider: null } }), null);
+  });
+
+  it('blocks once a rider or an external courier has taken it', () => {
+    assert.ok(ownDeliveryBlockedReason({ ...waiting, delivery: { deliveryPersonId: 'r1' } }));
+    assert.ok(ownDeliveryBlockedReason({ ...waiting, delivery: { provider: 'uber' } }));
+  });
+
+  it('blocks pickup orders and orders already on own riders', () => {
+    assert.ok(ownDeliveryBlockedReason({ ...waiting, orderType: 'PICKUP' }));
+    assert.ok(ownDeliveryBlockedReason({ ...waiting, deliveryHandledBy: 'SELF_DELIVERY' }));
+  });
+});
 
 describe('deliveryBlockedReason', () => {
   const partner = { orderType: 'DELIVERY', deliveryHandledBy: 'THIRD_PARTY', delivery: null };

@@ -41,8 +41,10 @@ export function AudiencePicker({
     );
   }, [customers, query]);
 
+  const reachable = customers.filter((c) => !c.unsubscribed).length;
+  const optedOut = customers.length - reachable;
   const options = [
-    { value: "ALL", label: "All customers", hint: `${customers.length} ${customers.length === 1 ? "person" : "people"}`, icon: Users },
+    { value: "ALL", label: "All customers", hint: `${reachable} ${reachable === 1 ? "person" : "people"}${optedOut ? ` · ${optedOut} unsubscribed` : ""}`, icon: Users },
     { value: "ONE", label: "One customer", hint: "Pick a person", icon: User },
   ] as const;
 
@@ -142,6 +144,11 @@ export function AudiencePicker({
                           {c.email}
                         </span>
                       </span>
+                      {c.unsubscribed && (
+                        <span title="Unsubscribed. You can still write to them about one of their orders." className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold ${selected ? "bg-white/15 text-white" : "bg-neutral-100 text-neutral-600"}`}>
+                          Unsubscribed
+                        </span>
+                      )}
                       <span className={`shrink-0 text-xs ${selected ? "text-white/70" : "text-neutral-400"}`}>
                         {c.orders} {c.orders === 1 ? "order" : "orders"}
                       </span>

@@ -1,113 +1,139 @@
 //components/print/ThermalReceipt.tsx
 'use client';
+import type { ReactNode } from 'react';
 import { theme } from '@/config/theme';
 
-interface ThermalReceiptProps {
-  order: any;
+interface ReceiptItem {
+  name?: string;
+  menuItem?: { name?: string };
+  quantity?: number;
+  unitPrice?: number;
+  subtotal?: number;
+  selectedModifiers?: { name?: string; optionName?: string }[];
 }
 
+interface ReceiptOrder {
+  orderNumber?: string;
+  orderType?: string;
+  createdAt?: string;
+  restaurant?: { name?: string; address?: string | null; phone?: string | null; currencyCode?: string };
+  customer?: { name?: string; phone?: string | null };
+  items?: ReceiptItem[];
+  subtotal?: number;
+  deliveryFee?: number;
+  discountAmount?: number;
+  couponCode?: string;
+  total?: number;
+  paymentMethod?: string;
+  paymentStatus?: string;
+  notes?: string | null;
+}
+
+interface ThermalReceiptProps {
+  order: ReceiptOrder;
+}
+
+const amount = (value?: number) => (value ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const words = (value?: string) => (value ?? '').replace(/_/g, ' ').toLowerCase();
+
+const Rule = ({ heavy }: { heavy?: boolean }) => (
+  <div aria-hidden className={`my-3 border-black ${heavy ? 'border-t-4 border-double' : 'border-t border-dashed'}`} />
+);
+
+const Row = ({ label, children, bold }: { label: ReactNode; children: ReactNode; bold?: boolean }) => (
+  <div className={`flex justify-between gap-3 ${bold ? 'font-bold' : ''}`}>
+    <span>{label}</span>
+    <span className="text-right">{children}</span>
+  </div>
+);
+
 export function ThermalReceipt({ order }: ThermalReceiptProps) {
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString('en-US', {
-      month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-    });
-  };
+  const currency = order.restaurant?.currencyCode || theme.content.currencyCode;
+  const created = order.createdAt ? new Date(order.createdAt) : null;
+  const date = created?.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+  const time = created?.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
 
   return (
-    <div id="printable-receipt" className="p-4 bg-white text-black font-mono text-sm max-w-[80mm] mx-auto">
-      {/* Header */}
-      <div className="text-center border-b-2 border-black pb-2 mb-3">
-        <h1 className="text-xl font-black uppercase tracking-wider">{order.restaurant?.name || 'Restaurant'}</h1>
-        <p className="text-xs mt-1">{order.restaurant?.address || ''}</p>
-        <p className="text-xs">{order.restaurant?.phone || ''}</p>
-      </div>
+    <div id="printable-receipt" className="mx-auto max-w-[80mm] bg-white font-mono text-black">
+      <div className="px-4 pb-6 pt-6 text-[12px] leading-snug">
+        <header className="text-center">
+          <h1 className="text-lg font-black uppercase tracking-wider">{order.restaurant?.name || 'Restaurant'}</h1>
+          {order.restaurant?.address && <p className="mt-1">{order.restaurant.address}</p>}
+          {order.restaurant?.phone && <p>Tel: {order.restaurant.phone}</p>}
+        </header>
 
-      {/* Order Meta */}
-      <div className="border-b border-black pb-2 mb-3 text-xs space-y-1">
-        <div className="flex justify-between">
-          <span className="font-bold">Order #:</span>
-          <span>{order.orderNumber}</span>
-        </div>
-        <div className="flex justify-between">
-          <span>Date:</span>
-          <span>{formatDate(order.createdAt)}</span>
-        </div>
-        <div className="flex justify-between">
-          <span>Type:</span>
-          <span className="font-bold uppercase">{order.orderType}</span>
-        </div>
-        {order.customer?.name && (
-          <div className="flex justify-between mt-1">
-            <span>Customer:</span>
-            <span>{order.customer.name} {order.customer.phone ? `(${order.customer.phone})` : ''}</span>
-          </div>
-        )}
-      </div>
+        <Rule />
+        <p className="text-center text-sm font-black uppercase tracking-[0.3em]">Receipt</p>
+        <Rule />
 
-      {/* Items Section */}
-      <div className="border-b border-black pb-2 mb-3">
-        <h2 className="text-xs font-black uppercase mb-2">Items</h2>
-        {order.items?.map((item: any, idx: number) => (
-          <div key={idx} className="mb-3 pb-2 border-b border-dashed border-gray-400 last:border-0 last:pb-0 last:mb-0">
-            {/* Item Name & Price */}
-            <div className="flex justify-between items-start font-bold text-sm">
-              <span className="flex-1 pr-2">{item.quantity}x {item.menuItem?.name || item.name || 'Menu Item'}</span>
-              <span className="shrink-0">NPR {item.subtotal?.toFixed(2) || '0.00'}</span>
-            </div>
-            
-            {/* Modifiers (Indented & Subtle) - ONLY MODIFIERS, NO NOTES */}
-            {item.selectedModifiers && item.selectedModifiers.length > 0 && (
-              <div className="pl-3 mt-1 text-xs text-gray-700 border-l-2 border-gray-300">
-                {item.selectedModifiers.map((mod: any, mIdx: number) => (
-                  <div key={mIdx}>+ {mod.optionName || mod.name}</div>
-                ))}
+        <div className="space-y-1">
+          <Row label="Order #">{order.orderNumber}</Row>
+          {created && <Row label="Date">{date}</Row>}
+          {created && <Row label="Time">{time}</Row>}
+          <Row label="Type"><span className="capitalize">{words(order.orderType)}</span></Row>
+          {order.customer?.name && <Row label="Customer">{order.customer.name}</Row>}
+          {order.customer?.phone && <Row label="Phone">{order.customer.phone}</Row>}
+        </div>
+
+        <Rule heavy />
+
+        <div className="flex justify-between font-black uppercase">
+          <span>Qty Item</span>
+          <span>Amount</span>
+        </div>
+        <Rule />
+
+        <ul className="space-y-2">
+          {order.items?.map((item, idx) => (
+            <li key={idx}>
+              <div className="flex justify-between gap-3 font-bold">
+                <span className="flex-1">{item.quantity}x {item.menuItem?.name || item.name || 'Menu Item'}</span>
+                <span className="shrink-0">{amount(item.subtotal)}</span>
               </div>
-            )}
-            {/* ✅ REMOVED: item.notes display - this is kitchen-only info */}
-          </div>
-        ))}
-      </div>
+              {(item.quantity ?? 1) > 1 && item.unitPrice != null && (
+                <div className="pl-5 text-gray-700">@ {amount(item.unitPrice)} each</div>
+              )}
+              {item.selectedModifiers?.map((mod, mIdx) => (
+                <div key={mIdx} className="pl-5 text-gray-700">+ {mod.optionName || mod.name}</div>
+              ))}
+            </li>
+          ))}
+        </ul>
 
-      {/* Totals */}
-      <div className="text-xs space-y-1.5 mb-3">
-        <div className="flex justify-between">
-          <span>Subtotal</span>
-          <span>NPR {order.subtotal?.toFixed(2) || '0.00'}</span>
+        <Rule />
+
+        <div className="space-y-1">
+          <Row label="Subtotal">{amount(order.subtotal)}</Row>
+          {(order.deliveryFee ?? 0) > 0 && <Row label="Delivery fee">{amount(order.deliveryFee)}</Row>}
+          {(order.discountAmount ?? 0) > 0 && <Row label={`Discount${order.couponCode ? ` (${order.couponCode})` : ''}`}>-{amount(order.discountAmount)}</Row>}
         </div>
-        {order.deliveryFee > 0 && (
-          <div className="flex justify-between">
-            <span>Delivery Fee</span>
-            <span>NPR {order.deliveryFee.toFixed(2)}</span>
-          </div>
-        )}
-        {order.discountAmount > 0 && (
-          <div className="flex justify-between text-gray-600">
-            <span>Discount ({order.couponCode})</span>
-            <span>- NPR {order.discountAmount.toFixed(2)}</span>
-          </div>
-        )}
-        <div className="flex justify-between font-black text-base border-t-2 border-black pt-2 mt-2">
+
+        <Rule heavy />
+        <div className="flex items-baseline justify-between gap-3 text-base font-black">
           <span>TOTAL</span>
-          <span>NPR {order.total?.toFixed(2) || '0.00'}</span>
+          <span>{currency} {amount(order.total)}</span>
         </div>
-        <div className="flex justify-between text-xs mt-2">
-          <span>Payment:</span>
-          <span className="font-bold uppercase">{order.paymentMethod}</span>
-        </div>
-      </div>
+        <Rule heavy />
 
-      {/* Order-Level Notes (Delivery Instructions) - OK to show on customer receipt */}
-      {order.notes && (
-        <div className="mt-3 pt-3 border-t-2 border-dashed border-black">
-          <p className="text-xs font-black uppercase mb-1">Delivery Instructions:</p>
-          <p className="text-sm font-bold break-words">{order.notes}</p>
+        <div className="space-y-1">
+          <Row label="Payment"><span className="uppercase">{order.paymentMethod}</span></Row>
+          {order.paymentStatus && <Row label="Status"><span className="capitalize">{words(order.paymentStatus)}</span></Row>}
         </div>
-      )}
 
-      {/* Footer */}
-      <div className="text-center mt-6 pt-3 border-t border-black text-xs">
-        <p className="font-bold">Thank you for your order!</p>
-        <p className="mt-1 text-gray-500">Powered by {theme.brand.name}</p>
+        {order.notes && (
+          <>
+            <Rule />
+            <p className="font-black uppercase">Delivery instructions</p>
+            <p className="mt-1 break-words">{order.notes}</p>
+          </>
+        )}
+
+        <Rule />
+        <footer className="text-center">
+          <p className="text-sm font-black uppercase tracking-wider">Thank you!</p>
+          <p className="mt-1">We hope to see you again.</p>
+          <p className="mt-3 text-gray-500">Powered by {theme.brand.name}</p>
+        </footer>
       </div>
     </div>
   );

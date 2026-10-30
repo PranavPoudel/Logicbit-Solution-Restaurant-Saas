@@ -17,6 +17,7 @@ import {
 import type { OwnerOrderSummary } from "@/types/order";
 import { playSound } from "@/lib/utils/sound";
 import { riderOf } from "@/lib/utils/order-rider";
+import { formatMoney } from "@/lib/utils/money";
 import { useEscapeKey } from "@/hooks/use-escape-key";
 import { useDialogFocus } from "@/hooks/use-dialog-focus";
 import { useIsMounted } from "@/hooks/use-is-mounted";
@@ -78,7 +79,7 @@ function NoticeText({ notice }: { notice: Notice }) {
         )}
       </span>
       <span className="block mt-0.5 text-xs text-neutral-400">
-        {notice.kind !== "order" ? `${rider?.phone ?? "No phone"} · ` : ""}Rs {order.total ?? 0} · {timeOf(order.createdAt)}
+        {notice.kind !== "order" ? `${rider?.phone ?? "No phone"} · ` : ""}{formatMoney(order.total ?? 0, order.currencyCode)} · {timeOf(order.createdAt)}
       </span>
     </span>
   );
@@ -198,7 +199,7 @@ function OrderDetails({ order, onOpen }: { order: OwnerOrderSummary; onOpen: () 
                 {item.quantity ?? 1}× {item.menuItem?.name ?? "item"}
                 {options && <span className="block text-xs text-neutral-400">{options}</span>}
               </span>
-              <span className="font-mono shrink-0">Rs {item.subtotal ?? 0}</span>
+              <span className="font-mono shrink-0">{formatMoney(item.subtotal ?? 0, order.currencyCode)}</span>
             </li>
           );
         })}
@@ -207,23 +208,23 @@ function OrderDetails({ order, onOpen }: { order: OwnerOrderSummary; onOpen: () 
       <div className="border-t border-neutral-100 pt-3 space-y-1">
         <p className="flex justify-between">
           <span>Subtotal</span>
-          <span className="font-mono">Rs {order.subtotal ?? order.total ?? 0}</span>
+          <span className="font-mono">{formatMoney(order.subtotal ?? order.total ?? 0, order.currencyCode)}</span>
         </p>
         {discount > 0 && (
           <p className="flex justify-between">
             <span>Discount{order.couponCode ? ` (${order.couponCode})` : ""}</span>
-            <span className="font-mono">- Rs {discount}</span>
+            <span className="font-mono">-{formatMoney(discount, order.currencyCode)}</span>
           </p>
         )}
         {order.orderType === "DELIVERY" && (
           <p className="flex justify-between">
             <span>Delivery fee</span>
-            <span className="font-mono">Rs {order.deliveryFee ?? 0}</span>
+            <span className="font-mono">{formatMoney(order.deliveryFee ?? 0, order.currencyCode)}</span>
           </p>
         )}
         <p className="flex justify-between font-semibold text-neutral-900">
           <span>Total</span>
-          <span className="font-mono">Rs {order.total ?? 0}</span>
+          <span className="font-mono">{formatMoney(order.total ?? 0, order.currencyCode)}</span>
         </p>
       </div>
 

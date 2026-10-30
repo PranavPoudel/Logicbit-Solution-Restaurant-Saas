@@ -11,7 +11,7 @@ import { useAutoApprove, useAutoRiderStore } from "@/store/auto-rider-store";
 import { useIsMounted } from "@/hooks/use-is-mounted";
 import { useNow } from "@/hooks/use-now";
 import { useElementWidth } from "@/hooks/use-element-width";
-import { listRestaurantOrders, updateOrderStatus, cancelRestaurantOrder, issueOrderRefund } from "@/lib/api/orders";
+import { listRestaurantOrders, updateOrderStatus, cancelRestaurantOrder, issueOrderRefund, switchOrderToOwnDelivery } from "@/lib/api/orders";
 import { shortNumber, stageLabel } from "@/lib/utils/order-flow";
 import { playSound } from "@/lib/utils/sound";
 import { OrderTabs, ORDERS_PANEL_ID } from "@/components/owner-orders/order-tabs";
@@ -105,6 +105,14 @@ function OrdersPageContent() {
     },
     onError: () => playSound("error"),
   });
+  const ownDeliveryMutation = useMutation({
+    mutationFn: (orderId: string) => switchOrderToOwnDelivery(restaurantId as string, orderId),
+    onSuccess: (_data, orderId) => {
+      playSound("success");
+      return settle(orderId, (before) => `Order ${before ? shortNumber(before) : ""} will be delivered by your own riders`);
+    },
+    onError: () => playSound("error"),
+  });
 
   if (!restaurantId) {
     return (
@@ -133,9 +141,9 @@ function OrdersPageContent() {
     ...HISTORY_GROUPS.map((g) => ({ key: g.key, label: g.label, count: 0, highlight: false, history: true })),
   ];
 
-  const busy = statusMutation.isPending || cancelMutation.isPending || refundMutation.isPending;
+  const busy = statusMutation.isPending || cancelMutation.isPending || refundMutation.isPending || ownDeliveryMutation.isPending;
   const pendingId = statusMutation.isPending ? statusMutation.variables?.orderId : cancelMutation.isPending ? cancelMutation.variables : undefined;
-  const actionError = statusMutation.error ?? cancelMutation.error ?? refundMutation.error;
+  const actionError = statusMutation.error ?? cancelMutation.error ?? refundMutation.error ?? ownDeliveryMutation.error;
   const offline = ordersQuery.isError && !!orders;
   const showDetail = split || (detailOpen && !!selected);
 
@@ -201,6 +209,7 @@ function OrdersPageContent() {
               statusMutation.reset();
               cancelMutation.reset();
               refundMutation.reset();
+              ownDeliveryMutation.reset();
             }}
             className="min-h-11 rounded-lg px-3 text-sm font-medium text-red-800 hover:bg-red-100 outline-none focus-visible:ring-2 focus-visible:ring-red-400"
           >
@@ -274,6 +283,10 @@ function OrdersPageContent() {
                       onRefund={(amount, reason) => {
                         setSelectedId(selected.id);
                         refundMutation.mutate({ orderId: selected.id, amount, reason });
+                      }}
+                      onOwnDelivery={() => {
+                        setSelectedId(selected.id);
+                        ownDeliveryMutation.mutate(selected.id);
                       }}
                     />
                   ) : (
