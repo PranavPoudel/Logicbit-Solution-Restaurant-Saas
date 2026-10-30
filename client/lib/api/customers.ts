@@ -1,11 +1,9 @@
 // lib/api/customers.ts — Module 18: Customer Self-Service
 import { apiClient } from "@/lib/api/client";
 
-// TODO: confirm exact DTO via Swagger.
 export interface UpdateProfileInput {
-  fullName?: string;
+  name?: string;
   phone?: string;
-  [key: string]: unknown;
 }
 
 export async function updateMyProfile(input: UpdateProfileInput) {
@@ -22,11 +20,10 @@ export async function changeMyPassword(currentPassword: string, newPassword: str
 }
 
 export interface AddressInput {
-  label?: string;
-  addressLine: string;
-  lat: number;
-  lng: number;
-  [key: string]: unknown;
+  label: string;
+  fullAddress: string;
+  latitude: number;
+  longitude: number;
 }
 
 export const addressesApi = {

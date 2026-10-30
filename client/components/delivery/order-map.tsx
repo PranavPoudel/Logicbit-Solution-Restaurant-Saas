@@ -1,6 +1,7 @@
 
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -105,6 +106,7 @@ function FitOrderBounds({
         maxZoom: 16,
       }
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map, key]);
 
   return null;
@@ -115,6 +117,7 @@ export default function OrderMap({
   customer,
   rider,
 }: Props) {
+  const t = useTranslations("map");
   const hasCustomer =
     !!customer &&
     Number.isFinite(customer.lat) &&
@@ -160,7 +163,7 @@ export default function OrderMap({
           icon={restaurantIcon}
         >
           <Popup>
-            <strong>Pickup</strong>
+            <strong>{t("pickup")}</strong>
             <br />
             {restaurant!.name ?? "Restaurant"}
           </Popup>
@@ -173,7 +176,7 @@ export default function OrderMap({
           icon={customerIcon}
         >
           <Popup>
-            <strong>Drop-off</strong>
+            <strong>{t("dropoff")}</strong>
 
             {customer!.address && (
               <>
@@ -197,7 +200,7 @@ export default function OrderMap({
             position={[rider.lat, rider.lng]}
             icon={riderIcon}
           >
-            <Popup>You are here</Popup>
+            <Popup>{t("you")}</Popup>
           </Marker>
         )}
     </MapContainer>

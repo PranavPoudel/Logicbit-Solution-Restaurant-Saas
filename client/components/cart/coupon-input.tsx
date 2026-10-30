@@ -1,80 +1,57 @@
 // components/cart/coupon-input.tsx
 "use client";
 
-import { useState } from "react";
-import { Tag, X } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useCoupon } from "@/hooks/use-coupon";
+import { useMoney } from "@/hooks/use-money";
+import { Button, Icon, IconButton, inputCls } from "@/components/ui/primitives";
 
-interface CouponInputProps {
-  restaurantId: string;
-  subtotal: number;
-  // Simplified: We just pass the code up. Actual validation & discount calculation 
-  // happens securely on the backend during the final checkout submission.
-  onApplied: (code: string) => void;
-  appliedCode: string | null;
-  onRemove: () => void;
-}
+export function CouponInput({ id = "cp" }: { id?: string }) {
+  const money = useMoney();
+  const t = useTranslations("coupon");
+  const { coupon, code, setCode, loading, error, apply, remove } = useCoupon();
 
-export function CouponInput({
-  onApplied,
-  appliedCode,
-  onRemove,
-}: CouponInputProps) {
-  const [code, setCode] = useState("");
-  const [error, setError] = useState("");
-
-  // State when a coupon is successfully "applied" (locally)
-  if (appliedCode) {
+  if (coupon) {
     return (
-      <div className="flex items-center justify-between bg-[#0F6B5C]/10 text-[#0F6B5C] text-sm px-3.5 py-2.5 rounded-xl">
-        <span className="flex items-center gap-2 font-medium">
-          <Tag size={14} />
-          {appliedCode} applied
+      <div className="flex items-center justify-between gap-2 rounded-full bg-herb/15 py-1 pl-4 pr-1 text-herb" role="status">
+        <span className="flex items-center gap-2 font-bold">
+          <Icon name="check" className="h-5 w-5" />
+          {t("applied", { code: coupon.code, amount: money(coupon.discountAmount) })}
         </span>
-        <button 
-          onClick={onRemove} 
-          aria-label="Remove coupon" 
-          className="hover:text-red-500 transition-colors"
-        >
-          <X size={15} />
-        </button>
+        <IconButton icon="x" label={t("remove")} onClick={remove} className="hover:bg-herb/15" />
       </div>
     );
   }
 
-  // State when entering a coupon
   return (
     <div>
-      <div className="flex gap-2">
+      <label htmlFor={id} className="mb-2 block font-bold">{t("have")}</label>
+      <form
+        className="flex gap-2"
+        onSubmit={(e) => {
+          e.preventDefault();
+          apply();
+        }}
+      >
         <input
+          id={id}
           value={code}
-          onChange={(e) => {
-            setCode(e.target.value.toUpperCase());
-            setError("");
-          }}
-          placeholder="Coupon code"
-          className="flex-1 bg-white border border-[#E8E7E2] rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#E3A008]/40 focus:border-[#E3A008]"
+          onChange={(e) => setCode(e.target.value.toUpperCase())}
+          placeholder={t("placeholder")}
+          aria-invalid={!!error}
+          aria-describedby={`${id}-err`}
+          className={`${inputCls} !min-h-11 uppercase ${error ? "!border-chili" : ""}`}
         />
-        <button
-          onClick={() => {
-            if (!code.trim()) {
-              setError("Please enter a code");
-              return;
-            }
-            // No API call here. We trust the code for now and let the backend 
-            // validate it during the actual order creation to prevent abuse.
-            onApplied(code);
-          }}
-          className="text-sm font-medium bg-[#17181C] text-white px-4 py-2.5 rounded-xl hover:bg-[#2B2D33] transition-colors"
-        >
-          Apply
-        </button>
-      </div>
+        <Button variant="outline" type="submit" disabled={loading} className="shrink-0">
+          {loading ? "…" : t("apply")}
+        </Button>
+      </form>
       {error && (
-        <p className="text-xs text-red-600 mt-1.5">{error}</p>
+        <p id={`${id}-err`} role="alert" className="mt-2 flex items-center gap-2 font-medium text-danger">
+          <Icon name="alert" className="h-4 w-4" />
+          {error}
+        </p>
       )}
-      <p className="text-[11px] text-neutral-400 mt-1.5">
-        * Validity and discount will be verified when you place your order.
-      </p>
     </div>
   );
 }

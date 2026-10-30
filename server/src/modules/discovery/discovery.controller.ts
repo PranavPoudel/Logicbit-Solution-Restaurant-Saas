@@ -1,3 +1,4 @@
+//src/modules/discovery/discovery.controller.ts
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { DiscoveryService } from './discovery.service';
@@ -18,6 +19,11 @@ export class DiscoveryController {
   @Get('restaurants/nearby')
   findNearby(@Query() query: NearbyQueryDto) {
     return this.discoveryService.findNearby(query);
+  }
+
+  @Get('trending-items')
+  getTrendingItems() {
+    return this.discoveryService.getTrendingItems();
   }
 
   @Get('restaurants/:idOrSlug')

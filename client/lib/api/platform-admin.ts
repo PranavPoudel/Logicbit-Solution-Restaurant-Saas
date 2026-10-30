@@ -1,4 +1,3 @@
-// lib/api/platform-admin.ts — Module 20: Platform Admin
 import { platformApiClient } from "@/lib/api/platform-client";
 
 // --- Revenue & restaurants ---
@@ -36,17 +35,17 @@ export async function overrideRestaurant(id: string, override: Record<string, un
   return data;
 }
 
-export async function suspendRestaurant(id: string, reason?: string) {
+export async function suspendRestaurant(id: string, suspend: boolean) {
   const { data } = await platformApiClient.patch(`/platform-admin/restaurants/${id}/suspend`, {
-    reason,
+    suspend,
   });
   return data;
 }
 
-export async function setRestaurantCommission(id: string, commissionPercent: number) {
+export async function setRestaurantCommission(id: string, percent: number) {
   const { data } = await platformApiClient.patch(
     `/platform-admin/restaurants/${id}/commission`,
-    { commissionPercent }
+    { percent }
   );
   return data;
 }
@@ -70,9 +69,33 @@ export async function getRestaurantActivityLogs(restaurantId: string) {
   return data;
 }
 
-export async function getAllActivityLogs() {
-  const { data } = await platformApiClient.get("/platform-admin/activity-logs");
+export async function getAllActivityLogs(page?: number, limit?: number) {
+  const { data } = await platformApiClient.get("/platform-admin/activity-logs", {
+    params: { page, limit },
+  });
   return data;
+}
+
+export interface OwnerStats {
+  orders: number;
+  sales: number;
+  commission: number;
+}
+
+export interface OwnerRestaurantStats extends OwnerStats {
+  id: string;
+  name: string;
+}
+
+export interface OwnerOverview extends OwnerStats {
+  tenantId: string;
+  owner: { name: string; email: string; phone: string | null } | null;
+  restaurants: OwnerRestaurantStats[];
+}
+
+export async function getOwnersOverview(): Promise<OwnerOverview[]> {
+  const { data } = await platformApiClient.get("/platform-admin/owners-overview");
+  return data?.data || data;
 }
 
 // --- Refunds ---

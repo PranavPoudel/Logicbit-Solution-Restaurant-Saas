@@ -15,6 +15,7 @@ interface CustomerAuthState {
     customer: Customer;
   }) => void;
   setAccessToken: (accessToken: string) => void;
+  setCustomer: (customer: Customer) => void;
   logout: () => void;
 }
 
@@ -35,6 +36,8 @@ export const useCustomerAuthStore = create<CustomerAuthState>()(
         }),
 
       setAccessToken: (accessToken) => set({ accessToken }),
+
+      setCustomer: (customer) => set({ customer }),
 
       logout: () =>
         set({

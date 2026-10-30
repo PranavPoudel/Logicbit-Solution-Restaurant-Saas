@@ -41,7 +41,7 @@ async function bootstrap() {
 
   // --- Swagger API Docs ---
   const config = new DocumentBuilder()
-    .setTitle('LogicBit Restaurant SaaS API')
+    .setTitle(`${process.env.BRAND_NAME ?? 'LogicBit'} Restaurant SaaS API`)
     .setDescription('Multi-tenant Restaurant SaaS backend — Auth, Menu, Discovery, Orders, Payments, Coupons')
     .setVersion('1.0')
     .addBearerAuth()
@@ -52,7 +52,7 @@ async function bootstrap() {
   const port = process.env.PORT || 3005;
   await app.listen(port);
 
-  console.log(`🚀 LogicBit Backend running on: http://localhost:${port}`);
+  console.log(`🚀 ${process.env.BRAND_NAME ?? 'LogicBit'} Backend running on: http://localhost:${port}`);
   console.log(`📚 API Docs (Swagger): http://localhost:${port}/api/docs`);
 }
 bootstrap();

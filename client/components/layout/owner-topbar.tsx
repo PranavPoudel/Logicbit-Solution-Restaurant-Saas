@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Bell, ChevronDown, LogOut, Plus } from "lucide-react";
+import { ChevronDown, LogOut, Plus } from "lucide-react";
 import { useOwnerAuthStore } from "@/store/owner-auth-store";
 import { AddRestaurantModal } from "./add-restaurant-modal";
+import { OwnerNotifications } from "./owner-notifications";
 
 export function OwnerTopbar() {
   const router = useRouter();
@@ -74,13 +75,7 @@ export function OwnerTopbar() {
         </div>
 
         <div className="flex items-center gap-4">
-          <button
-            aria-label="Notifications"
-            className="relative p-2 rounded-md hover:bg-neutral-100 text-neutral-600 transition-colors"
-          >
-            <Bell size={19} />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#E3A008]" />
-          </button>
+          <OwnerNotifications key={activeRestaurantId} />
 
           <div className="relative">
             <button

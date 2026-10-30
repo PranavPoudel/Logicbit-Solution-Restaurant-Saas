@@ -11,6 +11,30 @@ export interface BannerInput {
   [key: string]: unknown;
 }
 
+
+export interface Banner {
+  id: string;
+  imageUrl: string;
+  title?: string;
+  subtitle?: string;
+  linkUrl?: string;
+  displayOrder?: number;
+  isActive?: boolean;
+}
+
+export interface StorefrontPopup {
+  id: string;
+  title: string;
+  message?: string;
+  imageUrl?: string;
+  ctaText?: string;
+  ctaLink?: string;
+  type: PopupType;
+  isActive: boolean;
+  startDate?: string;
+  endDate?: string;
+}
+
 export const storefrontBannersApi = {
   create: async (restaurantId: string, input: BannerInput) =>
     (await ownerApiClient.post(`/restaurants/${restaurantId}/storefront/banners`, input)).data,
@@ -47,12 +71,25 @@ export const storefrontConfigApi = {
     (await ownerApiClient.patch(`/restaurants/${restaurantId}/storefront/config`, input)).data,
 };
 
+export type PopupType = "DISCOUNT" | "NEW_DISH" | "EVENT" | "ANNOUNCEMENT" | "EXTERNAL_AD";
+
+export const POPUP_TYPES: { value: PopupType; label: string }[] = [
+  { value: "DISCOUNT", label: "Discount" },
+  { value: "NEW_DISH", label: "New dish" },
+  { value: "EVENT", label: "Event" },
+  { value: "ANNOUNCEMENT", label: "Announcement" },
+  { value: "EXTERNAL_AD", label: "External ad" },
+];
+
+export const POPUP_LIMITS = { own: 3, external: 1 };
+
 export interface StorefrontPopupInput {
   title: string;
   message?: string;        
   imageUrl?: string;
   ctaText?: string;
   ctaLink?: string;
+  type?: PopupType;
   startDate?: string;
   endDate?: string;
   isActive?: boolean;

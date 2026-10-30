@@ -1,4 +1,5 @@
-import { IsString, IsNotEmpty, IsOptional, IsBoolean, IsInt, IsArray, IsUUID, Min, MaxLength, IsObject } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsBoolean, IsInt, IsArray, IsUUID, Min, MaxLength, IsObject, IsEnum } from 'class-validator';
+import { PopupType } from '@prisma/client';
 
 export class CreateBannerDto {
   @IsString()
@@ -110,6 +111,10 @@ export class CreatePopupDto {
   @IsString()
   @IsOptional()
   ctaLink?: string;
+
+  @IsEnum(PopupType)
+  @IsOptional()
+  type?: PopupType;
 
   @IsOptional()
   startDate?: string;

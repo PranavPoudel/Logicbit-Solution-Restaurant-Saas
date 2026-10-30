@@ -1,7 +1,4 @@
 
-
-
-
 // lib/api/create-api-client.ts
 import axios, {
   AxiosError,
@@ -35,7 +32,7 @@ export function createApiClient({ refreshPath, auth }: CreateApiClientOptions) {
   const client = axios.create({
     baseURL: API_BASE_URL,
     headers: { "Content-Type": "application/json" },
-  });
+  }); 
 
   // Confirmed backend envelope: { success: boolean, data: <payload>, message? }.
   // Unwrap it once here so every function in lib/api/*.ts can just use the

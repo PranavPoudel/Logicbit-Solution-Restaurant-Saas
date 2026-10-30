@@ -10,7 +10,6 @@ import { CategoryManager } from "@/components/owner-menu/category-manager";
 import { MenuItemManager } from "@/components/owner-menu/menu-item-manager";
 import { ModifierGroupManager } from "@/components/owner-menu/modifier-group-manager";
 import { MenuTrashBin } from "@/components/owner-menu/menu-trash-bin";
-import { SubscriptionUpgradeBanner } from "@/components/ui/subscription-upgrade-banner";
 
 const TABS = [
   { key: "ITEMS", label: "Menu Items" },
@@ -50,6 +49,20 @@ export default function MenuPage() {
       queryClient.invalidateQueries({ queryKey: ["owner-modifier-groups", restaurantId] }),
   });
 
+  const addSingleMutation = useMutation({
+    mutationFn: async (input: { name: string; extraPrice: number; allergenInfo?: string }) => {
+      const created = await modifierGroupsApi.create(restaurantId as string, { name: input.name, minSelect: 0, maxSelect: 1, isRequired: false });
+      try {
+        await modifierGroupsApi.addOption(restaurantId as string, created.id, input);
+      } catch (error) {
+        await modifierGroupsApi.remove(restaurantId as string, created.id);
+        throw error;
+      }
+    },
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["owner-modifier-groups", restaurantId] }),
+  });
+
   const deleteGroupMutation = useMutation({
     mutationFn: (id: string) => modifierGroupsApi.remove(restaurantId as string, id),
     onSuccess: () =>
@@ -57,7 +70,7 @@ export default function MenuPage() {
   });
 
   const addOptionMutation = useMutation({
-    mutationFn: ({ groupId, input }: { groupId: string; input: { name: string; extraPrice: number } }) =>
+    mutationFn: ({ groupId, input }: { groupId: string; input: { name: string; extraPrice: number; allergenInfo?: string } }) =>
       modifierGroupsApi.addOption(restaurantId as string, groupId, input),
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: ["owner-modifier-groups", restaurantId] }),
@@ -83,8 +96,6 @@ export default function MenuPage() {
     <div className="max-w-7xl">
       <h1 className="text-xl font-semibold text-neutral-900 mb-1">Menu Management</h1>
       <p className="text-sm text-neutral-500 mb-6">Manage your categories, menu items, modifiers, and trashed items.</p>
-      <SubscriptionUpgradeBanner />
-
       {/* Top Tabs */}
       <div className="flex gap-1 border-b border-neutral-200 mb-6 overflow-x-auto">
         {TABS.map((tab) => {
@@ -131,6 +142,7 @@ export default function MenuPage() {
           <ModifierGroupManager
             groups={modifierGroupsQuery.data ?? []}
             onAddGroup={(input) => addGroupMutation.mutate(input)}
+            onAddSingle={(input) => addSingleMutation.mutate(input)}
             onDeleteGroup={(id) => deleteGroupMutation.mutate(id)}
             onAddOption={(groupId, input) => addOptionMutation.mutate({ groupId, input })}
             onDeleteOption={(groupId, optionId) =>
@@ -138,6 +150,7 @@ export default function MenuPage() {
             }
             isMutating={
               addGroupMutation.isPending ||
+              addSingleMutation.isPending ||
               deleteGroupMutation.isPending ||
               addOptionMutation.isPending ||
               deleteOptionMutation.isPending

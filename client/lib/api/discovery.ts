@@ -2,6 +2,7 @@
 import { apiClient } from "@/lib/api/client";
 import type { DiscoveryRestaurant } from "@/types/restaurant";
 import type { RestaurantDetail, MenuCategory, MenuItemDetail } from "@/types/menu";
+import type { PublicPopup } from "@/lib/api/public-storefront";
 
 export interface NearbyRestaurantsParams {
   lat: number;
@@ -22,6 +23,10 @@ export interface NearbyRestaurantsResponse {
   total: number;
 }
 
+export async function getPublicRestaurant(id: string) {
+  const { data } = await apiClient.get(`/discovery/restaurants/${id}`);
+  return data;
+}
 export async function getNearbyRestaurants(
   params: NearbyRestaurantsParams
 ): Promise<NearbyRestaurantsResponse> {
@@ -74,9 +79,10 @@ export async function getNearbyRestaurants(
 
 export interface HomepageBanner {
   id: string;
-  imageUrl: string;
+  imageUrl?: string | null;
   title?: string;
-  linkUrl?: string;
+  linkUrl?: string | null;
+  restaurant?: { id: string; name: string; slug?: string };
 }
 
 export async function getHomepageBanners(): Promise<HomepageBanner[]> {
@@ -93,8 +99,9 @@ export async function getHomepageBanners(): Promise<HomepageBanner[]> {
 
 export interface PopupAdResponse {
   id: string;
-  imageUrl: string;
+  imageUrl?: string | null;
   title: string;
+  linkUrl?: string | null;
   description?: string;
 }
 
@@ -168,6 +175,11 @@ export async function getFeaturedItems(restaurantId: string) {
   return data;
 }
 
+export async function getTrendingItems() {
+  const { data } = await apiClient.get("/discovery/trending-items");
+  return data;
+}
+
 export async function getFeaturedCategories(restaurantId: string) {
   const { data } = await apiClient.get(
     `/discovery/restaurants/${restaurantId}/menu/featured-categories`
@@ -187,10 +199,6 @@ export async function checkDeliveryAvailability(
   return data;
 }
 
-export async function getRestaurantReviews(restaurantId: string) {
-  const { data } = await apiClient.get(`/discovery/restaurants/${restaurantId}/reviews`);
-  return data;
-}
 /*
 export async function getRestaurantStorefront(restaurantId: string) {
   const { data } = await apiClient.get(`/discovery/restaurants/${restaurantId}/storefront`);
@@ -229,17 +237,21 @@ export interface StorefrontBanner {
   displayOrder?: number;
 }
 
-export interface StorefrontPopup {
+export type StorefrontPopup = PublicPopup;
+
+export interface StorefrontOffer {
   id: string;
-  title: string;
-  message?: string;
-  imageUrl?: string;
-  ctaText?: string;
-  ctaLink?: string;
+  code: string | null;
+  type: "PERCENTAGE" | "FLAT";
+  value: number;
+  maxDiscount?: number | null;
+  minOrderAmount?: number | null;
+  validUntil?: string | null;
 }
 
 export interface StorefrontData {
   banners: StorefrontBanner[];
+  offers?: StorefrontOffer[];
   about?: string;
   contact?: {
     phone?: string;
@@ -252,9 +264,6 @@ export interface StorefrontData {
 
 export async function getRestaurantStorefront(restaurantId: string): Promise<StorefrontData> {
   const { data } = await apiClient.get(`/discovery/restaurants/${restaurantId}/storefront`);
-  if (process.env.NODE_ENV === "development") {
-    console.log("[storefront] unwrapped payload:", data);
-  }
   return data?.data ?? data;
 }
 
@@ -264,4 +273,14 @@ export async function getRestaurantStorefrontPopup(restaurantId: string): Promis
     console.log("[storefront/popup] unwrapped payload:", data);
   }
   return data?.data ?? data;
+}
+
+const FETCH_SIZE = 50;
+const MAX_FETCH_PAGES = 10;
+
+export async function getAllNearby(lat: number, lng: number) {
+  const first = await getNearbyRestaurants({ lat, lng, radiusKm: 50, limit: FETCH_SIZE });
+  const pages = Math.min(Math.ceil(first.total / FETCH_SIZE), MAX_FETCH_PAGES);
+  const rest = await Promise.all(Array.from({ length: pages - 1 }, (_, i) => getNearbyRestaurants({ lat, lng, radiusKm: 50, limit: FETCH_SIZE, page: i + 2 })));
+  return { rows: [first, ...rest].flatMap((p) => p.data), total: first.total };
 }

@@ -3,7 +3,9 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle, Wallet } from "lucide-react";
+import { QueryError } from "@/components/ui/query-error";
 import { useOwnerAuthStore } from "@/store/owner-auth-store";
+import { theme } from "@/config/theme";
 import { listRestaurantSettlements, getOutstandingSettlement } from "@/lib/api/settlements";
 
 interface SettlementRow {
@@ -49,7 +51,7 @@ export default function SettlementsPage() {
     <div className="max-w-3xl">
       <h1 className="text-xl font-semibold text-neutral-900 mb-1">Settlements</h1>
       <p className="text-sm text-neutral-500 mb-6">
-        Commission owed to LogicBit from cash-on-delivery orders.
+        Commission owed to {theme.brand.name} from cash-on-delivery orders.
       </p>
 
       <div className="bg-white border border-neutral-200 rounded-xl p-5 mb-5 flex items-center gap-4">
@@ -70,6 +72,8 @@ export default function SettlementsPage() {
         </div>
         {historyQuery.isLoading ? (
           <p className="text-sm text-neutral-400 text-center py-8">Loading…</p>
+        ) : historyQuery.isError ? (
+          <QueryError what="settlement history" error={historyQuery.error} onRetry={() => historyQuery.refetch()} />
         ) : (historyQuery.data ?? []).length === 0 ? (
           <p className="text-sm text-neutral-400 text-center py-8">
             No settlement history yet.

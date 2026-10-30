@@ -1,5 +1,5 @@
 // src/modules/order/dto/order-item-input.dto.ts
-import { IsUUID, IsInt, Min, IsOptional, IsArray, ValidateNested } from 'class-validator';
+import { IsUUID, IsInt, Min, IsOptional, IsArray, ValidateNested, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class SelectedModifierDto {
@@ -17,7 +17,7 @@ export class SelectedModifierDto {
 }
 
 export class OrderItemInputDto {
-  @IsUUID()
+  @IsUUID() 
   menuItemId: string;
 
   @IsInt()
@@ -29,4 +29,9 @@ export class OrderItemInputDto {
   @Type(() => SelectedModifierDto)
   @IsOptional()
   selectedModifiers?: SelectedModifierDto[];
+
+
+  @IsString()
+  @IsOptional()
+  notes?: string;
 }

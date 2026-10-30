@@ -1,3 +1,4 @@
+//app/owner/register/page.tsx
 "use client";
 
 import { useState } from "react";
@@ -5,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { registerOwner, type OwnerRegisterInput } from "@/lib/api/auth";
 import { useOwnerAuthStore } from "@/store/owner-auth-store"; 
+import { theme } from "@/config/theme";
 import { DynamicMapPicker } from "@/components/map/dynamic-map-picker";
 
 export default function OwnerRegisterPage() {
@@ -143,7 +145,7 @@ export default function OwnerRegisterPage() {
             Create your Restaurant Account
           </h1>
           <p className="text-sm text-neutral-500 mt-2">
-            Join LogicBit and start managing your orders today.
+            Join {theme.brand.name} and start managing your orders today.
           </p>
         </div>
 
@@ -235,7 +237,7 @@ export default function OwnerRegisterPage() {
                     value={formData.restaurantAddress}
                     onChange={handleChange}
                     className="flex-1 px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-[#1B2333] focus:border-transparent outline-none transition"
-                    placeholder="e.g. Thamel, Kathmandu"
+                    placeholder="e.g. Street, area, city"
                   />
                   <button
                     type="button"

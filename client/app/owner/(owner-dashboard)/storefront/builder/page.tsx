@@ -6,9 +6,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Layout, Image as ImageIcon, Bell, Settings, Save, Loader2, ArrowUp, ArrowDown, Eye, EyeOff, Globe } from "lucide-react";
 import { useOwnerAuthStore } from "@/store/owner-auth-store";
 import { storefrontConfigApi, type StorefrontConfigInput, type SectionSetting } from "@/lib/api/storefront";
-import { storefrontBannersApi, type BannerInput } from "@/lib/api/storefront";
-import { storefrontPopupsApi, type StorefrontPopupInput } from "@/lib/api/storefront";
-import { ImageUpload } from "@/components/ui/image-upload";
+import { BannerManager } from "@/components/owner-storefront/banner-manager";
+import { PopupManager } from "@/components/owner-storefront/popup-manager";
 
 const TABS = [
   { key: "LAYOUT", label: "Homepage Layout", icon: Layout },
@@ -82,7 +81,8 @@ export default function StorefrontBuilderPage() {
     setSectionSettings(newSettings);
   };
 
-  const updateSection = (id: string, field: keyof SectionSetting, value: any) => {
+  // ✅ FIXED: Replaced 'any' with 'string | boolean'
+  const updateSection = (id: string, field: keyof SectionSetting, value: string | boolean) => {
     setSectionSettings(prev => prev.map(s => s.id === id ? { ...s, [field]: value } : s));
   };
 
@@ -216,142 +216,6 @@ export default function StorefrontBuilderPage() {
       </div>
 
       {renderTabContent()}
-    </div>
-  );
-}
-
-// --- Sub-components for Banners and Popups (Reusing your existing logic, adapted for tabs) ---
-
-function BannerManager({ restaurantId }: { restaurantId: string }) {
-  const queryClient = useQueryClient();
-  const [isCreating, setIsCreating] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [formData, setFormData] = useState<BannerInput>({ title: "", subtitle: "", imageUrl: "", linkUrl: "" });
-
-  const { data: banners = [] } = useQuery({ queryKey: ["storefront-banners", restaurantId], queryFn: () => storefrontBannersApi.list(restaurantId) });
-  
-  const saveMutation = useMutation({
-    mutationFn: (data: { id?: string; input: BannerInput }) => 
-      data.id ? storefrontBannersApi.update(restaurantId, data.id, data.input) : storefrontBannersApi.create(restaurantId, data.input),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["storefront-banners", restaurantId] });
-      setIsCreating(false); setEditingId(null); setFormData({ title: "", subtitle: "", imageUrl: "", linkUrl: "" });
-    }
-  });
-
-  const deleteMutation = useMutation({ mutationFn: (id: string) => storefrontBannersApi.remove(restaurantId, id), onSuccess: () => queryClient.invalidateQueries({ queryKey: ["storefront-banners", restaurantId] }) });
-
-  return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h3 className="text-base font-semibold text-neutral-900">Homepage Banners</h3>
-        {!isCreating && <button onClick={() => setIsCreating(true)} className="flex items-center gap-2 px-4 py-2 bg-[#1B2333] text-white rounded-lg text-sm font-medium">Add Banner</button>}
-      </div>
-
-      {isCreating && (
-        <form onSubmit={(e) => { e.preventDefault(); saveMutation.mutate({ id: editingId || undefined, input: formData }); }} className="bg-white border border-neutral-200 rounded-xl p-6 space-y-4">
-          <ImageUpload restaurantId={restaurantId} value={formData.imageUrl} onChange={(url) => setFormData(p => ({ ...p, imageUrl: url }))} className="w-full h-48" label="Banner Image (16:9 recommended)" />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input required value={formData.title} onChange={e => setFormData(p => ({ ...p, title: e.target.value }))} placeholder="Title" className="px-3 py-2 border border-neutral-300 rounded-lg outline-none focus:ring-2 focus:ring-[#1B2333]" />
-            <input value={formData.subtitle} onChange={e => setFormData(p => ({ ...p, subtitle: e.target.value }))} placeholder="Subtitle" className="px-3 py-2 border border-neutral-300 rounded-lg outline-none focus:ring-2 focus:ring-[#1B2333]" />
-            <input value={formData.linkUrl} onChange={e => setFormData(p => ({ ...p, linkUrl: e.target.value }))} placeholder="Link URL (Optional)" className="md:col-span-2 px-3 py-2 border border-neutral-300 rounded-lg outline-none focus:ring-2 focus:ring-[#1B2333]" />
-          </div>
-          <div className="flex justify-end gap-3 pt-4 border-t">
-            <button type="button" onClick={() => { setIsCreating(false); setEditingId(null); }} className="px-4 py-2 text-sm text-neutral-600 hover:bg-neutral-100 rounded-lg">Cancel</button>
-            <button type="submit" disabled={saveMutation.isPending} className="px-4 py-2 text-sm text-white bg-[#1B2333] rounded-lg disabled:opacity-50">{editingId ? "Update" : "Add"} Banner</button>
-          </div>
-        </form>
-      )}
-
-      <div className="space-y-3">
-        {banners.map((b: any, i: number) => (
-          <div key={b.id} className="bg-white border border-neutral-200 rounded-xl p-4 flex gap-4 items-center">
-            <div className="w-32 h-20 bg-neutral-100 rounded-lg overflow-hidden shrink-0">
-              {b.imageUrl ? <img src={b.imageUrl} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-neutral-400"><ImageIcon size={20}/></div>}
-            </div>
-            <div className="flex-1 min-w-0">
-              <h4 className="font-semibold text-neutral-900 truncate">{b.title || "Untitled"}</h4>
-              <p className="text-sm text-neutral-500 truncate">{b.subtitle || "No subtitle"}</p>
-            </div>
-            <div className="flex gap-2">
-              <button onClick={() => { setEditingId(b.id); setFormData({ title: b.title, subtitle: b.subtitle, imageUrl: b.imageUrl, linkUrl: b.linkUrl }); setIsCreating(true); }} className="px-3 py-1.5 text-xs font-medium text-[#1B2333] hover:bg-neutral-100 rounded-lg">Edit</button>
-              <button onClick={() => confirm("Delete this banner?") && deleteMutation.mutate(b.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg"><ImageIcon size={18} className="hidden" />🗑️</button>
-            </div>
-          </div>
-        ))}
-        {banners.length === 0 && !isCreating && <p className="text-center text-sm text-neutral-500 py-8">No banners yet.</p>}
-      </div>
-    </div>
-  );
-}
-
-function PopupManager({ restaurantId }: { restaurantId: string }) {
-  const queryClient = useQueryClient();
-  const [isCreating, setIsCreating] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [formData, setFormData] = useState<StorefrontPopupInput>({ title: "", message: "", imageUrl: "", ctaText: "", ctaLink: "", isActive: true });
-
-  const { data: popups = [] } = useQuery({ queryKey: ["storefront-popups", restaurantId], queryFn: () => storefrontPopupsApi.list(restaurantId) });
-  
-  const saveMutation = useMutation({
-    mutationFn: (data: { id?: string; input: StorefrontPopupInput }) => 
-      data.id ? storefrontPopupsApi.update(restaurantId, data.id, data.input) : storefrontPopupsApi.create(restaurantId, data.input),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["storefront-popups", restaurantId] });
-      setIsCreating(false); setEditingId(null); setFormData({ title: "", message: "", imageUrl: "", ctaText: "", ctaLink: "", isActive: true });
-    }
-  });
-
-  const deleteMutation = useMutation({ mutationFn: (id: string) => storefrontPopupsApi.remove(restaurantId, id), onSuccess: () => queryClient.invalidateQueries({ queryKey: ["storefront-popups", restaurantId] }) });
-
-  return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h3 className="text-base font-semibold text-neutral-900">Promotional Popups</h3>
-        {!isCreating && <button onClick={() => setIsCreating(true)} className="flex items-center gap-2 px-4 py-2 bg-[#1B2333] text-white rounded-lg text-sm font-medium">Add Popup</button>}
-      </div>
-
-      {isCreating && (
-        <form onSubmit={(e) => { e.preventDefault(); saveMutation.mutate({ id: editingId || undefined, input: formData }); }} className="bg-white border border-neutral-200 rounded-xl p-6 space-y-4">
-          <ImageUpload restaurantId={restaurantId} value={formData.imageUrl} onChange={(url) => setFormData(p => ({ ...p, imageUrl: url }))} className="w-full h-40" label="Popup Image (Optional)" />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input required value={formData.title} onChange={e => setFormData(p => ({ ...p, title: e.target.value }))} placeholder="Popup Title *" className="px-3 py-2 border border-neutral-300 rounded-lg outline-none focus:ring-2 focus:ring-[#1B2333]" />
-            <input value={formData.ctaText} onChange={e => setFormData(p => ({ ...p, ctaText: e.target.value }))} placeholder="Button Text (e.g., Order Now)" className="px-3 py-2 border border-neutral-300 rounded-lg outline-none focus:ring-2 focus:ring-[#1B2333]" />
-            <textarea value={formData.message} onChange={e => setFormData(p => ({ ...p, message: e.target.value }))} placeholder="Message" rows={3} className="md:col-span-2 px-3 py-2 border border-neutral-300 rounded-lg outline-none focus:ring-2 focus:ring-[#1B2333] resize-none" />
-            <input value={formData.ctaLink} onChange={e => setFormData(p => ({ ...p, ctaLink: e.target.value }))} placeholder="Button Link URL" className="md:col-span-2 px-3 py-2 border border-neutral-300 rounded-lg outline-none focus:ring-2 focus:ring-[#1B2333]" />
-          </div>
-          <div className="md:col-span-2 flex items-center gap-2">
-            <input type="checkbox" id="isActive" checked={formData.isActive} onChange={e => setFormData(p => ({ ...p, isActive: e.target.checked }))} className="w-4 h-4 accent-[#1B2333]" />
-            <label htmlFor="isActive" className="text-sm font-medium text-neutral-700">Active</label>
-          </div>
-          <div className="flex justify-end gap-3 pt-4 border-t">
-            <button type="button" onClick={() => { setIsCreating(false); setEditingId(null); }} className="px-4 py-2 text-sm text-neutral-600 hover:bg-neutral-100 rounded-lg">Cancel</button>
-            <button type="submit" disabled={saveMutation.isPending} className="px-4 py-2 text-sm text-white bg-[#1B2333] rounded-lg disabled:opacity-50">{editingId ? "Update" : "Add"} Popup</button>
-          </div>
-        </form>
-      )}
-
-      <div className="space-y-3">
-        {popups.map((p: any) => (
-          <div key={p.id} className="bg-white border border-neutral-200 rounded-xl p-4 flex gap-4 items-center">
-            <div className="w-20 h-20 bg-neutral-100 rounded-lg overflow-hidden shrink-0 flex items-center justify-center">
-              {p.imageUrl ? <img src={p.imageUrl} alt="" className="w-full h-full object-cover" /> : <Bell size={20} className="text-neutral-400" />}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <h4 className="font-semibold text-neutral-900 truncate">{p.title}</h4>
-                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${p.isActive ? 'bg-green-100 text-green-700' : 'bg-neutral-100 text-neutral-600'}`}>{p.isActive ? 'Active' : 'Inactive'}</span>
-              </div>
-              <p className="text-sm text-neutral-500 line-clamp-2">{p.message || "No message"}</p>
-            </div>
-            <div className="flex gap-2">
-              <button onClick={() => { setEditingId(p.id); setFormData({ title: p.title, message: p.message, imageUrl: p.imageUrl, ctaText: p.ctaText, ctaLink: p.ctaLink, isActive: p.isActive }); setIsCreating(true); }} className="px-3 py-1.5 text-xs font-medium text-[#1B2333] hover:bg-neutral-100 rounded-lg">Edit</button>
-              <button onClick={() => confirm("Delete this popup?") && deleteMutation.mutate(p.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg">🗑️</button>
-            </div>
-          </div>
-        ))}
-        {popups.length === 0 && !isCreating && <p className="text-center text-sm text-neutral-500 py-8">No popups scheduled.</p>}
-      </div>
     </div>
   );
 }

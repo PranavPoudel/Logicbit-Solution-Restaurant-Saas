@@ -1,5 +1,5 @@
 //src/modules/order/order.service.ts
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CouponService } from '../coupon/coupon.service';
 import { PaymentService } from '../payment/payment.service';
@@ -9,12 +9,15 @@ import { haversineDistanceKm } from '../../common/utils/haversine.util';
 import { calculateDeliveryQuote } from '../../common/utils/delivery-fee.util';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto, CancelOrderDto } from './dto/update-order-status.dto';
+import { computeOpenStatus } from '../../common/utils/opening-hours.util';
 
 const CANCELLABLE_STATUSES = ['PENDING', 'ACCEPTED'];
 const TERMINAL_STATUSES = ['DELIVERED', 'COMPLETED', 'CANCELLED'];
 
 @Injectable()
 export class OrderService {
+  private readonly logger = new Logger(OrderService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly couponService: CouponService,
@@ -22,6 +25,11 @@ export class OrderService {
     private readonly notificationService: NotificationService,
     private readonly activityLog: ActivityLogService,
   ) {}
+
+  async previewCoupon(customerId: string, restaurantId: string, code: string, subtotal: number) {
+    const { coupon, discountAmount } = await this.couponService.validateAndCalculate(restaurantId, customerId, code.trim(), subtotal);
+    return { code: coupon.code, discountAmount };
+  }
 
   /**
    * checkout()
@@ -37,7 +45,7 @@ export class OrderService {
       where: { id: dto.restaurantId, isActive: true },
     });
     if (!restaurant) throw new NotFoundException('Restaurant not found');
-    if (!restaurant.isOpen) throw new BadRequestException('This restaurant is currently closed');
+    if (!computeOpenStatus(restaurant).isOpen) throw new BadRequestException('This restaurant is currently closed');
 
     // --- 1. हरेक item को price DB बाट taजा निकालेर calculate गर्ने ---
     let subtotal = 0;
@@ -82,7 +90,7 @@ export class OrderService {
         }
 
         modifierTotal += option.extraPrice;
-        resolvedModifiers.push({ groupId: mod.modifierGroupId, optionId: option.id, name: option.name, price: option.extraPrice });
+        resolvedModifiers.push({ groupId: mod.modifierGroupId, optionId: option.id, name: option.name, price: option.extraPrice, allergenInfo: option.allergenInfo });
         selectedGroupCounts.set(mod.modifierGroupId, (selectedGroupCounts.get(mod.modifierGroupId) ?? 0) + 1);
       }
 
@@ -112,6 +120,7 @@ export class OrderService {
         unitPrice,
         subtotal: itemSubtotal,
         selectedModifiers: resolvedModifiers,
+        notes: inputItem.notes,
       });
     }
 
@@ -257,6 +266,7 @@ export class OrderService {
       where: { id: orderId },
       include: {
         items: { include: { menuItem: true } },
+        restaurant: { select: { id: true, name: true, address: true, phone: true, refundPolicy: true, latitude: true, longitude: true, currencyCode: true } },
         statusHistory: { orderBy: { createdAt: 'asc' } },
         refund: true,
         delivery: {
@@ -279,17 +289,35 @@ export class OrderService {
     return this.prisma.order.findMany({
       where: { customerId },
       orderBy: { createdAt: 'desc' },
-      include: { items: { include: { menuItem: true } } },
+      include: { items: { include: { menuItem: true } }, restaurant: { select: { id: true, name: true, currencyCode: true } }, refund: true },
     });
   }
 
   /** Owner-facing — आफ्नो restaurant का मात्र order */
-  async findAllForRestaurant(tenantId: string, restaurantId: string, status?: string) {
+   async findAllForRestaurant(
+    tenantId: string, 
+    restaurantId: string, 
+    status?: string, 
+    startDate?: string, 
+    endDate?: string
+  ) {
+    const whereClause: any = { tenantId, restaurantId };
+    
+    if (status) {
+      whereClause.status = status;
+    }
+    
+    if (startDate || endDate) {
+      whereClause.createdAt = {};
+      if (startDate) whereClause.createdAt.gte = new Date(startDate);
+      if (endDate) whereClause.createdAt.lte = new Date(endDate); // End of day handled by frontend or we can add 23:59:59
+    }
+
     return this.prisma.order.findMany({
-      where: { tenantId, restaurantId, ...(status ? { status: status as any } : {}) },
+      where: whereClause,
       orderBy: { createdAt: 'desc' },
       include: {
-        items: { include: { menuItem: true } },
+        items: { include: { menuItem: { select: { name: true } } } },
         customer: { select: { name: true, phone: true } },
       },
     });
@@ -309,6 +337,12 @@ export class OrderService {
     });
     if (!order) throw new NotFoundException('Order not found');
     return order;
+  }
+
+  async emailPreview(tenantId: string, restaurantId: string, orderId: string) {
+    await this.findOneForRestaurant(tenantId, restaurantId, orderId);
+    const built = await this.notificationService.buildOrderConfirmation(orderId);
+    return { to: built?.recipient, ...built?.email };
   }
 
   /** Owner-facing — status update (Accept/Preparing/Ready/Delivered...) */
@@ -336,7 +370,13 @@ export class OrderService {
       return result;
     });
 
-    await this.notificationService.notifyOrderStatusChange(order.customerId, tenantId, order.orderNumber, dto.status);
+    if (dto.status === 'ACCEPTED') {
+      if (order.status !== 'ACCEPTED') {
+        void this.notificationService.notifyOrderAccepted(orderId).catch((err) => this.logger.error(`Order confirmation email failed for ${order.orderNumber}`, err as Error));
+      }
+    } else {
+      await this.notificationService.notifyOrderStatusChange(order.customerId, tenantId, order.orderNumber, dto.status);
+    }
 
     await this.activityLog.log({
       tenantId,
@@ -410,6 +450,18 @@ export class OrderService {
         body: `A new delivery is ready near ${restaurant.name}. Open the app to accept.`,
       });
     }
+  }
+
+  async rejectRider(tenantId: string, restaurantId: string, orderId: string) {
+    const order = await this.findOneForRestaurant(tenantId, restaurantId, orderId);
+    if (order.status !== 'READY' || order.delivery?.status !== 'ASSIGNED') {
+      throw new BadRequestException('There is no rider waiting for approval on this order');
+    }
+
+    return this.prisma.delivery.update({
+      where: { orderId },
+      data: { status: 'UNASSIGNED', deliveryPersonId: null, assignedAt: null },
+    });
   }
 
   /**
@@ -487,9 +539,48 @@ export class OrderService {
     return { success: true, message: 'Order cancelled successfully', data: updated };
   }
 
+
+    /** 🆕 Fetch only unprinted, non-cancelled orders for auto-print polling */
+  async findUnprintedForRestaurant(tenantId: string, restaurantId: string) {
+    return this.prisma.order.findMany({
+      where: { 
+        tenantId, 
+        restaurantId, 
+        printedAt: null, 
+        status: { not: 'CANCELLED' } // Don't auto-print cancelled orders
+      },
+      orderBy: { createdAt: 'asc' }, // Process oldest first
+      include: { 
+        items: { include: { menuItem: true } }, 
+        customer: { select: { name: true, phone: true } } 
+      },
+    });
+  }
+
+  /** 🆕 Mark an order as printed */
+  async markAsPrinted(tenantId: string, restaurantId: string, orderId: string) {
+    return this.prisma.order.update({
+      where: { id: orderId, tenantId, restaurantId },
+      data: { printedAt: new Date() },
+    });
+  }
+
+  
   private generateOrderNumber(): string {
     const year = new Date().getFullYear();
     const random = Math.floor(100000 + Math.random() * 900000);
     return `ORD-${year}-${random}`;
+  }
+
+    /**
+   * markOrderAsPaid
+   * Safely updates paymentStatus to PAID. 
+   * Used exclusively by payment webhooks to confirm successful online payments.
+   */
+  async markOrderAsPaid(orderId: string) {
+    return this.prisma.order.update({
+      where: { id: orderId },
+      data: { paymentStatus: 'PAID' },
+    });
   }
 }

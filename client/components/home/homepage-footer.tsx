@@ -1,82 +1,53 @@
- // components/home/homepage-footer.tsx
-"use client";
-
+// components/home/homepage-footer.tsx
 import Link from "next/link";
-import { Phone, Mail, Camera, Globe } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { theme } from "@/config/theme";
+import { Icon } from "@/components/ui/primitives";
 
-export function HomepageFooter() {
+export function CustomerFooter() {
+  const t = useTranslations();
+  const columns: [string, [string, string][]][] = [
+    [t("footer.eat"), [[t("header.restaurants"), "/restaurants"], [t("header.myOrders"), "/account?tab=orders"], [t("footer.search"), "/search"]]],
+    [theme.brand.name, [[t("header.forRestaurants"), "/for-restaurants"], [t("footer.privacy"), "/privacy"], [t("footer.terms"), "/terms"]]],
+  ];
+
   return (
-    <footer style={{ backgroundColor: theme.colors.dark, color: theme.colors.background }} className="mt-12">
-      <div className="max-w-6xl mx-auto px-5 py-12 grid sm:grid-cols-4 gap-8">
-        <div>
-          <h3 className="font-serif text-xl mb-2">{theme.brand.name}</h3>
-          <p className="text-sm" style={{ color: `${theme.colors.background}8C` }}>
-            {theme.content.siteTagline}
+    <footer className="relative mt-auto overflow-hidden bg-footer px-5 pt-16 text-cream md:px-10 dark:text-ink">
+      <div className="mx-auto grid max-w-[1440px] gap-10 md:grid-cols-4">
+        <div className="md:col-span-2">
+          <p className="font-display text-4xl font-bold leading-tight">
+            {t("footer.stillScrolling")}
+            <br />
+            <span className="text-saffron">{t("footer.stomach")}</span>
           </p>
+          <Link href="/restaurants" className="mt-6 inline-flex h-14 items-center gap-2 rounded-full bg-chili px-8 font-display text-lg font-extrabold text-parchment transition hover:-translate-y-0.5 hover:bg-parchment hover:text-espresso active:translate-y-0">
+            {t("footer.orderNow")}
+            <Icon name="arrow" className="h-5 w-5" />
+          </Link>
         </div>
-
-        <div>
-          <h4 className="text-xs uppercase tracking-wide mb-3" style={{ color: `${theme.colors.background}66` }}>
-            Company
-          </h4>
-          <div className="space-y-2 text-sm" style={{ color: `${theme.colors.background}B3` }}>
-            <Link href="/for-restaurants" className="block hover:opacity-100" style={{ opacity: 0.9 }}>
-              For Restaurants
-            </Link>
-            <Link href="/about" className="block hover:opacity-100" style={{ opacity: 0.9 }}>
-              About Us
-            </Link>
-            <Link href="/careers" className="block hover:opacity-100" style={{ opacity: 0.9 }}>
-              Careers
-            </Link>
+        {columns.map(([heading, links]) => (
+          <div key={heading}>
+            <p className="font-bold text-saffron">{heading}</p>
+            <ul className="mt-3 space-y-2">
+              {links.map(([label, href]) => (
+                <li key={href}>
+                  <Link href={href} className="hover:text-saffron">
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
-        </div>
-
-        <div>
-          <h4 className="text-xs uppercase tracking-wide mb-3" style={{ color: `${theme.colors.background}66` }}>
-            Support
-          </h4>
-          <div className="space-y-2 text-sm" style={{ color: `${theme.colors.background}B3` }}>
-            <Link href="/help" className="block hover:opacity-100" style={{ opacity: 0.9 }}>
-              Help Center
-            </Link>
-            <Link href="/terms" className="block hover:opacity-100" style={{ opacity: 0.9 }}>
-              Terms of Service
-            </Link>
-            <Link href="/privacy" className="block hover:opacity-100" style={{ opacity: 0.9 }}>
-              Privacy Policy
-            </Link>
-          </div>
-        </div>
-
-        <div>
-          <h4 className="text-xs uppercase tracking-wide mb-3" style={{ color: `${theme.colors.background}66` }}>
-            Contact
-          </h4>
-          <div className="space-y-2 text-sm" style={{ color: `${theme.colors.background}B3` }}>
-            <div className="flex items-center gap-2">
-              <Phone size={14} style={{ color: theme.colors.primary }} />
-              <span>{theme.content.contactPhone}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Mail size={14} style={{ color: theme.colors.primary }} />
-              <span>{theme.content.contactEmail}</span>
-            </div>
-            <div className="flex items-center gap-3 mt-3">
-              <Globe size={18} className="cursor-pointer" style={{ color: `${theme.colors.background}80` }} />
-              <Camera size={18} className="cursor-pointer" style={{ color: `${theme.colors.background}80` }} />
-            </div>
-          </div>
-        </div>
+        ))}
       </div>
-
-      <div
-        className="py-4 text-center text-xs"
-        style={{ borderTop: `1px solid ${theme.colors.background}1A`, color: `${theme.colors.background}66` }}
-      >
-        {theme.brand.name}. {theme.content.copyrightText}
-      </div>
+      <p className="font-display mx-auto mt-12 max-w-[1440px] select-none text-[24vw] font-extrabold leading-[0.75] tracking-[-0.06em] text-chili md:text-[300px]" aria-hidden>
+        {theme.brand.name}
+      </p>
+      <p className="relative mx-auto max-w-[1440px] py-6 text-xs text-cream/70 dark:text-ink/70">
+        © {new Date().getFullYear()} {theme.brand.name} ·{" "}
+        <a href={`mailto:${theme.content.contactEmail}`} className="hover:text-saffron hover:underline">{theme.content.contactEmail}</a> ·{" "}
+        <a href={`tel:${theme.content.contactPhone.replace(/[^\d+]/g, "")}`} className="hover:text-saffron hover:underline">{theme.content.contactPhone}</a>
+      </p>
     </footer>
   );
 }

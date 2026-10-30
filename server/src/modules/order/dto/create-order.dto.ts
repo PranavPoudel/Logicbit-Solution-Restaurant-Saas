@@ -16,6 +16,7 @@ export enum PaymentMethodDto {
   KHALTI = 'KHALTI',
   IPS = 'IPS',
   PHONEPAY = 'PHONEPAY',
+  PAYPAY = 'PAYPAY',
 }
 
 export class CreateOrderDto {
@@ -50,4 +51,8 @@ export class CreateOrderDto {
   @IsNumber()
   @IsOptional()
   deliveryLongitude?: number;
+
+  @IsOptional() 
+  @IsString() 
+  notes?: string;
 }

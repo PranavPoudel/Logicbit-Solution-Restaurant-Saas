@@ -1,5 +1,12 @@
 // types/restaurant.ts
 
+export interface CuisineRef {
+  id?: string;
+  slug?: string;
+  name?: string;
+}
+export type CuisineLike = string | CuisineRef;
+
 /**
  * Shape returned by GET /discovery/restaurants/nearby.
  * NOTE: placeholder — confirm exact field names against Swagger before
@@ -11,9 +18,15 @@ export interface DiscoveryRestaurant {
   name?: string;
   coverImageUrl?: string;
   avgRating?: number;
-  cuisines?: string[];
+  cuisines?: CuisineLike[];
+  address?: string;
+  city?: string;
+  logoUrl?: string | null;
+  phone?: string;
   distanceKm?: number;
   isOpen?: boolean;
   isSponsored?: boolean;
   estimatedDeliveryMinutes?: number;
+  createdAt?: string;
+  totalOrders?: number;
 }

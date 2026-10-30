@@ -1,124 +1,174 @@
+// app/%5Blocale%5D/%28customer%29/restaurants/%5Bslug%5D/page.tsx
 "use client";
 
-import { use, useState } from "react";
-import { useLocale } from "next-intl";
+import { Fragment, use, useMemo, useState } from "react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { AlertTriangle } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { RestaurantHeader } from "@/components/menu/restaurant-header";
-import { FloatingCartBar } from "@/components/menu/floating-cart-bar";
+import { MenuSection } from "@/components/menu/menu-section";
 import { ModifierModal } from "@/components/menu-modal/modifier-modal";
+import { StorefrontBannerCarousel } from "@/components/restaurant/storefront-banner-carousel";
+import { StorefrontOffersSection } from "@/components/restaurant/storefront-offers-section";
+import { StorefrontAboutSection } from "@/components/restaurant/storefront-about-section";
+import { StorefrontContactSection } from "@/components/restaurant/storefront-contact-section";
+import { StorefrontReviewsSection } from "@/components/restaurant/storefront-reviews-section";
+import { SimilarRestaurants } from "@/components/restaurant/similar-restaurants";
+import { StorefrontPopupModal } from "@/components/restaurant/storefront-popup-modal";
 import {
+  getNearbyRestaurants,
   getRestaurantByIdOrSlug,
   getRestaurantMenu,
   getRestaurantStorefront,
   getRestaurantStorefrontPopup,
+  type SectionSetting,
 } from "@/lib/api/discovery";
-import { StorefrontSectionRenderer } from "@/components/restaurant/storefront-section-renderer";
-import { StorefrontPopupModal } from "@/components/restaurant/storefront-popup-modal";
-import { RestaurantFooter } from "@/components/menu/restaurant-footer";
+import { restaurantAccentStyle } from "@/lib/utils/restaurant-theme";
+import { CurrencyProvider } from "@/hooks/use-money";
+import { useGeolocation } from "@/hooks/use-geolocation";
+import { useChatRestaurant } from "@/hooks/use-chat-restaurant";
+import { describeOpen } from "@/lib/utils/hours";
 
-export default function RestaurantDetailPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+const DEFAULT_SECTIONS: SectionSetting[] = ["banner", "menu", "about", "contact", "reviews"].map((id) => ({ id, isVisible: true, titleEn: "", titleJa: "" }));
+
+export default function RestaurantDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const t = useTranslations("restaurant");
+  const locale = useLocale();
   const { slug } = use(params);
-  const currentLocale = useLocale();
+  const { lat, lng, isResolved } = useGeolocation();
+  const linkedItem = useSearchParams().get("item");
+  const [modifierItemId, setModifierItemId] = useState<string | null>(linkedItem);
 
-  // 1. Fetch Restaurant Details
   const restaurantQuery = useQuery({
     queryKey: ["restaurant", slug],
     queryFn: () => getRestaurantByIdOrSlug(slug),
   });
+  const restaurant = restaurantQuery.data;
+  const restaurantId = restaurant?.id;
 
-  const restaurantId = restaurantQuery.data?.id;
-
-  // 2. Fetch Menu
   const menuQuery = useQuery({
     queryKey: ["restaurant-menu", restaurantId],
     queryFn: () => getRestaurantMenu(restaurantId as string),
     enabled: !!restaurantId,
   });
-
-  // 3. Fetch Storefront Data
   const storefrontQuery = useQuery({
     queryKey: ["storefront", restaurantId],
     queryFn: () => getRestaurantStorefront(restaurantId as string),
     enabled: !!restaurantId,
   });
-
-  // 4. Fetch Active Popup
   const popupQuery = useQuery({
     queryKey: ["storefront-popup", restaurantId],
     queryFn: () => getRestaurantStorefrontPopup(restaurantId as string),
     enabled: !!restaurantId,
   });
+  const nearbyQuery = useQuery({
+    queryKey: ["nearby-restaurants", lat, lng, "similar"],
+    queryFn: () => getNearbyRestaurants({ lat, lng, radiusKm: 50, limit: 12 }),
+    enabled: isResolved,
+  });
 
   const categories = menuQuery.data ?? [];
-  const [modifierItemId, setModifierItemId] = useState<string | null>(null);
+  const storefront = storefrontQuery.data;
+  const sections = (storefront?.sectionSettings?.length ? storefront.sectionSettings : DEFAULT_SECTIONS).filter((s) => s.isVisible);
+  const titleOf = (id: string, fallback: string) => {
+    const s = sections.find((x) => x.id === id);
+    return (locale === "ja" ? s?.titleJa : s?.titleEn) || s?.titleEn || fallback;
+  };
+  const banners = storefront?.banners ?? [];
 
-  const storefrontData = storefrontQuery.data;
-  const rawSettings = storefrontData?.sectionSettings ?? [];
-const sectionSettings = rawSettings.length > 0
-  ? rawSettings
-  : [{ id: "menu", isVisible: true, titleEn: "Our Menu", titleJa: "メニュー" }];
-  const banners = storefrontData?.banners ?? [];
-  const aboutText = storefrontData?.about;
-  const contact = storefrontData?.contact;
-  const socialLinks = storefrontData?.socialLinks;
+  const similar = useMemo(() => (nearbyQuery.data?.data ?? []).filter((r) => r.id !== restaurantId).slice(0, 3), [nearbyQuery.data, restaurantId]);
+
+  const { closes, opens } = describeOpen(restaurant?.openStatus, restaurant?.isOpen !== false, t, locale);
+  useChatRestaurant(
+    restaurant
+      ? {
+          id: restaurant.id,
+          name: restaurant.name ?? t("fallbackName"),
+          address: restaurant.address,
+          phone: restaurant.phone,
+          isOpen: restaurant.isOpen !== false,
+          closesAt: closes,
+          opensAt: opens,
+          deliveryMinutes: restaurant.estimatedDeliveryMinutes,
+          categories: categories.map((c) => c.name).filter((n): n is string => !!n),
+          offerCodes: (storefront?.offers ?? []).map((o) => o.code).filter((c): c is string => !!c),
+        }
+      : null,
+  );
 
   if (restaurantQuery.isLoading) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-16 text-center text-sm text-neutral-400">
-        Loading restaurant…
+      <div className="mx-auto w-full max-w-[1440px] px-5 py-16 md:px-10" aria-busy="true">
+        <div className="h-[200px] animate-pulse rounded-[32px] bg-ink/10 md:h-[280px]" />
+        <div className="mt-16 h-12 w-1/2 animate-pulse rounded-2xl bg-ink/10" />
       </div>
     );
   }
 
-  if (restaurantQuery.isError || !restaurantQuery.data) {
+  if (restaurantQuery.isError || !restaurant) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-16 flex flex-col items-center text-center gap-3">
-        <AlertTriangle className="text-neutral-300" size={28} />
-        <p className="text-sm text-neutral-500">
-          Couldn&apos;t load this restaurant. It may not exist, or the backend
-          isn&apos;t reachable.
-        </p>
+      <div className="mx-auto flex max-w-lg flex-col items-center gap-4 px-5 py-20 text-center" role="alert">
+        <h1 className="font-display text-4xl font-extrabold">{t("notFoundTitle")}</h1>
+        <p className="text-lg text-ink/75">{t("notFoundBody")}</p>
+        <Link href="/restaurants" className="inline-flex min-h-12 items-center rounded-full bg-chili px-6 font-bold text-parchment">{t("browseKitchens")}</Link>
       </div>
     );
   }
+
+  const section = (id: string) => {
+    switch (id) {
+      case "banner":
+        return banners.length > 0 && (
+          <div className="mx-auto mt-8 w-full max-w-[1440px] px-5 md:px-10">
+            <StorefrontBannerCarousel banners={banners} />
+          </div>
+        );
+      case "menu":
+        return (
+          <>
+            <MenuSection categories={categories} onOpenModifiers={setModifierItemId} />
+            {menuQuery.isLoading && <p className="mx-auto mt-10 w-full max-w-[1440px] px-5 text-lg text-ink/70 md:px-10">{t("loadingMenu")}</p>}
+            {!menuQuery.isLoading && categories.length === 0 && (
+              <p className="mx-auto mt-10 w-full max-w-[1440px] px-5 text-lg text-ink/70 md:px-10">{t("noMenu")}</p>
+            )}
+          </>
+        );
+      case "offers":
+        return <StorefrontOffersSection title={titleOf("offers", t("sectionOffers"))} offers={storefront?.offers ?? []} />;
+      case "about":
+        return <StorefrontAboutSection title={titleOf("about", t("sectionAbout"))} aboutText={storefront?.about} restaurant={restaurant} />;
+      case "contact":
+        return (
+          <StorefrontContactSection
+            title={titleOf("contact", t("sectionContact"))}
+            restaurant={restaurant}
+            contact={storefront?.contact}
+            socialLinks={storefront?.socialLinks}
+          />
+        );
+      case "reviews":
+        return <StorefrontReviewsSection title={titleOf("reviews", t("sectionReviews"))} restaurantId={restaurant.id} rating={restaurant.avgRating} total={restaurant.totalReviews} />;
+      default:
+        return null;
+    }
+  };
 
   return (
-    <div className="min-h-screen flex flex-col pb-24">
-      <RestaurantHeader restaurant={restaurantQuery.data} />
+    <CurrencyProvider code={restaurant?.currencyCode}>
+    <div style={restaurantAccentStyle(restaurant)} className="pb-28 lg:pb-16">
+      <div className={sections[0] && ["offers", "about", "contact", "reviews"].includes(sections[0].id) ? "pb-10" : ""}>
+        <RestaurantHeader restaurant={restaurant} />
+      </div>
 
-      {/* Dynamic Storefront Sections (Uses currentLocale for proper i18n) */}
-      <StorefrontSectionRenderer
-        sectionSettings={sectionSettings}
-        restaurantId={restaurantId!}
-        locale={currentLocale}
-        categories={categories}
-        onOpenModifiers={setModifierItemId}
-        aboutText={aboutText}
-        contact={contact}
-        socialLinks={socialLinks}
-        banners={banners}
-        latitude={(restaurantQuery.data as any).latitude}
-        longitude={(restaurantQuery.data as any).longitude}
-      />
+      {sections.map((s) => <Fragment key={s.id}>{section(s.id)}</Fragment>)}
 
-      {/* Footer & Floating Cart */}
-      <RestaurantFooter restaurant={restaurantQuery.data} />
-      <FloatingCartBar />
+      <SimilarRestaurants restaurants={similar} loading={nearbyQuery.isLoading || !isResolved} error={nearbyQuery.isError} onRetry={() => nearbyQuery.refetch()} />
 
-      {modifierItemId && (
-        <ModifierModal
-          restaurantId={restaurantQuery.data.id}
-          menuItemId={modifierItemId}
-          onClose={() => setModifierItemId(null)}
-        />
-      )}
+      {modifierItemId && <ModifierModal restaurantId={restaurant.id} menuItemId={modifierItemId} onClose={() => setModifierItemId(null)} />}
 
       <StorefrontPopupModal popups={popupQuery.data ? [popupQuery.data] : []} />
     </div>
+    </CurrencyProvider>
   );
 }

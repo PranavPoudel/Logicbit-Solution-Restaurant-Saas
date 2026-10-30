@@ -2,137 +2,83 @@
 "use client";
 
 import Link from "next/link";
-import { Star, Heart } from "lucide-react";
-import { useState } from "react";
+import { useTranslations } from "next-intl";
+import { useFavorite } from "@/hooks/use-favorite";
+import { cuisineName, restaurantImage } from "@/lib/utils/cuisine";
+import { useCuisineLabel } from "@/hooks/use-cuisine-label";
 import type { DiscoveryRestaurant } from "@/types/restaurant";
-import { theme } from "@/config/theme";
+import { Icon, IconButton, OpenBadge } from "@/components/ui/primitives";
 
-export function RestaurantCard({ restaurant }: { restaurant: DiscoveryRestaurant }) {
-  const [isFavorited, setIsFavorited] = useState(false);
+const TINTS = [
+  { bg: "bg-saffron", text: "text-ink" },
+  { bg: "bg-chili", text: "text-cream" },
+  { bg: "bg-herb", text: "text-cream" },
+];
+const ROTS = ["-rotate-2", "rotate-2", "-rotate-1", "rotate-1"];
 
-  // Defensive fallbacks
-  const name = restaurant.name ?? "Restaurant";
-  const cuisines = restaurant.cuisines ?? [];
-  const rating = typeof restaurant.avgRating === "number" ? restaurant.avgRating : null;
-  const distanceKm = typeof restaurant.distanceKm === "number" ? restaurant.distanceKm : null;
-  const slug = restaurant.slug ?? restaurant.id;
-  const isOpen = restaurant.isOpen !== false;
+export function RestaurantCard({ r, index, compact }: { r: DiscoveryRestaurant; index: number; compact?: boolean }) {
+  const t = useTranslations("restaurant");
+  const cuisineLabel = useCuisineLabel();
+  const tint = TINTS[index % TINTS.length];
+  const open = r.isOpen !== false;
+  const rating = r.avgRating ?? 0;
+  const hasOrders = (r.totalOrders ?? 0) > 0;
+  const name = r.name ?? t("fallbackName");
+  const href = `/restaurants/${r.slug ?? r.id}`;
+
+  const { fav, toggle } = useFavorite(r.id);
 
   return (
-    <Link
-      href={`/restaurants/${slug}`}
-      className="group block bg-white rounded-2xl overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all"
-      style={{ border: `1px solid ${theme.colors.dark}14` }}
-    >
-      <div className="relative aspect-[4/3] overflow-hidden" style={{ backgroundColor: `${theme.colors.dark}0D` }}>
-        {restaurant.coverImageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={restaurant.coverImageUrl}
-            alt={name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            onError={(e) => {
-              // Fallback if image URL is broken
-              (e.target as HTMLImageElement).style.display = 'none';
-            }}
-          />
-        ) : (
-          <div
-            className="w-full h-full flex items-center justify-center font-serif text-4xl"
-            style={{ backgroundColor: theme.colors.dark, color: `${theme.colors.background}33` }}
-          >
-            {name.charAt(0)}
+    <article className={`${ROTS[index % ROTS.length]} group relative rounded-[28px] bg-paper p-3 pb-5 shadow-warm transition hover:-translate-y-1 hover:rotate-0`}>
+      <div className="relative aspect-[4/3] overflow-hidden rounded-[20px]">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={restaurantImage(r)} alt={t("foodFrom", { name })} className={`h-full w-full object-cover transition duration-500 group-hover:scale-105 ${open ? "" : "opacity-70 grayscale"}`} />
+        <div className="absolute left-3 top-3 flex flex-wrap gap-2">
+          <OpenBadge open={open} />
+        </div>
+        {r.isSponsored && <span className="shadow-hard absolute bottom-3 left-3 -rotate-3 rounded-xl bg-ink px-3 py-1 font-display text-base font-extrabold text-cream">{t("sponsored")}</span>}
+        <IconButton
+          icon="heart"
+          label={fav ? t("removeFav", { name }) : t("saveFav", { name })}
+          aria-pressed={fav}
+          onClick={toggle}
+          className={`shadow-soft absolute bottom-3 right-3 z-10 ${fav ? "bg-chili text-parchment" : "bg-parchment text-espresso"}`}
+        />
+      </div>
+
+      <div className={`${tint.bg} ${tint.text} absolute -right-4 -top-5 z-10 grid h-20 w-20 rotate-12 place-items-center rounded-full border-4 border-paper font-display text-2xl font-extrabold shadow-hard`}>
+        {hasOrders || rating > 0 ? `★${rating.toFixed(1)}` : t("new")}
+      </div>
+
+      <div className={`px-2 pt-4 ${open ? "" : "opacity-75"}`}>
+        <h3 className="font-display text-2xl font-bold leading-tight">
+          <Link href={href} className="text-left after:absolute after:inset-0 after:rounded-[28px] focus-visible:outline-none focus-visible:after:ring-4 focus-visible:after:ring-saffron">
+            {name}
+          </Link>
+        </h3>
+        <div className="mt-2 flex flex-wrap gap-2">
+          {(r.cuisines ?? []).map((c) => (
+            <span key={cuisineName(c)} className="rounded-full bg-ink/10 px-3 py-1 font-bold">{cuisineLabel(c)}</span>
+          ))}
+        </div>
+        <p className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-ink/75">
+          {r.estimatedDeliveryMinutes != null && (
+            <span className="flex items-center gap-1.5"><Icon name="clock" className="h-4 w-4" />{t("minutes", { count: r.estimatedDeliveryMinutes })}</span>
+          )}
+          {r.distanceKm != null && (
+            <span className="flex items-center gap-1.5"><Icon name="pin" className="h-4 w-4" />{t("km", { value: r.distanceKm })}</span>
+          )}
+          {r.city && <span className="flex items-center gap-1.5"><Icon name="store" className="h-4 w-4" />{r.city}</span>}
+        </p>
+        {!compact && (
+          <div className="relative z-10 mt-4 flex items-center justify-end">
+            <Link href={href} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-chili px-5 font-bold text-parchment shadow-red transition hover:-translate-y-0.5">
+              {t("viewMenu")}
+              <Icon name="arrow" className="h-5 w-5" />
+            </Link>
           </div>
         )}
-
-        <div
-          className="absolute inset-0"
-          style={{ background: `linear-gradient(to bottom, ${theme.colors.dark}40, transparent, transparent)` }}
-        />
-
-        <div className="absolute top-2.5 left-2.5 right-2.5 flex items-start justify-between">
-          <span
-            className="text-[10px] font-mono font-bold uppercase tracking-wide px-2 py-1 rounded-md"
-            style={{
-              backgroundColor: isOpen ? theme.colors.statusOpenBg : `${theme.colors.dark}99`,
-              color: theme.colors.background,
-            }}
-          >
-            {isOpen ? theme.content.openLabelShort : theme.content.closedLabel}
-          </span>
-
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              setIsFavorited((v) => !v);
-            }}
-            aria-label={isFavorited ? "Remove from favorites" : "Add to favorites"}
-            className="w-7 h-7 rounded-full backdrop-blur flex items-center justify-center transition-colors"
-            style={{ backgroundColor: `${theme.colors.background}E6` }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = theme.colors.background)}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = `${theme.colors.background}E6`)}
-          >
-            <Heart
-              size={14}
-              style={{
-                fill: isFavorited ? theme.colors.primary : "none",
-                color: isFavorited ? theme.colors.primary : `${theme.colors.dark}66`,
-              }}
-            />
-          </button>
-        </div>
-
-        {restaurant.isSponsored && (
-          <span
-            className="absolute bottom-2.5 left-2.5 text-[10px] font-mono font-bold uppercase tracking-wide px-2 py-1 rounded-md"
-            style={{ backgroundColor: theme.colors.primary, color: theme.colors.background }}
-          >
-            {theme.content.sponsoredLabel}
-          </span>
-        )}
-
-        {rating !== null && (
-          <span
-            className="absolute bottom-2.5 right-2.5 flex items-center gap-1 backdrop-blur text-xs font-mono font-semibold px-2 py-1 rounded-md"
-            style={{ backgroundColor: `${theme.colors.background}F2`, color: theme.colors.dark }}
-          >
-            <Star size={11} style={{ fill: theme.colors.primary, color: theme.colors.primary }} />
-            {rating.toFixed(1)}
-          </span>
-        )}
       </div>
-
-      <div className="p-3.5">
-        <h3 className="font-serif font-semibold text-[15px] leading-tight truncate" style={{ color: theme.colors.dark }}>
-          {name}
-        </h3>
-
-        <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
-          {cuisines.length > 0 ? (
-            cuisines.slice(0, 3).map((cuisine: any) => (
-              <span
-                key={cuisine.id || cuisine.slug}
-                className="text-[11px] font-medium px-2 py-0.5 rounded-full truncate"
-                style={{ color: theme.colors.primary, backgroundColor: `${theme.colors.primary}14` }}
-              >
-                {cuisine.name}
-              </span>
-            ))
-          ) : (
-            <span className="text-[11px]" style={{ color: `${theme.colors.dark}40` }}>—</span>
-          )}
-        </div>
-
-        <div className="flex items-center gap-2.5 mt-2.5 font-mono text-[11px]" style={{ color: `${theme.colors.dark}80` }}>
-          {distanceKm !== null && <span>{distanceKm.toFixed(1)} {theme.content.distanceAwaySuffix}</span>}
-          {restaurant.estimatedDeliveryMinutes && (
-            <>
-              <span style={{ color: `${theme.colors.dark}40` }}>·</span>
-              <span>{restaurant.estimatedDeliveryMinutes} {theme.content.minutesSuffix}</span>
-            </>
-          )}
-        </div>
-      </div>
-    </Link>
+    </article>
   );
 }

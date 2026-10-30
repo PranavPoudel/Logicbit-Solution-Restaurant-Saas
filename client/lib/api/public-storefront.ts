@@ -1,7 +1,8 @@
 import { apiClient } from "@/lib/api/client";
+import { API_ORIGIN } from "@/lib/api-config";
+import type { PopupType } from "@/lib/api/storefront";
 
 // Helper to resolve relative image URLs from the backend
-const API_ORIGIN = process.env.NEXT_PUBLIC_API_URL?.replace("/api/v1", "") || "http://localhost:3700";
 
 export const resolveMediaUrl = (url?: string) => {
   if (!url) return url;
@@ -26,6 +27,8 @@ export interface PublicBanner {
   linkUrl?: string;
 }
 
+type RawBanner = Omit<PublicBanner, "imageUrl"> & { imageUrl?: string; isActive?: boolean };
+
 export interface PublicStorefrontData {
   config: PublicConfig;
   banners: PublicBanner[];
@@ -33,6 +36,8 @@ export interface PublicStorefrontData {
 
 export interface PublicPopup {
   id: string;
+  restaurantId: string;
+  type?: PopupType;
   title: string;
   message?: string;
   imageUrl?: string;
@@ -46,9 +51,9 @@ export const publicStorefrontApi = {
     
     // Safely extract and format banners
     const rawBanners = data?.banners || data || [];
-    const banners = (Array.isArray(rawBanners) ? rawBanners : []).filter((b: any) => b.isActive).map((b: any) => ({
+    const banners = (Array.isArray(rawBanners) ? (rawBanners as RawBanner[]) : []).filter((b) => b.isActive).map((b) => ({
       ...b,
-      imageUrl: resolveMediaUrl(b.imageUrl),
+      imageUrl: resolveMediaUrl(b.imageUrl) ?? "",
     }));
 
     // Safely extract config

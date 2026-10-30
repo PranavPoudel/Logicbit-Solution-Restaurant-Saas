@@ -1,14 +1,15 @@
-// app/(owner-dashboard)/dashboard/page.tsx
+// app/owner/(owner-dashboard)/dashboard/page.tsx
 "use client";
 
-import { ShoppingBag, Wallet, Clock, CheckCircle2, AlertCircle, Link as LinkIcon, Users } from "lucide-react";
-import Link from "next/link";
+import { ShoppingBag, Wallet, Clock, CheckCircle2, Users } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { QueryError } from "@/components/ui/query-error";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { RevenueChart } from "@/components/dashboard/revenue-chart";
 import { PendingOrdersWidget } from "@/components/dashboard/pending-orders-widget";
 import { useOwnerAuthStore } from "@/store/owner-auth-store";
 import { getRestaurantSubscription } from "@/lib/api/subscriptions";
+import { getSubscriptionState } from "@/lib/utils/subscription";
 import { getRestaurantAnalytics } from "@/lib/api/analytics";
 import { listRestaurantOrders } from "@/lib/api/orders";
 
@@ -45,7 +46,7 @@ export default function DashboardPage() {
   // 2. Pending Orders Query
   const ordersQuery = useQuery({
     queryKey: ["dashboard-pending-orders", restaurantId],
-    queryFn: () => listRestaurantOrders(restaurantId as string, "PENDING") as Promise<OwnerOrderRow[]>,
+    queryFn: () => listRestaurantOrders(restaurantId as string, { status: "PENDING" }) as Promise<OwnerOrderRow[]>,
     enabled: !!restaurantId,
   });
 
@@ -58,9 +59,10 @@ export default function DashboardPage() {
 
   const analytics = analyticsQuery.data;
 
+  // ✅ Map orders safely, ensuring 'id' is always present and valid
   const pendingOrders = (ordersQuery.data ?? []).map((o) => ({
     id: o.id,
-    code: o.orderNumber ?? o.id.slice(0, 6),
+    code: o.orderNumber ?? (o.id ? o.id.slice(0, 6).toUpperCase() : "N/A"),
     customerName: o.customer?.name ?? "Customer",
     itemCount: (o.items ?? []).reduce((sum, i) => sum + (i.quantity ?? 1), 0),
     total: o.total ?? 0,
@@ -69,9 +71,11 @@ export default function DashboardPage() {
       : 0,
   }));
 
-  const sub = subscriptionQuery.data as any;
-  const hasNoSubscription = sub?.status === "NO_SUBSCRIPTION";
-  const isExpiring = sub?.status === "expiring";
+  // 🔍 DIAGNOSTIC LOG: Check your browser console to confirm IDs are flowing correctly
+  console.log("Dashboard Pending Orders Data:", pendingOrders);
+
+  const sub = subscriptionQuery.data;
+  const state = getSubscriptionState(sub);
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto p-1">
@@ -81,44 +85,23 @@ export default function DashboardPage() {
         <p className="text-sm text-neutral-500 mt-1">Here&apos;s what&apos;s happening at your restaurant today.</p>
       </div>
 
-      {/* Subscription Banners */}
-      {hasNoSubscription ? (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 shrink-0" />
-            <div>
-              <p className="text-sm font-semibold text-red-700">No Active Subscription</p>
-              <p className="text-xs text-red-600 mt-0.5">Upgrade to unlock menu management, orders, and analytics.</p>
-            </div>
-          </div>
-          <Link href="/subscriptions" className="w-full sm:w-auto px-4 py-2 bg-[#E3A008] hover:bg-amber-600 text-white text-sm font-semibold rounded-lg transition-colors text-center whitespace-nowrap flex items-center justify-center gap-2">
-            <LinkIcon size={16} /> Upgrade Plan
-          </Link>
-        </div>
-      ) : isExpiring ? (
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
-            <div>
-              <p className="text-sm font-semibold text-amber-700">Subscription Expiring Soon</p>
-              <p className="text-xs text-amber-600 mt-0.5">
-                Your plan expires on {sub?.expiryDate && new Date(sub.expiryDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-              </p>
-            </div>
-          </div>
-          <Link href="/subscriptions" className="w-full sm:w-auto px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold rounded-lg transition-colors text-center whitespace-nowrap flex items-center justify-center gap-2">
-            <LinkIcon size={16} /> Renew Now
-          </Link>
-        </div>
-      ) : sub ? (
+      {state === "active" ? (
         <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-center gap-3">
           <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
           <p className="text-sm font-medium text-emerald-800">
-            Active Plan: <span className="font-semibold">{sub.planName ?? "Standard"}</span>
-            {sub.daysRemaining && ` · ${sub.daysRemaining} days remaining`}
+            Active Plan: <span className="font-semibold">{sub && "planName" in sub ? sub.planName : "Standard"}</span>
+            {sub && "daysRemaining" in sub && sub.daysRemaining && ` · ${sub.daysRemaining} days remaining`}
           </p>
         </div>
       ) : null}
+
+      {(analyticsQuery.isError || ordersQuery.isError) && (
+        <QueryError
+          what="some dashboard data"
+          error={analyticsQuery.error ?? ordersQuery.error}
+          onRetry={() => { analyticsQuery.refetch(); ordersQuery.refetch(); }}
+        />
+      )}
 
       {/* Stat Cards Grid (Sakura Style with Color Variants & Real Data) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

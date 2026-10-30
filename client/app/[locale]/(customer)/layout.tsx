@@ -1,6 +1,8 @@
 // app/(customer)/layout.tsx
+import { CustomerShell } from "@/components/layout/customer-shell";
 import { CustomerHeader } from "@/components/layout/customer-header";
-import { LanguageSwitcherButton } from "@/components/ui/language-switcher-button";
+import { CustomerFooter } from "@/components/home/homepage-footer";
+import { ChatWidget } from "@/components/chatbot/chat-widget";
 
 export default function CustomerLayout({
   children,
@@ -8,12 +10,11 @@ export default function CustomerLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col min-h-screen bg-[#FAFAF7]">
+    <CustomerShell>
       <CustomerHeader />
       <main className="flex-1">{children}</main>
-      <div className="fixed bottom-4 right-4 z-50">
-  <LanguageSwitcherButton />
-</div>
-    </div>
+      <CustomerFooter />
+      <ChatWidget />
+    </CustomerShell>
   );
 }
