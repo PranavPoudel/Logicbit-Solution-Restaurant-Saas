@@ -274,6 +274,7 @@ model Category {
   isOnHomepage    Boolean   @default(false) // 🆕 Show on homepage
   isActive        Boolean   @default(true)
   deletedAt       DateTime? // 🆕 Soft delete for Trash
+  parentId        String?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
@@ -281,7 +282,11 @@ model Category {
   restaurant Restaurant @relation(fields: [restaurantId], references: [id])
   menuItems  MenuItem[]
 
+  parent   Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children Category[] @relation("CategoryHierarchy")
+
   @@index([restaurantId])
+  @@index([parentId])
 }
 
 model MenuItem {

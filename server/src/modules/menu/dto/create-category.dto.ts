@@ -1,5 +1,14 @@
-// modules/menu/dto/create-category.dto.ts
-import { IsString, IsNotEmpty, IsOptional, IsBoolean, IsInt, Min, MaxLength } from 'class-validator';
+
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsBoolean,
+  IsInt,
+  IsUUID,
+  Min,
+  MaxLength,
+} from 'class-validator';
 
 export class CreateCategoryDto {
   @IsString()
@@ -10,7 +19,7 @@ export class CreateCategoryDto {
   @IsString()
   @IsOptional()
   @MaxLength(100)
-  nameJa?: string; // 🆕 Japanese Name
+  nameJa?: string;
 
   @IsString()
   @IsOptional()
@@ -20,7 +29,7 @@ export class CreateCategoryDto {
   @IsString()
   @IsOptional()
   @MaxLength(500)
-  descriptionJa?: string; // 🆕 Japanese Description
+  descriptionJa?: string;
 
   @IsString()
   @IsOptional()
@@ -32,7 +41,7 @@ export class CreateCategoryDto {
 
   @IsBoolean()
   @IsOptional()
-  isOnHomepage?: boolean; // 🆕 Show on homepage
+  isOnHomepage?: boolean;
 
   @IsBoolean()
   @IsOptional()
@@ -42,4 +51,9 @@ export class CreateCategoryDto {
   @Min(0)
   @IsOptional()
   displayOrder?: number;
+
+  // Optional parent category ID for creating a subcategory.
+  @IsUUID()
+  @IsOptional()
+  parentId?: string;
 }
