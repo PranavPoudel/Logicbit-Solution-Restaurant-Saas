@@ -1,13 +1,16 @@
-// admin-promotion.controller.ts
-import { Controller, Patch, Param, Body, UseGuards, Req } from '@nestjs/common';
+import { Controller, Patch, Param, Body, UseGuards, Req, Get } from '@nestjs/common';
 import { AdminPromotionService } from './admin-promotion.service';
 import { UpdatePromotionLimitsDto } from './dto/update-promotion-limit.dto';
 import { ReviewPromotionDto } from './dto/review-promotion.dto';
-// import { SuperAdminGuard } from '../../auth/guards/super-admin.guard'; 
 
-@Controller('platform-admin/promotions')
+@Controller('api/v1/platform-admin/promotions/')
 export class AdminPromotionController {
   constructor(private readonly adminPromotionService: AdminPromotionService ) {}
+
+  @Get('pending')
+  async getPendingPromotions() {
+    return this.adminPromotionService.getPendingPromotions();
+  }
 
   @Patch('restaurant/:restaurantId/limits')
   async updateLimits(

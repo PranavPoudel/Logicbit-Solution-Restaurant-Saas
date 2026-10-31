@@ -66,4 +66,26 @@ export class AdminPromotionService {
 
     return { success: true, data: updated };
   }
+
+  async getPendingPromotions() {
+  const pendingPromotions = await this.prisma.coupon.findMany({
+    where: {
+      approvalStatus: 'PENDING_APPROVAL',
+    },
+    include: {
+      restaurant: {
+        select: {
+          name: true,
+          id: true,
+        }
+      }
+    },
+    orderBy: {
+      createdAt: 'desc'
+    }
+  });
+
+  return { success: true, data: pendingPromotions };
 }
+}
+

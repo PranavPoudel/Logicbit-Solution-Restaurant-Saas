@@ -160,3 +160,35 @@ export async function updatePlatformStaff(id: string, input: Partial<AddPlatform
   const { data } = await platformApiClient.patch(`/platform-admin/staff/${id}`, input);
   return data;
 }
+
+
+// --- Promotions & Storefront Limits ---
+
+export interface PromotionLimits {
+  maxActivePromotions?: number;
+  maxDiscountCap?: number;
+  allowedCouponTypes?: ("PERCENTAGE" | "FLAT")[];
+  maxActiveBanners?: number;
+  maxActivePopups?: number;
+}
+
+export async function updateRestaurantPromotionLimits(id: string, limits: PromotionLimits) {
+  const { data } = await platformApiClient.patch(
+    `/platform-admin/promotions/restaurant/${id}/limits`,
+    limits
+  );
+  return data;
+}
+
+export async function reviewPendingPromotion(couponId: string, status: 'APPROVED' | 'REJECTED') {
+  const { data } = await platformApiClient.patch(
+    `/platform-admin/promotions/${couponId}/review`,
+    { status }
+  );
+  return data;
+}
+
+export async function listPendingPromotions() {
+  const { data } = await platformApiClient.get("/platform-admin/promotions/pending");
+  return data;
+}
