@@ -15,6 +15,9 @@ import {
   updateOrderStatus,
 } from "@/lib/api/orders";
 import type { OwnerOrderSummary } from "@/types/order";
+import { playSound } from "@/lib/utils/sound";
+import { riderOf } from "@/lib/utils/order-rider";
+import { formatMoney } from "@/lib/utils/money";
 import { useEscapeKey } from "@/hooks/use-escape-key";
 import { useDialogFocus } from "@/hooks/use-dialog-focus";
 import { useIsMounted } from "@/hooks/use-is-mounted";
@@ -39,23 +42,6 @@ const orderHref = (orderId: string) => `/owner/orders/${orderId}`;
 const timeOf = (iso?: string) =>
   iso ? new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "—";
 
-function playChime() {
-  try {
-    const audio = new AudioContext();
-    [660, 880].forEach((frequency, i) => {
-      const tone = audio.createOscillator();
-      const volume = audio.createGain();
-      const start = audio.currentTime + i * 0.15;
-      tone.frequency.value = frequency;
-      volume.gain.setValueAtTime(0.15, start);
-      volume.gain.exponentialRampToValueAtTime(0.001, start + 0.3);
-      tone.connect(volume).connect(audio.destination);
-      tone.start(start);
-      tone.stop(start + 0.3);
-    });
-  } catch {}
-}
-
 function readSeen(restaurantId: string) {
   try {
     return Number(localStorage.getItem(seenKey(restaurantId))) || 0;
@@ -75,7 +61,7 @@ function itemsSummary(order: OwnerOrderSummary) {
 
 function NoticeText({ notice }: { notice: Notice }) {
   const { order } = notice;
-  const rider = order.delivery?.deliveryPerson;
+  const rider = riderOf(order);
 
   return (
     <span className="min-w-0">
@@ -93,7 +79,7 @@ function NoticeText({ notice }: { notice: Notice }) {
         )}
       </span>
       <span className="block mt-0.5 text-xs text-neutral-400">
-        {notice.kind !== "order" ? `${rider?.phone ?? "No phone"} · ` : ""}Rs {order.total ?? 0} · {timeOf(order.createdAt)}
+        {notice.kind !== "order" ? `${rider?.phone ?? "No phone"} · ` : ""}{formatMoney(order.total ?? 0, order.currencyCode)} · {timeOf(order.createdAt)}
       </span>
     </span>
   );
@@ -169,7 +155,7 @@ function NoticeActions({
 }
 
 export function RiderCard({ order }: { order: OwnerOrderSummary }) {
-  const rider = order.delivery?.deliveryPerson;
+  const rider = riderOf(order);
   const delivered = order.delivery?.status === "DELIVERED";
 
   return (
@@ -213,7 +199,7 @@ function OrderDetails({ order, onOpen }: { order: OwnerOrderSummary; onOpen: () 
                 {item.quantity ?? 1}× {item.menuItem?.name ?? "item"}
                 {options && <span className="block text-xs text-neutral-400">{options}</span>}
               </span>
-              <span className="font-mono shrink-0">Rs {item.subtotal ?? 0}</span>
+              <span className="font-mono shrink-0">{formatMoney(item.subtotal ?? 0, order.currencyCode)}</span>
             </li>
           );
         })}
@@ -222,23 +208,23 @@ function OrderDetails({ order, onOpen }: { order: OwnerOrderSummary; onOpen: () 
       <div className="border-t border-neutral-100 pt-3 space-y-1">
         <p className="flex justify-between">
           <span>Subtotal</span>
-          <span className="font-mono">Rs {order.subtotal ?? order.total ?? 0}</span>
+          <span className="font-mono">{formatMoney(order.subtotal ?? order.total ?? 0, order.currencyCode)}</span>
         </p>
         {discount > 0 && (
           <p className="flex justify-between">
             <span>Discount{order.couponCode ? ` (${order.couponCode})` : ""}</span>
-            <span className="font-mono">- Rs {discount}</span>
+            <span className="font-mono">-{formatMoney(discount, order.currencyCode)}</span>
           </p>
         )}
         {order.orderType === "DELIVERY" && (
           <p className="flex justify-between">
             <span>Delivery fee</span>
-            <span className="font-mono">Rs {order.deliveryFee ?? 0}</span>
+            <span className="font-mono">{formatMoney(order.deliveryFee ?? 0, order.currencyCode)}</span>
           </p>
         )}
         <p className="flex justify-between font-semibold text-neutral-900">
           <span>Total</span>
-          <span className="font-mono">Rs {order.total ?? 0}</span>
+          <span className="font-mono">{formatMoney(order.total ?? 0, order.currencyCode)}</span>
         </p>
       </div>
 
@@ -446,7 +432,7 @@ export function OwnerNotifications() {
     if (fresh.length) {
       setToasts((current) => [...current, ...fresh].slice(-MAX_TOASTS));
       fresh.forEach((n) => setTimeout(() => dismissToast(n.key), TOAST_MS));
-      playChime();
+      playSound(fresh.some((n) => n.kind === "rider") ? "rider" : "chime");
     }
   }, [ready, notices]);
 

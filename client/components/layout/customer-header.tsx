@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCartStore } from "@/store/cart-store";
+import { useSoundMuted } from "@/store/sound-store";
 import { useCustomerAuthStore } from "@/store/customer-auth-store";
 import { useIsMounted } from "@/hooks/use-is-mounted";
 import { useTranslations } from "next-intl";
@@ -36,6 +37,7 @@ export function CustomerHeader() {
   const pathname = usePathname();
   const mounted = useIsMounted();
   const { dark, setDark } = useCustomerTheme();
+  const [muted, setMuted] = useSoundMuted();
   const [menuOpen, setMenuOpen] = useState(false);
   const count = useCartStore((s) => s.itemCount());
   const customer = useCustomerAuthStore((s) => s.customer);
@@ -68,6 +70,12 @@ export function CustomerHeader() {
       </nav>
       <div className="flex items-center gap-2">
         <LanguageSwitcherButton className="hidden md:flex" />
+        <IconButton
+          icon={muted ? "volumeOff" : "volume"}
+          label={muted ? t("unmuteSounds") : t("muteSounds")}
+          onClick={() => setMuted(!muted)}
+          className="hidden border-2 border-ink/20 hover:border-ink md:grid"
+        />
         <IconButton
           icon={dark ? "sun" : "moon"}
           label={dark ? t("switchToLight") : t("switchToDark")}
@@ -130,6 +138,12 @@ export function CustomerHeader() {
                   {t("logIn")}
                 </Link>
               )}
+            </li>
+            <li>
+              <button type="button" onClick={() => setMuted(!muted)} className="flex min-h-12 w-full items-center gap-3 rounded-full px-4 text-lg font-bold hover:bg-ink/10">
+                <Icon name={muted ? "volumeOff" : "volume"} className="h-5 w-5 text-chili" />
+                {muted ? t("unmuteSounds") : t("muteSounds")}
+              </button>
             </li>
           </ul>
           <div className="mt-2 flex gap-2 border-t-2 border-ink/10 pt-3">

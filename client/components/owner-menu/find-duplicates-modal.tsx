@@ -2,6 +2,7 @@
 "use client";
 
 import { X, Trash2, Image as ImageIcon } from "lucide-react";
+import { useMoney } from "@/hooks/use-money";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { menuItemsApi } from "@/lib/api/menu";
 
@@ -21,6 +22,7 @@ interface FindDuplicatesModalProps {
 }
 
 export function FindDuplicatesModal({ duplicates, restaurantId, onClose }: FindDuplicatesModalProps) {
+  const money = useMoney();
   const queryClient = useQueryClient();
 
   const removeMutation = useMutation({
@@ -80,7 +82,7 @@ export function FindDuplicatesModal({ duplicates, restaurantId, onClose }: FindD
                         <div className="min-w-0">
                           <p className="text-sm font-medium text-neutral-900 truncate">{item.name}</p>
                           <p className="text-xs text-neutral-500">
-                            {item.category?.name || "Uncategorized"} · Rs {item.price}
+                            {item.category?.name || "Uncategorized"} · {money(item.price)}
                           </p>
                           <p className="text-[10px] text-neutral-400 mt-0.5">
                             Added {new Date(item.createdAt).toLocaleDateString()}

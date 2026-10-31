@@ -18,14 +18,14 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         mode === "login" ? (
           <>
             {t("newTo", { brand: theme.brand.name })}{" "}
-            <Link href="/signup" className="min-h-11 font-bold text-chili underline underline-offset-4">
+            <Link href="/signup" className="inline-flex min-h-11 items-center font-bold text-chili underline underline-offset-4">
               {t("createLink")}
             </Link>
           </>
         ) : (
           <>
             {t("haveAccount")}{" "}
-            <Link href="/login" className="min-h-11 font-bold text-chili underline underline-offset-4">
+            <Link href="/login" className="inline-flex min-h-11 items-center font-bold text-chili underline underline-offset-4">
               {t("logIn")}
             </Link>
           </>

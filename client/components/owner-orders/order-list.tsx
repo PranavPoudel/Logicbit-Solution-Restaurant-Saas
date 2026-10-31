@@ -136,7 +136,7 @@ export function OrderList({ groups, selectedId, now, closed, onSelect }: OrderLi
                           {stageLabel(status, order.orderType)}
                         </span>
                       )}
-                      <span className="text-sm font-semibold tabular-nums text-neutral-900">{formatMoney(order.total ?? 0)}</span>
+                      <span className="text-sm font-semibold tabular-nums text-neutral-900">{formatMoney(order.total ?? 0, order.currencyCode)}</span>
                     </span>
                   </button>
                 </li>

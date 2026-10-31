@@ -6,6 +6,7 @@ import { Loader2, X } from "lucide-react";
 import { findProvider } from "@/lib/delivery-partner-providers";
 import { ProviderBadge } from "@/components/delivery-partners/provider-badge";
 import { useEscapeKey } from "@/hooks/use-escape-key";
+import { useCurrencyCode } from "@/hooks/use-money";
 import { useDialogFocus } from "@/hooks/use-dialog-focus";
 import type { DeliveryPartner, DeliveryPartnerFeeType, DeliveryPartnerInput } from "@/lib/api/delivery-partners";
 
@@ -29,6 +30,7 @@ interface PartnerModalProps {
 }
 
 export function PartnerModal({ partner, pending, error, onSave, onClose }: PartnerModalProps) {
+  const currency = useCurrencyCode();
   useEscapeKey(onClose, !pending);
   const panelRef = useDialogFocus<HTMLDivElement>();
   const [contactName, setContactName] = useState(partner.contactName ?? "");
@@ -91,7 +93,7 @@ export function PartnerModal({ partner, pending, error, onSave, onClose }: Partn
             <div className="flex gap-2">
               <select value={feeType} onChange={(e) => setFeeType(e.target.value as DeliveryPartnerFeeType)} className="rounded-lg border border-neutral-300 px-3 py-2.5 text-sm outline-none transition-colors focus:border-neutral-900 focus:ring-2 focus:ring-neutral-900/10">
                 <option value="PERCENT">% of the order</option>
-                <option value="FLAT">Rs per delivery</option>
+                <option value="FLAT">{currency} per delivery</option>
               </select>
               <input type="number" min={0} max={feeType === "PERCENT" ? 100 : undefined} step="any" value={feeValue} onChange={(e) => setFeeValue(e.target.value)} placeholder="0" className={INPUT} />
             </div>

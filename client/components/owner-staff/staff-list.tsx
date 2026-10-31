@@ -142,7 +142,7 @@ export function StaffList() {
                   }
                 }}
                 disabled={deactivateMutation.isPending}
-                className="text-xs font-medium text-red-600 hover:bg-red-50 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
+                className="min-h-11 text-xs font-medium text-red-600 hover:bg-red-50 px-3 rounded-lg transition-colors disabled:opacity-50"
               >
                 Deactivate
               </button>

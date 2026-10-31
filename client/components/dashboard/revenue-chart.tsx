@@ -10,6 +10,7 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
+import { useMoney } from "@/hooks/use-money";
 
 interface RevenuePoint {
   date: string;
@@ -17,6 +18,7 @@ interface RevenuePoint {
 }
 
 export function RevenueChart({ data }: { data: RevenuePoint[] }) {
+  const money = useMoney();
   return (
     <div className="bg-white border border-neutral-200 rounded-xl p-5">
       <div className="flex items-center justify-between mb-4">
@@ -47,7 +49,7 @@ export function RevenueChart({ data }: { data: RevenuePoint[] }) {
           />
           <Tooltip
             formatter={(value) => [
-              `Rs ${Number(value ?? 0).toLocaleString()}`,
+              money(Number(value ?? 0)),
               "Revenue",
             ]}
             contentStyle={{

@@ -28,10 +28,10 @@ export function CustomerFooter() {
         {columns.map(([heading, links]) => (
           <div key={heading}>
             <p className="font-bold text-saffron">{heading}</p>
-            <ul className="mt-3 space-y-2">
+            <ul className="mt-1">
               {links.map(([label, href]) => (
                 <li key={href}>
-                  <Link href={href} className="hover:text-saffron">
+                  <Link href={href} className="inline-flex min-h-11 items-center hover:text-saffron">
                     {label}
                   </Link>
                 </li>
@@ -45,8 +45,8 @@ export function CustomerFooter() {
       </p>
       <p className="relative mx-auto max-w-[1440px] py-6 text-xs text-cream/70 dark:text-ink/70">
         © {new Date().getFullYear()} {theme.brand.name} ·{" "}
-        <a href={`mailto:${theme.content.contactEmail}`} className="hover:text-saffron hover:underline">{theme.content.contactEmail}</a> ·{" "}
-        <a href={`tel:${theme.content.contactPhone.replace(/[^\d+]/g, "")}`} className="hover:text-saffron hover:underline">{theme.content.contactPhone}</a>
+        <a href={`mailto:${theme.content.contactEmail}`} className="-my-3 inline-block py-3 hover:text-saffron hover:underline">{theme.content.contactEmail}</a> ·{" "}
+        <a href={`tel:${theme.content.contactPhone.replace(/[^\d+]/g, "")}`} className="-my-3 inline-block py-3 hover:text-saffron hover:underline">{theme.content.contactPhone}</a>
       </p>
     </footer>
   );

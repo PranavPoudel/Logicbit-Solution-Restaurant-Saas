@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 import { Pager } from "@/components/ui/pager";
+import { SortMenu } from "@/components/ui/sort-menu";
 import { CitiesNearMe } from "@/components/home/cities-near-me";
 import { listCities } from "@/lib/api/cities";
 import { cityLabel, countCities, liveCities, sameCity } from "@/lib/utils/cities";
@@ -68,18 +69,9 @@ function StateBox({ kind, onAction }: { kind: "empty" | "error"; onAction: () =>
   );
 }
 
-function SortSelect({ value, onChange, id }: { value: Sort; onChange: (s: Sort) => void; id: string }) {
+function SortSelect({ value, onChange }: { value: Sort; onChange: (s: Sort) => void }) {
   const t = useTranslations("restaurants");
-  return (
-    <label htmlFor={id} className="flex min-h-11 shrink-0 items-center gap-2 rounded-full bg-paper pl-4 pr-2 shadow-soft focus-within:ring-2 focus-within:ring-ink">
-      <span className="text-ink/70">{t("sortBy")}</span>
-      <select id={id} value={value} onChange={(e) => onChange(e.target.value as Sort)} className="min-h-11 cursor-pointer bg-transparent pr-2 font-bold text-ink outline-none">
-        {SORTS.map((s) => (
-          <option key={s} value={s} className="bg-paper">{t(SORT_LABEL[s])}</option>
-        ))}
-      </select>
-    </label>
-  );
+  return <SortMenu label={t("sortBy")} value={value} options={SORTS.map((s) => ({ value: s, label: t(SORT_LABEL[s]) }))} onChange={onChange} />;
 }
 
 type Params = { q?: string; cuisine?: string; city?: string };
@@ -223,7 +215,7 @@ function RestaurantsView({ params }: { params: Params }) {
               {t("clearFilters")}
             </button>
           )}
-          <div className="ml-auto"><SortSelect id="sort" value={sort} onChange={setSort} /></div>
+          <div className="ml-auto"><SortSelect value={sort} onChange={setSort} /></div>
         </div>
       </div>
 
@@ -276,7 +268,7 @@ function RestaurantsView({ params }: { params: Params }) {
               </div>
               <div>
                 <p className="mb-3 font-bold">{t("sort")}</p>
-                <SortSelect id="sort-m" value={sort} onChange={setSort} />
+                <SortSelect value={sort} onChange={setSort} />
               </div>
             </div>
             <div className="flex items-center gap-3 border-t border-ink/10 p-4">

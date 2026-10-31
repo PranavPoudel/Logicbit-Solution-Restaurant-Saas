@@ -12,6 +12,7 @@ import {
   FileText 
 } from "lucide-react";
 import { useOwnerAuthStore } from "@/store/owner-auth-store";
+import { useMoney } from "@/hooks/use-money";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { RevenueChart } from "@/components/dashboard/revenue-chart";
 import { ReportsTab } from "@/components/dashboard/reports-tab"; 
@@ -23,6 +24,7 @@ import { getRestaurantAnalytics } from "@/lib/api/analytics";
 
 export default function AnalyticsPage() {
   const restaurantId = useOwnerAuthStore((s) => s.activeRestaurantId);
+  const money = useMoney();
   const [activeTab, setActiveTab] = useState<"overview" | "reports">("overview");
 
   const { data: analytics, isLoading, isError } = useQuery({
@@ -110,7 +112,7 @@ export default function AnalyticsPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard 
               label="Total Revenue" 
-              value={`NPR ${analytics.totalRevenue.toLocaleString()}`} 
+              value={money(analytics.totalRevenue)}
               icon={DollarSign} 
             />
             <StatCard 
@@ -164,7 +166,7 @@ export default function AnalyticsPage() {
                       </div>
                       <div className="text-right">
                         <p className="text-sm font-semibold text-neutral-900">{item.sold} sold</p>
-                        <p className="text-xs text-neutral-500">NPR {item.revenue.toLocaleString()}</p>
+                        <p className="text-xs text-neutral-500">{money(item.revenue)}</p>
                       </div>
                     </div>
                   ))}

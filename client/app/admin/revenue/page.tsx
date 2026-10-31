@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useMoney } from "@/hooks/use-money";
 import { getRevenueSummary, RevenueSummary } from "@/lib/api/revenue";
 
 export default function RevenuePage() {
+  const money = useMoney();
   const [summary, setSummary] = useState<RevenueSummary | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -40,11 +42,11 @@ export default function RevenuePage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
           <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Total Revenue (All Time)</h3>
-          <p className="text-3xl font-bold text-gray-900 mt-2">Rs. {summary.totalRevenue.toFixed(2)}</p>
+          <p className="text-3xl font-bold text-gray-900 mt-2">{money(summary.totalRevenue)}</p>
         </div>
         <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
           <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">MRR</h3>
-          <p className="text-3xl font-bold text-emerald-600 mt-2">Rs. {summary.mrr.toFixed(2)}</p>
+          <p className="text-3xl font-bold text-emerald-600 mt-2">{money(summary.mrr)}</p>
         </div>
         <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
           <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Active Subscriptions</h3>
@@ -83,7 +85,7 @@ export default function RevenuePage() {
                       {tx.status}
                     </span>
                   </td>
-                  <td className="p-4 font-bold text-gray-900 text-right">Rs. {Number(tx.amount).toFixed(2)}</td>
+                  <td className="p-4 font-bold text-gray-900 text-right">{money(Number(tx.amount))}</td>
                 </tr>
               ))
             )}

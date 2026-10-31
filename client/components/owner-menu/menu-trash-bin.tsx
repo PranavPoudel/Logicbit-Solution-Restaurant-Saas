@@ -3,6 +3,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { RotateCcw, Trash2, AlertTriangle } from "lucide-react";
+import { useMoney } from "@/hooks/use-money";
 import { categoriesApi, menuItemsApi } from "@/lib/api/menu";
 
 interface MenuTrashBinProps {
@@ -13,6 +14,7 @@ interface MenuTrashBinProps {
 }
 
 export function MenuTrashBin({ categories, items, restaurantId, isLoading }: MenuTrashBinProps) {
+  const money = useMoney();
   const queryClient = useQueryClient();
 
   // Filter only deleted items (those with a deletedAt timestamp)
@@ -89,7 +91,7 @@ export function MenuTrashBin({ categories, items, restaurantId, isLoading }: Men
                 <li key={item.id} className="p-4 flex items-center justify-between">
                   <div>
                     <span className="text-sm font-medium text-neutral-800">{item.name}</span>
-                    <span className="text-xs text-neutral-500 ml-2">Rs {item.price}</span>
+                    <span className="text-xs text-neutral-500 ml-2">{money(item.price)}</span>
                   </div>
                   <div className="flex gap-2">
                     <button onClick={() => restoreItemMutation.mutate(item.id)} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-teal-700 bg-teal-50 hover:bg-teal-100 rounded-lg transition-colors">

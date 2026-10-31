@@ -1,3 +1,7 @@
+"use client";
+
+import { useMoney } from "@/hooks/use-money";
+
 interface Order {
   id: string;
   orderNumber: string;
@@ -23,6 +27,7 @@ const statusColors: Record<string, string> = {
 };
 
 export function RecentOrdersTable({ orders }: RecentOrdersTableProps) {
+  const money = useMoney();
   if (orders.length === 0) {
     return (
       <div className="bg-white rounded-xl border border-[#E8E7E2] p-8 text-center text-sm text-neutral-500">
@@ -58,7 +63,7 @@ export function RecentOrdersTable({ orders }: RecentOrdersTableProps) {
                   </span>
                 </td>
                 <td className="px-5 py-4 text-right font-mono font-medium text-[#1B2333]">
-                  NPR {order.total.toFixed(2)}
+                  {money(order.total)}
                 </td>
                 <td className="px-5 py-4 text-right text-neutral-500 text-xs">
                   {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

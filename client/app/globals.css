@@ -119,6 +119,15 @@ body {
     background-color: white !important;
   }
 
+  /* Customer receipt keeps its 80mm width and sits centred on the page */
+  #printable-receipt {
+    left: 0 !important;
+    right: 0 !important;
+    width: 80mm !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+  }
+
   /* 4. Force background colors to print (crucial for the red allergy box!) */
   * {
     -webkit-print-color-adjust: exact !important;
@@ -242,3 +251,6 @@ body {
 }
 .leaflet-tooltip.city-tip::before { display: none; }
 .customer.dark .cities-map .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) brightness(0.8) contrast(0.9) saturate(0.7); }
+@media (pointer: coarse) {
+  .customer .leaflet-bar a { width: 44px; height: 44px; line-height: 44px; }
+}

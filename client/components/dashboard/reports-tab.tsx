@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useOwnerAuthStore } from "@/store/owner-auth-store";
+import { useMoney } from "@/hooks/use-money";
 import { listRestaurantOrders } from "@/lib/api/orders";
 import { reservationsApi } from "@/lib/api/reservations";
 import { Download, Filter, Loader2, AlertCircle } from "lucide-react";
@@ -39,6 +40,7 @@ const exportToCSV = (data: any[], filename: string) => {
 
 export function ReportsTab() {
   const restaurantId = useOwnerAuthStore((s) => s.activeRestaurantId);
+  const money = useMoney();
   const [activeReport, setActiveReport] = useState<"orders" | "reservations">("orders");
   
   // Simple date inputs (you can upgrade to react-day-picker later)
@@ -232,7 +234,7 @@ export function ReportsTab() {
                     </td>
                     {activeReport === "orders" && (
                       <td className="px-6 py-4 text-right font-semibold text-neutral-900">
-                        NPR {Number(item.total).toLocaleString()}
+                        {money(Number(item.total))}
                       </td>
                     )}
                   </tr>

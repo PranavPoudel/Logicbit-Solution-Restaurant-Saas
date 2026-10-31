@@ -10,6 +10,7 @@ import { isAxiosError } from "axios";
 import { customerLoginSchema, type CustomerLoginInput } from "@/lib/validation/auth-schemas";
 import { customerLogin } from "@/lib/api/customer-auth";
 import { postLoginPath } from "@/lib/utils/redirect";
+import { playSound } from "@/lib/utils/sound";
 import { useCustomerAuthStore } from "@/store/customer-auth-store";
 import { AuthError, AuthInput, AuthPassword, AuthSubmit } from "@/components/auth/auth-shell";
 
@@ -29,9 +30,11 @@ export default function CustomerLoginPage() {
   const mutation = useMutation({
     mutationFn: customerLogin,
     onSuccess: (data) => {
+      playSound("success");
       setAuth(data);
       router.push(postLoginPath());
     },
+    onError: () => playSound("error"),
   });
 
   const onSubmit = (input: CustomerLoginInput) => mutation.mutate(input);

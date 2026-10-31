@@ -47,16 +47,14 @@ export class NotificationService {
       // उदाहरण (SendGrid): await sendgrid.send({ to: params.recipient, subject: params.subject, text: params.body, html: params.html });
       this.logger.log(`[${params.channel}] to ${params.recipient}: ${params.body}`);
 
-      await this.prisma.notification.update({
+      return await this.prisma.notification.update({
         where: { id: notification.id },
         data: { status: 'SENT', sentAt: new Date() },
       });
     } catch (error) {
       this.logger.error(`Notification failed for ${params.recipient}`, error as Error);
-      await this.prisma.notification.update({ where: { id: notification.id }, data: { status: 'FAILED' } });
+      return this.prisma.notification.update({ where: { id: notification.id }, data: { status: 'FAILED' } });
     }
-
-    return notification;
   }
 
   /** Customer-facing order summary (HTML + text), built from the order as it is now. */
@@ -109,6 +107,20 @@ export class NotificationService {
       subject: built.email.subject,
       body: built.email.text,
       html: built.email.html,
+    });
+  }
+
+  async notifyRefundIssued(customerId: string, tenantId: string, orderNumber: string, amount: number, reason: string) {
+    const customer = await this.prisma.customer.findUnique({ where: { id: customerId } });
+    if (!customer) return;
+
+    return this.send({
+      tenantId,
+      customerId,
+      channel: 'EMAIL',
+      recipient: customer.email,
+      subject: `Refund for order ${orderNumber}`,
+      body: `The restaurant refunded ${amount.toFixed(2)} for your order ${orderNumber}. Reason: ${reason}`,
     });
   }
 

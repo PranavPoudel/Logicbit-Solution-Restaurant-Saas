@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useMoney } from "@/hooks/use-money";
 import { getPendingRefunds, processRefund, RefundRequest, RefundStatus } from "@/lib/api/refunds";
 
 export default function RefundsPage() {
+  const money = useMoney();
   const [refunds, setRefunds] = useState<RefundRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRefund, setSelectedRefund] = useState<RefundRequest | null>(null);
@@ -73,7 +75,7 @@ export default function RefundsPage() {
             Total Pending Amount
           </p>
           <p className="text-2xl font-bold text-gray-900 mt-2">
-            Rs. {totalPendingAmount.toFixed(2)}
+            {money(totalPendingAmount)}
           </p>
         </div>
       </div>

@@ -2,6 +2,7 @@
 "use client";
 
 import { Pencil, Trash2, RotateCcw, X, Tag, Calendar, Users, Zap } from "lucide-react";
+import { useMoney } from "@/hooks/use-money";
 
 export interface OwnerCoupon {
   id: string;
@@ -30,9 +31,10 @@ interface CouponCardProps {
 }
 
 export function CouponCard({ coupon, isTrash, onEdit, onDelete, onRestore, onPermDelete, isLoading }: CouponCardProps) {
+  const money = useMoney();
   const isExpired = coupon.expiresAt ? new Date(coupon.expiresAt) < new Date() : false;
   const usageText = coupon.usageLimit ? `${coupon.usedCount} / ${coupon.usageLimit} used` : `${coupon.usedCount} used`;
-  const discountText = coupon.discountType === "PERCENTAGE" ? `${coupon.discountValue}% OFF` : `Rs. ${coupon.discountValue} OFF`;
+  const discountText = coupon.discountType === "PERCENTAGE" ? `${coupon.discountValue}% OFF` : `${money(coupon.discountValue)} OFF`;
 
   return (
     <div className={`bg-white border rounded-xl p-5 transition-shadow hover:shadow-sm ${isExpired ? 'border-neutral-200 opacity-75' : 'border-neutral-200'}`}>
@@ -56,12 +58,12 @@ export function CouponCard({ coupon, isTrash, onEdit, onDelete, onRestore, onPer
       <div className="space-y-2 mb-4">
         {coupon.minSubtotal ? (
           <p className="text-xs text-neutral-500 flex items-center gap-1.5">
-            <span className="w-1 h-1 rounded-full bg-neutral-400" /> Min. order: Rs. {coupon.minSubtotal}
+            <span className="w-1 h-1 rounded-full bg-neutral-400" /> Min. order: {money(coupon.minSubtotal)}
           </p>
         ) : null}
         {coupon.maxDiscount && coupon.discountType === "PERCENTAGE" ? (
           <p className="text-xs text-neutral-500 flex items-center gap-1.5">
-            <span className="w-1 h-1 rounded-full bg-neutral-400" /> Max discount: Rs. {coupon.maxDiscount}
+            <span className="w-1 h-1 rounded-full bg-neutral-400" /> Max discount: {money(coupon.maxDiscount)}
           </p>
         ) : null}
         <p className="text-xs text-neutral-500 flex items-center gap-1.5">
@@ -78,14 +80,14 @@ export function CouponCard({ coupon, isTrash, onEdit, onDelete, onRestore, onPer
             <button 
               onClick={() => onRestore()} 
               disabled={isLoading} 
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-teal-700 bg-teal-50 hover:bg-teal-100 rounded-lg transition-colors disabled:opacity-50"
+              className="flex min-h-11 items-center gap-1.5 px-3 text-xs font-medium text-teal-700 bg-teal-50 hover:bg-teal-100 rounded-lg transition-colors disabled:opacity-50"
             >
               <RotateCcw size={12} /> Restore
             </button>
             <button 
               onClick={() => onPermDelete()} 
               disabled={isLoading} 
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-700 bg-red-50 hover:bg-red-100 rounded-lg transition-colors disabled:opacity-50"
+              className="flex min-h-11 items-center gap-1.5 px-3 text-xs font-medium text-red-700 bg-red-50 hover:bg-red-100 rounded-lg transition-colors disabled:opacity-50"
             >
               <X size={12} /> Delete Forever
             </button>
@@ -94,15 +96,17 @@ export function CouponCard({ coupon, isTrash, onEdit, onDelete, onRestore, onPer
           <>
             <button 
               onClick={() => onEdit(coupon)} 
-              className="p-2 text-neutral-400 hover:text-[#E3A008] hover:bg-amber-50 rounded-lg transition-colors" 
+              className="grid h-11 w-11 place-items-center text-neutral-400 hover:text-[#E3A008] hover:bg-amber-50 rounded-lg transition-colors" 
               title="Edit coupon"
+              aria-label="Edit coupon"
             >
               <Pencil size={14} />
             </button>
             <button 
               onClick={() => onDelete()} 
-              className="p-2 text-neutral-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" 
+              className="grid h-11 w-11 place-items-center text-neutral-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" 
               title="Delete coupon"
+              aria-label="Delete coupon"
             >
               <Trash2 size={14} />
             </button>

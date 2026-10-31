@@ -7,6 +7,7 @@ import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { ValidateCouponDto } from './dto/validate-coupon.dto';
 import { UpdateOrderStatusDto, CancelOrderDto } from './dto/update-order-status.dto';
+import { IssueRefundDto } from './dto/issue-refund.dto';
 
 @ApiTags('Orders - Customer')
 @ApiBearerAuth()
@@ -80,12 +81,22 @@ export class RestaurantOrderController {
 
   @Patch(':id/cancel')
   cancel(@Req() req, @Param('restaurantId') restaurantId: string, @Param('id') id: string, @Body() dto: CancelOrderDto) {
-    return this.orderService.cancel('RESTAURANT', req.user.id, id, dto); // Fixed: added restaurantId to match service if needed, or adjust service
+    return this.orderService.cancel('RESTAURANT', req.user.id, id, dto, { tenantId: req.user.tenantId, restaurantId });
+  }
+
+  @Post(':id/refund')
+  issueRefund(@Req() req, @Param('restaurantId') restaurantId: string, @Param('id') id: string, @Body() dto: IssueRefundDto) {
+    return this.orderService.issueRefund(req.user.tenantId, restaurantId, id, dto, req.user.id);
   }
 
   @Patch(':id/print') // 🆕 Mark order as printed
   markPrinted(@Req() req, @Param('restaurantId') restaurantId: string, @Param('id') id: string) {
     return this.orderService.markAsPrinted(req.user.tenantId, restaurantId, id);
+  }
+
+  @Patch(':id/own-delivery')
+  switchToOwnDelivery(@Req() req, @Param('restaurantId') restaurantId: string, @Param('id') id: string) {
+    return this.orderService.switchToOwnDelivery(req.user.tenantId, restaurantId, id, req.user.id);
   }
 
   @Patch(':id/reject-rider')

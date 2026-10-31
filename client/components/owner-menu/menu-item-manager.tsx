@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, Pencil, Trash2, X, Check, Search, Tag, Layers } from "lucide-react";
+import { useCurrencyCode, useMoney } from "@/hooks/use-money";
 import { menuItemsApi, modifierGroupsApi, type MenuItemInput } from "@/lib/api/menu";
 import { FindDuplicatesModal } from "./find-duplicates-modal";
 import { ItemModifierLinkModal } from "./item-modifier-link-modal";
@@ -36,6 +37,8 @@ export function MenuItemManager({
   restaurantId,
   isLoading,
 }: MenuItemManagerProps) {
+  const money = useMoney();
+  const currency = useCurrencyCode();
   const queryClient = useQueryClient();
 
   const [showForm, setShowForm] = useState(false);
@@ -409,7 +412,7 @@ export function MenuItemManager({
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <FormField
-                label="Price (Rs) *"
+                label={`Price (${currency}) *`}
                 type="number"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
@@ -591,7 +594,7 @@ export function MenuItemManager({
                             </div>
 
                             <div className="flex items-center gap-3 mt-1">
-                              <span className="text-sm font-mono text-neutral-700 font-medium">Rs {item.price}</span>
+                              <span className="text-sm font-mono text-neutral-700 font-medium">{money(item.price)}</span>
                               {item.description && <span className="text-xs text-neutral-500 truncate max-w-md">{item.description}</span>}
                               {item.homepageSections?.length > 0 && (
                                 <span className="text-[10px] font-bold text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full">FEATURED</span>

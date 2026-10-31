@@ -102,11 +102,11 @@ export default function StorefrontBuilderPage() {
                 {sectionSettings.map((section, index) => (
                   <div key={section.id} className="flex items-center gap-4 p-4 bg-neutral-50 border border-neutral-200 rounded-lg">
                     <div className="flex flex-col gap-1">
-                      <button onClick={() => moveSection(index, "up")} disabled={index === 0} className="text-neutral-400 hover:text-neutral-700 disabled:opacity-30"><ArrowUp size={16} /></button>
-                      <button onClick={() => moveSection(index, "down")} disabled={index === sectionSettings.length - 1} className="text-neutral-400 hover:text-neutral-700 disabled:opacity-30"><ArrowDown size={16} /></button>
+                      <button onClick={() => moveSection(index, "up")} disabled={index === 0} aria-label={`Move ${section.titleEn || section.id} up`} className="grid h-9 w-11 place-items-center rounded text-neutral-400 hover:text-neutral-700 disabled:opacity-30"><ArrowUp size={16} /></button>
+                      <button onClick={() => moveSection(index, "down")} disabled={index === sectionSettings.length - 1} aria-label={`Move ${section.titleEn || section.id} down`} className="grid h-9 w-11 place-items-center rounded text-neutral-400 hover:text-neutral-700 disabled:opacity-30"><ArrowDown size={16} /></button>
                     </div>
                     
-                    <button onClick={() => updateSection(section.id, "isVisible", !section.isVisible)} className="shrink-0">
+                    <button onClick={() => updateSection(section.id, "isVisible", !section.isVisible)} aria-label={`${section.isVisible ? "Hide" : "Show"} ${section.titleEn || section.id}`} aria-pressed={section.isVisible} className="grid h-11 w-11 shrink-0 place-items-center">
                       {section.isVisible ? <Eye size={20} className="text-[#0F6B5C]" /> : <EyeOff size={20} className="text-neutral-400" />}
                     </button>
 

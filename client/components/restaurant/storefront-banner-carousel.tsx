@@ -102,16 +102,18 @@ export function StorefrontBannerCarousel({ banners }: StorefrontBannerCarouselPr
           </button>
 
           {/* Dots */}
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+          <div className="absolute bottom-0 left-1/2 flex -translate-x-1/2">
             {banners.map((_, idx) => (
               <button
                 key={idx}
                 onClick={() => goToSlide(idx)}
-                className={`w-2 h-2 rounded-full transition-all ${
-                  idx === currentIndex ? "bg-white w-6" : "bg-white/50 hover:bg-white/70"
-                }`}
+                className="group grid h-11 min-w-6 place-items-center px-1"
                 aria-label={`Go to slide ${idx + 1}`}
-              />
+              >
+                <span className={`h-2 rounded-full transition-all ${
+                  idx === currentIndex ? "w-6 bg-white" : "w-2 bg-white/50 group-hover:bg-white/70"
+                }`} />
+              </button>
             ))}
           </div>
         </>

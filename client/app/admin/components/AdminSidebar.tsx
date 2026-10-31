@@ -1,5 +1,6 @@
 'use client';
 
+import type { ReactElement } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { theme } from '@/config/theme';
@@ -7,7 +8,7 @@ import { theme } from '@/config/theme';
 interface NavItem {
   name: string;
   path: string;
-  icon: (props: { className?: string }) => JSX.Element;
+  icon: (props: { className?: string }) => ReactElement;
 }
 
 interface NavSection {

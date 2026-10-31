@@ -10,6 +10,7 @@ import { isAxiosError } from "axios";
 import { customerSignupSchema, type CustomerSignupInput } from "@/lib/validation/auth-schemas";
 import { customerSignup } from "@/lib/api/customer-auth";
 import { postLoginPath } from "@/lib/utils/redirect";
+import { playSound } from "@/lib/utils/sound";
 import { useCustomerAuthStore } from "@/store/customer-auth-store";
 import { AuthError, AuthInput, AuthPassword, AuthSubmit, PasswordStrength } from "@/components/auth/auth-shell";
 
@@ -32,9 +33,11 @@ export default function CustomerSignupPage() {
       return customerSignup({ fullName: input.fullName, email: input.email, phone: input.phone, password: input.password });
     },
     onSuccess: (data) => {
+      playSound("success");
       setAuth(data);
       router.push(postLoginPath());
     },
+    onError: () => playSound("error"),
   });
 
   const password = useWatch({ control, name: "password" });

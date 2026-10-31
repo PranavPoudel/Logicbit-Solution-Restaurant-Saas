@@ -5,20 +5,30 @@ import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { CouponInput } from "@/components/cart/coupon-input";
+import { ClosedNotice } from "@/components/restaurant/closed-notice";
 import { AllergenAlert, Button, Card, Icon, IconButton, Progress, RefundNote, Squiggle, Stepper } from "@/components/ui/primitives";
 import { useCartStore, type CartItem } from "@/store/cart-store";
 import { useIsMounted } from "@/hooks/use-is-mounted";
 import { getRestaurantByIdOrSlug } from "@/lib/api/discovery";
 import { restaurantAccentStyle } from "@/lib/utils/restaurant-theme";
+import { playSound } from "@/lib/utils/sound";
 import { getFullImageUrl } from "@/lib/utils/image";
 import { CurrencyProvider, useMoney } from "@/hooks/use-money";
 
-function CheckoutButton({ total }: { total: number }) {
+function CheckoutButton({ total, closed }: { total: number; closed?: boolean }) {
   const money = useMoney();
   const t = useTranslations("cart");
+  if (closed) {
+    return (
+      <span aria-disabled="true" className="flex h-14 w-full cursor-not-allowed items-center justify-center gap-2 rounded-full bg-ink/10 px-6 text-lg font-bold text-ink/60">
+        <Icon name="clock" className="h-5 w-5" />{t("checkoutClosed")}
+      </span>
+    );
+  }
   return (
   <Link
     href="/checkout"
+    onClick={() => playSound("tap")}
     className="shadow-red flex h-14 w-full items-center justify-between gap-3 rounded-full bg-[var(--accent,var(--brand-chili))] px-6 text-lg font-bold text-[var(--accent-ink,var(--brand-parchment))] transition hover:-translate-y-0.5"
   >
     <span>{t("checkout")} - {money(total)}</span>
@@ -80,7 +90,7 @@ function ItemRow({ i }: { i: CartItem }) {
   if (i.notes) mods.push(`"${i.notes}"`);
 
   return (
-    <li className="grid grid-cols-[72px_1fr] gap-x-4 gap-y-3 py-4 sm:grid-cols-[72px_1fr_auto] sm:items-center">
+    <li className="grid grid-cols-[72px_1fr] gap-x-4 gap-y-3 py-4 @lg:grid-cols-[72px_1fr_auto] @lg:items-center">
       {i.image ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={getFullImageUrl(i.image)} alt="" className="h-[72px] w-[72px] rounded-2xl object-cover" />
@@ -97,7 +107,7 @@ function ItemRow({ i }: { i: CartItem }) {
           </Button>
         </div>
       </div>
-      <div className="col-start-2 flex items-center justify-between gap-4 sm:col-start-auto">
+      <div className="col-start-2 flex items-center justify-between gap-4 @lg:col-start-auto">
         <Stepper
           value={i.quantity}
           onChange={(n) => (n <= 0 ? removeItem(i.menuItemId, i.variantKey) : n > i.quantity ? addItem({ ...i, quantity: 1 }) : removeOneOrAll(i.menuItemId, i.variantKey))}
@@ -110,6 +120,12 @@ function ItemRow({ i }: { i: CartItem }) {
 
 function EmptyCart() {
   const t = useTranslations("cart");
+  const lastRestaurantId = useCartStore((s) => s.lastRestaurantId);
+  const lastRestaurant = useQuery({
+    queryKey: ["restaurant", lastRestaurantId],
+    queryFn: () => getRestaurantByIdOrSlug(lastRestaurantId as string),
+    enabled: !!lastRestaurantId,
+  }).data;
   return (
     <div className="mx-auto max-w-xl px-5 py-16 text-center">
       <svg viewBox="0 0 240 200" className="mx-auto w-56" aria-hidden>
@@ -130,7 +146,14 @@ function EmptyCart() {
         </span>
       </h1>
       <p className="mt-3 text-lg text-ink/75">{t("emptyBody")}</p>
-      <Link href="/restaurants"><Button size="lg" className="mt-8">{t("browseRestaurants")}</Button></Link>
+      <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+        {lastRestaurant?.name && (
+          <Link href={`/restaurants/${lastRestaurant.slug ?? lastRestaurant.id}`}>
+            <Button size="lg"><Icon name="arrow" className="h-5 w-5 rotate-180" />{t("backToRestaurant", { restaurant: lastRestaurant.name })}</Button>
+          </Link>
+        )}
+        <Link href="/restaurants"><Button size="lg" variant={lastRestaurant?.name ? "outline" : "accent"}>{t("browseRestaurants")}</Button></Link>
+      </div>
     </div>
   );
 }
@@ -154,6 +177,7 @@ export default function CartPage() {
     enabled: !!restaurantId && mounted,
   });
   const r = restaurantQuery.data;
+  const closed = r?.isOpen === false;
   const money = useMoney(r?.currencyCode);
   const total = Math.max(0, subtotal - discount);
   const methods = [r?.supportsEsewa && "eSewa", r?.supportsKhalti && "Khalti", r?.supportsPaypay && "PayPay", r?.supportsCod !== false && t("cod")].filter(Boolean) as string[];
@@ -167,7 +191,7 @@ export default function CartPage() {
 
   const cta = (
     <div className="space-y-4">
-      <CheckoutButton total={total} />
+      <CheckoutButton total={total} closed={closed} />
       <Trust methods={methods} />
     </div>
   );
@@ -197,6 +221,8 @@ export default function CartPage() {
           </div>
         </div>
 
+        {closed && <div className="mb-8"><ClosedNotice restaurant={r} /></div>}
+
         <div className="grid items-start gap-8 lg:grid-cols-[1fr_400px]">
           <div className="space-y-6">
             <Card className="!p-6">
@@ -214,7 +240,7 @@ export default function CartPage() {
                   </Link>
                 )}
               </div>
-              <ul className="divide-y-2 divide-dashed divide-ink/10">
+              <ul className="@container divide-y-2 divide-dashed divide-ink/10">
                 {items.map((i) => <ItemRow key={`${i.menuItemId}::${i.variantKey}`} i={i} />)}
               </ul>
               <div className="flex justify-between border-t-2 border-ink/10 pt-4 font-bold">
@@ -237,7 +263,7 @@ export default function CartPage() {
           <span className="text-ink/70">{t("totalDot")} <span className="font-bold text-chili underline underline-offset-4">{t("viewSummary")}</span></span>
           <span className="font-display text-2xl font-extrabold">{money(total)}</span>
         </button>
-        <CheckoutButton total={total} />
+        <CheckoutButton total={total} closed={closed} />
       </div>
       {sheet && (
         <div className="fixed inset-0 z-50 flex items-end bg-espresso/60 lg:hidden" onClick={() => setSheet(false)}>

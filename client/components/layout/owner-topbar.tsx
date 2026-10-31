@@ -2,8 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronDown, LogOut, Plus } from "lucide-react";
+import { ChevronDown, LogOut, Menu, Plus, Volume2, VolumeX } from "lucide-react";
 import { useOwnerAuthStore } from "@/store/owner-auth-store";
+import { useSoundMuted } from "@/store/sound-store";
+import { useOwnerNavStore } from "@/store/owner-nav-store";
+import { OWNER_SIDEBAR_ID } from "./owner-sidebar";
 import { AddRestaurantModal } from "./add-restaurant-modal";
 import { OwnerNotifications } from "./owner-notifications";
 
@@ -14,21 +17,34 @@ export function OwnerTopbar() {
   const [restaurantMenuOpen, setRestaurantMenuOpen] = useState(false);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [muted, setMuted] = useSoundMuted();
+  const navOpen = useOwnerNavStore((s) => s.open);
+  const setNavOpen = useOwnerNavStore((s) => s.setOpen);
 
   const activeRestaurant =
     restaurants.find((r) => r.id === activeRestaurantId) ?? restaurants[0];
 
   return (
     <>
-      <header className="h-16 shrink-0 border-b border-neutral-200 bg-white flex items-center justify-between px-6">
+      <header className="h-16 shrink-0 border-b border-neutral-200 bg-white flex items-center justify-between gap-2 px-3 sm:px-6">
         {/* Restaurant switcher */}
-        <div className="relative">
+        <div className="relative flex min-w-0 items-center gap-1">
+          <button
+            type="button"
+            onClick={() => setNavOpen(true)}
+            aria-label="Open menu"
+            aria-expanded={navOpen}
+            aria-controls={OWNER_SIDEBAR_ID}
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-neutral-700 outline-none hover:bg-neutral-100 focus-visible:ring-2 focus-visible:ring-[#E3A008] lg:hidden"
+          >
+            <Menu size={20} aria-hidden="true" />
+          </button>
           <button
             onClick={() => setRestaurantMenuOpen((v) => !v)}
-            className="flex items-center gap-2 text-sm font-medium text-neutral-800 hover:bg-neutral-100 px-3 py-1.5 rounded-md transition-colors"
+            className="flex min-h-11 min-w-0 items-center gap-2 text-sm font-medium text-neutral-800 hover:bg-neutral-100 px-3 py-1.5 rounded-md transition-colors"
           >
-            {activeRestaurant ? activeRestaurant.name : "Select restaurant"}
-            <ChevronDown size={15} className="text-neutral-400" />
+            <span className="truncate">{activeRestaurant ? activeRestaurant.name : "Select restaurant"}</span>
+            <ChevronDown size={15} className="shrink-0 text-neutral-400" />
           </button>
 
           {restaurantMenuOpen && (
@@ -74,7 +90,16 @@ export function OwnerTopbar() {
           )}
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex shrink-0 items-center gap-1 sm:gap-4">
+          <button
+            type="button"
+            onClick={() => setMuted(!muted)}
+            aria-label={muted ? "Unmute sounds" : "Mute sounds"}
+            title={muted ? "Unmute sounds" : "Mute sounds"}
+            className="flex h-11 w-11 items-center justify-center rounded-lg text-neutral-600 outline-none hover:bg-neutral-100 focus-visible:ring-2 focus-visible:ring-[#E3A008]"
+          >
+            {muted ? <VolumeX size={18} aria-hidden="true" /> : <Volume2 size={18} aria-hidden="true" />}
+          </button>
           <OwnerNotifications key={activeRestaurantId} />
 
           <div className="relative">

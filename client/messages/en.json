@@ -12,6 +12,8 @@
     "logOut": "Log out",
     "switchToLight": "Switch to light mode",
     "switchToDark": "Switch to dark mode",
+    "muteSounds": "Mute sounds",
+    "unmuteSounds": "Unmute sounds",
     "cartCount": "Cart, {count} items",
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
@@ -91,6 +93,8 @@
     "emptyTitleA": "Your plate is",
     "emptyTitleB": "empty",
     "emptyBody": "And it looks sad about it. Local kitchens are one tap away.",
+    "backToRestaurant": "Back to {restaurant}",
+    "checkoutClosed": "Closed right now",
     "subtitle": "{count, plural, one {# item} other {# items}}",
     "subtitleFrom": "{count, plural, one {# item} other {# items}} from {restaurant}",
     "emptyCartBtn": "Empty cart",
@@ -195,6 +199,7 @@
     "refundAgree": "I've read the refund policy.",
     "refundAgreeShort": "I've read the refund policy: report issues within 2 hours.",
     "placing": "Placing order…",
+    "closedBlocked": "The restaurant is closed right now, so we can't take your order yet.",
     "needAddress": "Enter your delivery address to place the order.",
     "needPin": "Confirm your pin on the map to place the order.",
     "checkingFee": "Checking the delivery fee…",
@@ -419,7 +424,9 @@
       "opensOn": "Opens {day} at {time}",
       "today": "Today",
       "closedDay": "Closed"
-    }
+    },
+    "closedNoticeTitle": "{name} is closed right now",
+    "closedNoticeBody": "Your cart is saved, but they can't take your order until they open."
   },
   "menu": {
     "categories": "Menu categories",
@@ -968,5 +975,20 @@
     "humanStatus": "A team member is replying",
     "endedNote": "This chat has ended.",
     "newChat": "Start new chat"
+  },
+  "unsubscribe": {
+    "askTitle": "Unsubscribe from {restaurant}?",
+    "askBody": "You'll stop getting offers and updates from {restaurant}. You'll still get emails about your own orders.",
+    "confirm": "Unsubscribe",
+    "keep": "Keep getting emails",
+    "doneTitle": "You're unsubscribed",
+    "doneBody": "{restaurant} won't email you offers or updates any more.",
+    "undo": "Changed your mind? Resubscribe",
+    "backAgainTitle": "You're subscribed again",
+    "backAgainBody": "You'll hear from {restaurant} again.",
+    "invalidTitle": "This link doesn't work",
+    "invalidBody": "It may be incomplete or out of date. Open the link from the email again.",
+    "failed": "That didn't go through. Please try again.",
+    "browse": "Browse restaurants"
   }
 }

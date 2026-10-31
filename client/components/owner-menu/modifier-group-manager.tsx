@@ -3,6 +3,7 @@
 
 import { useState, type InputHTMLAttributes } from "react";
 import { Plus, Trash2, ChevronDown, ChevronRight } from "lucide-react";
+import { useCurrencyCode, useMoney } from "@/hooks/use-money";
 import { isSingleModifier } from "@/lib/utils/modifiers";
 
 export interface OwnerModifierOption {
@@ -44,7 +45,7 @@ function selectionRule(group: OwnerModifierGroup) {
   return `${group.isRequired ? "Required" : "Optional"} · ${choose}`;
 }
 
-const priceLabel = (price?: number) => (price ? `+Rs ${price}` : "Free");
+const priceLabel = (price: number | undefined, money: (amount: number) => string) => (price ? `+${money(price)}` : "Free");
 
 function LabeledInput({ label, ...props }: InputHTMLAttributes<HTMLInputElement> & { label: string }) {
   return (
@@ -82,6 +83,8 @@ export function ModifierGroupManager({
   onDeleteOption,
   isMutating,
 }: ModifierGroupManagerProps) {
+  const money = useMoney();
+  const currency = useCurrencyCode();
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [showGroupForm, setShowGroupForm] = useState(false);
   const [groupName, setGroupName] = useState("");
@@ -165,7 +168,7 @@ export function ModifierGroupManager({
               placeholder="e.g. Extra cheese"
             />
             <LabeledInput
-              label="Extra price (Rs)"
+              label={`Extra price (${currency})`}
               value={singlePrice}
               onChange={(e) => setSinglePrice(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && submitSingle()}
@@ -217,7 +220,7 @@ export function ModifierGroupManager({
                     </span>
                     <AllergenPill text={option.allergenInfo} />
                   </div>
-                  <span className="shrink-0 font-mono text-sm text-neutral-600">{priceLabel(option.extraPrice)}</span>
+                  <span className="shrink-0 font-mono text-sm text-neutral-600">{priceLabel(option.extraPrice, money)}</span>
                   <button onClick={() => confirmDelete(group)} className={ICON_BUTTON} aria-label={`Delete ${group.name}`}>
                     <Trash2 size={17} />
                   </button>
@@ -271,6 +274,8 @@ function OptionEditor({
   onAdd: (input: { name: string; extraPrice: number; allergenInfo?: string }) => void;
   onDelete: (optionId: string) => void;
 }) {
+  const money = useMoney();
+  const currency = useCurrencyCode();
   const [name, setName] = useState("");
   const [extraPrice, setExtraPrice] = useState("");
   const [allergenInfo, setAllergenInfo] = useState("");
@@ -295,7 +300,7 @@ function OptionEditor({
                 <span className="text-sm font-medium text-neutral-800">{opt.name}</span>
                 <AllergenPill text={opt.allergenInfo} />
               </div>
-              <span className="shrink-0 font-mono text-sm text-neutral-600">{priceLabel(opt.extraPrice)}</span>
+              <span className="shrink-0 font-mono text-sm text-neutral-600">{priceLabel(opt.extraPrice, money)}</span>
               <button onClick={() => onDelete(opt.id)} className={ICON_BUTTON} aria-label={`Delete ${opt.name}`}>
                 <Trash2 size={16} />
               </button>
@@ -317,7 +322,7 @@ function OptionEditor({
           value={extraPrice}
           onChange={(e) => setExtraPrice(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && submit()}
-          placeholder="+Rs"
+          placeholder={`+${currency}`}
           aria-label="Extra price"
           type="number"
           min={0}
