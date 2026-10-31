@@ -14,7 +14,30 @@ export class CouponService {
     const existing = await this.prisma.coupon.findFirst({ where: { tenantId, code, deletedAt: null } });
     if (existing) throw new ConflictException(`Coupon code "${code}" already exists`);
 
-    return this.prisma.coupon.create({
+    const restaurant = await this.prisma.restaurant.findUnique({
+      where: { id: restaurantId },
+      select: { maxActivePromotions: true, maxDiscountCap: true, allowedCouponTypes: true }
+    });
+
+    if (!restaurant) throw new NotFoundException('Restaurant not found');
+
+    const activeCouponsCount = await this.prisma.coupon.count({
+      where: { restaurantId, tenantId, isActive: true, deletedAt: null }
+    });
+    if (activeCouponsCount >= restaurant.maxActivePromotions) {
+      throw new BadRequestException(`Maximum limit of ${restaurant.maxActivePromotions} active promotions reached.`);
+    }
+
+
+    if (!restaurant.allowedCouponTypes.includes(dto.type as any)) {
+      throw new BadRequestException(`Promotion type ${dto.type} is not allowed for this restaurant.`);
+    }
+
+    const isException = dto.value > restaurant.maxDiscountCap || (dto.maxDiscount && dto.maxDiscount > restaurant.maxDiscountCap);
+    const approvalStatus = isException ? 'PENDING_APPROVAL' : 'APPROVED';
+    const isActive = !isException;
+
+    const coupon = await this.prisma.coupon.create({
       data: {
         tenantId,
         restaurantId,
@@ -27,8 +50,24 @@ export class CouponService {
         usageLimitPerCustomer: dto.usageLimitPerCustomer ?? 1,
         validFrom: dto.validFrom ? new Date(dto.validFrom) : new Date(),
         validUntil: dto.validUntil ? new Date(dto.validUntil) : null,
+        approvalStatus,
+        isActive,
       },
     });
+
+    // 5. Audit the creation or exception request
+    await this.prisma.activityLog.create({
+      data: {
+        tenantId,
+        restaurantId,
+        actorType: 'OWNER',
+        action: isException ? 'PROMOTION_EXCEPTION_REQUESTED' : 'PROMOTION_CREATED',
+        description: `Created promotion ${code} with status ${approvalStatus}`,
+        metadata: { couponId: coupon.id, value: dto.value, type: dto.type }
+      }
+    });
+
+    return coupon;
   }
 
   async findAll(tenantId: string, restaurantId: string, includeDeleted = false) {
@@ -83,9 +122,16 @@ export class CouponService {
 
   async validateAndCalculate(restaurantId: string, customerId: string, code: string, orderSubtotal: number) {
     const coupon = await this.prisma.coupon.findFirst({
-      where: { code: code.toUpperCase(), isActive: true, deletedAt: null, OR: [{ restaurantId }, { restaurantId: null }] },
+      where: { 
+        code: code.toUpperCase(), 
+        isActive: true, 
+        approvalStatus: 'APPROVED', 
+        deletedAt: null, 
+        OR: [{ restaurantId }, { restaurantId: null }] 
+      },
     });
-    if (!coupon) throw new NotFoundException('Invalid or expired coupon code');
+    
+    if (!coupon) throw new NotFoundException('Invalid, expired, or unapproved coupon code');
 
     const now = new Date();
     if (coupon.validFrom > now) throw new BadRequestException('This coupon is not active yet');
