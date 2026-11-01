@@ -2,6 +2,7 @@
 import { apiClient } from "@/lib/api/client";
 import { ownerApiClient } from "@/lib/api/owner-client";
 import type { OrderDetail } from "@/types/order";
+import type { RefundMethod } from "@/lib/utils/refund";
 
 // ✅ STRICTLY MATCHES BACKEND CreateOrderDto & OrderItemInputDto
 // Removed 'name' and 'extraPrice' to prevent forbidNonWhitelisted 400 errors.
@@ -88,7 +89,7 @@ export async function cancelRestaurantOrder(restaurantId: string, orderId: strin
   return data;
 }
 
-export async function issueOrderRefund(restaurantId: string, orderId: string, body: { amount: number; reason: string }) {
+export async function issueOrderRefund(restaurantId: string, orderId: string, body: { amount: number; reason: string; method: RefundMethod; reference?: string }) {
   const { data } = await ownerApiClient.post(
     `/restaurants/${restaurantId}/orders/${orderId}/refund`,
     body

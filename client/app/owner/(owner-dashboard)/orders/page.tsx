@@ -16,7 +16,7 @@ import { shortNumber, stageLabel } from "@/lib/utils/order-flow";
 import { playSound } from "@/lib/utils/sound";
 import { OrderTabs, ORDERS_PANEL_ID } from "@/components/owner-orders/order-tabs";
 import { OrderList, type OrderGroup } from "@/components/owner-orders/order-list";
-import { OrderDetail, DETAIL_TITLE_ID, PRIMARY_ACTION_ID } from "@/components/owner-orders/order-detail";
+import { OrderDetail, DETAIL_TITLE_ID, PRIMARY_ACTION_ID, type RefundRequest } from "@/components/owner-orders/order-detail";
 import type { OwnerOrderSummary } from "@/types/order";
 
 const ACTIVE_KEY = "ACTIVE";
@@ -98,10 +98,11 @@ function OrdersPageContent() {
     onError: () => playSound("error"),
   });
   const refundMutation = useMutation({
-    mutationFn: ({ orderId, amount, reason }: { orderId: string; amount: number; reason: string }) => issueOrderRefund(restaurantId as string, orderId, { amount, reason }),
-    onSuccess: (_data, { orderId }) => {
+    mutationFn: ({ orderId, ...body }: { orderId: string } & RefundRequest) => issueOrderRefund(restaurantId as string, orderId, body),
+    onSuccess: (data, { orderId }) => {
       playSound("success");
-      return settle(orderId, (before) => `Order ${before ? shortNumber(before) : ""} refunded`);
+      const waiting = data?.data?.status === "PENDING";
+      return settle(orderId, (before) => `Order ${before ? shortNumber(before) : ""} ${waiting ? "refund sent to PayPay, waiting for it to finish" : "refunded"}`);
     },
     onError: () => playSound("error"),
   });
@@ -280,9 +281,9 @@ function OrdersPageContent() {
                         cancelMutation.mutate(selected.id);
                       }}
                       refunding={refundMutation.isPending && refundMutation.variables?.orderId === selected.id}
-                      onRefund={(amount, reason) => {
+                      onRefund={(request) => {
                         setSelectedId(selected.id);
-                        refundMutation.mutate({ orderId: selected.id, amount, reason });
+                        refundMutation.mutate({ orderId: selected.id, ...request });
                       }}
                       onOwnDelivery={() => {
                         setSelectedId(selected.id);

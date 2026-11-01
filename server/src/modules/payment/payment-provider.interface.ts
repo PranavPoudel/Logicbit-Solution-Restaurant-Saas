@@ -6,6 +6,12 @@ export interface PaymentInitiationResult {
   providerReference?: string; // Gateway को transaction id
 }
 
+export interface RefundResult {
+  status: 'COMPLETED' | 'PENDING' | 'FAILED';
+  providerReference?: string; // Gateway को refund id
+  message?: string;
+}
+
 /**
  * PaymentProvider — सबै payment method ले implement गर्नुपर्ने common contract।
  * यसले "Strategy Pattern" प्रयोग गर्छ — Order module ले कहिल्यै कुन gateway
@@ -17,5 +23,6 @@ export interface PaymentProvider {
   readonly methodName: string;
   initiate(orderId: string, amount: number, currencyCode: string): Promise<PaymentInitiationResult>;
   verifyWebhook?(payload: any, signature?: string): Promise<{ orderId: string; success: boolean }>;
-  refund?(orderId: string, amount: number): Promise<{ success: boolean; providerReference?: string }>;
+  /** Never throws for a gateway error — it returns FAILED with the gateway's message so the owner can retry. */
+  refund?(orderId: string, amount: number, existingRefundId?: string): Promise<RefundResult>;
 }

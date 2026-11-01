@@ -57,6 +57,18 @@ export function refundBlockedReason(order: { paymentStatus: string; total: numbe
   return null;
 }
 
+/** PayPay can send the money back itself only when the customer paid through PayPay; otherwise it is recorded like cash */
+export function refundGoesThroughPayPay(order: { paymentMethod?: string | null }, method: string) {
+  return method === 'PAYPAY' && order.paymentMethod === 'PAYPAY';
+}
+
+export function refundMethodBlockedReason(order: { paymentMethod?: string | null; refund?: { method?: string | null; status: string } | null }, method: string) {
+  if (!refundGoesThroughPayPay(order, method) && order.refund?.method === 'PAYPAY' && order.refund.status === 'PENDING') {
+    return 'A PayPay refund is still waiting for PayPay. Retry it to check its status before refunding another way';
+  }
+  return null;
+}
+
 @Injectable()
 export class OrderService {
   private readonly logger = new Logger(OrderService.name);
@@ -387,14 +399,41 @@ export class OrderService {
     return order;
   }
 
-  /** Owner-facing — records a refund the restaurant has paid back to the customer */
+  /**
+   * Owner-facing — refunds an order. Cash, bank transfer and other methods record money the restaurant already
+   * paid back. PayPay sends the refund through the restaurant's own PayPay account and only counts it once PayPay confirms.
+   */
   async issueRefund(tenantId: string, restaurantId: string, orderId: string, dto: IssueRefundDto, issuedBy: string) {
     const order = await this.findOneForRestaurant(tenantId, restaurantId, orderId);
-    const blocked = refundBlockedReason(order, dto.amount);
+    const blocked = refundBlockedReason(order, dto.amount) ?? refundMethodBlockedReason(order, dto.method);
     if (blocked) throw new BadRequestException(blocked);
 
+    let reference = dto.reference?.trim() || null;
+
+    if (refundGoesThroughPayPay(order, dto.method)) {
+      const resume = order.refund?.method === 'PAYPAY' && order.refund.status === 'PENDING' ? order.refund.reference ?? undefined : undefined;
+      const result = await this.paymentService.refund('PAYPAY', orderId, dto.amount, resume);
+      reference = result.providerReference ?? null;
+
+      if (result.status !== 'COMPLETED') {
+        const failed = result.status === 'FAILED';
+        const data = {
+          amount: dto.amount,
+          reason: dto.reason,
+          method: dto.method,
+          reference,
+          status: failed ? ('FAILED' as const) : ('PENDING' as const),
+          failureReason: failed ? result.message ?? 'PayPay did not accept the refund' : null,
+          processedAt: null,
+        };
+        const saved = await this.prisma.refund.upsert({ where: { orderId }, create: { orderId, ...data }, update: data });
+        if (failed) throw new BadRequestException(`PayPay refund failed: ${data.failureReason}`);
+        return { success: true, data: saved };
+      }
+    }
+
     const refund = await this.prisma.$transaction(async (tx) => {
-      const data = { amount: dto.amount, status: 'PROCESSED' as const, reason: dto.reason, processedAt: new Date() };
+      const data = { amount: dto.amount, status: 'PROCESSED' as const, reason: dto.reason, method: dto.method, reference, failureReason: null, processedAt: new Date() };
       const saved = await tx.refund.upsert({ where: { orderId }, create: { orderId, ...data }, update: data });
       await tx.order.update({ where: { id: orderId }, data: { paymentStatus: 'REFUNDED' } });
       await tx.orderStatusHistory.create({
@@ -404,7 +443,7 @@ export class OrderService {
     });
 
     void this.notificationService
-      .notifyRefundIssued(order.customerId, tenantId, order.orderNumber, dto.amount, dto.reason)
+      .notifyRefundIssued(order.customerId, tenantId, order.orderNumber, dto.amount, dto.reason, dto.method, reference)
       .catch((err) => this.logger.error(`Refund email failed for ${order.orderNumber}`, err as Error));
 
     await this.activityLog.log({
@@ -413,8 +452,8 @@ export class OrderService {
       actorType: 'OWNER',
       actorId: issuedBy,
       action: 'ORDER_REFUNDED',
-      description: `Order ${order.orderNumber} refunded ${dto.amount}: ${dto.reason}`,
-      metadata: { orderId, amount: dto.amount },
+      description: `Order ${order.orderNumber} refunded ${dto.amount} by ${dto.method}: ${dto.reason}`,
+      metadata: { orderId, amount: dto.amount, method: dto.method },
     });
 
     return { success: true, data: refund };

@@ -87,8 +87,9 @@ export interface OrderDetail {
   deliveryAddress?: string | null;
   deliveryLatitude?: number | null;
   deliveryLongitude?: number | null;
-  
+
   notes?: string | null;
+  refund?: { status?: string; method?: string | null; reference?: string | null } | null;
 }
 
 // ✅ UPDATED: This is now the definitive shape for UI summary cards
@@ -100,7 +101,7 @@ export interface OrderSummary {
   paymentMethod?: string;
   paymentStatus?: string;
   cancellationReason?: string;
-  refund?: { amount?: number; status?: string; reason?: string | null; createdAt?: string; processedAt?: string | null } | null;
+  refund?: { amount?: number; status?: string; reason?: string | null; method?: string | null; reference?: string | null; failureReason?: string | null; createdAt?: string; processedAt?: string | null } | null;
   deliveryAddress?: string | null;
   deliveryHandledBy?: string;
   delivery?: {

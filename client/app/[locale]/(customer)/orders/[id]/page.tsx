@@ -123,11 +123,13 @@ export default function OrderTrackingPage({
   const orderNumber = order.orderNumber ?? order.id.slice(0, 8);
   const hasMap = !isPickup && order.deliveryLatitude != null && order.deliveryLongitude != null && !cancelled;
   const payTone = order.paymentStatus === "PAID" ? "herb" : order.paymentStatus === "REFUNDED" ? "saffron" : "soft";
+  const refundMethod = order.refund?.method && t.has(`refundMethod.${order.refund.method}`) ? t(`refundMethod.${order.refund.method}`) : null;
+  const refundRef = order.refund?.reference;
   const payText =
     order.paymentStatus === "PAID"
       ? t("paid", { method: t.has(`payLabel.${order.paymentMethod}`) ? t(`payLabel.${order.paymentMethod}`) : t("online") })
       : order.paymentStatus === "REFUNDED"
-        ? t("refunded")
+        ? refundMethod ? (refundRef ? t("refundedByRef", { method: refundMethod, ref: refundRef }) : t("refundedBy", { method: refundMethod })) : t("refunded")
         : order.paymentMethod === "COD"
           ? (isPickup ? t("payAtPickup") : t("payOnDelivery"))
           : t("paymentPending");
