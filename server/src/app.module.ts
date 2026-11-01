@@ -37,6 +37,7 @@ import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { TablesModule } from './modules/tables/tables.module';
 import { ReservationsModule } from './modules/reservations/reservations.module';
 import { ChatsModule } from './modules/chats/chats.module';
+import { AdminPromotionModule } from './modules/platform-admin-promotion/admin-promotion.module';
 
 
 
@@ -85,6 +86,7 @@ import { ChatsModule } from './modules/chats/chats.module';
     TablesModule,
     ReservationsModule,
     ChatsModule,
+    AdminPromotionModule,
   ],
   providers: [
     {

@@ -4,8 +4,8 @@ import { PopupType } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateBannerDto, UpdateBannerDto, ReorderBannersDto, UpdateStorefrontConfigDto, CreatePopupDto, UpdatePopupDto } from './dto/storefront.dto';
 
-const OWN_POPUP_LIMIT = 3;
-const EXTERNAL_POPUP_LIMIT = 1;
+// const OWN_POPUP_LIMIT = 3;
+// const EXTERNAL_POPUP_LIMIT = 1;
 
 @Injectable()
 export class StorefrontService {
@@ -14,9 +14,20 @@ export class StorefrontService {
   // ---------- Banners (Owner-facing) ----------
 
   async createBanner(tenantId: string, restaurantId: string, dto: CreateBannerDto) {
-    const restaurant = await this.prisma.restaurant.findFirst({ where: { id: restaurantId, tenantId } });
+   const restaurant = await this.prisma.restaurant.findFirst({ 
+      where: { id: restaurantId, tenantId },
+      select: { maxActiveBanners: true }
+    });
     if (!restaurant) throw new NotFoundException('Restaurant not found');
+  
+   const activeBannersCount = await this.prisma.storefrontBanner.count({
+      where: { tenantId, restaurantId, isActive: true }
+    }); 
 
+    if (dto.isActive !== false && activeBannersCount >= restaurant.maxActiveBanners) {
+      throw new BadRequestException(`Maximum limit of ${restaurant.maxActiveBanners} active banners reached. Turn one off to activate another.`);
+    }
+    
     return this.prisma.storefrontBanner.create({ data: { ...dto, tenantId, restaurantId } });
   }
 
@@ -27,9 +38,24 @@ export class StorefrontService {
     });
   }
 
-  async updateBanner(tenantId: string, restaurantId: string, id: string, dto: UpdateBannerDto) {
+async updateBanner(tenantId: string, restaurantId: string, id: string, dto: UpdateBannerDto) {
     const banner = await this.prisma.storefrontBanner.findFirst({ where: { id, tenantId, restaurantId } });
     if (!banner) throw new NotFoundException('Banner not found');
+
+    if (dto.isActive === true && !banner.isActive) {
+      const restaurant = await this.prisma.restaurant.findUnique({
+        where: { id: restaurantId },
+        select: { maxActiveBanners: true }
+      });
+      
+      const activeBannersCount = await this.prisma.storefrontBanner.count({
+        where: { tenantId, restaurantId, isActive: true }
+      });
+
+      if (activeBannersCount >= restaurant!.maxActiveBanners) {
+        throw new BadRequestException(`Maximum limit of ${restaurant!.maxActiveBanners} active banners reached. Turn one off to activate another.`);
+      }
+    }
 
     return this.prisma.storefrontBanner.update({ where: { id }, data: dto });
   }
@@ -90,9 +116,20 @@ export class StorefrontService {
 
   // ---------- Popup (Offer/Notification) ----------
 
-  private async assertPopupLimit(tenantId: string, restaurantId: string, type: PopupType, excludeId?: string) {
+ private async assertPopupLimit(tenantId: string, restaurantId: string, type: PopupType, excludeId?: string) {
     const isExternal = type === PopupType.EXTERNAL_AD;
-    const limit = isExternal ? EXTERNAL_POPUP_LIMIT : OWN_POPUP_LIMIT;
+    
+    let limit = 1; 
+
+    if (!isExternal) {
+      const restaurant = await this.prisma.restaurant.findUnique({
+        where: { id: restaurantId },
+        select: { maxActivePopups: true }
+      });
+      if (!restaurant) throw new NotFoundException('Restaurant not found');
+      limit = restaurant.maxActivePopups;
+    }
+
     const active = await this.prisma.storefrontPopup.count({
       where: {
         tenantId,
@@ -102,6 +139,7 @@ export class StorefrontService {
         ...(excludeId ? { id: { not: excludeId } } : {}),
       },
     });
+    
     if (active >= limit) {
       const kind = isExternal ? 'external ad' : 'promotional popups';
       throw new BadRequestException(`Limit reached: only ${limit} active ${kind} allowed. Turn one off to activate another.`);

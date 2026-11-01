@@ -158,6 +158,7 @@ model RestaurantCuisine {
 
 model Restaurant {
   id       String @id @default(uuid())
+  coupons         Coupon[]
   tenantId String
   name     String
   slug     String @unique
@@ -185,6 +186,13 @@ model Restaurant {
   supportsDelivery Boolean @default(true)
   supportsPickup   Boolean @default(true)
   supportsDineIn   Boolean @default(false)
+
+  maxActivePromotions Int          @default(5)
+  maxDiscountCap      Float        @default(50) // Maximum flat amount or percentage allowed without admin approval
+  allowedCouponTypes  CouponType[] @default([PERCENTAGE, FLAT])
+
+  maxActiveBanners    Int          @default(3)
+  maxActivePopups     Int          @default(1)
 
   // --- Distance-tiered Delivery Settings (owner ले आफैं तोक्ने) ---
   // 0 → selfDeliveryRadiusKm         : Restaurant आफैंले deliver गर्छ
@@ -581,10 +589,17 @@ enum CouponType {
   FLAT
 }
 
+enum ApprovalStatus {
+  APPROVED
+  PENDING_APPROVAL
+  REJECTED
+}
+
 model Coupon {
   id                  String     @id @default(uuid())
   tenantId            String
-  restaurantId        String?
+  restaurantId   String?
+  restaurant     Restaurant? @relation(fields: [restaurantId], references: [id])
   code                String?
   type                CouponType
   value               Float
@@ -597,7 +612,7 @@ model Coupon {
   validUntil          DateTime?
   isActive            Boolean    @default(true)
   isAutoApply         Boolean    @default(false)
-
+  approvalStatus ApprovalStatus @default(APPROVED)
   deletedAt           DateTime?  // 🆕 Added for Trash functionality
   createdAt           DateTime   @default(now())
   updatedAt           DateTime   @updatedAt
