@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { buildOrderConfirmationEmail } from './templates/order-confirmation.email';
+import { describeRefundPayback } from '../../common/utils/refund-method.util';
 
 /**
  * NotificationService
@@ -110,7 +111,7 @@ export class NotificationService {
     });
   }
 
-  async notifyRefundIssued(customerId: string, tenantId: string, orderNumber: string, amount: number, reason: string) {
+  async notifyRefundIssued(customerId: string, tenantId: string, orderNumber: string, amount: number, reason: string, method?: string | null, reference?: string | null) {
     const customer = await this.prisma.customer.findUnique({ where: { id: customerId } });
     if (!customer) return;
 
@@ -120,7 +121,7 @@ export class NotificationService {
       channel: 'EMAIL',
       recipient: customer.email,
       subject: `Refund for order ${orderNumber}`,
-      body: `The restaurant refunded ${amount.toFixed(2)} for your order ${orderNumber}. Reason: ${reason}`,
+      body: `The restaurant refunded ${amount.toFixed(2)}${describeRefundPayback(method, reference)} for your order ${orderNumber}. Reason: ${reason}`,
     });
   }
 

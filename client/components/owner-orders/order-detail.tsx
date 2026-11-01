@@ -8,6 +8,7 @@ import type { OwnerOrderSummary } from "@/types/order";
 import { formatMoney } from "@/lib/utils/money";
 import { ageLabel, flowFor, minutesSince, nextStep, shortNumber, stepIndex } from "@/lib/utils/order-flow";
 import { riderOf } from "@/lib/utils/order-rider";
+import { describeRefundPayback, REFUND_METHODS, type RefundMethod } from "@/lib/utils/refund";
 
 export const DETAIL_TITLE_ID = "order-detail-title";
 export const PRIMARY_ACTION_ID = "order-primary-action";
@@ -164,13 +165,49 @@ function RiderDialog({ order, onClose }: { order: OwnerOrderSummary; onClose: ()
   );
 }
 
-function RefundAction({ total, currency, disabled, refunding, onRefund }: { total: number; currency?: string; disabled: boolean; refunding: boolean; onRefund: (amount: number, reason: string) => void }) {
+export interface RefundRequest {
+  amount: number;
+  reason: string;
+  method: RefundMethod;
+  reference?: string;
+}
+
+interface RefundActionProps {
+  total: number;
+  currency?: string;
+  paidWithPayPay: boolean;
+  initialAmount: number;
+  disabled: boolean;
+  refunding: boolean;
+  onRefund: (request: RefundRequest) => void;
+}
+
+const REFUND_REASONS = ["Item missing", "Wrong item", "Late delivery", "Quality issue"];
+
+function RefundAction({ total, currency, paidWithPayPay, initialAmount, disabled, refunding, onRefund }: RefundActionProps) {
   const [open, setOpen] = useState(false);
-  const [amount, setAmount] = useState(String(total));
+  const [amount, setAmount] = useState(String(initialAmount));
   const [reason, setReason] = useState("");
+  const [method, setMethod] = useState<RefundMethod>(paidWithPayPay ? "PAYPAY" : "CASH");
+  const [reference, setReference] = useState("");
+  const [touched, setTouched] = useState({ amount: false, reason: false });
   const value = Number(amount);
-  const valid = value > 0 && value <= total && reason.trim().length > 0;
-  const field = "mt-1 min-h-11 w-full rounded-lg border border-neutral-300 bg-white px-3 text-sm text-neutral-900 outline-none focus-visible:ring-2 focus-visible:ring-[#E3A008] disabled:opacity-50";
+  const amountError = !(value > 0) ? "Enter an amount above 0" : value > total ? `It can't be more than ${formatMoney(total, currency)}` : "";
+  const reasonError = reason.trim() ? "" : "Say why. The customer sees this in their email";
+  const viaPayPay = method === "PAYPAY" && paidWithPayPay;
+  const methodLabel = REFUND_METHODS.find((m) => m.value === method)?.label ?? "";
+  const half = Math.round((total / 2) * 100) / 100;
+  const field = "mt-1.5 min-h-11 w-full rounded-lg border bg-white px-3 text-base text-neutral-900 outline-none focus-visible:ring-2 focus-visible:ring-[#E3A008] disabled:opacity-50 sm:text-sm";
+  const chip = "inline-flex min-h-11 items-center rounded-full border px-4 text-sm font-medium transition-colors duration-150 motion-reduce:transition-none outline-none focus-visible:ring-2 focus-visible:ring-[#E3A008] focus-visible:ring-offset-1 disabled:opacity-50";
+  const chipOff = "border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-50";
+  const chipOn = "border-[#111827] bg-[#111827] text-white";
+
+  const error = (id: string, message: string) => (
+    <p id={id} role="alert" className="mt-1.5 flex items-start gap-1.5 text-xs font-medium text-red-700">
+      <AlertCircle size={14} aria-hidden="true" className="mt-px shrink-0" />
+      {message}
+    </p>
+  );
 
   if (!open) {
     return (
@@ -184,33 +221,134 @@ function RefundAction({ total, currency, disabled, refunding, onRefund }: { tota
   return (
     <form
       aria-labelledby="refund-form-title"
+      noValidate
       onSubmit={(e) => {
         e.preventDefault();
-        if (valid) onRefund(value, reason.trim());
+        if (amountError || reasonError) {
+          setTouched({ amount: true, reason: true });
+          document.getElementById(amountError ? "refund-amount" : "refund-reason")?.focus();
+          return;
+        }
+        onRefund({ amount: value, reason: reason.trim(), method, reference: viaPayPay ? undefined : reference.trim() || undefined });
       }}
-      className="space-y-3 rounded-xl border border-neutral-200 p-4"
+      className="space-y-5 rounded-xl border border-neutral-200 p-4 sm:p-5"
     >
-      <h3 id="refund-form-title" className="text-sm font-semibold text-neutral-900">
-        Issue refund
-      </h3>
-      <p className="text-sm text-neutral-600">Record the money you paid back to the customer. They are told by email. An order can be refunded once.</p>
-      <div className="grid gap-3 sm:grid-cols-[10rem_minmax(0,1fr)]">
-        <label className="text-xs font-medium text-neutral-700">
-          Amount (max {formatMoney(total, currency)})
-          <input type="number" inputMode="decimal" min="0.01" max={total} step="0.01" value={amount} disabled={refunding} onChange={(e) => setAmount(e.target.value)} className={field} />
-        </label>
-        <label className="text-xs font-medium text-neutral-700">
-          Reason
-          <input type="text" maxLength={300} value={reason} disabled={refunding} onChange={(e) => setReason(e.target.value)} placeholder="e.g. Item missing from delivery" className={field} />
-        </label>
+      <div>
+        <h3 id="refund-form-title" className="text-base font-semibold text-neutral-900">
+          Issue refund
+        </h3>
+        <p className="mt-1 text-sm text-neutral-600">
+          {viaPayPay
+            ? "Sent to the customer's PayPay from your PayPay account. It counts as refunded once PayPay confirms."
+            : "Record money you already paid back. The customer is told by email. An order can be refunded once."}
+        </p>
       </div>
-      <div className="flex flex-wrap justify-end gap-3">
+
+      <div className="grid gap-5 sm:grid-cols-[12rem_minmax(0,1fr)]">
+        <div>
+          <label htmlFor="refund-amount" className="text-sm font-medium text-neutral-800">
+            Amount
+          </label>
+          <input
+            id="refund-amount"
+            type="number"
+            inputMode="decimal"
+            min="0.01"
+            max={total}
+            step="0.01"
+            value={amount}
+            disabled={refunding}
+            aria-invalid={touched.amount && !!amountError}
+            aria-describedby={touched.amount && amountError ? "refund-amount-error" : "refund-amount-hint"}
+            onChange={(e) => setAmount(e.target.value)}
+            onBlur={() => setTouched((t) => ({ ...t, amount: true }))}
+            className={`${field} ${touched.amount && amountError ? "border-red-500" : "border-neutral-300"}`}
+          />
+          {touched.amount && amountError ? error("refund-amount-error", amountError) : <p id="refund-amount-hint" className="mt-1.5 text-xs text-neutral-500">Up to {formatMoney(total, currency)}</p>}
+          <div className="mt-2 flex flex-wrap gap-2">
+            <button type="button" disabled={refunding} aria-pressed={value === total} onClick={() => setAmount(String(total))} className={`${chip} ${value === total ? chipOn : chipOff}`}>
+              Full
+            </button>
+            <button type="button" disabled={refunding} aria-pressed={value === half} onClick={() => setAmount(String(half))} className={`${chip} ${value === half ? chipOn : chipOff}`}>
+              Half
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label htmlFor="refund-reason" className="text-sm font-medium text-neutral-800">
+            Reason
+          </label>
+          <input
+            id="refund-reason"
+            type="text"
+            maxLength={300}
+            value={reason}
+            disabled={refunding}
+            aria-invalid={touched.reason && !!reasonError}
+            aria-describedby={touched.reason && reasonError ? "refund-reason-error" : undefined}
+            onChange={(e) => setReason(e.target.value)}
+            onBlur={() => setTouched((t) => ({ ...t, reason: true }))}
+            placeholder="e.g. Item missing from delivery"
+            className={`${field} ${touched.reason && reasonError ? "border-red-500" : "border-neutral-300"}`}
+          />
+          {touched.reason && reasonError && error("refund-reason-error", reasonError)}
+          <div className="mt-2 flex flex-wrap gap-2" role="group" aria-label="Common reasons">
+            {REFUND_REASONS.map((r) => (
+              <button key={r} type="button" disabled={refunding} onClick={() => setReason(r)} className={`${chip} ${reason === r ? chipOn : chipOff}`}>
+                {r}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <fieldset disabled={refunding} className="min-w-0">
+        <legend className="text-sm font-medium text-neutral-800">Paid back by</legend>
+        <div className="mt-1.5 grid grid-cols-2 gap-2 sm:grid-cols-[repeat(auto-fit,minmax(8rem,1fr))]">
+          {REFUND_METHODS.map((m) => (
+            <label
+              key={m.value}
+              className="relative flex min-h-11 cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-neutral-300 bg-white px-3 text-sm font-medium text-neutral-700 transition-colors duration-150 hover:bg-neutral-50 has-[:checked]:border-[#111827] has-[:checked]:bg-[#111827] has-[:checked]:text-white has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#E3A008] has-[:focus-visible]:ring-offset-1 has-[:disabled]:opacity-50 motion-reduce:transition-none"
+            >
+              <input type="radio" name="refund-method" value={m.value} checked={method === m.value} onChange={() => setMethod(m.value)} className="sr-only" />
+              {method === m.value && <Check size={16} aria-hidden="true" />}
+              {m.label}
+            </label>
+          ))}
+        </div>
+        {method === "PAYPAY" && !paidWithPayPay && (
+          <p className="mt-2 text-xs text-neutral-500">The customer didn&apos;t pay with PayPay, so you send the money yourself and it&apos;s recorded here.</p>
+        )}
+      </fieldset>
+
+      {!viaPayPay && (
+        <div>
+          <label htmlFor="refund-reference" className="text-sm font-medium text-neutral-800">
+            Reference <span className="font-normal text-neutral-500">(optional)</span>
+          </label>
+          <input id="refund-reference" type="text" maxLength={100} value={reference} disabled={refunding} aria-describedby="refund-reference-hint" onChange={(e) => setReference(e.target.value)} placeholder="e.g. transfer number" className={`${field} border-neutral-300`} />
+          <p id="refund-reference-hint" className="mt-1.5 text-xs text-neutral-500">
+            A transfer or receipt number, so you can trace this payment later. The customer sees it too.
+          </p>
+        </div>
+      )}
+
+      <p aria-live="polite" className="min-h-5 text-sm text-neutral-700">
+        {!amountError && !reasonError && (
+          <>
+            <span className="font-semibold tabular-nums">{formatMoney(value, currency)}</span> goes back to the customer {viaPayPay ? "through PayPay" : method === "PAYPAY" ? "by PayPay" : `by ${methodLabel.toLowerCase()}`}.
+          </>
+        )}
+      </p>
+
+      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
         <button type="button" disabled={refunding} onClick={() => setOpen(false)} className={`${button} border border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-50`}>
           Close
         </button>
-        <button type="submit" disabled={disabled || !valid} className={`${button} bg-[#111827] text-white hover:bg-[#1f2937]`}>
+        <button type="submit" disabled={disabled || refunding} className={`${button} bg-[#111827] text-white hover:bg-[#1f2937]`}>
           {refunding && <Loader2 size={16} aria-hidden="true" className="animate-spin motion-reduce:animate-none" />}
-          Confirm refund
+          {viaPayPay ? "Send refund to PayPay" : "Confirm refund"}
         </button>
       </div>
     </form>
@@ -225,7 +363,7 @@ interface OrderDetailProps {
   refunding: boolean;
   onAdvance: (next: string) => void;
   onCancel: () => void;
-  onRefund: (amount: number, reason: string) => void;
+  onRefund: (request: RefundRequest) => void;
   onOwnDelivery: () => void;
 }
 
@@ -330,6 +468,13 @@ export function OrderDetail({ order, now, disabled, pending, refunding, onAdvanc
                   <p className="text-sm font-semibold tabular-nums">{formatMoney(order.refund?.amount ?? order.total ?? 0, order.currencyCode)}</p>
                 </div>
                 <p className="mt-1 text-sm">{refund.note}</p>
+                {order.refund?.status === "PROCESSED" && describeRefundPayback(order.refund.method, order.refund.reference) && (
+                  <p className="mt-1 text-sm">Paid back by {describeRefundPayback(order.refund.method, order.refund.reference)}</p>
+                )}
+                {order.refund?.status === "FAILED" && order.refund.failureReason && <p className="mt-1 text-sm">PayPay said: {order.refund.failureReason}</p>}
+                {order.refund?.status === "PENDING" && order.refund.method === "PAYPAY" && (
+                  <p className="mt-1 text-sm">PayPay has not finished this refund yet. Press Issue refund again to check it.</p>
+                )}
                 {order.refund?.reason && <p className="mt-1 text-sm">Reason: {order.refund.reason}</p>}
                 <p className="mt-2 text-xs opacity-80">
                   {order.refund?.processedAt ? `Processed ${formatDate(order.refund.processedAt)}` : order.refund?.createdAt ? `Requested ${formatDate(order.refund.createdAt)}` : ""}
@@ -415,7 +560,18 @@ export function OrderDetail({ order, now, disabled, pending, refunding, onAdvanc
           </dl>
         </div>
 
-        {order.paymentStatus === "PAID" && <RefundAction total={order.total ?? 0} currency={order.currencyCode} disabled={disabled} refunding={refunding} onRefund={onRefund} />}
+        {order.paymentStatus === "PAID" && (
+          <RefundAction
+            key={`${order.id}-${order.refund?.status ?? "none"}`}
+            total={order.total ?? 0}
+            currency={order.currencyCode}
+            paidWithPayPay={order.paymentMethod === "PAYPAY"}
+            initialAmount={order.refund?.amount ?? order.total ?? 0}
+            disabled={disabled}
+            refunding={refunding}
+            onRefund={onRefund}
+          />
+        )}
       </div>
 
       {step && (
