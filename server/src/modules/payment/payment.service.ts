@@ -1,5 +1,5 @@
 // src/modules/payment/payment.service.ts
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PaymentProvider } from './payment-provider.interface';
 import { CodProvider } from './providers/cod.provider';
 import { CreditCardProvider, EsewaProvider, KhaltiProvider, IpsProvider, PhonePayProvider, PayPayProvider } from './providers/future-providers.stub';
@@ -37,5 +37,11 @@ export class PaymentService {
 
   async initiate(method: string, orderId: string, amount: number, currencyCode: string) {
     return this.getProvider(method).initiate(orderId, amount, currencyCode);
+  }
+
+  async refund(method: string, orderId: string, amount: number, existingRefundId?: string) {
+    const provider = this.getProvider(method);
+    if (!provider.refund) throw new BadRequestException('Refunds through this payment method are not switched on yet');
+    return provider.refund(orderId, amount, existingRefundId);
   }
 }

@@ -480,6 +480,13 @@ enum RefundStatus {
   NOT_APPLICABLE
 }
 
+enum RefundMethod {
+  CASH
+  BANK_TRANSFER
+  PAYPAY
+  OTHER
+}
+
 model Order {
   id           String   @id @default(uuid())
   tenantId     String
@@ -552,13 +559,16 @@ model OrderStatusHistory {
 // COD भए "NOT_APPLICABLE" (पैसा तिरिएकै थिएन), Online payment भए
 // gateway बाट फिर्ता processing track गर्ने।
 model Refund {
-  id          String       @id @default(uuid())
-  orderId     String       @unique
-  amount      Float
-  status      RefundStatus @default(PENDING)
-  reason      String?
-  processedAt DateTime?
-  createdAt   DateTime     @default(now())
+  id            String        @id @default(uuid())
+  orderId       String        @unique
+  amount        Float
+  status        RefundStatus  @default(PENDING)
+  reason        String?
+  method        RefundMethod?
+  reference     String?
+  failureReason String?
+  processedAt   DateTime?
+  createdAt     DateTime      @default(now())
 
   order Order @relation(fields: [orderId], references: [id])
 }

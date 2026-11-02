@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test';
 import { strict as assert } from 'node:assert';
-import { NotFoundException } from '@nestjs/common';
-import { canMoveOrderStatus, deliveryBlockedReason, OrderService, ownDeliveryBlockedReason, refundBlockedReason } from './order.service';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { canMoveOrderStatus, deliveryBlockedReason, OrderService, ownDeliveryBlockedReason, refundBlockedReason, refundGoesThroughPayPay, refundMethodBlockedReason } from './order.service';
 
 describe('ownDeliveryBlockedReason', () => {
   const waiting = { orderType: 'DELIVERY', deliveryHandledBy: 'THIRD_PARTY', delivery: null };
@@ -70,6 +70,102 @@ describe('refundBlockedReason', () => {
 
   it('lets an old pending refund record be completed', () => {
     assert.equal(refundBlockedReason({ ...paid, refund: { status: 'PENDING' } }, 100), null);
+  });
+});
+
+describe('refundGoesThroughPayPay', () => {
+  it('sends the money through PayPay only for orders the customer paid with PayPay', () => {
+    assert.equal(refundGoesThroughPayPay({ paymentMethod: 'PAYPAY' }, 'PAYPAY'), true);
+    assert.equal(refundGoesThroughPayPay({ paymentMethod: 'COD' }, 'PAYPAY'), false);
+    assert.equal(refundGoesThroughPayPay({ paymentMethod: 'PAYPAY' }, 'CASH'), false);
+  });
+});
+
+describe('refundMethodBlockedReason', () => {
+  it('lets any order be paid back by hand, including by PayPay on a cash order', () => {
+    for (const method of ['CASH', 'BANK_TRANSFER', 'OTHER', 'PAYPAY']) assert.equal(refundMethodBlockedReason({ paymentMethod: 'COD' }, method), null);
+    for (const method of ['CASH', 'BANK_TRANSFER', 'OTHER']) assert.equal(refundMethodBlockedReason({ paymentMethod: 'PAYPAY' }, method), null);
+  });
+
+  it('stops a second refund while PayPay is still working on the first', () => {
+    const waiting = { paymentMethod: 'PAYPAY', refund: { method: 'PAYPAY', status: 'PENDING' } };
+    assert.ok(refundMethodBlockedReason(waiting, 'CASH'));
+    assert.equal(refundMethodBlockedReason(waiting, 'PAYPAY'), null);
+    assert.equal(refundMethodBlockedReason({ ...waiting, refund: { method: 'PAYPAY', status: 'FAILED' } }, 'CASH'), null);
+  });
+});
+
+describe('OrderService.issueRefund', () => {
+  type Saved = Record<string, any>;
+  const build = (over: Record<string, any> = {}, payResult: any = { status: 'COMPLETED', providerReference: 'pp-ref' }) => {
+    const order = { id: 'o1', orderNumber: 'LB-1', status: 'DELIVERED', customerId: 'c1', paymentStatus: 'PAID', paymentMethod: 'PAYPAY', total: 100, refund: null, ...over };
+    const log: { refund?: Saved; paymentStatus?: string; emailed?: any[]; payCalls: any[] } = { payCalls: [] };
+    const tx = {
+      refund: { upsert: async ({ create }: any) => (log.refund = create) },
+      order: { update: async ({ data }: any) => (log.paymentStatus = data.paymentStatus) },
+      orderStatusHistory: { create: async () => null },
+    };
+    const prisma = {
+      order: { findFirst: async () => order },
+      refund: { upsert: async ({ create }: any) => (log.refund = create) },
+      $transaction: async (fn: any) => fn(tx),
+    };
+    const payments = { refund: async (...args: any[]) => (log.payCalls.push(args), payResult) };
+    const notifications = { notifyRefundIssued: async (...args: any[]) => ((log.emailed ??= []).push(args), null) };
+    const service = new OrderService(prisma as any, null as any, payments as any, notifications as any, { log: async () => null } as any, null as any);
+    return { service, log };
+  };
+  const dto = (over: Record<string, any> = {}) => ({ amount: 40, reason: 'Missing item', method: 'BANK_TRANSFER', reference: ' TX-77 ', ...over }) as any;
+
+  it('records a hand-paid refund with its method and reference and emails the customer', async () => {
+    const { service, log } = build();
+    await service.issueRefund('t1', 'r1', 'o1', dto(), 'u1');
+    assert.equal(log.refund?.status, 'PROCESSED');
+    assert.equal(log.refund?.method, 'BANK_TRANSFER');
+    assert.equal(log.refund?.reference, 'TX-77');
+    assert.equal(log.paymentStatus, 'REFUNDED');
+    assert.equal(log.payCalls.length, 0);
+    assert.deepEqual(log.emailed?.[0].slice(4), ['Missing item', 'BANK_TRANSFER', 'TX-77']);
+  });
+
+  it('sends a PayPay refund through PayPay and counts it once PayPay completes it', async () => {
+    const { service, log } = build();
+    await service.issueRefund('t1', 'r1', 'o1', dto({ method: 'PAYPAY', reference: undefined }), 'u1');
+    assert.deepEqual(log.payCalls[0], ['PAYPAY', 'o1', 40, undefined]);
+    assert.equal(log.refund?.status, 'PROCESSED');
+    assert.equal(log.refund?.reference, 'pp-ref');
+    assert.equal(log.paymentStatus, 'REFUNDED');
+  });
+
+  it('leaves the order paid and reports the reason when PayPay says no', async () => {
+    const { service, log } = build({}, { status: 'FAILED', message: 'INVALID_REFUND_AMOUNT' });
+    await assert.rejects(service.issueRefund('t1', 'r1', 'o1', dto({ method: 'PAYPAY' }), 'u1'), BadRequestException);
+    assert.equal(log.refund?.status, 'FAILED');
+    assert.equal(log.refund?.failureReason, 'INVALID_REFUND_AMOUNT');
+    assert.equal(log.paymentStatus, undefined);
+    assert.equal(log.emailed, undefined);
+  });
+
+  it('keeps a refund PayPay is still working on pending, and resumes it on retry', async () => {
+    const first = build({}, { status: 'PENDING', providerReference: 'pp-ref' });
+    await first.service.issueRefund('t1', 'r1', 'o1', dto({ method: 'PAYPAY' }), 'u1');
+    assert.equal(first.log.refund?.status, 'PENDING');
+    assert.equal(first.log.paymentStatus, undefined);
+
+    const retry = build({ refund: { method: 'PAYPAY', status: 'PENDING', reference: 'pp-ref' } });
+    await retry.service.issueRefund('t1', 'r1', 'o1', dto({ method: 'PAYPAY' }), 'u1');
+    assert.equal(retry.log.payCalls[0][3], 'pp-ref');
+    assert.equal(retry.log.refund?.status, 'PROCESSED');
+  });
+
+  it('records a PayPay payback on a cash order by hand, without calling PayPay', async () => {
+    const { service, log } = build({ paymentMethod: 'COD' });
+    await service.issueRefund('t1', 'r1', 'o1', dto({ method: 'PAYPAY', reference: 'PP-5' }), 'u1');
+    assert.equal(log.payCalls.length, 0);
+    assert.equal(log.refund?.status, 'PROCESSED');
+    assert.equal(log.refund?.method, 'PAYPAY');
+    assert.equal(log.refund?.reference, 'PP-5');
+    assert.equal(log.paymentStatus, 'REFUNDED');
   });
 });
 

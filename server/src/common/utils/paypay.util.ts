@@ -66,7 +66,17 @@ export class PayPayUtil {
       authorizationExpiry: null,
     };
   }
-    static verifyWebhookSignature(
+  static createRefundPayload(paymentId: string, amount: number, currencyCode: string, reason: string) {
+    return {
+      merchantRefundId: uuidv4(),
+      paymentId, // PayPay's own id for the payment, not our merchantPaymentId
+      amount: { amount, currency: currencyCode },
+      requestedAt: Math.floor(Date.now() / 1000),
+      reason,
+    };
+  }
+
+  static verifyWebhookSignature(
     apiSecret: string,
     headers: any,
     rawBody: string,
