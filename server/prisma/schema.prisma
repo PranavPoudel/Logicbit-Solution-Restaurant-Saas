@@ -174,6 +174,9 @@ model Restaurant {
   country          String?
   postalCode       String?
 
+
+  subscriptionMode SubscriptionMode @default(MANUAL)
+
   // Discovery / Filter fields
   priceRange   String?
   avgRating    Float    @default(0)
@@ -746,6 +749,11 @@ enum SubscriptionStatus {
   ACTIVE
   EXPIRED
   CANCELLED
+}
+
+enum SubscriptionMode {
+  MANUAL
+  AUTO
 }
 
 // SubscriptionPlan — "Free", "Monthly", "Quarterly", "1 Year"... जस्ता

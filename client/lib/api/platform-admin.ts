@@ -192,3 +192,20 @@ export async function listPendingPromotions() {
   const { data } = await platformApiClient.get("/platform-admin/promotions/pending");
   return data;
 }
+
+// --- Manual Subscription Override ---
+export async function listSubscriptionPlans() {
+  const { data } = await platformApiClient.get("/platform-admin/subscriptions/plans");
+  return data;
+}
+
+export interface AssignSubscriptionInput {
+  restaurantId: string;
+  planId: string;
+  mode: 'MANUAL' | 'AUTO';
+}
+
+export async function assignManualSubscription(input: AssignSubscriptionInput) {
+  const { data } = await platformApiClient.post("/platform-admin/subscriptions/manual-assign", input);
+  return data;
+}

@@ -38,6 +38,7 @@ import { TablesModule } from './modules/tables/tables.module';
 import { ReservationsModule } from './modules/reservations/reservations.module';
 import { ChatsModule } from './modules/chats/chats.module';
 import { AdminPromotionModule } from './modules/platform-admin-promotion/admin-promotion.module';
+import { AdminSubscriptionModule } from './modules/platform-admin-subscription/platform-admin.subscription.module';
 
 
 
@@ -87,6 +88,7 @@ import { AdminPromotionModule } from './modules/platform-admin-promotion/admin-p
     ReservationsModule,
     ChatsModule,
     AdminPromotionModule,
+    AdminSubscriptionModule
   ],
   providers: [
     {
