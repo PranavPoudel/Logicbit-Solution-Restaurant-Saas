@@ -272,6 +272,9 @@ function RefundAction({ total, currency, paidWithPayPay, initialAmount, disabled
             <button type="button" disabled={refunding} aria-pressed={value === half} onClick={() => setAmount(String(half))} className={`${chip} ${value === half ? chipOn : chipOff}`}>
               Half
             </button>
+            <button type="button" disabled={refunding} aria-pressed={value !== total && value !== half} onClick={() => { setAmount(""); document.getElementById("refund-amount")?.focus(); }} className={`${chip} ${value !== total && value !== half ? chipOn : chipOff}`}>
+              Custom
+            </button>
           </div>
         </div>
 
@@ -299,6 +302,9 @@ function RefundAction({ total, currency, paidWithPayPay, initialAmount, disabled
                 {r}
               </button>
             ))}
+            <button type="button" disabled={refunding} aria-pressed={!!reason && !REFUND_REASONS.includes(reason)} onClick={() => { setReason(""); document.getElementById("refund-reason")?.focus(); }} className={`${chip} ${reason && !REFUND_REASONS.includes(reason) ? chipOn : chipOff}`}>
+              Custom
+            </button>
           </div>
         </div>
       </div>
