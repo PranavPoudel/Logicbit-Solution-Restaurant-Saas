@@ -235,7 +235,8 @@ export function MenuItemManager({
       descriptionJa: descriptionJa.trim() || undefined,
       allergenInfo: allergenInfo.trim() || undefined,
       ingredients: ingredients.trim() || undefined,
-      image,
+      // null (not undefined): JSON drops undefined, so a removed image would never reach the server
+      image: image ?? null,
       homepageSections: sections,
     });
   }
