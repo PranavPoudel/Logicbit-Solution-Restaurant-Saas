@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { AllowWithoutPlan, SubscriptionActiveGuard } from '../subscription/guards/subscription-active.guard';
 import { ModifierGroupService } from './modifier-group.service';
 import { CreateModifierGroupDto } from './dto/create-modifier-group.dto';
 import { UpdateModifierGroupDto } from './dto/update-modifier-group.dto';
@@ -9,7 +10,8 @@ import { UpdateModifierOptionDto } from './dto/update-modifier-option.dto';
 
 @ApiTags('Menu - ModifierGroup')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, SubscriptionActiveGuard)
+@AllowWithoutPlan()
 @Controller('api/v1/restaurants/:restaurantId/modifier-groups')
 export class ModifierGroupController {
   constructor(private readonly modifierGroupService: ModifierGroupService) {}

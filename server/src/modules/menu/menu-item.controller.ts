@@ -2,6 +2,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, Req } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { AllowWithoutPlan, SubscriptionActiveGuard } from '../subscription/guards/subscription-active.guard';
 import { MenuItemService } from './menu-item.service';
 import { CreateMenuItemDto } from './dto/create-menu-item.dto';
 import { UpdateMenuItemDto } from './dto/update-menu-item.dto';
@@ -9,7 +10,8 @@ import { UpdateMenuItemDto } from './dto/update-menu-item.dto';
 
 @ApiTags('Menu - MenuItem')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, SubscriptionActiveGuard)
+@AllowWithoutPlan()
 @Controller('api/v1/restaurants/:restaurantId/menu-items')
 export class MenuItemController {
   constructor(private readonly menuItemService: MenuItemService) {}
