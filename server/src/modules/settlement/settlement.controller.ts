@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Patch, Body, Param, UseGuards, Req } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { SubscriptionActiveGuard } from '../subscription/guards/subscription-active.guard';
 import { PlatformStaffJwtAuthGuard } from '../platform-auth/guards/platform-staff-jwt-auth.guard';
 import { PlatformPermissionGuard } from '../platform-auth/guards/platform-permission.guard';
 import { RequirePlatformPermission } from '../platform-auth/decorators/require-permission.decorator';
@@ -9,7 +10,7 @@ import { GenerateSettlementDto, MarkSettlementPaidDto } from './dto/settlement.d
 
 @ApiTags('Settlement - Restaurant Owner')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, SubscriptionActiveGuard)
 @Controller('api/v1/restaurants/:restaurantId/settlements')
 export class SettlementController {
   constructor(private readonly settlementService: SettlementService) {}

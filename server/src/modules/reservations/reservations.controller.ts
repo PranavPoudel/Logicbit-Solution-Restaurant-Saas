@@ -1,13 +1,14 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, Req } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { SubscriptionActiveGuard } from '../subscription/guards/subscription-active.guard';
 import { ReservationsService } from './reservations.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
 
 @ApiTags('Reservations')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, SubscriptionActiveGuard)
 @Controller('api/v1/restaurants/:restaurantId/reservations')
 export class ReservationsController {
   constructor(private readonly reservationsService: ReservationsService) {}

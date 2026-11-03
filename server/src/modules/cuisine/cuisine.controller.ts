@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards, Req } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { SubscriptionActiveGuard } from '../subscription/guards/subscription-active.guard';
 import { PlatformStaffJwtAuthGuard } from '../platform-auth/guards/platform-staff-jwt-auth.guard';
 import { PlatformPermissionGuard } from '../platform-auth/guards/platform-permission.guard';
 import { RequirePlatformPermission } from '../platform-auth/decorators/require-permission.decorator';
@@ -50,7 +51,7 @@ export class PlatformCuisineController {
 
 @ApiTags('Cuisine - Owner')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, SubscriptionActiveGuard)
 @Controller('api/v1/restaurants/:restaurantId/cuisines')
 export class RestaurantCuisineController {
   constructor(private readonly cuisineService: CuisineService) {}

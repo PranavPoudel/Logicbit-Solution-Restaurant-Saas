@@ -3,6 +3,7 @@ import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards, Req, Http
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { SubscriptionActiveGuard } from '../subscription/guards/subscription-active.guard';
 import { DeliveryJwtAuthGuard } from './guards/delivery-jwt-auth.guard';
 import { DeliveryService } from './delivery.service';
 import { DeliveryPartnerService } from './delivery-partner.service';
@@ -29,7 +30,7 @@ export class DeliveryPersonManagementController {
 
 @ApiTags('Delivery - Owner Partners')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, SubscriptionActiveGuard)
 @Controller('api/v1/restaurants/:restaurantId/delivery-partners')
 export class DeliveryPartnerController {
   constructor(private readonly partners: DeliveryPartnerService) {}

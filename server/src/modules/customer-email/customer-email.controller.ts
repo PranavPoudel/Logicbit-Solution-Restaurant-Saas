@@ -2,12 +2,13 @@ import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Query, Req, UseGuard
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { SubscriptionActiveGuard } from '../subscription/guards/subscription-active.guard';
 import { CustomerEmailService } from './customer-email.service';
 import { SendCustomerEmailDto } from './dto/send-customer-email.dto';
 
 @ApiTags('Customer Emails')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, SubscriptionActiveGuard)
 @Controller('api/v1/restaurants/:restaurantId/customer-emails')
 export class CustomerEmailController {
   constructor(private readonly service: CustomerEmailService) {}

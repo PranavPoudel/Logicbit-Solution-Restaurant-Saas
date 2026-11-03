@@ -2,12 +2,13 @@
 import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards, Req } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { SubscriptionActiveGuard } from '../subscription/guards/subscription-active.guard';
 import { StorefrontService } from './storefront.service';
 import { CreateBannerDto, UpdateBannerDto, ReorderBannersDto, UpdateStorefrontConfigDto, CreatePopupDto, UpdatePopupDto } from './dto/storefront.dto';
 
 @ApiTags('Storefront - Owner (Website Builder)')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, SubscriptionActiveGuard)
 @Controller('api/v1/restaurants/:restaurantId/storefront')
 export class StorefrontController {
   constructor(private readonly storefrontService: StorefrontService) {}
