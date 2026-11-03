@@ -2,11 +2,13 @@
 import { Controller, Get, Param, UseGuards, Req } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { AllowWithoutPlan, SubscriptionActiveGuard } from '../subscription/guards/subscription-active.guard';
 import { AnalyticsService } from './analytics.service'; 
 
 @ApiTags('Analytics (Owner)')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, SubscriptionActiveGuard)
+@AllowWithoutPlan()
 @Controller('api/v1/restaurants/:restaurantId/analytics')
 export class AnalyticsController {
  

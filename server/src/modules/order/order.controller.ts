@@ -2,6 +2,7 @@
 import { Controller, Get, Post, Patch, Body, Param, Query, UseGuards, Req } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { AllowWithoutPlan, SubscriptionActiveGuard } from '../subscription/guards/subscription-active.guard';
 import { CustomerJwtAuthGuard } from '../customer-auth/guards/customer-jwt-auth.guard';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -44,7 +45,8 @@ export class OrderController {
 
 @ApiTags('Orders - Restaurant Owner')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, SubscriptionActiveGuard)
+@AllowWithoutPlan()
 @Controller('api/v1/restaurants/:restaurantId/orders')
 export class RestaurantOrderController {
   constructor(private readonly orderService: OrderService) {}
