@@ -3,6 +3,9 @@ export type SubscriptionState = "none" | "expired" | "expiring" | "active";
 
 const EXPIRING_SOON_DAYS = 7;
 
+/** What a restaurant with no plan yet can still use; an expired plan locks everything. */
+export const NO_PLAN_PATHS = ["/owner/dashboard", "/owner/orders", "/owner/menu"];
+
 interface SubscriptionPayload {
   status?: string;
   daysRemaining?: number | null;

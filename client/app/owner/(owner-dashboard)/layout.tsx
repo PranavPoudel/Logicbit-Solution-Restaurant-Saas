@@ -5,6 +5,7 @@ import { OwnerCurrency } from "@/components/layout/owner-currency";
 import { OwnerAuthGuard } from "@/components/auth/owner-auth-guard";
 import { OrderPrintListener } from "@/components/print/OrderPrintListener";
 import { SubscriptionUpgradeBanner } from "@/components/ui/subscription-upgrade-banner";
+import { SubscriptionLock } from "@/components/ui/subscription-lock";
 
 export default function OwnerDashboardLayout({
   children,
@@ -20,7 +21,7 @@ export default function OwnerDashboardLayout({
           <main className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
             <OwnerCurrency>
               <SubscriptionUpgradeBanner />
-              {children}
+              <SubscriptionLock>{children}</SubscriptionLock>
             </OwnerCurrency>
           </main>
         </div>
