@@ -100,7 +100,7 @@ const NAV_SECTIONS: NavSection[] = [
       },
       {
         name: "Subscriptions & Plans",
-        path: "/admin/subscriptions/plans",
+        path: "/admin/subscriptions/",
         icon: (props) => (
           <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a2 2 0 002-2V7a2 2 0 00-2-2H6a2 2 0 00-2 2v10a2 2 0 002 2z" />
