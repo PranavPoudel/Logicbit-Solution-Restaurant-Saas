@@ -42,7 +42,7 @@ export interface MenuItemInput {
   descriptionJa?: string;
   price: number;
   categoryId: string;
-  image?: string;
+  image?: string | null; // null = remove the image
   galleryImages?: string[];
   isAvailable?: boolean;
   spiceLevel?: string;
