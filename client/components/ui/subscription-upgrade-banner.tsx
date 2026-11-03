@@ -7,25 +7,15 @@ import { AlertCircle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useOwnerAuthStore } from "@/store/owner-auth-store";
 import { getRestaurantSubscription } from "@/lib/api/subscriptions";
-import { getSubscriptionState } from "@/lib/utils/subscription";
+import { getSubscriptionState, NO_PLAN_PATHS } from "@/lib/utils/subscription";
 
 const MEMBERSHIP_HREF = "/owner/subscriptions";
 
 const copy = {
   none: {
     title: "No active membership",
-    body: "Your restaurant has no membership yet. Contact support to get one and unlock the full dashboard.",
-    action: "View membership",
-    box: "bg-red-50 border-red-200",
-    icon: "text-red-600",
-    heading: "text-red-700",
-    text: "text-red-600",
-    button: "bg-[#E3A008] hover:bg-[#d49207] text-[#17181C]",
-  },
-  expired: {
-    title: "Membership expired",
-    body: "Your membership has ended. Contact support to renew it and keep your restaurant running.",
-    action: "View membership",
+    body: "Your restaurant has no membership yet. Pick a plan to unlock the full dashboard.",
+    action: "Choose a plan",
     box: "bg-red-50 border-red-200",
     icon: "text-red-600",
     heading: "text-red-700",
@@ -56,7 +46,8 @@ export function SubscriptionUpgradeBanner() {
 
   const state = getSubscriptionState(sub);
   if (pathname?.startsWith(MEMBERSHIP_HREF)) return null;
-  if (state !== "none" && state !== "expired" && state !== "expiring") return null;
+  if (state !== "none" && state !== "expiring") return null;
+  if (state === "none" && !NO_PLAN_PATHS.some((path) => pathname?.startsWith(path))) return null; // the lock card says it there
 
   const c = copy[state];
 
