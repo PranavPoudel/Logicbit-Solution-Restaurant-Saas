@@ -1,8 +1,9 @@
 // src/modules/payment/payment.service.ts
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { PaymentProvider } from './payment-provider.interface';
+import { PaymentCheck, PaymentContext, PaymentProvider } from './payment-provider.interface';
 import { CodProvider } from './providers/cod.provider';
-import { CreditCardProvider, EsewaProvider, KhaltiProvider, IpsProvider, PhonePayProvider, PayPayProvider } from './providers/future-providers.stub';
+import { CreditCardProvider, EsewaProvider, KhaltiProvider, IpsProvider, PhonePayProvider } from './providers/future-providers.stub';
+import { PayPayProvider } from './providers/paypay.provider';
 
 @Injectable()
 export class PaymentService {
@@ -35,8 +36,13 @@ export class PaymentService {
     return provider;
   }
 
-  async initiate(method: string, orderId: string, amount: number, currencyCode: string) {
-    return this.getProvider(method).initiate(orderId, amount, currencyCode);
+  async initiate(method: string, orderId: string, amount: number, currencyCode: string, context?: PaymentContext) {
+    return this.getProvider(method).initiate(orderId, amount, currencyCode, context);
+  }
+
+  async checkPayment(method: string, orderId: string): Promise<PaymentCheck> {
+    const provider = this.getProvider(method);
+    return provider.checkPayment ? provider.checkPayment(orderId) : { paid: false };
   }
 
   async refund(method: string, orderId: string, amount: number, existingRefundId?: string) {
