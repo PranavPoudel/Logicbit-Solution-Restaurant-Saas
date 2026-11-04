@@ -56,16 +56,6 @@ export class IpsProvider implements PaymentProvider {
 }
 
 @Injectable()
-export class PayPayProvider implements PaymentProvider {
-  readonly methodName = 'PAYPAY';
-  async initiate(): Promise<PaymentInitiationResult> {
-    throw new ServiceUnavailableException(
-      'PayPay payment is not yet configured. Please contact support or choose Cash on Delivery.',
-    );
-  }
-}
-
-@Injectable()
 export class PhonePayProvider implements PaymentProvider {
   readonly methodName = 'PHONEPAY';
   async initiate(): Promise<PaymentInitiationResult> {

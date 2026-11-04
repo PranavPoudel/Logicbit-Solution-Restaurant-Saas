@@ -1,4 +1,5 @@
 //src/modules/order/order.service.ts
+import { randomUUID } from 'crypto';
 import { BadRequestException, ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CouponService } from '../coupon/coupon.service';
@@ -41,6 +42,17 @@ export function deliveryBlockedReason(
   return null;
 }
 
+/** An online order that has not been paid yet cannot be accepted: the restaurant would cook food nobody paid for. */
+export function paymentBlockedReason(order: { paymentMethod: string; paymentStatus: string }, to: string) {
+  if (to === 'ACCEPTED' && order.paymentMethod !== 'COD' && order.paymentStatus !== 'PAID') {
+    return 'Waiting for the customer to pay. You can accept this order once the payment is confirmed.';
+  }
+  return null;
+}
+
+/** Online orders the customer has not paid for yet are hidden from the restaurant until the payment is confirmed. */
+const AWAITING_PAYMENT = { paymentMethod: { not: 'COD' }, paymentStatus: 'UNPAID', status: 'PENDING' } as const;
+
 export function ownDeliveryBlockedReason(
   order: { orderType: string; deliveryHandledBy?: string | null; delivery?: { deliveryPersonId?: string | null; provider?: string | null } | null },
 ) {
@@ -62,7 +74,10 @@ export function refundGoesThroughPayPay(order: { paymentMethod?: string | null }
   return method === 'PAYPAY' && order.paymentMethod === 'PAYPAY';
 }
 
-export function refundMethodBlockedReason(order: { paymentMethod?: string | null; refund?: { method?: string | null; status: string } | null }, method: string) {
+export function refundMethodBlockedReason(order: { paymentMethod?: string | null; refund?: { method?: string | null; status: string } | null }, method: string, amount?: number) {
+  if (amount !== undefined && refundGoesThroughPayPay(order, method) && !Number.isInteger(amount)) {
+    return 'PayPay refunds must be a whole number of yen';
+  }
   if (!refundGoesThroughPayPay(order, method) && order.refund?.method === 'PAYPAY' && order.refund.status === 'PENDING') {
     return 'A PayPay refund is still waiting for PayPay. Retry it to check its status before refunding another way';
   }
@@ -228,7 +243,8 @@ export class OrderService {
     }
 
     const tax = 0; // भविष्यमा restaurant/country अनुसार tax rate थप्न सकिन्छ
-    const total = Math.max(0, subtotal - discountAmount + deliveryFee + tax);
+    const exactTotal = Math.max(0, subtotal - discountAmount + deliveryFee + tax);
+    const total = restaurant.currencyCode === 'JPY' ? Math.round(exactTotal) : exactTotal; // yen has no decimals
 
     // --- Platform Commission (तपाईंको आम्दानी) ---
     // Commission खाना बेचेको (subtotal - discount) माथि मात्र calculate हुन्छ,
@@ -240,13 +256,17 @@ export class OrderService {
     const orderNumber = this.generateOrderNumber();
 
     // --- 4. Payment initiate (COD ले तुरुन्तै UNPAID confirm गर्छ) ---
+    // The id is chosen up front so an online gateway can be given the real order id before the order is saved.
+    // If the gateway refuses, nothing has been written yet.
     const paymentMethod = dto.paymentMethod ?? 'COD';
-    const paymentResult = await this.paymentService.initiate(paymentMethod, orderNumber, total, restaurant.currencyCode);
+    const orderId = randomUUID();
+    const paymentResult = await this.paymentService.initiate(paymentMethod, orderId, total, restaurant.currencyCode, { restaurantId: restaurant.id, orderNumber });
 
     // --- 5. Transaction: Order + Items + StatusHistory + CouponUsage ---
     const order = await this.prisma.$transaction(async (tx) => {
       const created = await tx.order.create({
         data: {
+          id: orderId,
           tenantId: restaurant.tenantId,
           restaurantId: restaurant.id,
           customerId,
@@ -289,7 +309,10 @@ export class OrderService {
     // GAP FIX: पहिले Restaurant Owner लाई नयाँ order आयो भनेर कहिल्यै
     // notify हुँदैनथ्यो — owner ले dashboard खोलेर पटक-पटक हेर्नुपर्थ्यो।
     // अब checkout हुनेबित्तिकै owner लाई notification जान्छ।
-    await this.notifyRestaurantOwner(restaurant.tenantId, order.orderNumber, order.total, restaurant.currencyCode);
+    // An online order reaches the restaurant only once it is paid (see confirmPayPayPayment).
+    if (paymentMethod === 'COD') {
+      await this.notifyRestaurantOwner(restaurant.tenantId, order.orderNumber, order.total, restaurant.currencyCode);
+    }
 
     await this.activityLog.log({
       tenantId: restaurant.tenantId,
@@ -301,7 +324,7 @@ export class OrderService {
       metadata: { orderId: order.id, total },
     });
 
-    return { success: true, message: 'Order placed successfully', data: order };
+    return { success: true, message: 'Order placed successfully', data: paymentResult.redirectUrl ? { ...order, redirectUrl: paymentResult.redirectUrl } : order };
   }
 
   /** Restaurant Owner (tenant का सबै user) लाई नयाँ order बारे notify गर्ने */
@@ -337,8 +360,12 @@ export class OrderService {
 
   /** Customer-facing — आफ्नो मात्र order हेर्ने */
   async findOneForCustomer(customerId: string, orderId: string) {
-    const order = await this.findOne(orderId);
+    let order = await this.findOne(orderId);
     if (order.customerId !== customerId) throw new NotFoundException('Order not found');
+    // The payment page polls this: ask the gateway directly, so a late or missing webhook cannot leave a paid order unpaid.
+    if (order.paymentMethod === 'PAYPAY' && order.paymentStatus === 'UNPAID' && (await this.confirmPayPayPayment(orderId))) {
+      order = await this.findOne(orderId);
+    }
     return order;
   }
 
@@ -358,7 +385,7 @@ export class OrderService {
     startDate?: string, 
     endDate?: string
   ) {
-    const whereClause: any = { tenantId, restaurantId };
+    const whereClause: any = { tenantId, restaurantId, NOT: AWAITING_PAYMENT };
     
     if (status) {
       whereClause.status = status;
@@ -405,7 +432,7 @@ export class OrderService {
    */
   async issueRefund(tenantId: string, restaurantId: string, orderId: string, dto: IssueRefundDto, issuedBy: string) {
     const order = await this.findOneForRestaurant(tenantId, restaurantId, orderId);
-    const blocked = refundBlockedReason(order, dto.amount) ?? refundMethodBlockedReason(order, dto.method);
+    const blocked = refundBlockedReason(order, dto.amount) ?? refundMethodBlockedReason(order, dto.method, dto.amount);
     if (blocked) throw new BadRequestException(blocked);
 
     let reference = dto.reference?.trim() || null;
@@ -474,6 +501,8 @@ export class OrderService {
     if (!canMoveOrderStatus(order.status, dto.status)) {
       throw new BadRequestException(`Order cannot move from ${order.status} to ${dto.status}`);
     }
+    const unpaid = paymentBlockedReason(order, dto.status);
+    if (unpaid) throw new BadRequestException(unpaid);
     const waiting = deliveryBlockedReason(order, dto.status);
     if (waiting) throw new BadRequestException(waiting);
 
@@ -709,8 +738,9 @@ export class OrderService {
       where: { 
         tenantId, 
         restaurantId, 
-        printedAt: null, 
-        status: { not: 'CANCELLED' } // Don't auto-print cancelled orders
+        printedAt: null,
+        status: { not: 'CANCELLED' }, // Don't auto-print cancelled orders
+        NOT: AWAITING_PAYMENT,
       },
       orderBy: { createdAt: 'asc' }, // Process oldest first
       include: { 
@@ -735,15 +765,43 @@ export class OrderService {
     return `ORD-${year}-${random}`;
   }
 
-    /**
-   * markOrderAsPaid
-   * Safely updates paymentStatus to PAID. 
-   * Used exclusively by payment webhooks to confirm successful online payments.
-   */
+  /** Flips an unpaid order to PAID; true only for the first caller, so racing confirmations act once. */
   async markOrderAsPaid(orderId: string) {
-    return this.prisma.order.update({
-      where: { id: orderId },
+    const { count } = await this.prisma.order.updateMany({
+      where: { id: orderId, paymentStatus: 'UNPAID' },
       data: { paymentStatus: 'PAID' },
     });
+    return count === 1;
+  }
+
+  /** Marks a PayPay order paid only after PayPay itself reports the full total completed; returns whether it is paid. */
+  async confirmPayPayPayment(orderId: string) {
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(orderId)) return false;
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      select: { paymentMethod: true, paymentStatus: true, total: true, currencyCode: true, orderNumber: true, tenantId: true, restaurantId: true },
+    });
+    if (!order || order.paymentMethod !== 'PAYPAY') return false;
+    if (order.paymentStatus !== 'UNPAID') return order.paymentStatus === 'PAID';
+
+    const check = await this.paymentService.checkPayment('PAYPAY', orderId);
+    if (!check.paid) return false;
+    if (Number(check.amount) !== Number(order.total) || check.currency !== order.currencyCode) {
+      this.logger.error(`PayPay reports ${check.amount} ${check.currency} for order ${order.orderNumber}, expected ${order.total} ${order.currencyCode}`);
+      return false;
+    }
+
+    if (await this.markOrderAsPaid(orderId)) {
+      await this.notifyRestaurantOwner(order.tenantId, order.orderNumber, Number(order.total), order.currencyCode ?? '');
+      await this.activityLog.log({
+        tenantId: order.tenantId,
+        restaurantId: order.restaurantId,
+        actorType: 'SYSTEM',
+        action: 'ORDER_PAID',
+        description: `Order ${order.orderNumber} paid with PayPay`,
+        metadata: { orderId },
+      });
+    }
+    return true;
   }
 }

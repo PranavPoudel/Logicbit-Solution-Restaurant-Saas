@@ -6,6 +6,18 @@ export interface PaymentInitiationResult {
   providerReference?: string; // Gateway को transaction id
 }
 
+/** What a provider needs to start a payment for an order that is not saved yet. */
+export interface PaymentContext {
+  restaurantId: string;
+  orderNumber: string;
+}
+
+export interface PaymentCheck {
+  paid: boolean;
+  amount?: number;
+  currency?: string;
+}
+
 export interface RefundResult {
   status: 'COMPLETED' | 'PENDING' | 'FAILED';
   providerReference?: string; // Gateway को refund id
@@ -21,8 +33,9 @@ export interface RefundResult {
  */
 export interface PaymentProvider {
   readonly methodName: string;
-  initiate(orderId: string, amount: number, currencyCode: string): Promise<PaymentInitiationResult>;
-  verifyWebhook?(payload: any, signature?: string): Promise<{ orderId: string; success: boolean }>;
+  initiate(orderId: string, amount: number, currencyCode: string, context?: PaymentContext): Promise<PaymentInitiationResult>;
+  /** Asks the gateway itself whether the order was paid; webhooks only say "check this order". */
+  checkPayment?(orderId: string): Promise<PaymentCheck>;
   /** Never throws for a gateway error — it returns FAILED with the gateway's message so the owner can retry. */
   refund?(orderId: string, amount: number, existingRefundId?: string): Promise<RefundResult>;
 }
