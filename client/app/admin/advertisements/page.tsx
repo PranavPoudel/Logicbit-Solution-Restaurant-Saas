@@ -1,3 +1,4 @@
+//app/admin/advertisements/page.tsx
 "use client";
 
 import { useEffect, useState, FormEvent } from "react";

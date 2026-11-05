@@ -1,3 +1,4 @@
+//app/admin/owners/page.tsx
 "use client";
 
 import { Fragment, useEffect, useState } from "react";

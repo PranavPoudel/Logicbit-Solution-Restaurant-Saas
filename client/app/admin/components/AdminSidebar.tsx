@@ -1,3 +1,4 @@
+//app/admin/components/AdminSidebar.tsx
 'use client';
 
 import type { ReactElement } from 'react';

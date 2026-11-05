@@ -1,3 +1,4 @@
+// src/modules/platform-admin/platform-admin.module.ts
 import { Module } from '@nestjs/common';
 import { PlatformAdminService } from './platform-admin.service';
 import { PlatformAdminController } from './platform-admin.controller';
