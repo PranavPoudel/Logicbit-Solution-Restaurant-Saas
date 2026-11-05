@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import { Star, Heart } from "lucide-react";
+import { Star, Heart, MapPin, Clock } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { DiscoveryRestaurant } from "@/types/restaurant";
 import { theme } from "@/config/theme";
@@ -43,15 +43,17 @@ export function RestaurantCard({ restaurant }: { restaurant: DiscoveryRestaurant
   return (
     <Link
       href={`/restaurants/${slug}`}
-      className="group block bg-white rounded-2xl overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all"
-      style={{ border: `1px solid ${theme.colors.dark}14` }}
+      className="group block bg-white rounded-2xl overflow-hidden hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all"
+      style={{ border: `1px solid ${theme.colors.dark}1F` }}
     >
-      <div className="relative h-56 sm:h-60 overflow-hidden" style={{ backgroundColor: `${theme.colors.dark}0D` }}>
+      <div className="relative h-52 sm:h-56 overflow-hidden" style={{ backgroundColor: `${theme.colors.dark}0D` }}>
         <AppImage
           sizes="(min-width:1024px) 33vw, (min-width:640px) 50vw, 100vw"
           src={restaurant.coverImageUrl || FALLBACK_IMAGE}
           alt={name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${
+            isOpen ? "" : "grayscale opacity-70"
+          }`}
           onError={(e) => {
             // Fallback if image URL is broken
             (e.target as HTMLImageElement).style.display = 'none';
@@ -63,14 +65,18 @@ export function RestaurantCard({ restaurant }: { restaurant: DiscoveryRestaurant
           style={{ background: `linear-gradient(to bottom, ${theme.colors.dark}40, transparent, transparent)` }}
         />
 
-        <div className="absolute top-2.5 left-2.5 right-2.5 flex items-start justify-between">
+        <div className="absolute top-3 left-3 right-3 flex items-start justify-between">
           <span
-            className="text-[10px] font-mono font-bold uppercase tracking-wide px-2 py-1 rounded-md"
+            className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide px-2.5 py-1 rounded-full"
             style={{
-              backgroundColor: isOpen ? theme.colors.statusOpenBg : `${theme.colors.dark}99`,
+              backgroundColor: isOpen ? theme.colors.statusOpenBg : `${theme.colors.dark}CC`,
               color: theme.colors.background,
             }}
           >
+            <span
+              className="w-1.5 h-1.5 rounded-full"
+              style={{ backgroundColor: isOpen ? "#B9F6B0" : "#FF9A8F" }}
+            />
             {isOpen ? theme.content.openLabelShort : theme.content.closedLabel}
           </span>
 
@@ -80,16 +86,16 @@ export function RestaurantCard({ restaurant }: { restaurant: DiscoveryRestaurant
               if (requireLogin()) toggleFavorite.mutate();
             }}
             aria-label={isFavorited ? "Remove from favorites" : "Add to favorites"}
-            className="w-7 h-7 rounded-full backdrop-blur flex items-center justify-center transition-colors"
-            style={{ backgroundColor: `${theme.colors.background}E6` }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = theme.colors.background)}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = `${theme.colors.background}E6`)}
+            className="w-10 h-10 rounded-full backdrop-blur flex items-center justify-center transition-colors shadow-sm"
+            style={{ backgroundColor: `${theme.colors.background}F2` }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#FFFFFF")}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = `${theme.colors.background}F2`)}
           >
             <Heart
-              size={14}
+              size={20}
               style={{
                 fill: isFavorited ? theme.colors.primary : "none",
-                color: isFavorited ? theme.colors.primary : `${theme.colors.dark}66`,
+                color: isFavorited ? theme.colors.primary : `${theme.colors.dark}99`,
               }}
             />
           </button>
@@ -97,7 +103,7 @@ export function RestaurantCard({ restaurant }: { restaurant: DiscoveryRestaurant
 
         {restaurant.isSponsored && (
           <span
-            className="absolute bottom-2.5 left-2.5 text-[10px] font-mono font-bold uppercase tracking-wide px-2 py-1 rounded-md"
+            className="absolute bottom-3 left-3 text-xs font-mono font-bold uppercase tracking-wide px-2.5 py-1 rounded-full"
             style={{ backgroundColor: theme.colors.primary, color: theme.colors.background }}
           >
             {theme.content.sponsoredLabel}
@@ -106,43 +112,54 @@ export function RestaurantCard({ restaurant }: { restaurant: DiscoveryRestaurant
 
         {rating !== null && (
           <span
-            className="absolute bottom-2.5 right-2.5 flex items-center gap-1 backdrop-blur text-xs font-mono font-semibold px-2 py-1 rounded-md"
-            style={{ backgroundColor: `${theme.colors.background}F2`, color: theme.colors.dark }}
+            className="absolute bottom-3 right-3 flex items-center gap-1 backdrop-blur text-sm font-mono font-bold px-2.5 py-1 rounded-full"
+            style={{ backgroundColor: `${theme.colors.background}F7`, color: theme.colors.dark }}
           >
-            <Star size={11} style={{ fill: theme.colors.primary, color: theme.colors.primary }} />
+            <Star size={15} style={{ fill: theme.colors.ratingGold, color: theme.colors.ratingGold }} />
             {rating.toFixed(1)}
           </span>
         )}
       </div>
 
       <div className="p-3.5">
-        <h3 className="font-serif font-semibold text-[15px] leading-tight truncate" style={{ color: theme.colors.dark }}>
+        <h3
+          className="font-serif font-bold text-lg leading-tight truncate"
+          style={{ color: theme.colors.dark }}
+        >
           {name}
         </h3>
 
-        <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+        <div className="flex items-center gap-1.5 mt-2 flex-wrap">
           {cuisines.length > 0 ? (
             cuisines.slice(0, 3).map((cuisine) => (
               <span
                 key={cuisine.key}
-                className="text-[11px] font-medium px-2 py-0.5 rounded-full truncate"
-                style={{ color: theme.colors.primary, backgroundColor: `${theme.colors.primary}14` }}
+                className="text-xs font-semibold px-2.5 py-1 rounded-full truncate"
+                style={{ color: theme.colors.primary, backgroundColor: `${theme.colors.primary}1A` }}
               >
                 {cuisine.name}
               </span>
             ))
           ) : (
-            <span className="text-[11px]" style={{ color: `${theme.colors.dark}40` }}>—</span>
+            <span className="text-xs" style={{ color: `${theme.colors.dark}66` }}>—</span>
           )}
         </div>
 
-        <div className="flex items-center gap-2.5 mt-2.5 font-mono text-[11px]" style={{ color: `${theme.colors.dark}80` }}>
-          {distanceKm !== null && <span>{distanceKm.toFixed(1)} {theme.content.distanceAwaySuffix}</span>}
+        <div
+          className="flex items-center gap-3 mt-3 text-sm font-medium"
+          style={{ color: `${theme.colors.dark}B3` }}
+        >
+          {distanceKm !== null && (
+            <span className="inline-flex items-center gap-1">
+              <MapPin size={16} style={{ color: theme.colors.primary }} />
+              {distanceKm.toFixed(1)} {theme.content.distanceAwaySuffix}
+            </span>
+          )}
           {restaurant.estimatedDeliveryMinutes && (
-            <>
-              <span style={{ color: `${theme.colors.dark}40` }}>·</span>
-              <span>{restaurant.estimatedDeliveryMinutes} {theme.content.minutesSuffix}</span>
-            </>
+            <span className="inline-flex items-center gap-1">
+              <Clock size={16} style={{ color: theme.colors.primary }} />
+              {restaurant.estimatedDeliveryMinutes} {theme.content.minutesSuffix}
+            </span>
           )}
         </div>
       </div>
