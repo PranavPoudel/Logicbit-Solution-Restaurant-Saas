@@ -311,7 +311,7 @@ export class OrderService {
     // अब checkout हुनेबित्तिकै owner लाई notification जान्छ।
     // An online order reaches the restaurant only once it is paid (see confirmPayPayPayment).
     if (paymentMethod === 'COD') {
-      await this.notifyRestaurantOwner(restaurant.tenantId, order.orderNumber, order.total, restaurant.currencyCode);
+      this.notifyRestaurantOwner(order.id);
     }
 
     await this.activityLog.log({
@@ -327,18 +327,9 @@ export class OrderService {
     return { success: true, message: 'Order placed successfully', data: paymentResult.redirectUrl ? { ...order, redirectUrl: paymentResult.redirectUrl } : order };
   }
 
-  /** Restaurant Owner (tenant का सबै user) लाई नयाँ order बारे notify गर्ने */
-  private async notifyRestaurantOwner(tenantId: string, orderNumber: string, total: number, currencyCode: string) {
-    const owners = await this.prisma.user.findMany({ where: { tenantId, isActive: true } });
-    for (const owner of owners) {
-      await this.notificationService.send({
-        tenantId,
-        channel: 'EMAIL',
-        recipient: owner.email,
-        subject: `New order ${orderNumber}`,
-        body: `You have a new order ${orderNumber} worth ${currencyCode} ${total}. Please check your dashboard.`,
-      });
-    }
+  /** The restaurant's owner and staff get an email when a new order reaches them. Sent in the background so checkout never waits on the mail server. */
+  private notifyRestaurantOwner(orderId: string) {
+    void this.notificationService.notifyNewOrder(orderId).catch((err) => this.logger.error(`New order email failed for ${orderId}`, err as Error));
   }
 
   async findOne(orderId: string) {
@@ -528,8 +519,9 @@ export class OrderService {
       if (order.status !== 'ACCEPTED') {
         void this.notificationService.notifyOrderAccepted(orderId).catch((err) => this.logger.error(`Order confirmation email failed for ${order.orderNumber}`, err as Error));
       }
-    } else {
-      await this.notificationService.notifyOrderStatusChange(order.customerId, tenantId, order.orderNumber, dto.status);
+    } else if (!(dto.status === 'OUT_FOR_DELIVERY' && order.delivery?.pickedUpAt)) {
+      // The customer was already told when the driver picked the order up.
+      void this.notificationService.notifyOrderUpdate(orderId, dto.status).catch((err) => this.logger.error(`Order status email failed for ${order.orderNumber}`, err as Error));
     }
 
     await this.activityLog.log({
@@ -792,7 +784,7 @@ export class OrderService {
     }
 
     if (await this.markOrderAsPaid(orderId)) {
-      await this.notifyRestaurantOwner(order.tenantId, order.orderNumber, Number(order.total), order.currencyCode ?? '');
+      this.notifyRestaurantOwner(orderId);
       await this.activityLog.log({
         tenantId: order.tenantId,
         restaurantId: order.restaurantId,

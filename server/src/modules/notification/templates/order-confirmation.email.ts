@@ -34,22 +34,24 @@ export interface BuiltEmail {
   text: string;
 }
 
-const escapeHtml = (value: string) =>
+export const escapeHtml = (value: string) =>
   value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
-const paymentLabel = (method: string, status: string) =>
+export function formatMoney(currencyCode: string, amount: number) {
+  try {
+    return new Intl.NumberFormat('en', { style: 'currency', currency: currencyCode, currencyDisplay: 'narrowSymbol' }).format(amount);
+  } catch {
+    return `${currencyCode} ${amount.toFixed(2)}`;
+  }
+}
+
+export const paymentLabel = (method: string, status: string) =>
   method === 'COD' ? 'Cash on delivery' : `${method.replace(/_/g, ' ')} (${status === 'PAID' ? 'paid' : 'payment pending'})`;
 
-const orderTypeLabel = { DELIVERY: 'Delivery', PICKUP: 'Pickup', DINE_IN: 'Dine in' } as const;
+export const orderTypeLabel = { DELIVERY: 'Delivery', PICKUP: 'Pickup', DINE_IN: 'Dine in' } as const;
 
 export function buildOrderConfirmationEmail(data: OrderEmailData): BuiltEmail {
-  const money = (amount: number) => {
-    try {
-      return new Intl.NumberFormat('en', { style: 'currency', currency: data.currencyCode, currencyDisplay: 'narrowSymbol' }).format(amount);
-    } catch {
-      return `${data.currencyCode} ${amount.toFixed(2)}`;
-    }
-  };
+  const money = (amount: number) => formatMoney(data.currencyCode, amount);
 
   const date = data.createdAt.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
   const subject = `Order ${data.orderNumber} confirmed - ${data.restaurantName}`;

@@ -236,10 +236,9 @@ describe('OrderService.confirmPayPayPayment', () => {
     const asked: string[] = [];
     const prisma = {
       order: { findUnique: async () => order, updateMany: async () => ({ count: updated }) },
-      user: { findMany: async () => [{ email: 'owner@test.com' }] },
     };
     const payments = { checkPayment: async (_m: string, id: string) => (asked.push(id), check) };
-    const notifications = { send: async (n: unknown) => sent.push(n) };
+    const notifications = { notifyNewOrder: async (id: unknown) => sent.push(id) };
     const service = new OrderService(prisma as any, null as any, payments as any, notifications as any, { log: async (l: unknown) => logged.push(l) } as any, null as any);
     return { service, sent, logged, asked };
   }
