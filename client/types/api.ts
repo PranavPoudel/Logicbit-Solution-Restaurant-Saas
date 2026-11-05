@@ -26,6 +26,7 @@ export interface Customer {
   name: string;
   email: string;
   phone?: string;
+  emailVerified?: boolean;
   createdAt?: string;
 }
 

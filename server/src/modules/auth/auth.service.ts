@@ -5,12 +5,11 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RegisterDto, InviteStaffDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-
-const SALT_ROUNDS = 10;
+import { AccountSecurityService, RequestCtx } from '../account-security/account-security.service';
+import { hashPassword } from '../account-security/passwords';
 
 @Injectable()
 export class AuthService {
@@ -18,6 +17,7 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
     private readonly config: ConfigService,
+    private readonly security: AccountSecurityService,
   ) {}
 
   /**
@@ -25,13 +25,14 @@ export class AuthService {
    * एकैचोटि Tenant + Owner User + Restaurant (default OWNER role सहित) बनाउँछ।
    * यो नै multi-tenant SaaS को "onboarding" entry point हो।
    */
-  async register(dto: RegisterDto) {
-    const existing = await this.prisma.user.findUnique({ where: { email: dto.email } });
+  async register(dto: RegisterDto, ctx: RequestCtx = {}) {
+    const email = this.security.normalizeEmail(dto.email);
+    const existing = await this.security.findByEmail('OWNER', email);
     if (existing) {
       throw new ConflictException('User with this email already exists');
     }
 
-    const passwordHash = await bcrypt.hash(dto.password, SALT_ROUNDS);
+    const passwordHash = await hashPassword(dto.password);
     const slug = this.slugify(dto.restaurantName);
 
     const result = await this.prisma.$transaction(async (tx) => {
@@ -47,10 +48,11 @@ export class AuthService {
         data: {
           tenantId: tenant.id,
           name: dto.name,
-          email: dto.email,
+          email,
           phone: dto.phone,
           passwordHash,
           isSuperAdmin: true, // पहिलो user नै आफ्नो tenant भित्र सर्वोच्च हुन्छ
+          emailVerified: false, // confirmed with the emailed code
         },
       });
 
@@ -72,6 +74,9 @@ export class AuthService {
       return { tenant, user, restaurant };
     });
 
+    this.security.audit('OWNER', result.user, 'AUTH_REGISTER', 'Owner account created', ctx);
+    this.security.sendCodeInBackground('OWNER', result.user, 'EMAIL_VERIFY');
+
     return {
       success: true,
       message: 'Registration successful',
@@ -79,27 +84,19 @@ export class AuthService {
         user: this.sanitizeUser(result.user, ['OWNER']),
         tenant: { id: result.tenant.id, name: result.tenant.name },
         restaurant: { id: result.restaurant.id, name: result.restaurant.name },
+        needsVerification: this.security.requireVerification,
       },
     };
   }
 
-  async login(dto: LoginDto) {
-    const user = await this.prisma.user.findUnique({
-      where: { email: dto.email },
-      include: { roles: { include: { role: true } }, tenant: true },
+  async login(dto: LoginDto, ctx: RequestCtx = {}) {
+    const user = await this.security.authenticate('OWNER', dto.email, dto.password, ctx, {
+      roles: { include: { role: true } },
+      tenant: true,
     });
 
-    if (!user || !user.isActive) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-
-    const passwordMatches = await bcrypt.compare(dto.password, user.passwordHash);
-    if (!passwordMatches) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-
-    const roleNames = user.roles.map((r) => r.role.name);
-    const tokens = await this.generateTokens(user.id, user.email, user.name, roleNames, user.tenantId, user.isSuperAdmin);
+    const roleNames = user.roles.map((r: { role: { name: string } }) => r.role.name);
+    const tokens = await this.generateTokens(user.id, user.email, user.name, roleNames, user.tenantId as string, user.isSuperAdmin, user.tokenVersion);
 
     return {
       success: true,
@@ -129,9 +126,13 @@ export class AuthService {
     if (!user || !user.isActive) {
       throw new UnauthorizedException('User no longer active');
     }
+    // A password reset or "log out everywhere" must also end refresh tokens, or a stolen session would survive it.
+    if ((payload.tv ?? 0) !== user.tokenVersion) {
+      throw new UnauthorizedException('Session is no longer valid. Please log in again.');
+    }
 
     const roleNames = user.roles.map((r) => r.role.name);
-    const tokens = await this.generateTokens(user.id, user.email, user.name, roleNames, user.tenantId, user.isSuperAdmin);
+    const tokens = await this.generateTokens(user.id, user.email, user.name, roleNames, user.tenantId, user.isSuperAdmin, user.tokenVersion);
 
     return { success: true, data: { tokens } };
   }
@@ -143,8 +144,9 @@ export class AuthService {
     roles: string[],
     tenantId: string,
     isSuperAdmin: boolean,
+    tokenVersion: number,
   ) {
-    const payload = { sub: userId, email, name, roles, tenantId, isSuperAdmin };
+    const payload = { sub: userId, email, name, roles, tenantId, isSuperAdmin, tv: tokenVersion };
 
     const accessToken = await this.jwt.signAsync(payload, {
       secret: this.config.get<string>('JWT_ACCESS_SECRET'),
@@ -171,6 +173,7 @@ export class AuthService {
       phone: user.phone,
       roles,
       tenantId: user.tenantId,
+      emailVerified: user.emailVerified,
     };
   }
 
@@ -185,7 +188,8 @@ export class AuthService {
   // ---------- Staff Management (GAP FIX — पहिले owner एक्लै थियो, team member थप्ने बाटो थिएन) ----------
 
   async inviteStaff(tenantId: string, dto: InviteStaffDto) {
-    const existing = await this.prisma.user.findUnique({ where: { email: dto.email } });
+    const email = this.security.normalizeEmail(dto.email);
+    const existing = await this.security.findByEmail('OWNER', email);
     if (existing) throw new ConflictException('A user with this email already exists');
 
     const validRoles = await this.prisma.role.findMany({ where: { id: { in: dto.roleIds }, tenantId } });
@@ -193,12 +197,12 @@ export class AuthService {
       throw new ConflictException('One or more roles do not belong to this restaurant');
     }
 
-    const passwordHash = await bcrypt.hash(dto.password, SALT_ROUNDS);
+    const passwordHash = await hashPassword(dto.password);
     const user = await this.prisma.user.create({
       data: {
         tenantId,
         name: dto.name,
-        email: dto.email,
+        email, // an owner vouches for invited staff, so emailVerified keeps its default (true)
         phone: dto.phone,
         passwordHash,
         isSuperAdmin: false, // Staff — Owner होइनन्

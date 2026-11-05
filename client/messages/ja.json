@@ -855,12 +855,55 @@
     "newTo": "{brand}は初めてですか？",
     "createLink": "アカウントを作成",
     "haveAccount": "すでにアカウントをお持ちですか？",
+    "forgotLink": "パスワードをお忘れですか？",
+    "orDivider": "または",
+    "google": "Googleで続ける",
+    "verifiedNotice": "メールアドレスを確認しました。ログインできます。",
+    "resetNotice": "パスワードを更新しました。新しいパスワードでログインしてください。",
+    "flow": {
+      "verify-email": { "title": "受信箱を", "accent": "ご確認ください。", "sub": "メールアドレス確認用の6桁のコードを送信しました。" },
+      "forgot-password": { "title": "パスワードを", "accent": "お忘れですか？", "sub": "メールアドレスを入力すると、コードをお送りします。" },
+      "reset-password": { "title": "新しい", "accent": "パスワードを設定。", "sub": "メールに届いたコードと新しいパスワードを入力してください。" }
+    },
+    "code": "6桁のコード",
+    "codeHint": "見つからない場合は、迷惑メールフォルダもご確認ください。",
+    "verify": "メールを確認",
+    "verifying": "確認中…",
+    "verifyFailed": "コードが正しくないか、有効期限が切れています。",
+    "resend": "新しいコードを送信",
+    "resendIn": "{seconds}秒後に新しいコードを送信できます",
+    "resent": "アカウントが存在する場合、新しいコードを送信しました。",
+    "skipForNow": "あとで",
+    "sendCode": "コードを送信",
+    "sending": "送信中…",
+    "forgotFailed": "コードを送信できませんでした。もう一度お試しください。",
+    "newPassword": "新しいパスワード",
+    "setPassword": "新しいパスワードを設定",
+    "saving": "保存中…",
+    "resetFailed": "コードが正しくないか、有効期限が切れています。",
+    "tooManyAttempts": "試行回数が多すぎます。1分ほど待ってからもう一度お試しください。",
+    "backToLogin": "ログインに戻る",
+    "social": {
+      "signingIn": "ログイン中…",
+      "tryAgain": "ログインに戻る",
+      "errors": {
+        "provider_not_configured": "Googleログインはまだ利用できません。",
+        "access_denied": "Googleログインをキャンセルしました。",
+        "invalid_state": "ログインリンクの有効期限が切れました。もう一度お試しください。",
+        "no_email": "Googleからメールアドレスが共有されなかったため、ログインできませんでした。",
+        "email_unverified": "Googleのメールアドレスが確認されていません。",
+        "account_disabled": "このアカウントは無効になっています。",
+        "login_failed": "Googleログインに失敗しました。もう一度お試しください。"
+      }
+    },
     "validation": {
       "email": "有効なメールアドレスを入力してください",
       "passwordMin": "パスワードは6文字以上で入力してください",
       "fullName": "お名前を入力してください",
       "phone": "有効な電話番号を入力してください",
-      "passwordMatch": "パスワードが一致しません"
+      "passwordMatch": "パスワードが一致しません",
+      "code": "6桁のコードを入力してください",
+      "passwordMin8": "パスワードは8文字以上で入力してください"
     }
   },
   "review": {

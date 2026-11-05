@@ -855,12 +855,55 @@
     "newTo": "New to {brand}?",
     "createLink": "Create an account",
     "haveAccount": "Already have an account?",
+    "forgotLink": "Forgot password?",
+    "orDivider": "or",
+    "google": "Continue with Google",
+    "verifiedNotice": "Email confirmed. You can log in now.",
+    "resetNotice": "Password updated. Log in with your new password.",
+    "flow": {
+      "verify-email": { "title": "Check your", "accent": "inbox.", "sub": "We sent a 6-digit code to confirm your email address." },
+      "forgot-password": { "title": "Forgot your", "accent": "password?", "sub": "Enter your email and we will send you a code." },
+      "reset-password": { "title": "Choose a", "accent": "new password.", "sub": "Enter the code from your email and a new password." }
+    },
+    "code": "6-digit code",
+    "codeHint": "Can't find it? Check your spam folder.",
+    "verify": "Confirm email",
+    "verifying": "Confirming…",
+    "verifyFailed": "That code is wrong or has expired.",
+    "resend": "Send a new code",
+    "resendIn": "Send a new code in {seconds}s",
+    "resent": "If the account exists, a new code is on its way.",
+    "skipForNow": "Skip for now",
+    "sendCode": "Send code",
+    "sending": "Sending…",
+    "forgotFailed": "We could not send the code. Please try again.",
+    "newPassword": "New password",
+    "setPassword": "Set new password",
+    "saving": "Saving…",
+    "resetFailed": "That code is wrong or has expired.",
+    "tooManyAttempts": "Too many attempts. Please wait a minute and try again.",
+    "backToLogin": "Back to log in",
+    "social": {
+      "signingIn": "Signing you in…",
+      "tryAgain": "Back to log in",
+      "errors": {
+        "provider_not_configured": "Google login is not available yet.",
+        "access_denied": "You cancelled the Google sign-in.",
+        "invalid_state": "That sign-in link has expired. Please try again.",
+        "no_email": "Google did not share an email address, so we could not sign you in.",
+        "email_unverified": "Your Google email address is not verified.",
+        "account_disabled": "This account has been disabled.",
+        "login_failed": "Google sign-in failed. Please try again."
+      }
+    },
     "validation": {
       "email": "Enter a valid email",
       "passwordMin": "Password must be at least 6 characters",
       "fullName": "Enter your full name",
       "phone": "Enter a valid phone number",
-      "passwordMatch": "Passwords do not match"
+      "passwordMatch": "Passwords do not match",
+      "code": "Enter the 6-digit code",
+      "passwordMin8": "Password must be at least 8 characters"
     }
   },
   "review": {

@@ -1,12 +1,11 @@
 import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RegisterCustomerDto } from './dto/register-customer.dto';
 import { LoginCustomerDto } from './dto/login-customer.dto';
-
-const SALT_ROUNDS = 10;
+import { AccountSecurityService, RequestCtx } from '../account-security/account-security.service';
+import { checkPassword, hashPassword } from '../account-security/passwords';
 
 @Injectable()
 export class CustomerAuthService {
@@ -14,31 +13,39 @@ export class CustomerAuthService {
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
     private readonly config: ConfigService,
+    private readonly security: AccountSecurityService,
   ) {}
 
-  async register(dto: RegisterCustomerDto) {
-    const existing = await this.prisma.customer.findUnique({ where: { email: dto.email } });
+  async register(dto: RegisterCustomerDto, ctx: RequestCtx = {}) {
+    const email = this.security.normalizeEmail(dto.email);
+    const existing = await this.security.findByEmail('CUSTOMER', email);
     if (existing) throw new ConflictException('Customer with this email already exists');
 
-    const passwordHash = await bcrypt.hash(dto.password, SALT_ROUNDS);
+    const passwordHash = await hashPassword(dto.password);
     const customer = await this.prisma.customer.create({
-      data: { name: dto.name, email: dto.email, phone: dto.phone, passwordHash, isGuest: false },
+      data: { name: dto.name, email, phone: dto.phone, passwordHash, isGuest: false, emailVerified: false },
     });
+    this.security.audit('CUSTOMER', customer, 'AUTH_REGISTER', 'Customer account created', ctx);
+    this.security.sendCodeInBackground('CUSTOMER', customer, 'EMAIL_VERIFY');
 
-    const tokens = await this.generateTokens(customer.id, customer.email, customer.name);
-    return { success: true, message: 'Registration successful', data: { customer: this.sanitize(customer), tokens } };
+    // When verification is required the customer gets no session until they confirm the emailed code.
+    const needsVerification = this.security.requireVerification;
+    const tokens = needsVerification ? undefined : await this.generateTokens(customer);
+    return {
+      success: true,
+      message: 'Registration successful',
+      data: { customer: this.sanitize(customer), tokens, needsVerification },
+    };
   }
 
-  async login(dto: LoginCustomerDto) {
-    const customer = await this.prisma.customer.findUnique({ where: { email: dto.email } });
-    if (!customer || !customer.isActive || !customer.passwordHash) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
+  async login(dto: LoginCustomerDto, ctx: RequestCtx = {}) {
+    const customer = await this.security.authenticate('CUSTOMER', dto.email, dto.password, ctx);
+    return this.startSession(customer);
+  }
 
-    const matches = await bcrypt.compare(dto.password, customer.passwordHash);
-    if (!matches) throw new UnauthorizedException('Invalid credentials');
-
-    const tokens = await this.generateTokens(customer.id, customer.email, customer.name);
+  /** The login response for a customer who has already been checked (password login or Google). */
+  async startSession(customer: { id: string; name: string; email: string; tokenVersion: number }) {
+    const tokens = await this.generateTokens(customer);
     return { success: true, message: 'Login successful', data: { customer: this.sanitize(customer), tokens } };
   }
 
@@ -53,12 +60,14 @@ export class CustomerAuthService {
     const customer = await this.prisma.customer.create({
       data: { name, phone, email: guestEmail, isGuest: true },
     });
-    const tokens = await this.generateTokens(customer.id, customer.email, customer.name);
+    const tokens = await this.generateTokens(customer);
     return { success: true, data: { customer: this.sanitize(customer), tokens } };
   }
 
-  private async generateTokens(customerId: string, email: string, name: string) {
-    const payload = { sub: customerId, email, name, type: 'customer' };
+  /** Also used by the Google login to start a session for a customer it has just found or created. */
+  async generateTokens(customer: { id: string; email: string; name: string; tokenVersion: number }) {
+    // `tv` lets "log out everywhere" and password resets cancel tokens that were already issued.
+    const payload = { sub: customer.id, email: customer.email, name: customer.name, type: 'customer', tv: customer.tokenVersion };
     const accessToken = await this.jwt.signAsync(payload, {
       secret: this.config.get<string>('JWT_ACCESS_SECRET'),
       expiresIn: this.config.get<string>('JWT_ACCESS_EXPIRES_IN'),
@@ -72,19 +81,30 @@ export class CustomerAuthService {
     return { success: true, data: this.sanitize(customer) };
   }
 
-  async changePassword(customerId: string, currentPassword: string, newPassword: string) {
+  async changePassword(customerId: string, currentPassword: string, newPassword: string, ctx: RequestCtx = {}) {
     const customer = await this.prisma.customer.findUnique({ where: { id: customerId } });
     if (!customer || !customer.passwordHash) throw new UnauthorizedException('Password change not available for guest accounts');
 
-    const matches = await bcrypt.compare(currentPassword, customer.passwordHash);
+    const matches = await checkPassword(customer.passwordHash, currentPassword);
     if (!matches) throw new UnauthorizedException('Current password is incorrect');
 
-    const passwordHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
-    await this.prisma.customer.update({ where: { id: customerId }, data: { passwordHash } });
-    return { success: true, message: 'Password changed successfully' };
+    // Other devices are signed out (a stolen session must not survive a password change); this one gets a fresh token.
+    const updated = await this.prisma.customer.update({
+      where: { id: customerId },
+      data: { passwordHash: await hashPassword(newPassword), tokenVersion: { increment: 1 } },
+    });
+    this.security.audit('CUSTOMER', customer, 'AUTH_PASSWORD_CHANGED', 'Password changed; other sessions ended', ctx);
+    return { success: true, message: 'Password changed successfully', data: { tokens: await this.generateTokens(updated) } };
   }
 
   private sanitize(customer: any) {
-    return { id: customer.id, name: customer.name, email: customer.email, phone: customer.phone, isGuest: customer.isGuest };
+    return {
+      id: customer.id,
+      name: customer.name,
+      email: customer.email,
+      phone: customer.phone,
+      isGuest: customer.isGuest,
+      emailVerified: customer.emailVerified,
+    };
   }
 }

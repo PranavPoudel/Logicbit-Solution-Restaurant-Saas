@@ -40,6 +40,12 @@ model User {
   passwordHash String
   isSuperAdmin Boolean  @default(false) // Tenant भित्रैको सर्वोच्च (Owner) — register गर्दा auto true हुन्छ
   isActive     Boolean  @default(true)
+  // Defaults to true on purpose: every account that already exists (and staff an owner invites) counts as verified.
+  // Only self sign-up creates an unverified account, by setting this to false explicitly.
+  emailVerified Boolean @default(true)
+  failedLogins  Int     @default(0)
+  lockedUntil   DateTime?
+  tokenVersion  Int     @default(0) // bumping this signs the account out of every device
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -398,6 +404,11 @@ model Customer {
   passwordHash String?
   isGuest      Boolean  @default(false)
   isActive     Boolean  @default(true)
+  // Defaults to true on purpose (see User.emailVerified): only self sign-up sets it to false.
+  emailVerified Boolean @default(true)
+  failedLogins  Int     @default(0)
+  lockedUntil   DateTime?
+  tokenVersion  Int     @default(0)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -406,6 +417,56 @@ model Customer {
   reviews   Review[]
   favorites CustomerFavorite[]
   chatSessions ChatSession[]
+  socialAccounts SocialAccount[]
+}
+
+enum AccountType {
+  CUSTOMER
+  OWNER
+}
+
+enum OtpPurpose {
+  EMAIL_VERIFY
+  PASSWORD_RESET
+}
+
+/// A one-time emailed code. Only an HMAC of the code is stored, never the code itself.
+model OtpCode {
+  id          String     @id @default(uuid())
+  accountType AccountType
+  accountId   String
+  purpose     OtpPurpose
+  codeHash    String
+  attempts    Int        @default(0)
+  expiresAt   DateTime
+  consumedAt  DateTime?
+  createdAt   DateTime   @default(now())
+
+  @@index([accountType, accountId, purpose])
+}
+
+/// Links a Google (or other provider) identity to a customer.
+model SocialAccount {
+  id             String   @id @default(uuid())
+  provider       String
+  providerUserId String
+  customerId     String
+  createdAt      DateTime @default(now())
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerUserId])
+  @@index([customerId])
+}
+
+/// Single-use, short-lived code the website swaps for tokens after a Google login (no token in the URL).
+model SocialLoginCode {
+  id         String    @id @default(uuid())
+  codeHash   String    @unique
+  customerId String
+  expiresAt  DateTime
+  usedAt     DateTime?
+  createdAt  DateTime  @default(now())
 }
 
 model CustomerAddress {
