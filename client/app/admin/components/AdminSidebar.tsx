@@ -1,12 +1,15 @@
+//app/admin/components/AdminSidebar.tsx
 'use client';
 
+import type { ReactElement } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { theme } from '@/config/theme';
 
 interface NavItem {
   name: string;
   path: string;
-  icon: (props: { className?: string }) => JSX.Element;
+  icon: (props: { className?: string }) => ReactElement;
 }
 
 interface NavSection {
@@ -60,6 +63,15 @@ const NAV_SECTIONS: NavSection[] = [
         ),
       },
       {
+        name: "Chats",
+        path: "/admin/chats",
+        icon: (props) => (
+          <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+          </svg>
+        ),
+      },
+      {
         name: "Roles & Permissions",
         path: "/admin/roles",
         icon: (props) => (
@@ -78,8 +90,18 @@ const NAV_SECTIONS: NavSection[] = [
         ),
       },
       {
+        name: "Cities",
+        path: "/admin/cities",
+        icon: (props) => (
+          <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+        ),
+      },
+      {
         name: "Subscriptions & Plans",
-        path: "/admin/subscriptions/plans",
+        path: "/admin/subscriptions/",
         icon: (props) => (
           <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a2 2 0 002-2V7a2 2 0 00-2-2H6a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -92,6 +114,15 @@ const NAV_SECTIONS: NavSection[] = [
         icon: (props) => (
           <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A2.5 2.5 0 013 11.2V9.8a2.5 2.5 0 012.436-2.483l12.55-1.255A.5.5 0 0118.5 6.56v10.88a.5.5 0 01-.514.498l-12.55-1.255z" />
+          </svg>
+        ),
+      },
+      {
+        name: "Pending Promotions",
+        path: "/admin/promotions",
+        icon: (props) => (
+          <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
           </svg>
         ),
       },
@@ -150,16 +181,6 @@ const NAV_SECTIONS: NavSection[] = [
           </svg>
         ),
       },
-  //     {
-  //       name: "Settings",
-  //       path: "/admin/settings",
-  //       icon: (props) => (
-  //         <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-  //           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-  //           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-  //         </svg>
-  //       ),
-  //     },
     ],
   },
 ];
@@ -171,8 +192,8 @@ export default function AdminSidebar() {
     <aside className="w-64 bg-white border-r border-gray-200 flex flex-col shadow-sm z-10 shrink-0 select-none">
       <div className="p-6 border-b border-gray-100 flex items-center h-16">
         <h3 className="text-lg font-bold text-gray-900 tracking-tight flex items-center gap-2">
-          <span className="bg-blue-600 text-white p-1.5 rounded-lg text-xs font-black">LB</span>
-          LogicBit Admin
+          <span className="bg-blue-600 text-white p-1.5 rounded-lg text-xs font-black">{theme.brand.name.slice(0, 2).toUpperCase()}</span>
+          {theme.brand.name} Admin
         </h3>
       </div>
       

@@ -1,3 +1,4 @@
+//app/owner/(owner-dashboard)/storefront/page.tsx
 import { redirect } from "next/navigation";
 
 export default function StorefrontRedirect() {

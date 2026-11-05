@@ -1,7 +1,9 @@
+// app/admin/settings/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
 import { Save, RotateCcw, Building2, Percent, Truck, ToggleLeft, Search } from "lucide-react";
+import { theme } from "@/config/theme";
 
 const STORAGE_KEY = "logicbit-admin-settings";
 
@@ -26,7 +28,7 @@ interface PlatformSettings {
 }
 
 const DEFAULTS: PlatformSettings = {
-  platformName: "LogicBit",
+  platformName: theme.brand.name,
   supportEmail: "",
   supportPhone: "",
   supportAddress: "",
@@ -259,7 +261,7 @@ export default function AdminSettingsPage() {
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
         <p className="text-sm text-gray-500 mt-1">
-          Platform-wide settings for LogicBit
+          Platform-wide settings for {theme.brand.name}
         </p>
       </div>
 
@@ -294,13 +296,13 @@ export default function AdminSettingsPage() {
             type="tel"
             value={values.supportPhone}
             onChange={(v) => set("supportPhone", v)}
-            placeholder="+977 1-4000000"
+            placeholder="Support phone number"
           />
           <TextField
             label="Address"
             value={values.supportAddress}
             onChange={(v) => set("supportAddress", v)}
-            placeholder="Kathmandu, Nepal"
+            placeholder="City, Country"
           />
         </Section>
 
@@ -401,7 +403,7 @@ export default function AdminSettingsPage() {
                 label="Site title"
                 value={values.seoTitle}
                 onChange={(v) => set("seoTitle", v)}
-                placeholder="LogicBit - Order food online"
+                placeholder={`${theme.brand.name} - Order food online`}
               />
               <TextField
                 label="Google Analytics ID"
@@ -424,7 +426,7 @@ export default function AdminSettingsPage() {
               value={values.seoKeywords}
               onChange={(v) => set("seoKeywords", v)}
               hint="Separate keywords with commas."
-              placeholder="food delivery, restaurants, Kathmandu"
+              placeholder="food delivery, restaurants, your city"
             />
           </Section>
         </div>

@@ -1,4 +1,5 @@
 // types/owner.ts
+import type { DayHours } from "@/types/hours";
 
 /**
  * Owner-portal user — confirmed shape from POST /auth/login response.
@@ -22,6 +23,9 @@ export interface Restaurant {
   secondaryColor?: string;
   isOpen?: boolean;
   isActive?: boolean;
+  openingHours?: DayHours[] | null;
+  timezone?: string;
+  currencyCode?: string;
 }
 
 export interface RestaurantSubscription {

@@ -1,13 +1,14 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, Req } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { SubscriptionActiveGuard } from '../subscription/guards/subscription-active.guard';
 import { ReservationsService } from './reservations.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
 
 @ApiTags('Reservations')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, SubscriptionActiveGuard)
 @Controller('api/v1/restaurants/:restaurantId/reservations')
 export class ReservationsController {
   constructor(private readonly reservationsService: ReservationsService) {}
@@ -25,10 +26,11 @@ export class ReservationsController {
     @Param('restaurantId') restaurantId: string,
     @Query('includeDeleted') includeDeleted?: string | boolean,
     @Query('status') status?: string,
-    @Query('date') date?: string
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string
   ) {
     const isDeletedIncluded = includeDeleted === 'true' || includeDeleted === true;
-    return this.reservationsService.findAll(req.user.tenantId, restaurantId, isDeletedIncluded, status, date);
+    return this.reservationsService.findAll(req.user.tenantId, restaurantId, isDeletedIncluded, status, startDate, endDate);
   }
 
   @Get(':id')

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, AlertTriangle, ShoppingBag, User, MapPin, Clock, Printer, AlertCircle , ChefHat} from "lucide-react";
 import { useOwnerAuthStore } from "@/store/owner-auth-store";
+import { useMoney } from "@/hooks/use-money";
 import { OrderActions, RiderCard } from "@/components/layout/owner-notifications";
 import { getOrderById, rejectRider, updateOrderStatus } from "@/lib/api/orders";
 import { ThermalReceipt } from "@/components/print/ThermalReceipt";
@@ -29,7 +30,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ orderId:
     enabled: !!restaurantId && !!orderId,
     refetchInterval: 15000,
   });
-
+  const money = useMoney(order?.currencyCode);
 
   const riderMutation = useMutation({
     mutationFn: (action: keyof typeof RIDER_STATUS | "reject") =>
@@ -192,7 +193,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ orderId:
                     )}
                   </div>
                   <span className="font-mono font-semibold text-neutral-900 shrink-0">
-                    Rs. {(item.subtotal ?? 0).toLocaleString()}
+                    {money(item.subtotal ?? 0)}
                   </span>
                 </li>
               ))}
@@ -203,17 +204,17 @@ export default function OrderDetailPage({ params }: { params: Promise<{ orderId:
           <div className="border-t border-neutral-100 pt-4 space-y-2">
             <div className="flex justify-between text-sm text-neutral-600">
               <span>Subtotal</span>
-              <span>Rs. {(order.subtotal ?? order.total ?? 0).toLocaleString()}</span>
+              <span>{money(order.subtotal ?? order.total ?? 0)}</span>
             </div>
             {order.deliveryFee > 0 && (
               <div className="flex justify-between text-sm text-neutral-600">
                 <span>Delivery Fee</span>
-                <span>Rs. {order.deliveryFee.toLocaleString()}</span>
+                <span>{money(order.deliveryFee)}</span>
               </div>
             )}
             <div className="flex justify-between items-center pt-3 border-t border-neutral-100">
               <span className="text-base font-bold text-neutral-900">Total</span>
-              <span className="text-xl font-bold text-[#1B2333]">Rs. {(order.total || 0).toLocaleString()}</span>
+              <span className="text-xl font-bold text-[#1B2333]">{money(order.total || 0)}</span>
             </div>
           </div>
 

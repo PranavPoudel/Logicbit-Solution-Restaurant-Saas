@@ -27,6 +27,28 @@
   --color-brand-success: var(--brand-success);
   --color-brand-open-bg: var(--brand-open-bg);
   --color-brand-open-text: var(--brand-open-text);
+
+  /* Customer storefront tokens (values live in config/theme.ts) */
+  --color-cream: var(--brand-cream);
+  --color-ink: var(--brand-warm-ink);
+  --color-footer: var(--brand-footer);
+  --color-paper: var(--brand-paper);
+  --color-chili: var(--brand-chili);
+  --color-chili-deep: var(--brand-chili-deep);
+  --color-crimson: var(--brand-crimson);
+  --color-saffron: var(--brand-saffron);
+  --color-herb: var(--brand-herb);
+  --color-herb-ink: var(--brand-herb-ink);
+  --color-tangerine: var(--brand-tangerine);
+  --color-blush: var(--brand-blush);
+  --color-danger: var(--brand-danger);
+  --color-parchment: var(--brand-parchment);
+  --color-espresso: var(--brand-espresso);
+  --color-map-sea: var(--brand-map-sea);
+  --color-map-land: var(--brand-map-land);
+  --color-map-park: var(--brand-map-park);
+  --color-map-water: var(--brand-map-water);
+  --color-map-road: var(--brand-map-road);
 }
 
 /* ==========================================
@@ -150,6 +172,15 @@ body:not(:has([data-admin-root])) select {
     background-color: white !important;
   }
 
+  /* Customer receipt keeps its 80mm width and sits centred on the page */
+  #printable-receipt {
+    left: 0 !important;
+    right: 0 !important;
+    width: 80mm !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+  }
+
   /* 4. Force background colors to print (crucial for the red allergy box!) */
   * {
     -webkit-print-color-adjust: exact !important;
@@ -162,4 +193,117 @@ body:not(:has([data-admin-root])) select {
     overflow: visible !important;
     height: auto !important;
   }
+}
+
+/* ==========================================
+   CUSTOMER STOREFRONT (scoped to .customer)
+   ========================================== */
+@custom-variant dark (&:where(.dark, .dark *));
+
+
+.customer {
+  --font-display: var(--font-bricolage), sans-serif;
+  --font-sans: var(--font-dm-sans), system-ui, sans-serif;
+  position: relative;
+  background: var(--brand-cream);
+  color: var(--brand-warm-ink);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  transition: background 0.3s;
+}
+.customer:lang(ja) {
+  --font-sans: var(--font-noto-jp), var(--font-dm-sans), system-ui, sans-serif;
+}
+.customer:lang(ja) .font-display {
+  font-family: var(--font-noto-jp), var(--font-space-grotesk), sans-serif;
+}
+.customer.dark {
+  --brand-cream: var(--night-cream);
+  --brand-warm-ink: var(--night-warm-ink);
+  --brand-footer: var(--night-footer);
+  --brand-paper: var(--night-paper);
+  --brand-chili-deep: var(--night-chili-deep);
+  --brand-herb-ink: var(--night-herb-ink);
+  --brand-danger: var(--night-danger);
+  --brand-map-sea: var(--night-map-sea);
+  --brand-map-land: var(--night-map-land);
+  --brand-map-park: var(--night-map-park);
+  --brand-map-water: var(--night-map-water);
+  --brand-map-road: var(--night-map-road);
+  color-scheme: dark;
+}
+.customer::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 40;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.customer .blob { border-radius: 58% 42% 55% 45% / 48% 60% 40% 52%; }
+.customer .arch { border-radius: 999px 999px 28px 28px; }
+.customer .shadow-warm { box-shadow: 0 24px 50px -18px rgba(160, 40, 10, 0.45); }
+.customer .shadow-hard { box-shadow: 5px 5px 0 var(--brand-warm-ink); }
+.customer .shadow-soft { box-shadow: 0 10px 24px -10px rgba(160, 40, 10, 0.35); }
+.customer .shadow-red { box-shadow: 0 12px 28px -10px rgba(224, 48, 30, 0.55); }
+.customer.dark .shadow-hard { box-shadow: 5px 5px 0 #000; }
+.customer.dark .shadow-soft, .customer.dark .shadow-red { box-shadow: 0 10px 24px -10px rgba(0, 0, 0, 0.7); }
+.customer.dark .shadow-warm { box-shadow: 0 24px 50px -18px rgba(0, 0, 0, 0.7); }
+.customer .thin-scroll { scrollbar-width: thin; scrollbar-color: rgba(42, 18, 10, 0.28) transparent; scrollbar-gutter: stable; }
+.customer .thin-scroll::-webkit-scrollbar { width: 6px; }
+.customer .thin-scroll::-webkit-scrollbar-thumb { background: rgba(42, 18, 10, 0.28); border-radius: 999px; }
+.customer .thin-scroll::-webkit-scrollbar-track { background: transparent; margin-block: 20px; }
+.customer.dark .thin-scroll { scrollbar-color: rgba(255, 241, 220, 0.3) transparent; }
+.customer a, .customer button, .customer select, .customer summary, .customer [role="tab"], .customer [role="switch"], .customer label, .customer input:not([type="range"]), .customer textarea {
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease, translate 0.2s ease, scale 0.15s ease;
+}
+.customer button:not(:disabled):active, .customer a[class*="rounded"]:active { scale: 0.97; }
+@media (prefers-reduced-motion: reduce) {
+  .customer button:not(:disabled):active, .customer a[class*="rounded"]:active { scale: 1; }
+}
+.customer .no-scrollbar::-webkit-scrollbar { display: none; }
+.customer .no-scrollbar { scrollbar-width: none; }
+
+@keyframes customer-spin { to { transform: rotate(360deg); } }
+.customer .spin-slow { animation: customer-spin 14s linear infinite; }
+@keyframes customer-bob { 50% { transform: translateY(-8px); } }
+.customer .bob { animation: customer-bob 3s ease-in-out infinite; }
+@keyframes customer-shimmer { to { background-position: -200% 0; } }
+.customer .shimmer {
+  background: linear-gradient(90deg, var(--color-map-land) 25%, var(--color-map-sea) 50%, var(--color-map-land) 75%);
+  background-size: 200% 100%;
+  animation: customer-shimmer 1.4s linear infinite;
+}
+@keyframes customer-ride { 0% { offset-distance: 0%; } 100% { offset-distance: 100%; } }
+.customer .rider {
+  offset-path: path("M60 250 C 140 240, 150 140, 240 150 S 330 60, 420 70");
+  animation: customer-ride 9s ease-in-out infinite alternate;
+}
+@keyframes customer-dot { 0%, 60%, 100% { transform: translateY(0); opacity: .4; } 30% { transform: translateY(-5px); opacity: 1; } }
+.customer .dot-bounce { animation: customer-dot 1s ease-in-out infinite; }
+@keyframes customer-pop { 0% { transform: scale(0.4); opacity: 0; } 70% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
+.customer .pop { animation: customer-pop 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.3) both; }
+@keyframes customer-up { from { transform: translateY(100%); } }
+.customer .sheet-in { animation: customer-up 0.3s ease-out; }
+@keyframes customer-fade { from { opacity: 0; } }
+@media (min-width: 768px) { .customer .sheet-in { animation: customer-fade 0.2s ease-out; } }
+@media (prefers-reduced-motion: reduce) {
+  .customer .spin-slow, .customer .bob, .customer .dot-bounce { animation: none; }
+}
+
+
+.leaflet-tooltip.city-tip {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  border: 0;
+  border-radius: 9999px;
+  padding: 4px 6px 4px 12px;
+  font-weight: 800;
+  box-shadow: 0 10px 24px -10px rgba(0, 0, 0, 0.5);
+}
+.leaflet-tooltip.city-tip::before { display: none; }
+.customer.dark .cities-map .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) brightness(0.8) contrast(0.9) saturate(0.7); }
+@media (pointer: coarse) {
+  .customer .leaflet-bar a { width: 44px; height: 44px; line-height: 44px; }
 }

@@ -1,8 +1,10 @@
 //src/modules/restaurant/restaurant.service.ts
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { UpdateRestaurantDto } from './dto/update-restaurant.dto';
 import { CreateRestaurantDto } from './dto/create-restaurant.dto';
+import { isValidTimeZone } from '../../common/utils/opening-hours.util';
 
 @Injectable()
 export class RestaurantService {
@@ -48,10 +50,13 @@ export class RestaurantService {
 
   async update(tenantId: string, id: string, dto: UpdateRestaurantDto) {
     await this.findOne(tenantId, id); 
+
+    if (dto.timezone && !isValidTimeZone(dto.timezone)) throw new BadRequestException('Unknown timezone');
     
+    const { openingHours, ...rest } = dto;
     await this.prisma.restaurant.updateMany({ 
       where: { id, tenantId }, 
-      data: dto 
+      data: { ...rest, ...(openingHours && { openingHours: openingHours as unknown as Prisma.InputJsonValue }) },
     });
     
     return this.findOne(tenantId, id);

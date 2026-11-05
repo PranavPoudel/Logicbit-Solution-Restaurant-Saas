@@ -1,5 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { buildOrderConfirmationEmail } from './templates/order-confirmation.email';
+import { describeRefundPayback } from '../../common/utils/refund-method.util';
 
 /**
  * NotificationService
@@ -27,6 +29,7 @@ export class NotificationService {
     recipient: string;
     subject?: string;
     body: string;
+    html?: string;
   }) {
     const notification = await this.prisma.notification.create({
       data: {
@@ -42,19 +45,84 @@ export class NotificationService {
 
     try {
       // TODO(production): यहाँ real SMS/Email provider को API call गर्ने।
-      // उदाहरण (SendGrid): await sendgrid.send({ to: params.recipient, subject: params.subject, text: params.body });
+      // उदाहरण (SendGrid): await sendgrid.send({ to: params.recipient, subject: params.subject, text: params.body, html: params.html });
       this.logger.log(`[${params.channel}] to ${params.recipient}: ${params.body}`);
 
-      await this.prisma.notification.update({
+      return await this.prisma.notification.update({
         where: { id: notification.id },
         data: { status: 'SENT', sentAt: new Date() },
       });
     } catch (error) {
       this.logger.error(`Notification failed for ${params.recipient}`, error as Error);
-      await this.prisma.notification.update({ where: { id: notification.id }, data: { status: 'FAILED' } });
+      return this.prisma.notification.update({ where: { id: notification.id }, data: { status: 'FAILED' } });
     }
+  }
 
-    return notification;
+  /** Customer-facing order summary (HTML + text), built from the order as it is now. */
+  async buildOrderConfirmation(orderId: string) {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      include: {
+        restaurant: { select: { name: true, currencyCode: true } },
+        customer: { select: { name: true, email: true, phone: true } },
+        items: { include: { menuItem: { select: { name: true } } } },
+      },
+    });
+    if (!order) return null;
+
+    const email = buildOrderConfirmationEmail({
+      brandName: process.env.BRAND_NAME ?? 'LogicBit',
+      supportEmail: process.env.SUPPORT_EMAIL || undefined,
+      customerName: order.customer.name,
+      orderNumber: order.orderNumber,
+      createdAt: order.createdAt,
+      orderType: order.orderType,
+      restaurantName: order.restaurant.name,
+      currencyCode: order.restaurant.currencyCode,
+      deliveryAddress: order.deliveryAddress,
+      phone: order.customer.phone,
+      paymentMethod: order.paymentMethod,
+      paymentStatus: order.paymentStatus,
+      items: order.items.map((i) => ({ name: i.menuItem.name, quantity: i.quantity, unitPrice: i.unitPrice, total: i.subtotal, notes: i.notes })),
+      subtotal: order.subtotal,
+      deliveryFee: order.deliveryFee,
+      tax: order.tax,
+      discountAmount: order.discountAmount,
+      couponCode: order.couponCode,
+      total: order.total,
+    });
+
+    return { email, recipient: order.customer.email, customerId: order.customerId, tenantId: order.tenantId };
+  }
+
+  /** Sent once, when the restaurant accepts the order. */
+  async notifyOrderAccepted(orderId: string) {
+    const built = await this.buildOrderConfirmation(orderId);
+    if (!built) return;
+
+    return this.send({
+      tenantId: built.tenantId,
+      customerId: built.customerId,
+      channel: 'EMAIL',
+      recipient: built.recipient,
+      subject: built.email.subject,
+      body: built.email.text,
+      html: built.email.html,
+    });
+  }
+
+  async notifyRefundIssued(customerId: string, tenantId: string, orderNumber: string, amount: number, reason: string, method?: string | null, reference?: string | null) {
+    const customer = await this.prisma.customer.findUnique({ where: { id: customerId } });
+    if (!customer) return;
+
+    return this.send({
+      tenantId,
+      customerId,
+      channel: 'EMAIL',
+      recipient: customer.email,
+      subject: `Refund for order ${orderNumber}`,
+      body: `The restaurant refunded ${amount.toFixed(2)}${describeRefundPayback(method, reference)} for your order ${orderNumber}. Reason: ${reason}`,
+    });
   }
 
   /** Order status बदलिँदा customer लाई सूचना पठाउने shortcut */

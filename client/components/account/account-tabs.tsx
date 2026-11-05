@@ -1,12 +1,13 @@
 // components/account/account-tabs.tsx
 "use client";
 
-import type { ComponentType } from "react";
+import { useTranslations } from "next-intl";
+import { Icon } from "@/components/ui/primitives";
 
 interface Tab {
   key: string;
   label: string;
-  Icon?: ComponentType<{ size?: number; className?: string }>;
+  icon?: string;
 }
 
 export function AccountTabs({
@@ -18,19 +19,20 @@ export function AccountTabs({
   activeKey: string;
   onSelect: (key: string) => void;
 }) {
+  const t = useTranslations("account");
   return (
-    <div className="flex gap-1 overflow-x-auto border-b border-[#E8E7E2] md:sticky md:top-24 md:w-60 md:shrink-0 md:flex-col md:gap-0 md:overflow-visible md:border-b-0 md:border-l [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-      {tabs.map(({ key, label, Icon }) => (
+    <div role="tablist" aria-label={t("sections")} className="no-scrollbar flex gap-2 overflow-x-auto py-1 md:sticky md:top-24 md:w-64 md:shrink-0 md:flex-col md:overflow-visible">
+      {tabs.map(({ key, label, icon }) => (
         <button
           key={key}
+          role="tab"
+          aria-selected={activeKey === key}
           onClick={() => onSelect(key)}
-          className={`flex shrink-0 items-center gap-3 text-sm md:text-base font-medium px-4 min-h-11 md:min-h-12 md:text-left border-b-2 md:border-b-0 md:border-l-2 md:-ml-px transition-colors ${
-            activeKey === key
-              ? "border-[#E3A008] text-[#17181C]"
-              : "border-transparent text-neutral-400 hover:text-[#17181C]"
+          className={`flex min-h-12 shrink-0 items-center gap-3 rounded-full px-5 text-base font-bold md:text-lg ${
+            activeKey === key ? "bg-ink text-cream shadow-soft" : "bg-paper text-ink/80 hover:bg-ink/10 hover:text-ink"
           }`}
         >
-          {Icon && <Icon size={18} className="hidden md:block" />}
+          {icon && <Icon name={icon} className="hidden h-5 w-5 md:block" />}
           {label}
         </button>
       ))}

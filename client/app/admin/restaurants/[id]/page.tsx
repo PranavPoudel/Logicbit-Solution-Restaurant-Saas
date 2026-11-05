@@ -1,9 +1,11 @@
+//app/admin/restaurants/[id]/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { getRestaurantFullDetail } from "@/lib/api/platform-admin";
+import RestaurantPromotionLimitsForm from "@/components/admin/promotions/RestaurantLimitsForm";
 
 export default function RestaurantDetailsPage() {
   const params = useParams();
@@ -18,7 +20,6 @@ export default function RestaurantDetailsPage() {
       try {
         setLoading(true);
         const data = await getRestaurantFullDetail(id);
-        // Unwrap in case the backend nests it in a 'data' object
         setRestaurant(data?.data || data);
       } catch (err: any) {
         console.error("Failed to load restaurant details:", err);
@@ -46,6 +47,15 @@ export default function RestaurantDetailsPage() {
     );
   }
 
+  // 1. Extract the limits for the form
+  const initialLimits = {
+    maxActivePromotions: restaurant.maxActivePromotions,
+    maxDiscountCap: restaurant.maxDiscountCap,
+    allowedCouponTypes: restaurant.allowedCouponTypes,
+    maxActiveBanners: restaurant.maxActiveBanners,
+    maxActivePopups: restaurant.maxActivePopups,
+  };
+
   return (
     <div className="p-6 max-w-5xl">
       <div className="mb-6">
@@ -72,7 +82,7 @@ export default function RestaurantDetailsPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         {/* Core Information */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900 mb-4 border-b pb-2">General Information</h3>
@@ -182,6 +192,14 @@ export default function RestaurantDetailsPage() {
             </li>
           </ul>
         </div>
+      </div>
+
+      {/* 2. New Promotion & Storefront Limits Section */}
+      <div className="mb-8">
+        <RestaurantPromotionLimitsForm 
+          restaurantId={id} 
+          initialLimits={initialLimits} 
+        />
       </div>
     </div>
   );

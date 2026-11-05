@@ -1,3 +1,4 @@
+// src/modules/platform-admin/platform-admin.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ActivityLogService } from '../activity-log/activity-log.service';
@@ -197,6 +198,14 @@ export class PlatformAdminService {
   }
 
   // --- DELIVERIES & RIDERS SERVICE METHODS ---
+
+  listDeliveryPartners() {
+    return this.prisma.deliveryPartner.findMany({
+      where: { deletedAt: null },
+      include: { restaurant: { select: { id: true, name: true } } },
+      orderBy: [{ name: 'asc' }, { createdAt: 'desc' }],
+    });
+  }
 
   async listAllDeliveries(status?: string) {
     const where = status ? { status: status as any } : {};

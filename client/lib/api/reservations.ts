@@ -30,9 +30,10 @@ export interface CreateReservationDto {
 }
 
 export const reservationsApi = {
-  list: async (restaurantId: string, params?: { includeDeleted?: boolean; status?: string; date?: string }) =>
-    (await ownerApiClient.get(`/restaurants/${restaurantId}/reservations`, { params })).data,
-
+  list: async (
+    restaurantId: string, 
+    params?: { includeDeleted?: boolean; status?: string; startDate?: string; endDate?: string }
+  ) => (await ownerApiClient.get(`/restaurants/${restaurantId}/reservations`, { params })).data,
   create: async (restaurantId: string, dto: CreateReservationDto) =>
     (await ownerApiClient.post(`/restaurants/${restaurantId}/reservations`, dto)).data,
 

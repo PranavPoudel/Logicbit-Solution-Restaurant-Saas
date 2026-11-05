@@ -1,12 +1,14 @@
 // app/owner/(owner-dashboard)/delivery-persons/page.tsx
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, Suspense, useEffect, useState } from "react";
 import {
   addDeliveryPerson,
   listDeliveryPersons,
 } from "@/lib/api/delivery-persons";
 import { useOwnerAuthStore } from "@/store/owner-auth-store";
+import { theme } from "@/config/theme";
+import { PartnerSection } from "@/components/delivery-partners/partner-section";
 
 interface DeliveryPerson {
   id: string;
@@ -234,6 +236,10 @@ export default function DeliveryPersonsPage() {
         </div>
       )}
 
+      <Suspense>
+        <PartnerSection />
+      </Suspense>
+
       {/* ✅ Section 2: Freelance Riders */}
       {!loading && (
         <div className="rounded-xl border border-teal-200 bg-teal-50/50">
@@ -242,7 +248,7 @@ export default function DeliveryPersonsPage() {
               Available Freelance Riders
             </h2>
             <p className="text-xs text-teal-700 mt-1">
-              Independent delivery persons registered on LogicBit who are currently online and available for gig work.
+              Independent delivery persons registered on {theme.brand.name} who are currently online and available for gig work.
             </p>
           </div>
 

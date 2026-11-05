@@ -98,7 +98,7 @@ export function AddRestaurantModal({ isOpen, onClose }: AddRestaurantModalProps)
               type="text"
               value={city}
               onChange={(e) => setCity(e.target.value)}
-              placeholder="e.g., Kathmandu"
+              placeholder="City"
               className="w-full px-3.5 py-2.5 text-sm border border-neutral-200 rounded-lg focus:ring-2 focus:ring-[#E3A008]/40 focus:border-[#E3A008] outline-none"
               required
             />

@@ -1,95 +1,87 @@
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import 'dotenv/config'; // Ensure environment variables are loaded
 
 const prisma = new PrismaClient();
 const SALT_ROUNDS = 10;
 
+// =========================================================
+// SAFETY & ENVIRONMENT CHECKS
+// =========================================================
+const isProduction = process.env.NODE_ENV === 'production';
+const forceClear = process.env.FORCE_CLEAR_DB === 'true';
+
+if (isProduction && !forceClear) {
+  console.log('🛡️  Production environment detected. Skipping destructive database clear to protect live data.');
+}
+
+// =========================================================
+// HELPER: CLEAR DATABASE (SAFE)
+// =========================================================
+async function clearDatabase() {
+  if (isProduction && !forceClear) {
+    return; // Silently skip in production unless explicitly forced
+  }
+
+  console.log('🧹 Clearing existing database data (TRUNCATE CASCADE)...');
+  try {
+    const tables = await prisma.$queryRaw<Array<{ tablename: string }>>`
+      SELECT tablename FROM pg_tables WHERE schemaname='public'
+    `;
+
+    const tableNames = tables
+      .map((t) => t.tablename)
+      .filter((name) => name !== '_prisma_migrations');
+
+    if (tableNames.length > 0) {
+      const tablesStr = tableNames.map((name) => `"public"."${name}"`).join(', ');
+      await prisma.$executeRawUnsafe(`TRUNCATE TABLE ${tablesStr} RESTART IDENTITY CASCADE;`);
+      console.log('✅ Database cleared successfully.\n');
+    }
+  } catch (error) {
+    console.error('❌ Failed to clear database:', error);
+    throw error;
+  }
+}
+
+// =========================================================
+// MAIN SEED FUNCTION
+// =========================================================
 async function main() {
-  console.log('🌱 Starting database seed...');
+  console.log('🌱 Starting minimal production seed (Admin, Customer, and Essential Master Data)...');
 
-  // =========================================================
-  // 1. PLATFORM ROLES, STAFF & PERMISSIONS
-  // =========================================================
-  console.log('🔹 Setting up Platform Roles, Staff & Permissions...');
+  // 0. CLEAR EXISTING DATA (Conditional & Safe)
+  await clearDatabase();
+
+  // 1. ESSENTIAL MASTER DATA (Idempotent Upserts)
+  // Kept because the UI requires these reference tables to exist before adding real data.
+  console.log('🔹 Setting up Essential Master Data...');
   
-  const adminRole = await prisma.platformRole.upsert({
-    where: { name: 'Super Admin' },
-    update: {},
-    create: { name: 'Super Admin' },
-  });
-
-  const bootstrapEmail = process.env.PLATFORM_ADMIN_EMAIL ?? 'admin@logicbit.local';
-  const bootstrapPassword = process.env.PLATFORM_ADMIN_PASSWORD ?? 'ChangeMe123!'; // Matched frontend docs
-  const adminPassword = await bcrypt.hash(bootstrapPassword, SALT_ROUNDS);
-
-  await prisma.platformStaff.upsert({
-    where: { email: bootstrapEmail },
-    update: { 
-      name: 'Super Admin', 
-      passwordHash: adminPassword, 
-      roleId: adminRole.id 
-    },
-    create: {
-      name: 'Super Admin',
-      email: bootstrapEmail,
-      passwordHash: adminPassword,
-      roleId: adminRole.id,
-    },
-  });
-
-  console.log('🛡️ Seeding Platform Permissions...');
-  const requiredPermissions = [
-    'VIEW_REVENUE', 'VIEW_RESTAURANTS', 'OVERRIDE_RESTAURANT_SETTINGS',
-    'SUSPEND_RESTAURANT', 'MANAGE_COMMISSION', 'MODERATE_CONTENT',
-    'MANAGE_PLATFORM_STAFF', 'MANAGE_SETTLEMENTS', 'MANAGE_SUBSCRIPTIONS',
-    'MANAGE_ADVERTISEMENTS', 'MANAGE_CUISINES', 'VIEW_DELIVERIES',
-    'VIEW_ACTIVITY_LOGS', 'PROCESS_REFUNDS',
-  ];
-
-  for (const perm of requiredPermissions) {
-    await prisma.platformPermission.upsert({
-      where: { name: perm },
-      update: {},
-      create: { name: perm, description: `Allows ${perm.toLowerCase().replace(/_/g, ' ')}` },
-    });
-  }
-
-  const allPermissions = await prisma.platformPermission.findMany();
-  for (const permission of allPermissions) {
-    await prisma.platformRolePermission.upsert({
-      where: {
-        roleId_permissionId: {
-          roleId: adminRole.id,
-          permissionId: permission.id,
-        },
-      },
-      update: {},
-      create: {
-        roleId: adminRole.id,
-        permissionId: permission.id,
-      },
-    });
-  }
-
-  // =========================================================
-  // 2. MASTER DATA (Cuisines & Subscription Plans)
-  // =========================================================
-  console.log('🔹 Setting up Master Data...');
-
-  const cuisineNames = ['Nepali', 'Newari', 'Fast Food', 'Chinese', 'Desserts', 'Indian'];
+  const cuisineNames = ['Nepali', 'Newari', 'Fast Food', 'Chinese', 'Desserts', 'Indian', 'Italian', 'Japanese'];
   for (const name of cuisineNames) {
     await prisma.cuisine.upsert({
-      where: { name },
+      where: { name }, // Matches @unique on name
       update: {},
-      create: { 
-        name, 
-        slug: name.toLowerCase().replace(/\s+/g, '-'), 
-        isActive: true 
-      },
+      create: { name, slug: name.toLowerCase().replace(/\s+/g, '-'), isActive: true },
     });
   }
 
-  console.log('💳 Seeding Subscription Plans...');
+  const citiesData = [
+    { name: 'Kathmandu', nameJa: 'カトマンズ', country: 'NP', latitude: 27.7172, longitude: 85.324, displayOrder: 1 },
+    { name: 'Patan', nameJa: 'パタン', country: 'NP', latitude: 27.6766, longitude: 85.3142, displayOrder: 2 },
+    { name: 'Bhaktapur', nameJa: 'バクタプル', country: 'NP', latitude: 27.671, longitude: 85.4298, displayOrder: 3 },
+    { name: 'Pokhara', nameJa: 'ポカラ', country: 'NP', latitude: 28.2096, longitude: 83.9856, displayOrder: 4 },
+    { name: 'Chitwan', nameJa: 'チトワン', country: 'NP', latitude: 27.5291, longitude: 84.3542, displayOrder: 5 },
+  ];
+
+  for (const city of citiesData) {
+    await prisma.city.upsert({
+      where: { name_country: { name: city.name, country: city.country } }, // Matches @@unique([name, country])
+      update: { nameJa: city.nameJa, latitude: city.latitude, longitude: city.longitude, displayOrder: city.displayOrder },
+      create: city,
+    });
+  }
+
   const plans = [
     { name: 'Free Tier', durationMonths: 1, price: 0, isActive: true },
     { name: 'Basic Monthly', durationMonths: 1, price: 2999, isActive: true },
@@ -101,242 +93,92 @@ async function main() {
 
   for (const plan of plans) {
     await prisma.subscriptionPlan.upsert({
-      where: { name: plan.name },
+      where: { name: plan.name }, // Matches @unique on name
       update: {},
       create: plan,
     });
   }
 
-  // Fetch the Pro Plan to use in restaurant scenarios safely
-  const proPlan = await prisma.subscriptionPlan.findUnique({ where: { name: 'Pro Plan' } });
+  // 2. PLATFORM STAFF RBAC (Super Admin)
+  console.log('🔹 Setting up Platform Roles, Staff & Permissions...');
+  
+  const adminRole = await prisma.platformRole.upsert({
+    where: { name: 'Super Admin' }, // Matches @unique on name
+    update: {},
+    create: { name: 'Super Admin' },
+  });
 
-  // =========================================================
-  // 3. HELPER: Create Restaurant Scenario
-  // =========================================================
-  async function createRestaurantScenario(
-    tenantName: string,
-    ownerEmail: string,
-    ownerName: string,
-    restaurantName: string,
-    slug: string,
-    city: string,
-    lat: number,
-    lng: number,
-    cuisineNamesToLink: string[],
-    hasSubscription: boolean = false
-  ) {
-    const password = await bcrypt.hash('password123', SALT_ROUNDS);
+  const requiredPermissions = [
+    'VIEW_REVENUE', 'VIEW_RESTAURANTS', 'OVERRIDE_RESTAURANT_SETTINGS',
+    'SUSPEND_RESTAURANT', 'MANAGE_COMMISSION', 'MODERATE_CONTENT',
+    'MANAGE_PLATFORM_STAFF', 'MANAGE_SETTLEMENTS', 'MANAGE_SUBSCRIPTIONS',
+    'MANAGE_ADVERTISEMENTS', 'MANAGE_CUISINES', 'MANAGE_CITIES', 'VIEW_DELIVERIES',
+    'VIEW_ACTIVITY_LOGS', 'PROCESS_REFUNDS',
+  ];
 
-    const existingUser = await prisma.user.findUnique({ where: { email: ownerEmail } });
-    let tenantId = existingUser?.tenantId;
-
-    if (!tenantId) {
-      const tenant = await prisma.tenant.create({ data: { name: tenantName } });
-      tenantId = tenant.id;
-    }
-
-    await prisma.user.upsert({
-      where: { email: ownerEmail },
-      update: {
-        name: ownerName,
-        passwordHash: password,
-        isSuperAdmin: true,
-      },
-      create: {
-        tenantId,
-        name: ownerName,
-        email: ownerEmail,
-        passwordHash: password,
-        isSuperAdmin: true,
-      },
+  for (const perm of requiredPermissions) {
+    await prisma.platformPermission.upsert({
+      where: { name: perm }, // Matches @unique on name
+      update: {},
+      create: { name: perm, description: `Allows ${perm.toLowerCase().replace(/_/g, ' ')}` },
     });
-
-    const restaurant = await prisma.restaurant.upsert({
-      where: { slug },
-      update: {
-        tenantId,
-        name: restaurantName,
-        latitude: lat,
-        longitude: lng,
-        address: `123 Main Street, ${city}`,
-        city,
-        country: 'Nepal',
-        isOpen: true,
-        supportsDelivery: true,
-        supportsPickup: true,
-        supportsDineIn: true,
-        selfDeliveryRadiusKm: 5,
-        maxDeliveryRadiusKm: 10,
-        selfDeliveryFlatFee: 60,
-        platformCommissionPercent: 10,
-        primaryColor: '#E3A008',
-        secondaryColor: '#17181C',
-      },
-      create: {
-        tenantId,
-        name: restaurantName,
-        slug,
-        latitude: lat,
-        longitude: lng,
-        address: `123 Main Street, ${city}`,
-        city,
-        country: 'Nepal',
-        isOpen: true,
-        supportsDelivery: true,
-        supportsPickup: true,
-        supportsDineIn: true,
-        selfDeliveryRadiusKm: 5,
-        maxDeliveryRadiusKm: 10,
-        selfDeliveryFlatFee: 60,
-        platformCommissionPercent: 10,
-        primaryColor: '#E3A008',
-        secondaryColor: '#17181C',
-      },
-    });
-
-    // Add Subscription if requested
-    if (hasSubscription && proPlan) {
-      await prisma.restaurantSubscription.upsert({
-        where: { restaurantId: restaurant.id },
-        update: {
-          planId: proPlan.id,
-          status: 'ACTIVE',
-          expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-          autoRenew: true,
-        },
-        create: {
-          restaurantId: restaurant.id,
-          planId: proPlan.id,
-          status: 'ACTIVE',
-          startDate: new Date(),
-          expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-          autoRenew: true,
-        },
-      });
-      console.log(`   ↳ ✅ Added ACTIVE Pro Plan subscription for ${restaurantName}`);
-    }
-
-    await prisma.restaurantCuisine.deleteMany({
-      where: { restaurantId: restaurant.id },
-    });
-
-    const cuisines = await prisma.cuisine.findMany({
-      where: { name: { in: cuisineNamesToLink } },
-    });
-
-    if (cuisines.length > 0) {
-      await prisma.restaurantCuisine.createMany({
-        data: cuisines.map((c) => ({
-          restaurantId: restaurant.id,
-          cuisineId: c.id,
-        })),
-      });
-    }
-
-    // Refresh Menu
-    let category = await prisma.category.findFirst({
-      where: { restaurantId: restaurant.id, name: 'Popular Items' },
-    });
-
-    if (!category) {
-      category = await prisma.category.create({
-        data: {
-          tenantId,
-          restaurantId: restaurant.id,
-          name: 'Popular Items',
-          displayOrder: 1,
-          isActive: true,
-        },
-      });
-    }
-
-    await prisma.menuItem.deleteMany({
-      where: { categoryId: category.id },
-    });
-
-    const itemName1 = restaurantName.includes('Momo') ? 'Buff Momo' : (restaurantName.includes('Newari') ? 'Choila' : 'Cheese Burger');
-    const itemName2 = restaurantName.includes('Momo') ? 'Veg Momo' : (restaurantName.includes('Newari') ? 'Bara' : 'Veg Burger');
-
-    await prisma.menuItem.createMany({
-      data: [
-        {
-          tenantId,
-          restaurantId: restaurant.id,
-          categoryId: category.id,
-          name: itemName1,
-          description: 'Freshly made and delicious',
-          price: itemName1.includes('Momo') ? 150 : (itemName1.includes('Choila') ? 250 : 350),
-          isAvailable: true,
-          isVegetarian: false,
-        },
-        {
-          tenantId,
-          restaurantId: restaurant.id,
-          categoryId: category.id,
-          name: itemName2,
-          description: 'A great vegetarian option',
-          price: itemName2.includes('Momo') ? 120 : (itemName2.includes('Bara') ? 150 : 250),
-          isAvailable: true,
-          isVegetarian: true,
-        },
-      ],
-    });
-
-    console.log(`✅ Created/Updated: ${restaurantName} (${ownerEmail})`);
   }
 
-  // =========================================================
-  // 4. CREATE RESTAURANT SCENARIOS
-  // =========================================================
-  console.log('🔹 Setting up Restaurants & Tenants...');
+  const allPermissions = await prisma.platformPermission.findMany();
+  const existingRolePerms = await prisma.platformRolePermission.findMany({ where: { roleId: adminRole.id } });
   
-  await createRestaurantScenario(
-    'Momo Tenants', 'owner1@test.com', 'Ramesh Shrestha',
-    "Momo's & More", 'momos-and-more', 'Kathmandu', 27.7172, 85.3240,
-    ['Nepali', 'Fast Food'],
-    true // GRANTS SUBSCRIPTION
-  );
+  if (existingRolePerms.length === 0) {
+    await prisma.platformRolePermission.createMany({ 
+      data: allPermissions.map((permission) => ({ roleId: adminRole.id, permissionId: permission.id })),
+      skipDuplicates: true,
+    });
+  }
 
-  await createRestaurantScenario(
-    'Newari Tenants', 'owner2@test.com', 'Sita Maharjan',
-    'Newari Bhanchha Ghar', 'newari-bhanchha-ghar', 'Patan', 27.6766, 85.3253,
-    ['Newari', 'Nepali'],
-    false
-  );
+  // 3. CREATE SUPER ADMIN ACCOUNT
+  console.log('🔹 Setting up Super Admin Account...');
+  const bootstrapEmail = process.env.PLATFORM_ADMIN_EMAIL ?? 'admin@logicbit.local';
+  const bootstrapPassword = process.env.PLATFORM_ADMIN_PASSWORD ?? 'ChangeMe123!';
+  const adminPassword = await bcrypt.hash(bootstrapPassword, SALT_ROUNDS);
 
-  await createRestaurantScenario(
-    'Burger Tenants', 'owner3@test.com', 'John Doe',
-    'Burger Station', 'burger-station', 'Kathmandu', 27.7000, 85.3100,
-    ['Fast Food', 'Chinese'],
-    false
-  );
-
-  // =========================================================
-  // 5. CREATE TEST CUSTOMER
-  // =========================================================
-  console.log('🔹 Setting up Test Customer...');
-  const customerPassword = await bcrypt.hash('password123', SALT_ROUNDS);
-  await prisma.customer.upsert({
-    where: { email: 'customer@test.com' },
-    update: { name: 'Test Customer', passwordHash: customerPassword },
-    create: {
-      name: 'Test Customer',
-      email: 'customer@test.com',
-      passwordHash: customerPassword,
-      isGuest: false,
+  await prisma.platformStaff.upsert({
+    where: { email: bootstrapEmail }, // Matches @unique on email
+    update: { 
+      passwordHash: adminPassword,
+      roleId: adminRole.id 
+    },
+    create: { 
+      name: 'Super Admin', 
+      email: bootstrapEmail, 
+      passwordHash: adminPassword, 
+      roleId: adminRole.id 
     },
   });
 
-  console.log('\n🎉 Seed completed successfully!');
-  console.log('\n📝 Test Accounts:');
+  // 4. CREATE TEST CUSTOMER ACCOUNT
+  console.log('🔹 Setting up Test Customer Account...');
+  const customerEmail = 'customer@test.com';
+  const customerPassword = await bcrypt.hash('password123', SALT_ROUNDS);
+
+  await prisma.customer.upsert({
+    where: { email: customerEmail }, // Matches @unique on email
+    update: { 
+      passwordHash: customerPassword 
+    },
+    create: { 
+      name: 'Test Customer', 
+      email: customerEmail, 
+      passwordHash: customerPassword, 
+      isGuest: false 
+    },
+  });
+
+  console.log('\n🎉 Minimal seed completed successfully!');
+  console.log('\n📝 Test Accounts Ready:');
   console.log(`  Platform Admin: ${bootstrapEmail} (Password: ${bootstrapPassword})`);
-  console.log('  Owner 1 (WITH SUBSCRIPTION): owner1@test.com (Password: password123)');
-  console.log('  Owner 2 (NO SUBSCRIPTION):   owner2@test.com (Password: password123)');
-  console.log('  Owner 3 (NO SUBSCRIPTION):   owner3@test.com (Password: password123)');
-  console.log('  Customer:                    customer@test.com (Password: password123)');
+  console.log(`  Test Customer:  ${customerEmail} (Password: password123)`);
+  console.log('\n💡 Note: All mock restaurants, menus, orders, and reviews have been omitted.');
+  console.log('   You can now log in as the Super Admin to input real production data.');
 }
-
-
 
 main()
   .catch((e) => {

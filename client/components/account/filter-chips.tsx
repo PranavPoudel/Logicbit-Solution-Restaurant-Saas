@@ -1,6 +1,8 @@
 // components/account/filter-chips.tsx
 "use client";
 
+import { Chip } from "@/components/ui/primitives";
+
 interface FilterChipsProps<T extends string> {
   filters: ReadonlyArray<{ key: T; label: string; count?: number }>;
   active: T;
@@ -9,22 +11,12 @@ interface FilterChipsProps<T extends string> {
 
 export function FilterChips<T extends string>({ filters, active, onChange }: FilterChipsProps<T>) {
   return (
-    <div className="flex gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <div className="no-scrollbar flex gap-2 overflow-x-auto py-1">
       {filters.map((f) => (
-        <button
-          key={f.key}
-          type="button"
-          onClick={() => onChange(f.key)}
-          aria-pressed={active === f.key}
-          className={`shrink-0 rounded-full border px-4 min-h-10 text-sm font-medium transition-colors duration-200 ${
-            active === f.key
-              ? "border-[#17181C] bg-[#17181C] text-white"
-              : "border-[#E8E7E2] bg-white text-neutral-600 hover:border-neutral-300"
-          }`}
-        >
+        <Chip key={f.key} active={active === f.key} aria-pressed={active === f.key} onClick={() => onChange(f.key)}>
           {f.label}
-          {f.count != null && <span className="ml-1.5 opacity-60">{f.count}</span>}
-        </button>
+          {f.count != null && <span className="ml-1.5 opacity-70">{f.count}</span>}
+        </Chip>
       ))}
     </div>
   );

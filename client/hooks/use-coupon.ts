@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 import { isAxiosError } from "axios";
+import { useTranslations } from "next-intl";
 import { useCartStore } from "@/store/cart-store";
 import { validateCoupon } from "@/lib/api/orders";
 import { getErrorMessage } from "@/lib/utils/error";
+import { playSound } from "@/lib/utils/sound";
 
 export function useCoupon() {
+  const t = useTranslations("coupon");
   const { subtotal, activeRestaurantId, coupon, setCoupon } = useCartStore();
   const restaurantId = activeRestaurantId();
   const sub = subtotal();
@@ -17,25 +20,27 @@ export function useCoupon() {
     const trimmed = code.trim();
     setError("");
     if (!trimmed) {
-      setError("Please enter a coupon code first.");
+      setError(t("emptyCode"));
       return;
     }
     if (!restaurantId) {
-      setError("This cart has no restaurant attached. Clear the cart and add your items again.");
+      setError(t("noRestaurant"));
       return;
     }
     setLoading(true);
     try {
       setCoupon(await validateCoupon(restaurantId, trimmed.toUpperCase(), sub));
+      playSound("success");
     } catch (err) {
       setCoupon(null);
+      playSound("error");
       const response = isAxiosError(err) ? err.response : undefined;
       setError(
         response?.status === 401
-          ? "Please log in to apply a coupon."
+          ? t("loginRequired")
           : !response
-            ? "Could not reach the server. Check your connection."
-            : getErrorMessage(err, "This coupon could not be applied.")
+            ? t("noServer")
+            : getErrorMessage(err, t("fallback"))
       );
     } finally {
       setLoading(false);
@@ -59,12 +64,12 @@ export function useCoupon() {
       .catch(() => {
         if (cancelled) return;
         setCoupon(null);
-        setError("Your coupon is no longer valid for this cart.");
+        setError(t("noLongerValid"));
       });
     return () => {
       cancelled = true;
     };
-  }, [sub, appliedCode, restaurantId, setCoupon]);
+  }, [sub, appliedCode, restaurantId, setCoupon, t]);
 
   return { coupon, code, setCode, loading, error, apply, remove };
 }

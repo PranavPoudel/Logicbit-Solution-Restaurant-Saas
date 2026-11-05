@@ -3,36 +3,39 @@ import * as crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 
 export class PayPayUtil {
+  static readonly contentType = 'application/json;charset=UTF-8';
+
   /**
-   * Generates the required 'Authorization' header for PayPay Open API.
-   * PayPay uses a specific HMAC-SHA256 signature algorithm.
+   * Builds the 'Authorization' header PayPay Open Payment API expects:
+   * hmac OPA-Auth:<apiKey>:<signature>:<nonce>:<epoch>:<bodyHash>
+   * A request without a body signs the literal string "empty" for both the content type and the body hash.
    */
   static generateAuthHeader(
+    apiKey: string,
     apiSecret: string,
-    url: string, // e.g., '/v2/codes/dynamic'
+    path: string, // e.g. '/v2/codes'
     method: string, // 'POST' or 'GET'
-    body: any = null,
+    body: unknown = null,
   ): string {
     const epoch = Math.floor(Date.now() / 1000).toString();
-    const nonce = uuidv4();
-    
-    // PayPay requires the body to be a JSON string for the signature
-    const bodyString = body ? JSON.stringify(body) : '';
-    
-    // The message must be joined by newline characters exactly in this order
-    const message = [url, method, nonce, epoch, bodyString].join('\n');
-    
-    const hash = crypto
-      .createHmac('SHA256', apiSecret)
-      .update(message)
-      .digest('base64');
-      
-    // PayPay requires the 'hmac OPA-Auth:' prefix
-    return `hmac OPA-Auth:${hash}`;
+    const nonce = uuidv4().slice(0, 8);
+
+    let contentType = 'empty';
+    let bodyHash = 'empty';
+    if (body) {
+      contentType = PayPayUtil.contentType;
+      bodyHash = crypto.createHash('md5').update(contentType).update(JSON.stringify(body)).digest('base64');
+    }
+
+    const message = [path, method, nonce, epoch, contentType, bodyHash].join('\n');
+    const signature = crypto.createHmac('sha256', apiSecret).update(message).digest('base64');
+
+    return `hmac OPA-Auth:${[apiKey, signature, nonce, epoch, bodyHash].join(':')}`;
   }
 
   /**
    * Constructs the payload for creating a Dynamic QR/Payment Link.
+   * PayPay only accepts whole-yen amounts, so the caller must pass an integer JPY amount.
    */
   static createPaymentPayload(
     orderId: string,
@@ -43,11 +46,13 @@ export class PayPayUtil {
   ) {
     return {
       merchantPaymentId: orderId, // This is how we map the webhook back to our Order
+      codeType: 'ORDER_QR',
       amount: {
         amount: amount,
         currency: currencyCode,
       },
-      orderDetails: [
+      orderDescription,
+      orderItems: [
         {
           name: orderDescription,
           category: 'Food & Beverage',
@@ -62,40 +67,16 @@ export class PayPayUtil {
       requestedAt: Math.floor(Date.now() / 1000),
       redirectUrl: redirectUrl,
       redirectType: 'WEB_LINK', // 'WEB_LINK' or 'APP_DEEP_LINK'
-      isAuthorization: false,
-      authorizationExpiry: null,
     };
   }
-    static verifyWebhookSignature(
-    apiSecret: string,
-    headers: any,
-    rawBody: string,
-    url: string,
-    method: string,
-  ): boolean {
-    const authHeader = headers['authorization'] || headers['Authorization'];
-    if (!authHeader || !authHeader.startsWith('hmac OPA-Auth:')) {
-      return false;
-    }
 
-    const providedSignature = authHeader.replace('hmac OPA-Auth:', '');
-    const nonce = headers['x-nonce'] || headers['X-Nonce'];
-    const epoch = headers['x-epoch'] || headers['X-Epoch'];
-
-    if (!nonce || !epoch) {
-      return false;
-    }
-
-    const message = [url, method, nonce, epoch, rawBody].join('\n');
-    const expectedSignature = crypto
-      .createHmac('SHA256', apiSecret)
-      .update(message)
-      .digest('base64');
-
-    // Use timingSafeEqual to prevent timing attacks
-    return crypto.timingSafeEqual(
-      Buffer.from(expectedSignature),
-      Buffer.from(providedSignature),
-    );
+  static createRefundPayload(paymentId: string, amount: number, currencyCode: string, reason: string) {
+    return {
+      merchantRefundId: uuidv4(),
+      paymentId, // PayPay's own id for the payment, not our merchantPaymentId
+      amount: { amount, currency: currencyCode },
+      requestedAt: Math.floor(Date.now() / 1000),
+      reason,
+    };
   }
 }

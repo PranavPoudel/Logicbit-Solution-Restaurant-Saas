@@ -1,3 +1,4 @@
+// src/modules/platform-admin/platform-admin.controller.ts
 import { Controller, Get, Patch, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { IsNumber, Min, Max, IsBoolean, IsEnum, IsString, IsOptional } from 'class-validator';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
@@ -101,6 +102,12 @@ export class PlatformAdminController {
   @RequirePlatformPermission('VIEW_DELIVERIES')
   listAllDeliveries(@Query('status') status?: string) {
     return this.platformAdminService.listAllDeliveries(status);
+  }
+
+  @Get('delivery-partners')
+  @RequirePlatformPermission('VIEW_DELIVERIES')
+  listDeliveryPartners() {
+    return this.platformAdminService.listDeliveryPartners();
   }
 
   @Get('riders')

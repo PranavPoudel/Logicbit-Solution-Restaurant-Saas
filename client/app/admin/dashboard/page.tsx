@@ -1,7 +1,10 @@
+//app/admin/dashboard/page.tsx
 "use client";
 import Link from "next/link";
+import { useMoney } from "@/hooks/use-money";
 
 export default function AdminDashboardPage() {
+  const money = useMoney();
   return (
     <div className="space-y-8">
       {/* Page Header */}
@@ -14,7 +17,7 @@ export default function AdminDashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
           <p className="text-sm font-medium text-gray-500 mb-1">Total Platform Revenue</p>
-          <p className="text-3xl font-bold text-gray-900">Rs. 0</p>
+          <p className="text-3xl font-bold text-gray-900">{money(0)}</p>
         </div>
         <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
           <p className="text-sm font-medium text-gray-500 mb-1">Active Subscriptions</p>

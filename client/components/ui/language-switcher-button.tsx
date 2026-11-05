@@ -1,66 +1,30 @@
+// components/ui/language-switcher-button.tsx
 "use client";
 
-import { useState } from "react";
-import { useLocale } from "next-intl";
-import { useRouter, usePathname } from "next/navigation";
-import { ChevronUp, ChevronDown } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import { usePathname, useRouter } from "next/navigation";
 
-// ✅ Only English and Japanese
-const languages = {
-  en: { label: "English", flag: "🇬🇧" },
-  ja: { label: "日本語", flag: "🇯🇵" },
+const OTHER: Record<string, { code: string; label: string }> = {
+  en: { code: "ja", label: "日本語" },
+  ja: { code: "en", label: "English" },
 };
 
-export function LanguageSwitcherButton() {
+export function LanguageSwitcherButton({ className = "" }: { className?: string }) {
   const locale = useLocale();
+  const t = useTranslations("header");
   const router = useRouter();
   const pathname = usePathname();
-  const [isOpen, setIsOpen] = useState(false);
-
-  const currentLang = languages[locale as keyof typeof languages] || languages.en;
-
-  const handleLanguageChange = (newLocale: string) => {
-    const newPathname = pathname.replace(`/${locale}`, `/${newLocale}`);
-    router.replace(newPathname);
-    setIsOpen(false);
-  };
+  const other = OTHER[locale] ?? OTHER.en;
 
   return (
-    <div className="relative">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 bg-white border-2 border-[#8B0000] px-3 py-1.5 rounded shadow hover:shadow-md transition-shadow"
-      >
-        <span className="text-lg">{currentLang.flag}</span>
-        <span className="font-semibold text-[#8B0000] text-sm uppercase">{locale}</span>
-        {isOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-      </button>
-
-      {isOpen && (
-        <>
-          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
-          <div className="absolute bottom-full right-0 mb-2 bg-white border-2 border-[#8B0000] rounded shadow-lg z-50 min-w-[140px]">
-            {Object.entries(languages).map(([code, { label, flag }]) => (
-              <button
-                key={code}
-                onClick={() => handleLanguageChange(code)}
-                className={`w-full flex items-center gap-2 px-3 py-2 hover:bg-[#8B0000]/10 transition-colors ${
-                  locale === code ? "bg-[#8B0000]/20" : ""
-                }`}
-              >
-                <span className="text-lg">{flag}</span>
-                <span className="text-sm font-medium text-[#8B0000]">{label}</span>
-              </button>
-            ))}
-            
-            {/* ✅ Optional: A helpful hint for other languages */}
-            <div className="border-t border-neutral-100 my-1" />
-            <div className="px-3 py-2 text-[10px] text-neutral-400 text-center">
-              Use your browser to translate to other languages
-            </div>
-          </div>
-        </>
-      )}
-    </div>
+    <button
+      type="button"
+      lang={other.code}
+      aria-label={t("switchLanguage", { language: other.label })}
+      onClick={() => router.replace(pathname.replace(`/${locale}`, `/${other.code}`) + window.location.search)}
+      className={`min-h-11 shrink-0 items-center justify-center rounded-full border-2 border-ink/20 px-4 font-bold hover:border-ink ${className}`}
+    >
+      {other.label}
+    </button>
   );
 }

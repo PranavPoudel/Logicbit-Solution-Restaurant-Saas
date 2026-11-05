@@ -2,6 +2,7 @@
 import { apiClient } from "@/lib/api/client";
 import { ownerApiClient } from "@/lib/api/owner-client";
 import type { OrderDetail } from "@/types/order";
+import type { RefundMethod } from "@/lib/utils/refund";
 
 // ✅ STRICTLY MATCHES BACKEND CreateOrderDto & OrderItemInputDto
 // Removed 'name' and 'extraPrice' to prevent forbidNonWhitelisted 400 errors.
@@ -13,6 +14,7 @@ export interface CheckoutInput {
   deliveryAddress?: string;
   deliveryLatitude?: number;
   deliveryLongitude?: number;
+  deliveryQuoteId?: string;
   items: Array<{
     menuItemId: string;
     quantity: number;
@@ -44,16 +46,12 @@ export async function getMyOrder(id: string): Promise<OrderDetail> {
 }
 
 // --- Owner side ---
-export async function listRestaurantOrders(restaurantId: string, status?: string) {
-  const { data } = await ownerApiClient.get(`/restaurants/${restaurantId}/orders`, {
-    params: status ? { status } : undefined,
-  });
-  if (process.env.NODE_ENV === "development") {
-    // eslint-disable-next-line no-console
-    console.log("[restaurants/:id/orders] unwrapped payload:", data);
-  }
-  if (Array.isArray(data)) return data;
-  return data?.orders ?? data?.data ?? [];
+export async function listRestaurantOrders(
+  restaurantId: string, 
+  params?: { status?: string; startDate?: string; endDate?: string }
+) {
+  const { data } = await ownerApiClient.get(`/restaurants/${restaurantId}/orders`, { params });
+  return Array.isArray(data) ? data : data?.orders ?? data?.data ?? [];
 }
 
 export async function getRestaurantOrder(restaurantId: string, orderId: string) {
@@ -88,6 +86,19 @@ export async function cancelRestaurantOrder(restaurantId: string, orderId: strin
   const { data } = await ownerApiClient.patch(
     `/restaurants/${restaurantId}/orders/${orderId}/cancel`
   );
+  return data;
+}
+
+export async function issueOrderRefund(restaurantId: string, orderId: string, body: { amount: number; reason: string; method: RefundMethod; reference?: string }) {
+  const { data } = await ownerApiClient.post(
+    `/restaurants/${restaurantId}/orders/${orderId}/refund`,
+    body
+  );
+  return data;
+}
+
+export async function switchOrderToOwnDelivery(restaurantId: string, orderId: string) {
+  const { data } = await ownerApiClient.patch(`/restaurants/${restaurantId}/orders/${orderId}/own-delivery`);
   return data;
 }
 

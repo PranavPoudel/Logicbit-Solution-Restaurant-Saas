@@ -3,7 +3,10 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle, Wallet } from "lucide-react";
+import { QueryError } from "@/components/ui/query-error";
 import { useOwnerAuthStore } from "@/store/owner-auth-store";
+import { theme } from "@/config/theme";
+import { useMoney } from "@/hooks/use-money";
 import { listRestaurantSettlements, getOutstandingSettlement } from "@/lib/api/settlements";
 
 interface SettlementRow {
@@ -17,6 +20,7 @@ interface SettlementRow {
 
 export default function SettlementsPage() {
   const restaurantId = useOwnerAuthStore((s) => s.activeRestaurantId);
+  const money = useMoney();
 
   const outstandingQuery = useQuery({
     queryKey: ["settlement-outstanding", restaurantId],
@@ -49,7 +53,7 @@ export default function SettlementsPage() {
     <div className="max-w-3xl">
       <h1 className="text-xl font-semibold text-neutral-900 mb-1">Settlements</h1>
       <p className="text-sm text-neutral-500 mb-6">
-        Commission owed to LogicBit from cash-on-delivery orders.
+        Commission owed to {theme.brand.name} from cash-on-delivery orders.
       </p>
 
       <div className="bg-white border border-neutral-200 rounded-xl p-5 mb-5 flex items-center gap-4">
@@ -59,7 +63,7 @@ export default function SettlementsPage() {
         <div>
           <p className="text-xs text-neutral-500">Outstanding commission</p>
           <p className="text-xl font-semibold text-neutral-900 font-mono">
-            Rs {outstandingQuery.isLoading ? "…" : outstanding?.commissionDue ?? 0}
+            {outstandingQuery.isLoading ? "…" : money(outstanding?.commissionDue ?? 0)}
           </p>
         </div>
       </div>
@@ -70,6 +74,8 @@ export default function SettlementsPage() {
         </div>
         {historyQuery.isLoading ? (
           <p className="text-sm text-neutral-400 text-center py-8">Loading…</p>
+        ) : historyQuery.isError ? (
+          <QueryError what="settlement history" error={historyQuery.error} onRetry={() => historyQuery.refetch()} />
         ) : (historyQuery.data ?? []).length === 0 ? (
           <p className="text-sm text-neutral-400 text-center py-8">
             No settlement history yet.
@@ -92,10 +98,10 @@ export default function SettlementsPage() {
                     {s.periodEnd ? new Date(s.periodEnd).toLocaleDateString() : "—"}
                   </td>
                   <td className="px-5 py-3 font-mono text-neutral-700">
-                    Rs {s.totalCodAmount ?? 0}
+                    {money(s.totalCodAmount ?? 0)}
                   </td>
                   <td className="px-5 py-3 font-mono text-neutral-700">
-                    Rs {s.commissionDue ?? 0}
+                    {money(s.commissionDue ?? 0)}
                   </td>
                   <td className="px-5 py-3">
                     <span

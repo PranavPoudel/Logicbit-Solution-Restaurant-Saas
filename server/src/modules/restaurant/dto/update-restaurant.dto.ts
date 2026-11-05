@@ -5,11 +5,15 @@ import {
   IsNumber,
   IsBoolean,
   IsArray,
+  ArrayMaxSize,
+  ValidateNested,
   IsEnum,
   Min,
   Max,
   MaxLength,
 } from 'class-validator';
+import { Type } from 'class-transformer';
+import { DayHoursDto } from './opening-hours.dto';
 
 export class UpdateRestaurantDto {
   @IsString()
@@ -66,6 +70,18 @@ export class UpdateRestaurantDto {
   @IsBoolean()
   @IsOptional()
   isOpen?: boolean;
+
+  @IsArray()
+  @ArrayMaxSize(7)
+  @ValidateNested({ each: true })
+  @Type(() => DayHoursDto)
+  @IsOptional()
+  openingHours?: DayHoursDto[];
+
+  @IsString()
+  @IsOptional()
+  @MaxLength(60)
+  timezone?: string;
 
   @IsString()
   @IsOptional()

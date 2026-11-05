@@ -1,3 +1,4 @@
+// app/admin/components/AdminTable.tsx
 'use client';
 
 interface Column<T> {

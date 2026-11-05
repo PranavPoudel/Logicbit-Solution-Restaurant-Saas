@@ -8,9 +8,12 @@ import { TranslationService } from '../translation/translation.service';
 import { AdvertisementService } from '../advertisement/advertisement.service';
 
 import { calculateDeliveryQuote } from '../../common/utils/delivery-fee.util';
+import { computeOpenStatus } from '../../common/utils/opening-hours.util';
 
 @Injectable()
 export class DiscoveryService {
+  private trending?: { value: { success: boolean; data: unknown[] }; expires: number };
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly translation: TranslationService,
@@ -50,7 +53,6 @@ export class DiscoveryService {
     ];
     if (minRating !== undefined) conditions.push(Prisma.sql`"avgRating" >= ${minRating}`);
     if (priceRange) conditions.push(Prisma.sql`"priceRange" = ${priceRange}`);
-    if (isOpenNow) conditions.push(Prisma.sql`"isOpen" = true`);
     if (cuisineType) {
       // GAP FIX: पहिले `cuisineTypes` free-text array column थियो, अब
       // managed Cuisine relation प्रयोग हुन्छ — cuisine को slug ले filter गर्ने।
@@ -75,7 +77,17 @@ export class DiscoveryService {
       LIMIT 200;
     `;
 
-    const maxOrdersInArea = Math.max(1, ...rows.map((r) => r.totalOrders ?? 0));
+    const orderCounts = await this.prisma.order.groupBy({
+      by: ['restaurantId'],
+      where: { restaurantId: { in: rows.map((r) => r.id) }, status: { not: 'CANCELLED' } },
+      _count: { _all: true },
+    });
+    const orderCountById = new Map(orderCounts.map((o) => [o.restaurantId, o._count._all]));
+    rows.forEach((r) => {
+      r.totalOrders = orderCountById.get(r.id) ?? 0;
+    });
+
+    const maxOrdersInArea = Math.max(1, ...rows.map((r) => r.totalOrders));
     const sponsoredIds = await this.advertisementService.getSearchBoostedRestaurantIds();
 
     // Sponsored (SEARCH_BOOST ad किनेका) restaurant लाई ranking score मा
@@ -111,7 +123,8 @@ export class DiscoveryService {
         return b.score - a.score; // 'recommended' — ranking algorithm (default)
       });
 
-    const paginated = ranked.slice(offset, offset + limit);
+    const visible = isOpenNow ? ranked.filter((r) => computeOpenStatus(r).isOpen) : ranked;
+    const paginated = visible.slice(offset, offset + limit);
 
     // Raw SQL बाट आएको result मा cuisine names हुँदैन (त्यो अर्कै table मा
     // छ) — यहाँ separate query ले fetch गरेर merge गरिन्छ।
@@ -131,7 +144,7 @@ export class DiscoveryService {
       success: true,
       data: {
         restaurants: paginated.map((r) => this.toPublicRestaurantShape(r, cuisineMap.get(r.id) ?? [])),
-        pagination: { page, limit, total: ranked.length },
+        pagination: { page, limit, total: visible.length },
       },
     };
   }
@@ -165,6 +178,7 @@ export class DiscoveryService {
         menuItems: {
           where: { deletedAt: null, isAvailable: true },
           orderBy: { displayOrder: 'asc' },
+          include: { _count: { select: { modifierGroups: true } } },
         },
       },
     });
@@ -187,7 +201,12 @@ export class DiscoveryService {
           )
         : categories;
 
-    return { success: true, data: { restaurant: this.toPublicRestaurantShape(restaurant, await this.getCuisineNames(restaurantId)), categories: translatedCategories } };
+    const withModifierFlag = translatedCategories.map((cat) => ({
+      ...cat,
+      menuItems: cat.menuItems.map(({ _count, ...item }) => ({ ...item, hasModifiers: _count.modifierGroups > 0 })),
+    }));
+
+    return { success: true, data: { restaurant: this.toPublicRestaurantShape(restaurant, await this.getCuisineNames(restaurantId)), categories: withModifierFlag } };
   }
 
   private async getCuisineNames(restaurantId: string) {
@@ -254,6 +273,46 @@ export class DiscoveryService {
     return { success: true, data: items };
   }
 
+  /** PUBLIC — Homepage "Trending" section: most ordered dishes in the last 30 days, topped up with featured dishes */
+  async getTrendingItems(limit = 3) {
+    if (this.trending && this.trending.expires > Date.now()) return this.trending.value;
+
+    const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const live = { deletedAt: null, isAvailable: true, restaurant: { isActive: true } };
+    const select = {
+      id: true,
+      name: true,
+      price: true,
+      image: true,
+      restaurant: { select: { id: true, name: true, slug: true, currencyCode: true } },
+    };
+
+    const top = await this.prisma.orderItem.groupBy({
+      by: ['menuItemId'],
+      where: { order: { createdAt: { gte: since }, status: { not: 'CANCELLED' } }, menuItem: live },
+      _sum: { quantity: true },
+      orderBy: { _sum: { quantity: 'desc' } },
+      take: limit,
+    });
+
+    const ranked = await this.prisma.menuItem.findMany({ where: { id: { in: top.map((t) => t.menuItemId) } }, select });
+    const items = top.flatMap((t) => ranked.filter((m) => m.id === t.menuItemId));
+
+    if (items.length < limit) {
+      const fill = await this.prisma.menuItem.findMany({
+        where: { ...live, isFeatured: true, id: { notIn: items.map((i) => i.id) } },
+        select,
+        orderBy: { displayOrder: 'asc' },
+        take: limit - items.length,
+      });
+      items.push(...fill);
+    }
+
+    const value = { success: true, data: items };
+    this.trending = { value, expires: Date.now() + 5 * 60 * 1000 };
+    return value;
+  }
+
   /** PUBLIC — Homepage "Popular Category" section को लागि */
   async getFeaturedCategories(restaurantId: string) {
     const categories = await this.prisma.category.findMany({
@@ -300,6 +359,7 @@ export class DiscoveryService {
   }
 
   private toPublicRestaurantShape(r: any, cuisines: { name: string; slug: string }[] = []) {
+    const openStatus = computeOpenStatus(r);
     return {
       id: r.id,
       name: r.name,
@@ -308,7 +368,10 @@ export class DiscoveryService {
       avgRating: r.avgRating,
       priceRange: r.priceRange,
       distanceKm: r.distanceKm,
-      isOpen: r.isOpen,
+      isOpen: openStatus.isOpen,
+      openStatus,
+      openingHours: r.openingHours ?? null,
+      timezone: r.timezone,
       isSponsored: r.isSponsored ?? false,
       logoUrl: r.logoUrl,
       coverImageUrl: r.coverImageUrl,
