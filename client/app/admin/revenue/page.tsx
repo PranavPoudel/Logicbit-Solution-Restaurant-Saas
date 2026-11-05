@@ -1,3 +1,4 @@
+// app/admin/revenue/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";

@@ -1,3 +1,4 @@
+// src/modules/platform-admin/platform-admin.controller.ts
 import { Controller, Get, Patch, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { IsNumber, Min, Max, IsBoolean, IsEnum, IsString, IsOptional } from 'class-validator';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';

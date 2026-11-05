@@ -1,3 +1,4 @@
+//app/admin/restaurants/[id]/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
