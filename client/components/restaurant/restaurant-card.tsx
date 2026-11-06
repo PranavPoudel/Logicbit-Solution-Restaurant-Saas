@@ -64,12 +64,6 @@ export function RestaurantCard({ r, index, compact }: { r: DiscoveryRestaurant; 
         </div>
 
         <div className="mt-3 space-y-1 text-ink/75">
-          {phone && (
-            <p className="flex items-center gap-1.5 font-bold text-ink">
-              <span aria-hidden>☎</span>
-              {phone}
-            </p>
-          )}
           <p className="flex flex-wrap gap-x-4 gap-y-1">
             {r.distanceKm != null && (
               <span className="flex items-center gap-1.5"><Icon name="pin" className="h-4 w-4" />{t("km", { value: r.distanceKm })}</span>
@@ -79,6 +73,12 @@ export function RestaurantCard({ r, index, compact }: { r: DiscoveryRestaurant; 
             )}
             {r.city && <span className="flex items-center gap-1.5"><Icon name="store" className="h-4 w-4" />{r.city}</span>}
           </p>
+          {phone && (
+            <p className="flex items-center gap-1.5 font-bold text-ink">
+              <span aria-hidden>☎</span>
+              {phone}
+            </p>
+          )}
         </div>
 
         {!compact && (
