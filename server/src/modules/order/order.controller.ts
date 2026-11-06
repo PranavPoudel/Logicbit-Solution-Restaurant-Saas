@@ -1,5 +1,5 @@
 // src/modules/order/order.controller.ts
-import { Controller, Get, Post, Patch, Body, Param, Query, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, Param, Query, UseGuards, Req, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AllowWithoutPlan, SubscriptionActiveGuard } from '../subscription/guards/subscription-active.guard';
@@ -40,6 +40,13 @@ export class OrderController {
   @Patch(':id/cancel')
   cancel(@Req() req, @Param('id') id: string, @Body() dto: CancelOrderDto) {
     return this.orderService.cancel('CUSTOMER', req.user.id, id, dto);
+  }
+
+  /** "Pay now" for an order that is still waiting for its card payment. */
+  @Post(':id/pay')
+  @HttpCode(HttpStatus.OK)
+  pay(@Req() req, @Param('id') id: string) {
+    return this.orderService.payNow(req.user.id, id);
   }
 }
 

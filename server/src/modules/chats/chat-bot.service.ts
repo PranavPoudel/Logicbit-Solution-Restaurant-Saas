@@ -422,8 +422,8 @@ export class ChatBotService {
   // Data loading
   // ===========================================================================
 
-  private loadRestaurant(id: string): Promise<RestaurantRow | null> {
-    return this.prisma.restaurant.findUnique({
+  private async loadRestaurant(id: string): Promise<RestaurantRow | null> {
+    const row = await this.prisma.restaurant.findUnique({
       where: { id },
       select: {
         id: true, tenantId: true, name: true, address: true, city: true, phone: true,
@@ -432,9 +432,15 @@ export class ChatBotService {
         maxDeliveryRadiusKm: true, avgRating: true, totalReviews: true, currencyCode: true,
         supportsCod: true, supportsCreditCard: true, supportsEsewa: true, supportsKhalti: true,
         supportsIps: true, supportsPhonePay: true, supportsPaypay: true,
+        stripeSecretKey: true,
         cuisines: { select: { cuisine: { select: { name: true } } } },
       },
     });
+    if (!row) return null;
+    // The chatbot must not tell customers they can pay by card when checkout would refuse it (no Stripe key saved).
+    // The key itself is dropped here and never reaches the reply.
+    const { stripeSecretKey, ...rest } = row;
+    return { ...rest, supportsCreditCard: rest.supportsCreditCard && !!stripeSecretKey };
   }
 
   private loadMenu(restaurantId: string): Promise<MenuRow[]> {

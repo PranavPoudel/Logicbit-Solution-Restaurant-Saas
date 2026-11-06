@@ -389,7 +389,9 @@ export class DiscoveryService {
 
   //ADDED: Expose enabled payment methods to the public checkout flow
       supportsCod: r.supportsCod ?? true,
-      supportsCreditCard: r.supportsCreditCard ?? false,
+      // Card is only offered to customers when the restaurant has a Stripe key saved: with the switch on and no key,
+      // customers would fill a cart and then get an error at checkout.
+      supportsCreditCard: (r.supportsCreditCard ?? false) && !!r.stripeSecretKey,
       supportsEsewa: r.supportsEsewa ?? false,
       supportsKhalti: r.supportsKhalti ?? false,
       supportsIps: r.supportsIps ?? false,

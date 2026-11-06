@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test';
 import { strict as assert } from 'node:assert';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { canMoveOrderStatus, deliveryBlockedReason, OrderService, ownDeliveryBlockedReason, paymentBlockedReason, refundBlockedReason, refundGoesThroughPayPay, refundMethodBlockedReason } from './order.service';
+import { canMoveOrderStatus, deliveryBlockedReason, OrderService, ownDeliveryBlockedReason, paymentBlockedReason, refundBlockedReason, refundGoesThroughCard, refundGoesThroughPayPay, refundMethodBlockedReason } from './order.service';
 
 describe('ownDeliveryBlockedReason', () => {
   const waiting = { orderType: 'DELIVERY', deliveryHandledBy: 'THIRD_PARTY', delivery: null };
@@ -226,7 +226,7 @@ describe('paymentBlockedReason', () => {
   });
 });
 
-describe('OrderService.confirmPayPayPayment', () => {
+describe('OrderService.confirmOnlinePayment', () => {
   const ORDER_ID = '8ef0080a-5c27-4b4e-bd21-1407858d8288';
   const paypayOrder = { paymentMethod: 'PAYPAY', paymentStatus: 'UNPAID', total: 1200, currencyCode: 'JPY', orderNumber: 'ORD-1', tenantId: 't1', restaurantId: 'r1' };
 
@@ -245,37 +245,91 @@ describe('OrderService.confirmPayPayPayment', () => {
 
   it('marks the order paid and tells the restaurant once PayPay confirms the full amount', async () => {
     const { service, sent, logged } = build(paypayOrder, { paid: true, amount: 1200, currency: 'JPY' });
-    assert.equal(await service.confirmPayPayPayment(ORDER_ID), true);
+    assert.equal(await service.confirmOnlinePayment(ORDER_ID), true);
     assert.equal(sent.length, 1);
     assert.equal(logged.length, 1);
   });
 
   it('does not mark it paid when PayPay reports a different amount or currency', async () => {
     const { service, sent } = build(paypayOrder, { paid: true, amount: 100, currency: 'JPY' });
-    assert.equal(await service.confirmPayPayPayment(ORDER_ID), false);
+    assert.equal(await service.confirmOnlinePayment(ORDER_ID), false);
     assert.equal(sent.length, 0);
-    assert.equal(await build(paypayOrder, { paid: true, amount: 1200, currency: 'USD' }).service.confirmPayPayPayment(ORDER_ID), false);
+    assert.equal(await build(paypayOrder, { paid: true, amount: 1200, currency: 'USD' }).service.confirmOnlinePayment(ORDER_ID), false);
   });
 
   it('does not mark it paid while PayPay says it is unpaid', async () => {
     const { service, sent } = build(paypayOrder, { paid: false });
-    assert.equal(await service.confirmPayPayPayment(ORDER_ID), false);
+    assert.equal(await service.confirmOnlinePayment(ORDER_ID), false);
     assert.equal(sent.length, 0);
   });
 
   it('acts only once when two confirmations arrive together', async () => {
     const { service, sent } = build(paypayOrder, { paid: true, amount: 1200, currency: 'JPY' }, 0);
-    assert.equal(await service.confirmPayPayPayment(ORDER_ID), true);
+    assert.equal(await service.confirmOnlinePayment(ORDER_ID), true);
     assert.equal(sent.length, 0);
   });
 
   it('does not ask PayPay about orders that are already paid, not PayPay, or not real', async () => {
     const paid = build({ ...paypayOrder, paymentStatus: 'PAID' }, { paid: true });
-    assert.equal(await paid.service.confirmPayPayPayment(ORDER_ID), true);
+    assert.equal(await paid.service.confirmOnlinePayment(ORDER_ID), true);
     const cash = build({ ...paypayOrder, paymentMethod: 'COD' }, { paid: true });
-    assert.equal(await cash.service.confirmPayPayPayment(ORDER_ID), false);
+    assert.equal(await cash.service.confirmOnlinePayment(ORDER_ID), false);
     const junk = build(paypayOrder, { paid: true });
-    assert.equal(await junk.service.confirmPayPayPayment('not-a-uuid'), false);
+    assert.equal(await junk.service.confirmOnlinePayment('not-a-uuid'), false);
     assert.equal(paid.asked.length + cash.asked.length + junk.asked.length, 0);
+  });
+});
+
+describe('card payments', () => {
+  const ORDER_ID = '8ef0080a-5c27-4b4e-bd21-1407858d8288';
+  const cardOrder = { paymentMethod: 'CREDIT_CARD', paymentStatus: 'UNPAID', total: 1200, currencyCode: 'JPY', orderNumber: 'ORD-2', tenantId: 't1', restaurantId: 'r1' };
+
+  function build(order: any, check: any) {
+    const sent: unknown[] = [];
+    const logged: any[] = [];
+    const asked: string[] = [];
+    const prisma = { order: { findUnique: async () => order, updateMany: async () => ({ count: 1 }) } };
+    const payments = { checkPayment: async (method: string) => (asked.push(method), check) };
+    const notifications = { notifyNewOrder: async (id: unknown) => sent.push(id) };
+    const service = new OrderService(prisma as any, null as any, payments as any, notifications as any, { log: async (l: unknown) => logged.push(l) } as any, null as any);
+    return { service, sent, logged, asked };
+  }
+
+  it('asks the card gateway and marks the order paid only for the full amount', async () => {
+    const ok = build(cardOrder, { paid: true, amount: 1200, currency: 'JPY' });
+    assert.equal(await ok.service.confirmOnlinePayment(ORDER_ID), true);
+    assert.deepEqual(ok.asked, ['CREDIT_CARD']);
+    assert.equal(ok.sent.length, 1);
+    assert.match(ok.logged[0].description, /paid with card/);
+
+    const short = build(cardOrder, { paid: true, amount: 100, currency: 'JPY' });
+    assert.equal(await short.service.confirmOnlinePayment(ORDER_ID), false);
+    assert.equal(short.sent.length, 0);
+  });
+
+  it('keeps a card order hidden until paid, and unacceptable', () => {
+    assert.match(paymentBlockedReason({ paymentMethod: 'CREDIT_CARD', paymentStatus: 'UNPAID' }, 'ACCEPTED')!, /pay/i);
+    assert.equal(paymentBlockedReason({ paymentMethod: 'CREDIT_CARD', paymentStatus: 'PAID' }, 'ACCEPTED'), null);
+  });
+
+  it('sends a refund back to the card only for orders paid by card', () => {
+    assert.equal(refundGoesThroughCard({ paymentMethod: 'CREDIT_CARD' }, 'CARD'), true);
+    assert.equal(refundGoesThroughCard({ paymentMethod: 'COD' }, 'CARD'), false);
+    assert.equal(refundGoesThroughCard({ paymentMethod: 'PAYPAY' }, 'CARD'), false);
+    assert.equal(refundGoesThroughCard({ paymentMethod: 'CREDIT_CARD' }, 'CASH'), false);
+  });
+
+  it('lets a card be recorded by hand on any order, and waits for a pending card refund', () => {
+    assert.equal(refundMethodBlockedReason({ paymentMethod: 'COD' }, 'CARD'), null);
+    const waiting = { paymentMethod: 'CREDIT_CARD', refund: { method: 'CARD', status: 'PENDING' } };
+    assert.match(refundMethodBlockedReason(waiting, 'CASH')!, /Stripe/);
+    assert.equal(refundMethodBlockedReason(waiting, 'CARD'), null);
+  });
+
+  it('only accepts whole yen when Stripe sends a yen refund back itself', () => {
+    const yen = { paymentMethod: 'CREDIT_CARD', currencyCode: 'JPY' };
+    assert.match(refundMethodBlockedReason(yen, 'CARD', 100.5)!, /whole number of yen/);
+    assert.equal(refundMethodBlockedReason(yen, 'CARD', 100), null);
+    assert.equal(refundMethodBlockedReason({ paymentMethod: 'CREDIT_CARD', currencyCode: 'USD' }, 'CARD', 100.5), null);
   });
 });

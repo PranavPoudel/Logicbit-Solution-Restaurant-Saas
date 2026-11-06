@@ -241,6 +241,10 @@ model Restaurant {
   paypayApiKey     String?
   paypayApiSecret  String?
 
+  // --- Card payments through Stripe Checkout (Per-Restaurant Credentials) ---
+  // The restaurant's own secret key (sk_live_... or sk_test_...). Never sent back to any client.
+  stripeSecretKey String?
+
    // --- Enabled Payment Methods ---
   supportsCod          Boolean @default(true)
   supportsCreditCard   Boolean @default(false)
@@ -548,6 +552,7 @@ enum RefundMethod {
   CASH
   BANK_TRANSFER
   PAYPAY
+  CARD
   OTHER
 }
 
@@ -578,6 +583,8 @@ model Order {
 
   paymentStatus PaymentStatus @default(UNPAID)
   paymentMethod PaymentMethod @default(COD)
+  // The gateway's own id for this payment (a Stripe Checkout Session id for card payments).
+  paymentReference String?
 
  // --- Printing ---
   printedAt     DateTime?       //  Null = unprinted, Timestamp = printed
