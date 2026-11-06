@@ -4,8 +4,60 @@ import { getFullImageUrl } from "@/lib/utils/image";
 import { OpeningHours } from "@/components/restaurant/opening-hours";
 import type { RestaurantDetail } from "@/types/menu";
 
+type RestaurantExtras = {
+  supportsDelivery?: boolean;
+  supportsPickup?: boolean;
+  supportsDineIn?: boolean;
+  supportsCod?: boolean;
+  supportsCreditCard?: boolean;
+  supportsEsewa?: boolean;
+  supportsKhalti?: boolean;
+  supportsIps?: boolean;
+  supportsPhonePay?: boolean;
+  supportsPaypay?: boolean;
+  facilities?: string[];
+};
+
+function InfoBlock({ title, items }: { title: string; items: string[] }) {
+  if (items.length === 0) return null;
+  return (
+    <div className="rounded-[24px] border-2 border-ink/10 bg-cream/40 p-5">
+      <h3 className="font-display text-xl font-extrabold">{title}</h3>
+      <ul className="mt-3 flex flex-wrap gap-2">
+        {items.map((item) => (
+          <li key={item} className="inline-flex min-h-10 items-center gap-2 rounded-full bg-ink/10 px-4 text-base font-bold">
+            <span aria-hidden className="text-herb">✓</span>
+            {item}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 export function StorefrontAboutSection({ title, aboutText, restaurant }: { title: string; aboutText?: string | null; restaurant: RestaurantDetail }) {
   const rated = (restaurant.avgRating ?? 0) > 0;
+  const r = restaurant as RestaurantDetail & RestaurantExtras;
+
+  const options = [
+    r.supportsDelivery && "Delivery",
+    r.supportsPickup && "Takeaway",
+    r.supportsDineIn && "Dine-in",
+  ].filter(Boolean) as string[];
+
+  const payments = [
+    r.supportsCod && "Cash",
+    r.supportsCreditCard && "Credit Card",
+    r.supportsPaypay && "PayPay",
+    r.supportsEsewa && "eSewa",
+    r.supportsKhalti && "Khalti",
+    r.supportsPhonePay && "PhonePe",
+    r.supportsIps && "Bank Transfer",
+  ].filter(Boolean) as string[];
+
+  const facilities = r.facilities ?? [];
+  const hasInfo = options.length > 0 || payments.length > 0 || facilities.length > 0;
+
   return (
     <section aria-labelledby="about" className="mx-auto w-full max-w-[1440px] border-t border-ink/10 px-5 py-10 md:px-10">
       <h2 id="about" className="relative inline-block font-display text-[32px] font-extrabold tracking-tight md:text-[40px]">
@@ -37,7 +89,16 @@ export function StorefrontAboutSection({ title, aboutText, restaurant }: { title
           </div>
           </>
         )}
-        <OpeningHours restaurant={restaurant} divided={!!aboutText} />
+
+        {hasInfo && (
+          <div className={`grid gap-4 md:grid-cols-2 ${aboutText ? "mt-8 border-t border-ink/10 pt-8" : ""}`}>
+            <InfoBlock title="Options" items={options} />
+            <InfoBlock title="Payment Methods" items={payments} />
+            <InfoBlock title="Facilities / Amenities" items={facilities} />
+          </div>
+        )}
+
+        <OpeningHours restaurant={restaurant} divided={!!aboutText || hasInfo} />
       </div>
     </section>
   );
