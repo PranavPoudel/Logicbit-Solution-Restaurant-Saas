@@ -11,6 +11,12 @@ import { GlobalExceptionFilter } from './common/filters/http-exception.filter';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { rawBody: true });
 
+  // Behind a proxy (Render and similar) req.ip is the proxy's address unless Express is told to trust it,
+  // which would put the whole site in one rate-limit bucket. Set TRUST_PROXY to the number of proxies (1 on Render).
+  // Leave it unset locally, where nothing sits in front of the server.
+  const trustProxy = process.env.TRUST_PROXY;
+  if (trustProxy) app.set('trust proxy', trustProxy === 'true' ? true : /^\d+$/.test(trustProxy) ? Number(trustProxy) : trustProxy);
+
   // --- Security headers ---
   app.use(
     helmet({

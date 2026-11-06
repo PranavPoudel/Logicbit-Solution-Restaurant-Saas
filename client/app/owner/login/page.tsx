@@ -1,6 +1,8 @@
 // app/owner/login/page.tsx
 "use client";
 
+import { use } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,13 +13,16 @@ import {
   ownerLoginSchema,
   type OwnerLoginInput,
 } from "@/lib/validation/auth-schemas";
-import { ownerLogin } from "@/lib/api/owner-auth";
+import { ownerLogin, ownerResendVerification } from "@/lib/api/owner-auth";
+import { authErrorInfo } from "@/lib/utils/auth-error";
+import { OwnerAuthNotice } from "@/components/auth/owner-auth-card";
 import { listMyRestaurants } from "@/lib/api/restaurants";
 import { useOwnerAuthStore } from "@/store/owner-auth-store";
 import { theme } from "@/config/theme";
 import { FormField } from "@/components/ui/form-field";
 
-export default function OwnerLoginPage() {
+export default function OwnerLoginPage({ searchParams }: { searchParams: Promise<{ verified?: string; reset?: string }> }) {
+  const { verified, reset } = use(searchParams);
   const router = useRouter();
   const { setAuth, setRestaurants } = useOwnerAuthStore();
 
@@ -54,6 +59,14 @@ export default function OwnerLoginPage() {
       }
 
       router.push("/owner/dashboard");
+    },
+
+    onError: (error, input) => {
+      // An account that has not confirmed its email yet is sent to enter the code, with a fresh one on its way.
+      if (authErrorInfo(error).code === "EMAIL_NOT_VERIFIED") {
+        void ownerResendVerification(input.email).catch(() => undefined);
+        router.push(`/owner/verify-email?email=${encodeURIComponent(input.email)}`);
+      }
     },
   });
 
@@ -95,6 +108,9 @@ export default function OwnerLoginPage() {
           onSubmit={handleSubmit(onSubmit)}
           className="space-y-4"
         >
+          {verified && <OwnerAuthNotice>Email confirmed. You can log in now.</OwnerAuthNotice>}
+          {reset && <OwnerAuthNotice>Password updated. Log in with your new password.</OwnerAuthNotice>}
+
           <FormField
             label="Email"
             type="email"
@@ -112,6 +128,12 @@ export default function OwnerLoginPage() {
             error={errors.password?.message}
             {...register("password")}
           />
+
+          <p className="text-right -mt-2">
+            <Link href="/owner/forgot-password" className="text-sm font-medium text-[#1B2333] underline underline-offset-4">
+              Forgot password?
+            </Link>
+          </p>
 
           {errorMessage && (
             <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">

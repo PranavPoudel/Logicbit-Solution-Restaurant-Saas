@@ -32,6 +32,24 @@ export async function ownerRegister(input: OwnerRegisterInput) {
   return data;
 }
 
+// --- Emailed codes: confirm the email, reset the password ---
+
+export async function ownerVerifyEmail(input: { email: string; code: string }) {
+  await ownerApiClient.post("/auth/verify-email", input);
+}
+
+export async function ownerResendVerification(email: string) {
+  await ownerApiClient.post("/auth/resend-verification", { email });
+}
+
+export async function ownerForgotPassword(email: string) {
+  await ownerApiClient.post("/auth/forgot-password", { email });
+}
+
+export async function ownerResetPassword(input: { email: string; code: string; newPassword: string }) {
+  await ownerApiClient.post("/auth/reset-password", input);
+}
+
 export async function getOwnerProfile() {
   const { data } = await ownerApiClient.get("/auth/profile");
   return data;

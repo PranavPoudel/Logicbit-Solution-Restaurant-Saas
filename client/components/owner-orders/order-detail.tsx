@@ -8,7 +8,7 @@ import type { OwnerOrderSummary } from "@/types/order";
 import { formatMoney } from "@/lib/utils/money";
 import { ageLabel, flowFor, minutesSince, nextStep, shortNumber, stepIndex } from "@/lib/utils/order-flow";
 import { riderOf } from "@/lib/utils/order-rider";
-import { describeRefundPayback, REFUND_METHODS, type RefundMethod } from "@/lib/utils/refund";
+import { describeRefundPayback, GATEWAY_NAME, gatewayRefundMethod, REFUND_METHODS, type RefundMethod } from "@/lib/utils/refund";
 
 export const DETAIL_TITLE_ID = "order-detail-title";
 export const PRIMARY_ACTION_ID = "order-primary-action";
@@ -175,7 +175,8 @@ export interface RefundRequest {
 interface RefundActionProps {
   total: number;
   currency?: string;
-  paidWithPayPay: boolean;
+  /** The refund method that goes back through the payment gateway, or null for an order paid another way. */
+  gateway: "PAYPAY" | "CARD" | null;
   initialAmount: number;
   disabled: boolean;
   refunding: boolean;
@@ -184,17 +185,18 @@ interface RefundActionProps {
 
 const REFUND_REASONS = ["Item missing", "Wrong item", "Late delivery", "Quality issue"];
 
-function RefundAction({ total, currency, paidWithPayPay, initialAmount, disabled, refunding, onRefund }: RefundActionProps) {
+function RefundAction({ total, currency, gateway, initialAmount, disabled, refunding, onRefund }: RefundActionProps) {
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState(String(initialAmount));
   const [reason, setReason] = useState("");
-  const [method, setMethod] = useState<RefundMethod>(paidWithPayPay ? "PAYPAY" : "CASH");
+  const [method, setMethod] = useState<RefundMethod>(gateway ?? "CASH");
   const [reference, setReference] = useState("");
   const [touched, setTouched] = useState({ amount: false, reason: false });
   const value = Number(amount);
   const amountError = !(value > 0) ? "Enter an amount above 0" : value > total ? `It can't be more than ${formatMoney(total, currency)}` : "";
   const reasonError = reason.trim() ? "" : "Say why. The customer sees this in their email";
-  const viaPayPay = method === "PAYPAY" && paidWithPayPay;
+  const viaGateway = gateway !== null && method === gateway;
+  const gatewayName = gateway ? GATEWAY_NAME[gateway] : "";
   const methodLabel = REFUND_METHODS.find((m) => m.value === method)?.label ?? "";
   const half = Math.round((total / 2) * 100) / 100;
   const field = "mt-1.5 min-h-11 w-full rounded-lg border bg-white px-3 text-base text-neutral-900 outline-none focus-visible:ring-2 focus-visible:ring-[#E3A008] disabled:opacity-50 sm:text-sm";
@@ -229,7 +231,7 @@ function RefundAction({ total, currency, paidWithPayPay, initialAmount, disabled
           document.getElementById(amountError ? "refund-amount" : "refund-reason")?.focus();
           return;
         }
-        onRefund({ amount: value, reason: reason.trim(), method, reference: viaPayPay ? undefined : reference.trim() || undefined });
+        onRefund({ amount: value, reason: reason.trim(), method, reference: viaGateway ? undefined : reference.trim() || undefined });
       }}
       className="space-y-5 rounded-xl border border-neutral-200 p-4 sm:p-5"
     >
@@ -238,8 +240,8 @@ function RefundAction({ total, currency, paidWithPayPay, initialAmount, disabled
           Issue refund
         </h3>
         <p className="mt-1 text-sm text-neutral-600">
-          {viaPayPay
-            ? "Sent to the customer's PayPay from your PayPay account. It counts as refunded once PayPay confirms."
+          {viaGateway
+            ? `Sent back to the customer's ${method === "CARD" ? "card" : "PayPay"} from your ${gatewayName} account. It counts as refunded once ${gatewayName} confirms.`
             : "Record money you already paid back. The customer is told by email. An order can be refunded once."}
         </p>
       </div>
@@ -323,12 +325,12 @@ function RefundAction({ total, currency, paidWithPayPay, initialAmount, disabled
             </label>
           ))}
         </div>
-        {method === "PAYPAY" && !paidWithPayPay && (
-          <p className="mt-2 text-xs text-neutral-500">The customer didn&apos;t pay with PayPay, so you send the money yourself and it&apos;s recorded here.</p>
+        {(method === "PAYPAY" || method === "CARD") && !viaGateway && (
+          <p className="mt-2 text-xs text-neutral-500">The customer didn&apos;t pay with {methodLabel}, so you send the money yourself and it&apos;s recorded here.</p>
         )}
       </fieldset>
 
-      {!viaPayPay && (
+      {!viaGateway && (
         <div>
           <label htmlFor="refund-reference" className="text-sm font-medium text-neutral-800">
             Reference <span className="font-normal text-neutral-500">(optional)</span>
@@ -343,7 +345,7 @@ function RefundAction({ total, currency, paidWithPayPay, initialAmount, disabled
       <p aria-live="polite" className="min-h-5 text-sm text-neutral-700">
         {!amountError && !reasonError && (
           <>
-            <span className="font-semibold tabular-nums">{formatMoney(value, currency)}</span> goes back to the customer {viaPayPay ? "through PayPay" : method === "PAYPAY" ? "by PayPay" : `by ${methodLabel.toLowerCase()}`}.
+            <span className="font-semibold tabular-nums">{formatMoney(value, currency)}</span> goes back to the customer {viaGateway ? `through ${methodLabel}` : method === "PAYPAY" ? "by PayPay" : `by ${methodLabel.toLowerCase()}`}.
           </>
         )}
       </p>
@@ -354,7 +356,7 @@ function RefundAction({ total, currency, paidWithPayPay, initialAmount, disabled
         </button>
         <button type="submit" disabled={disabled || refunding} className={`${button} bg-[#111827] text-white hover:bg-[#1f2937]`}>
           {refunding && <Loader2 size={16} aria-hidden="true" className="animate-spin motion-reduce:animate-none" />}
-          {viaPayPay ? "Send refund to PayPay" : "Confirm refund"}
+          {viaGateway ? `Send refund to ${methodLabel}` : "Confirm refund"}
         </button>
       </div>
     </form>
@@ -477,9 +479,9 @@ export function OrderDetail({ order, now, disabled, pending, refunding, onAdvanc
                 {order.refund?.status === "PROCESSED" && describeRefundPayback(order.refund.method, order.refund.reference) && (
                   <p className="mt-1 text-sm">Paid back by {describeRefundPayback(order.refund.method, order.refund.reference)}</p>
                 )}
-                {order.refund?.status === "FAILED" && order.refund.failureReason && <p className="mt-1 text-sm">PayPay said: {order.refund.failureReason}</p>}
-                {order.refund?.status === "PENDING" && order.refund.method === "PAYPAY" && (
-                  <p className="mt-1 text-sm">PayPay has not finished this refund yet. Press Issue refund again to check it.</p>
+                {order.refund?.status === "FAILED" && order.refund.failureReason && <p className="mt-1 text-sm">{order.refund.method === "CARD" ? "Stripe" : "PayPay"} said: {order.refund.failureReason}</p>}
+                {order.refund?.status === "PENDING" && (order.refund.method === "PAYPAY" || order.refund.method === "CARD") && (
+                  <p className="mt-1 text-sm">{order.refund.method === "CARD" ? "Stripe" : "PayPay"} has not finished this refund yet. Press Issue refund again to check it.</p>
                 )}
                 {order.refund?.reason && <p className="mt-1 text-sm">Reason: {order.refund.reason}</p>}
                 <p className="mt-2 text-xs opacity-80">
@@ -571,7 +573,7 @@ export function OrderDetail({ order, now, disabled, pending, refunding, onAdvanc
             key={`${order.id}-${order.refund?.status ?? "none"}`}
             total={order.total ?? 0}
             currency={order.currencyCode}
-            paidWithPayPay={order.paymentMethod === "PAYPAY"}
+            gateway={gatewayRefundMethod(order.paymentMethod)}
             initialAmount={order.refund?.amount ?? order.total ?? 0}
             disabled={disabled}
             refunding={refunding}

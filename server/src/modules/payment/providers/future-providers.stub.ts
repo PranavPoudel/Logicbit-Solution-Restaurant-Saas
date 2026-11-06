@@ -16,16 +16,6 @@ import { PaymentProvider, PaymentInitiationResult } from '../payment-provider.in
  */
 
 @Injectable()
-export class CreditCardProvider implements PaymentProvider {
-  readonly methodName = 'CREDIT_CARD';
-  async initiate(): Promise<PaymentInitiationResult> {
-    throw new ServiceUnavailableException(
-      'Credit Card payment is not yet configured. Please contact support or choose Cash on Delivery.',
-    );
-  }
-}
-
-@Injectable()
 export class EsewaProvider implements PaymentProvider {
   readonly methodName = 'ESEWA';
   async initiate(): Promise<PaymentInitiationResult> {

@@ -18,6 +18,15 @@ export interface PaymentCheck {
   currency?: string;
 }
 
+/** Where a customer goes to pay an order that is still unpaid. */
+export interface PaymentResume {
+  /** True when the money already arrived, so there is nothing left to pay. */
+  paid?: boolean;
+  redirectUrl?: string;
+  /** The gateway's id of the payment page to use from now on. Differs from the old one when the old page expired. */
+  providerReference?: string;
+}
+
 export interface RefundResult {
   status: 'COMPLETED' | 'PENDING' | 'FAILED';
   providerReference?: string; // Gateway को refund id
@@ -36,6 +45,10 @@ export interface PaymentProvider {
   initiate(orderId: string, amount: number, currencyCode: string, context?: PaymentContext): Promise<PaymentInitiationResult>;
   /** Asks the gateway itself whether the order was paid; webhooks only say "check this order". */
   checkPayment?(orderId: string): Promise<PaymentCheck>;
+  /** Gives a customer a page to pay an order that is still unpaid: the open one, or a fresh one if it expired. */
+  resume?(orderId: string): Promise<PaymentResume>;
+  /** Closes the open payment page so a cancelled order cannot be paid afterwards. Reports paid=true when the money already arrived. Throws if it cannot be sure the page is closed. */
+  cancelPayment?(orderId: string): Promise<{ paid: boolean }>;
   /** Never throws for a gateway error — it returns FAILED with the gateway's message so the owner can retry. */
   refund?(orderId: string, amount: number, existingRefundId?: string): Promise<RefundResult>;
 }

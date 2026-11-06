@@ -77,8 +77,15 @@ export interface RestaurantUpdatePayload {
   paypayMerchantId?: string;
   paypayApiKey?: string;
   paypayApiSecret?: string;
+  stripeSecretKey?: string;
 }
 
+
+/** Deletes the saved Stripe key and switches card payments off. Refused while customers are still paying by card. */
+export async function removeMyStripeKey(id: string) {
+  const { data } = await ownerApiClient.delete(`/restaurants/${id}/stripe-key`);
+  return data;
+}
 
 export async function updateMyRestaurant(id: string, input: UpdateRestaurantInput) {
   const { data } = await ownerApiClient.patch(`/restaurants/${id}`, input);

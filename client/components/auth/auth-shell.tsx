@@ -73,6 +73,39 @@ export function AuthError({ children }: { children: ReactNode }) {
   );
 }
 
+export function AuthNotice({ children }: { children: ReactNode }) {
+  return (
+    <div role="status" className="flex gap-3 rounded-2xl border-2 border-herb bg-herb/10 p-4">
+      <Icon name="check" className="h-5 w-5 shrink-0 text-herb" />
+      <p className="font-medium">{children}</p>
+    </div>
+  );
+}
+
+export function OrDivider() {
+  const t = useTranslations("auth");
+  return (
+    <div role="separator" className="flex items-center gap-4 text-ink/55">
+      <span className="h-px flex-1 bg-ink/15" />
+      {t("orDivider")}
+      <span className="h-px flex-1 bg-ink/15" />
+    </div>
+  );
+}
+
+export function GoogleButton({ onClick, children }: { onClick: () => void; children: ReactNode }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="inline-flex h-14 w-full items-center justify-center gap-3 rounded-full border-2 border-ink/15 bg-paper px-6 text-lg font-bold text-ink transition hover:-translate-y-0.5 hover:border-ink"
+    >
+      <span aria-hidden className="grid h-7 w-7 place-items-center rounded-full bg-ink/5 font-display text-base font-extrabold">G</span>
+      {children}
+    </button>
+  );
+}
+
 export function AuthSubmit({ pending, children, pendingLabel }: { pending: boolean; children: ReactNode; pendingLabel: string }) {
   return (
     <button
@@ -147,7 +180,8 @@ function Visual({ mode }: { mode: Mode }) {
   );
 }
 
-export function AuthShell({ mode, children, footer }: { mode: Mode; children: ReactNode; footer: ReactNode }) {
+/** `heading` replaces the login/sign-up title for the other account pages (verify, forgot and reset password) and hides the tabs. */
+export function AuthShell({ mode, children, footer, heading }: { mode: Mode; children: ReactNode; footer: ReactNode; heading?: { title: string; accent: string; sub: string } }) {
   const t = useTranslations("auth");
   const c = COPY[mode];
   return (
@@ -160,7 +194,7 @@ export function AuthShell({ mode, children, footer }: { mode: Mode; children: Re
         </div>
 
         <div className="mx-auto flex w-full max-w-[460px] flex-1 flex-col justify-center py-10">
-          <div className="relative mb-8 grid grid-cols-2 rounded-full bg-ink/5 p-1" role="tablist" aria-label={t("account")}>
+          <div className={`relative mb-8 grid grid-cols-2 rounded-full bg-ink/5 p-1 ${heading ? "hidden" : ""}`} role="tablist" aria-label={t("account")}>
             <span
               aria-hidden
               className="absolute inset-y-1 left-1 w-[calc(50%-4px)] rounded-full bg-paper shadow-soft transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
@@ -181,9 +215,9 @@ export function AuthShell({ mode, children, footer }: { mode: Mode; children: Re
 
           <div key={mode} className="animate-fade-up">
             <h1 className="font-display text-[40px] font-extrabold leading-[1.05] tracking-tight md:text-[48px]">
-              {t(`copy.${mode}.title`)} <span className="relative inline-block">{t(`copy.${mode}.accent`)}<Squiggle className="absolute -bottom-1 left-0 h-3 w-full text-chili" /></span>
+              {heading ? heading.title : t(`copy.${mode}.title`)} <span className="relative inline-block">{heading ? heading.accent : t(`copy.${mode}.accent`)}<Squiggle className="absolute -bottom-1 left-0 h-3 w-full text-chili" /></span>
             </h1>
-            <p className="mt-3 text-lg text-ink/75">{t(`copy.${mode}.sub`)}</p>
+            <p className="mt-3 text-lg text-ink/75">{heading ? heading.sub : t(`copy.${mode}.sub`)}</p>
 
             <div className="mt-8">{children}</div>
             <p className="mt-8 text-center text-lg">{footer}</p>

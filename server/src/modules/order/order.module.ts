@@ -4,6 +4,7 @@ import { OrderController, RestaurantOrderController } from './order.controller';
 import { CouponModule } from '../coupon/coupon.module';
 import { PaymentModule } from '../payment/payment.module';
 import { DeliveryModule } from '../delivery/delivery.module';
+import { UnpaidOrderExpiryService } from './unpaid-order-expiry.service';
 
 @Module({
   imports: [
@@ -12,7 +13,7 @@ import { DeliveryModule } from '../delivery/delivery.module';
     DeliveryModule,
     ],
   controllers: [OrderController, RestaurantOrderController],
-  providers: [OrderService],
+  providers: [OrderService, UnpaidOrderExpiryService],
   exports: [OrderService],
 })
 export class OrderModule {}

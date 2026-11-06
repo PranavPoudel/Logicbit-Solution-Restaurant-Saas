@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { getMyOrder } from "@/lib/api/orders";
+import { cancelMyOrder, getMyOrder, payOrderNow } from "@/lib/api/orders";
 import { useMoney } from "@/hooks/use-money";
 import { playSound } from "@/lib/utils/sound";
 import { ORDER_STATUS_STEPS, PICKUP_STATUS_STEPS } from "@/types/order";
@@ -70,6 +70,9 @@ export default function OrderTrackingPage({
   const queryClient = useQueryClient();
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(sp.placed === "1");
+  const [paymentBusy, setPaymentBusy] = useState<"pay" | "cancel" | null>(null);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [confirmCancel, setConfirmCancel] = useState(false);
 
   const { data: order, isLoading, isError } = useQuery({
     queryKey: ["order", id],
@@ -120,6 +123,8 @@ export default function OrderTrackingPage({
   const headAccent = isPickup && t.has(`headline.${hk}.pickup`) ? t(`headline.${hk}.pickup`) : t(`headline.${hk}.accent`);
   const phone = order.restaurant?.phone ?? "none";
   const phoneLink = (chunks: React.ReactNode) => <a className="font-bold underline" href={`tel:${phone}`}>{chunks}</a>;
+  const restaurantPlace = order.restaurant?.latitude != null && order.restaurant?.longitude != null ? `${order.restaurant.latitude},${order.restaurant.longitude}` : order.restaurant?.address;
+  const directionsUrl = restaurantPlace ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(restaurantPlace)}` : null;
   const orderNumber = order.orderNumber ?? order.id.slice(0, 8);
   const hasMap = !isPickup && order.deliveryLatitude != null && order.deliveryLongitude != null && !cancelled;
   const payTone = order.paymentStatus === "PAID" ? "herb" : order.paymentStatus === "REFUNDED" ? "saffron" : "soft";
@@ -133,6 +138,39 @@ export default function OrderTrackingPage({
         : order.paymentMethod === "COD"
           ? (isPickup ? t("payAtPickup") : t("payOnDelivery"))
           : t("paymentPending");
+
+  // A card order the customer has not paid for yet: the restaurant has not received it.
+  const awaitingPayment = order.paymentMethod === "CREDIT_CARD" && order.paymentStatus === "UNPAID" && normalized === "PENDING";
+
+  const handlePayNow = async () => {
+    setPaymentBusy("pay");
+    setPaymentError(null);
+    try {
+      const result = await payOrderNow(id);
+      if (result.paid || !result.redirectUrl) {
+        await queryClient.invalidateQueries({ queryKey: ["order", id] });
+        setPaymentBusy(null);
+        return;
+      }
+      window.location.href = result.redirectUrl;
+    } catch {
+      setPaymentError(t("payError"));
+      setPaymentBusy(null);
+    }
+  };
+
+  const handleCancelUnpaid = async () => {
+    setPaymentBusy("cancel");
+    setPaymentError(null);
+    try {
+      await cancelMyOrder(id);
+      setConfirmCancel(false);
+      await queryClient.invalidateQueries({ queryKey: ["order", id] });
+    } catch {
+      setPaymentError(t("cancelUnpaidError"));
+    }
+    setPaymentBusy(null);
+  };
 
   const dismissConfirm = () => {
     setConfirmOpen(false);
@@ -172,6 +210,8 @@ export default function OrderTrackingPage({
             <h1 className="font-display text-5xl font-extrabold leading-none tracking-tight md:text-7xl">
               {cancelled ? (
                 <>{t("cancelledHead")} <span className="text-chili">{t("cancelledAccent")}</span></>
+              ) : awaitingPayment ? (
+                <>{t("awaitingHead")} <span className="text-chili">{t("awaitingAccent")}</span></>
               ) : (
                 <>
                   {headHead} <span className={normalized === "DELIVERED" ? "text-herb" : "text-chili"}>{headAccent}</span>
@@ -213,7 +253,32 @@ export default function OrderTrackingPage({
                 );
               })}
             </ol>
-            {statusMessage && <p className="mt-6 text-center text-lg text-ink/75">{statusMessage}</p>}
+            {awaitingPayment ? (
+              <div className="mt-6 text-center" role="status">
+                <p className="text-lg text-ink/75">{t("awaitingBody")}</p>
+                {confirmCancel ? (
+                  <div className="mt-4 flex flex-col items-center gap-3">
+                    <p className="font-bold">{t("cancelUnpaidConfirm")}</p>
+                    <div className="flex flex-wrap justify-center gap-3">
+                      <Button variant="ink" disabled={paymentBusy !== null} onClick={handleCancelUnpaid}>
+                        {paymentBusy === "cancel" ? t("cancelling") : t("cancelUnpaidYes")}
+                      </Button>
+                      <Button variant="outline" disabled={paymentBusy !== null} onClick={() => setConfirmCancel(false)}>{t("cancelUnpaidKeep")}</Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mt-4 flex flex-wrap justify-center gap-3">
+                    <Button size="lg" disabled={paymentBusy !== null} onClick={handlePayNow}>
+                      {paymentBusy === "pay" ? t("paying") : t("payNow")}
+                    </Button>
+                    <Button size="lg" variant="outline" disabled={paymentBusy !== null} onClick={() => setConfirmCancel(true)}>{t("cancelUnpaid")}</Button>
+                  </div>
+                )}
+                {paymentError && <p role="alert" className="mt-3 font-bold text-chili">{paymentError}</p>}
+              </div>
+            ) : (
+              statusMessage && <p className="mt-6 text-center text-lg text-ink/75">{statusMessage}</p>
+            )}
           </Card>
         )}
 
@@ -297,8 +362,23 @@ export default function OrderTrackingPage({
               ) : (
                 <p className="mt-3 text-ink/75">{t("contact", { restaurant: restaurantName })}</p>
               )}
-              {order.restaurant?.phone && (
-                <a href={`tel:${order.restaurant.phone}`} className="mt-4 flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-ink px-5 font-bold text-cream shadow-soft"><Icon name="phone" />{t("callRestaurant", { restaurant: restaurantName })}</a>
+              <div className="mt-4 space-y-2 border-t-2 border-ink/10 pt-4">
+                <p className="font-bold">{restaurantName}</p>
+                {order.restaurant?.address && <p className="flex items-start gap-2 text-ink/75"><Icon name="pin" className="mt-0.5 h-5 w-5 shrink-0" />{order.restaurant.address}</p>}
+                <p className="flex items-center gap-2 text-ink/75">
+                  <Icon name="phone" className="h-5 w-5 shrink-0" />
+                  {order.restaurant?.phone ? <a href={`tel:${order.restaurant.phone}`} className="font-bold underline">{order.restaurant.phone}</a> : t("noPhone")}
+                </p>
+              </div>
+              {(order.restaurant?.phone || directionsUrl) && (
+                <div className="mt-4 grid gap-2">
+                  {order.restaurant?.phone && (
+                    <a href={`tel:${order.restaurant.phone}`} className="flex min-h-12 items-center justify-center gap-2 rounded-full bg-ink px-5 font-bold text-cream shadow-soft"><Icon name="phone" />{t("callRestaurant", { restaurant: restaurantName })}</a>
+                  )}
+                  {directionsUrl && (
+                    <a href={directionsUrl} target="_blank" rel="noopener noreferrer" className="flex min-h-12 items-center justify-center gap-2 rounded-full border-2 border-ink px-5 font-bold"><Icon name="pin" />{t("directions")}</a>
+                  )}
+                </div>
               )}
             </Card>
 

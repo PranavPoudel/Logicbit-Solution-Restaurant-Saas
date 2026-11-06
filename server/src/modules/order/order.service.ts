@@ -1,6 +1,6 @@
 //src/modules/order/order.service.ts
 import { randomUUID } from 'crypto';
-import { BadRequestException, ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadGatewayException, BadRequestException, ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CouponService } from '../coupon/coupon.service';
 import { PaymentService } from '../payment/payment.service';
@@ -74,15 +74,40 @@ export function refundGoesThroughPayPay(order: { paymentMethod?: string | null }
   return method === 'PAYPAY' && order.paymentMethod === 'PAYPAY';
 }
 
-export function refundMethodBlockedReason(order: { paymentMethod?: string | null; refund?: { method?: string | null; status: string } | null }, method: string, amount?: number) {
+/** Stripe can send the money back to the card itself only when the customer paid by card; otherwise it is recorded like cash */
+export function refundGoesThroughCard(order: { paymentMethod?: string | null }, method: string) {
+  return method === 'CARD' && order.paymentMethod === 'CREDIT_CARD';
+}
+
+export function refundMethodBlockedReason(
+  order: { paymentMethod?: string | null; currencyCode?: string | null; refund?: { method?: string | null; status: string } | null },
+  method: string,
+  amount?: number,
+) {
   if (amount !== undefined && refundGoesThroughPayPay(order, method) && !Number.isInteger(amount)) {
     return 'PayPay refunds must be a whole number of yen';
+  }
+  if (amount !== undefined && refundGoesThroughCard(order, method) && order.currencyCode === 'JPY' && !Number.isInteger(amount)) {
+    return 'Card refunds in yen must be a whole number of yen';
   }
   if (!refundGoesThroughPayPay(order, method) && order.refund?.method === 'PAYPAY' && order.refund.status === 'PENDING') {
     return 'A PayPay refund is still waiting for PayPay. Retry it to check its status before refunding another way';
   }
+  if (!refundGoesThroughCard(order, method) && order.refund?.method === 'CARD' && order.refund.status === 'PENDING') {
+    return 'A card refund is still waiting for Stripe. Retry it to check its status before refunding another way';
+  }
   return null;
 }
+
+/** Payment methods where the customer pays on a gateway page and the gateway, not the browser, says whether it worked. */
+const ONLINE_PAYMENT_METHODS = ['PAYPAY', 'CREDIT_CARD'];
+const ONLINE_PAYMENT_LABEL: Record<string, string> = { PAYPAY: 'PayPay', CREDIT_CARD: 'card' };
+
+/** An unpaid card order is given up on this long after it was placed (Stripe closes its page after 31 minutes). */
+export const UNPAID_ORDER_MINUTES = 35;
+
+/** Payment pages live 31 minutes and are only reopened until the order is given up on, so after this long none can still be open. */
+export const PAYMENT_PAGE_GONE_MINUTES = 90;
 
 @Injectable()
 export class OrderService {
@@ -287,6 +312,7 @@ export class OrderService {
           deliveryHandledBy: deliveryHandledBy as any,
           paymentMethod: paymentMethod as any,
           paymentStatus: paymentResult.paymentStatus as any,
+          paymentReference: paymentResult.providerReference,
           items: { create: orderItemsData },
         },
         include: { items: { include: { menuItem: true } } },
@@ -309,9 +335,9 @@ export class OrderService {
     // GAP FIX: पहिले Restaurant Owner लाई नयाँ order आयो भनेर कहिल्यै
     // notify हुँदैनथ्यो — owner ले dashboard खोलेर पटक-पटक हेर्नुपर्थ्यो।
     // अब checkout हुनेबित्तिकै owner लाई notification जान्छ।
-    // An online order reaches the restaurant only once it is paid (see confirmPayPayPayment).
+    // An online order reaches the restaurant only once it is paid (see confirmOnlinePayment).
     if (paymentMethod === 'COD') {
-      await this.notifyRestaurantOwner(restaurant.tenantId, order.orderNumber, order.total, restaurant.currencyCode);
+      this.notifyRestaurantOwner(order.id);
     }
 
     await this.activityLog.log({
@@ -327,18 +353,9 @@ export class OrderService {
     return { success: true, message: 'Order placed successfully', data: paymentResult.redirectUrl ? { ...order, redirectUrl: paymentResult.redirectUrl } : order };
   }
 
-  /** Restaurant Owner (tenant का सबै user) लाई नयाँ order बारे notify गर्ने */
-  private async notifyRestaurantOwner(tenantId: string, orderNumber: string, total: number, currencyCode: string) {
-    const owners = await this.prisma.user.findMany({ where: { tenantId, isActive: true } });
-    for (const owner of owners) {
-      await this.notificationService.send({
-        tenantId,
-        channel: 'EMAIL',
-        recipient: owner.email,
-        subject: `New order ${orderNumber}`,
-        body: `You have a new order ${orderNumber} worth ${currencyCode} ${total}. Please check your dashboard.`,
-      });
-    }
+  /** The restaurant's owner and staff get an email when a new order reaches them. Sent in the background so checkout never waits on the mail server. */
+  private notifyRestaurantOwner(orderId: string) {
+    void this.notificationService.notifyNewOrder(orderId).catch((err) => this.logger.error(`New order email failed for ${orderId}`, err as Error));
   }
 
   async findOne(orderId: string) {
@@ -363,7 +380,7 @@ export class OrderService {
     let order = await this.findOne(orderId);
     if (order.customerId !== customerId) throw new NotFoundException('Order not found');
     // The payment page polls this: ask the gateway directly, so a late or missing webhook cannot leave a paid order unpaid.
-    if (order.paymentMethod === 'PAYPAY' && order.paymentStatus === 'UNPAID' && (await this.confirmPayPayPayment(orderId))) {
+    if (ONLINE_PAYMENT_METHODS.includes(order.paymentMethod) && order.paymentStatus === 'UNPAID' && order.status !== 'CANCELLED' && (await this.confirmOnlinePayment(orderId))) {
       order = await this.findOne(orderId);
     }
     return order;
@@ -428,7 +445,7 @@ export class OrderService {
 
   /**
    * Owner-facing — refunds an order. Cash, bank transfer and other methods record money the restaurant already
-   * paid back. PayPay sends the refund through the restaurant's own PayPay account and only counts it once PayPay confirms.
+   * paid back. PayPay and card refunds are sent through the restaurant's own PayPay or Stripe account and only counted once the gateway confirms.
    */
   async issueRefund(tenantId: string, restaurantId: string, orderId: string, dto: IssueRefundDto, issuedBy: string) {
     const order = await this.findOneForRestaurant(tenantId, restaurantId, orderId);
@@ -437,9 +454,14 @@ export class OrderService {
 
     let reference = dto.reference?.trim() || null;
 
-    if (refundGoesThroughPayPay(order, dto.method)) {
-      const resume = order.refund?.method === 'PAYPAY' && order.refund.status === 'PENDING' ? order.refund.reference ?? undefined : undefined;
-      const result = await this.paymentService.refund('PAYPAY', orderId, dto.amount, resume);
+    const gateway = refundGoesThroughPayPay(order, dto.method)
+      ? { provider: 'PAYPAY', name: 'PayPay' }
+      : refundGoesThroughCard(order, dto.method)
+        ? { provider: 'CREDIT_CARD', name: 'Stripe' }
+        : null;
+    if (gateway) {
+      const resume = order.refund?.method === dto.method && order.refund.status === 'PENDING' ? order.refund.reference ?? undefined : undefined;
+      const result = await this.paymentService.refund(gateway.provider, orderId, dto.amount, resume);
       reference = result.providerReference ?? null;
 
       if (result.status !== 'COMPLETED') {
@@ -450,11 +472,11 @@ export class OrderService {
           method: dto.method,
           reference,
           status: failed ? ('FAILED' as const) : ('PENDING' as const),
-          failureReason: failed ? result.message ?? 'PayPay did not accept the refund' : null,
+          failureReason: failed ? result.message ?? `${gateway.name} did not accept the refund` : null,
           processedAt: null,
         };
         const saved = await this.prisma.refund.upsert({ where: { orderId }, create: { orderId, ...data }, update: data });
-        if (failed) throw new BadRequestException(`PayPay refund failed: ${data.failureReason}`);
+        if (failed) throw new BadRequestException(`${gateway.name} refund failed: ${data.failureReason}`);
         return { success: true, data: saved };
       }
     }
@@ -528,8 +550,9 @@ export class OrderService {
       if (order.status !== 'ACCEPTED') {
         void this.notificationService.notifyOrderAccepted(orderId).catch((err) => this.logger.error(`Order confirmation email failed for ${order.orderNumber}`, err as Error));
       }
-    } else {
-      await this.notificationService.notifyOrderStatusChange(order.customerId, tenantId, order.orderNumber, dto.status);
+    } else if (!(dto.status === 'OUT_FOR_DELIVERY' && order.delivery?.pickedUpAt)) {
+      // The customer was already told when the driver picked the order up.
+      void this.notificationService.notifyOrderUpdate(orderId, dto.status).catch((err) => this.logger.error(`Order status email failed for ${order.orderNumber}`, err as Error));
     }
 
     await this.activityLog.log({
@@ -690,13 +713,25 @@ export class OrderService {
         throw new ForbiddenException('This order is already being prepared and can no longer be cancelled by you. Please contact the restaurant.');
       }
 
-      const restaurant = await this.prisma.restaurant.findUnique({ where: { id: order.restaurantId } });
-      const windowMinutes = restaurant?.cancellationWindowMinutes ?? 5;
-      const minutesSinceOrder = (Date.now() - order.createdAt.getTime()) / 60000;
-      if (minutesSinceOrder > windowMinutes) {
-        throw new ForbiddenException(
-          `The ${windowMinutes}-minute cancellation window has passed. Please contact the restaurant directly.`,
-        );
+      // The restaurant has not seen an unpaid online order, so the cancellation window does not apply to it.
+      if (!this.isUnpaidClosable(order)) {
+        const restaurant = await this.prisma.restaurant.findUnique({ where: { id: order.restaurantId } });
+        const windowMinutes = restaurant?.cancellationWindowMinutes ?? 5;
+        const minutesSinceOrder = (Date.now() - order.createdAt.getTime()) / 60000;
+        if (minutesSinceOrder > windowMinutes) {
+          throw new ForbiddenException(
+            `The ${windowMinutes}-minute cancellation window has passed. Please contact the restaurant directly.`,
+          );
+        }
+      }
+    }
+
+    // Close the payment page first: a cancelled order must never be payable afterwards.
+    if (this.isUnpaidClosable(order)) {
+      const { paid } = await this.paymentService.cancelPayment(order.paymentMethod, orderId);
+      if (paid) {
+        await this.confirmOnlinePayment(orderId);
+        throw new BadRequestException('Your payment just went through, so this order is now paid. You can cancel it again if you still want to.');
       }
     }
 
@@ -765,6 +800,86 @@ export class OrderService {
     return `ORD-${year}-${random}`;
   }
 
+  /** An online order whose payment page we can reopen and close, and that has not been paid. */
+  private isUnpaidClosable(order: { paymentMethod: string; paymentStatus: string; status: string }) {
+    return order.paymentStatus === 'UNPAID' && order.status === 'PENDING' && this.paymentService.canResume(order.paymentMethod);
+  }
+
+  /**
+   * Customer-facing — "Pay now" on an order that is still waiting for payment. Reuses the open payment page,
+   * or makes a fresh one if it expired; returns where to send the customer.
+   */
+  async payNow(customerId: string, orderId: string) {
+    const order = await this.prisma.order.findUnique({ where: { id: orderId } });
+    if (!order || order.customerId !== customerId) throw new NotFoundException('Order not found');
+    if (order.paymentStatus === 'PAID') return { success: true, paid: true };
+    if (!this.isUnpaidClosable(order)) throw new BadRequestException('This order is not waiting for a payment');
+
+    const resume = await this.paymentService.resume(order.paymentMethod, orderId);
+    if (resume.paid) {
+      await this.confirmOnlinePayment(orderId);
+      return { success: true, paid: true };
+    }
+    if (!resume.redirectUrl) throw new BadGatewayException('The payment page could not be opened. Please try again.');
+
+    if (resume.providerReference && resume.providerReference !== order.paymentReference) {
+      await this.prisma.order.updateMany({ where: { id: orderId, paymentStatus: 'UNPAID' }, data: { paymentReference: resume.providerReference } });
+    }
+    return { success: true, paid: false, redirectUrl: resume.redirectUrl };
+  }
+
+  /**
+   * Runs on a timer: cancels card orders nobody paid for. A payment that arrived late is confirmed instead,
+   * and an order is only cancelled after its payment page has been closed, so it can never be paid and cancelled.
+   */
+  async cancelExpiredUnpaidOrders(now = new Date()) {
+    const cutoff = new Date(now.getTime() - UNPAID_ORDER_MINUTES * 60000);
+    const stale = await this.prisma.order.findMany({
+      where: { paymentMethod: 'CREDIT_CARD', paymentStatus: 'UNPAID', status: 'PENDING', createdAt: { lt: cutoff } },
+      select: { id: true, orderNumber: true, tenantId: true, restaurantId: true, paymentMethod: true, createdAt: true },
+      orderBy: { createdAt: 'desc' }, // newest first, so orders that keep failing cannot crowd out the rest
+      take: 50,
+    });
+
+    let cancelled = 0;
+    for (const order of stale) {
+      try {
+        if (await this.confirmOnlinePayment(order.id)) continue;
+        let paid = false;
+        try {
+          ({ paid } = await this.paymentService.cancelPayment(order.paymentMethod, order.id));
+        } catch (error) {
+          // If the payment page cannot be checked (the restaurant's key is gone), wait. Once the order is old enough that no
+          // page can still be open, it is safe to cancel without asking.
+          if (now.getTime() - order.createdAt.getTime() < PAYMENT_PAGE_GONE_MINUTES * 60000) throw error;
+        }
+        if (paid) {
+          await this.confirmOnlinePayment(order.id);
+          continue;
+        }
+
+        const { count } = await this.prisma.order.updateMany({
+          where: { id: order.id, status: 'PENDING', paymentStatus: 'UNPAID' },
+          data: { status: 'CANCELLED', cancelledBy: 'SYSTEM', cancellationReason: 'The payment was not completed in time', cancelledAt: now },
+        });
+        if (count !== 1) continue;
+        cancelled++;
+        await this.prisma.orderStatusHistory.create({ data: { orderId: order.id, status: 'CANCELLED', note: 'The payment was not completed in time', changedBy: 'system' } });
+        await this.activityLog.log({
+          tenantId: order.tenantId,
+          restaurantId: order.restaurantId,
+          actorType: 'SYSTEM',
+          action: 'ORDER_CANCELLED',
+          description: `Order ${order.orderNumber} cancelled: the card payment was not completed in time`,
+          metadata: { orderId: order.id },
+        });
+      } catch (error) {
+        this.logger.error(`Could not expire unpaid order ${order.orderNumber}`, error as Error);
+      }
+    }
+    return cancelled;
+  }
+
   /** Flips an unpaid order to PAID; true only for the first caller, so racing confirmations act once. */
   async markOrderAsPaid(orderId: string) {
     const { count } = await this.prisma.order.updateMany({
@@ -774,31 +889,46 @@ export class OrderService {
     return count === 1;
   }
 
-  /** Marks a PayPay order paid only after PayPay itself reports the full total completed; returns whether it is paid. */
-  async confirmPayPayPayment(orderId: string) {
+  /** Marks a PayPay or card order paid only after the gateway itself reports the full total completed; returns whether it is paid. */
+  async confirmOnlinePayment(orderId: string) {
     if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(orderId)) return false;
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
-      select: { paymentMethod: true, paymentStatus: true, total: true, currencyCode: true, orderNumber: true, tenantId: true, restaurantId: true },
+      select: { status: true, paymentMethod: true, paymentStatus: true, total: true, currencyCode: true, orderNumber: true, tenantId: true, restaurantId: true },
     });
-    if (!order || order.paymentMethod !== 'PAYPAY') return false;
+    if (!order || !ONLINE_PAYMENT_METHODS.includes(order.paymentMethod)) return false;
     if (order.paymentStatus !== 'UNPAID') return order.paymentStatus === 'PAID';
 
-    const check = await this.paymentService.checkPayment('PAYPAY', orderId);
+    const label = ONLINE_PAYMENT_LABEL[order.paymentMethod];
+    const check = await this.paymentService.checkPayment(order.paymentMethod, orderId);
     if (!check.paid) return false;
     if (Number(check.amount) !== Number(order.total) || check.currency !== order.currencyCode) {
-      this.logger.error(`PayPay reports ${check.amount} ${check.currency} for order ${order.orderNumber}, expected ${order.total} ${order.currencyCode}`);
+      this.logger.error(`The ${label} gateway reports ${check.amount} ${check.currency} for order ${order.orderNumber}, expected ${order.total} ${order.currencyCode}`);
       return false;
     }
 
     if (await this.markOrderAsPaid(orderId)) {
-      await this.notifyRestaurantOwner(order.tenantId, order.orderNumber, Number(order.total), order.currencyCode ?? '');
+      if (order.status === 'CANCELLED') {
+        // The money arrived for an order that was already cancelled. Record it as paid so the owner can refund it from
+        // the order page, but do not tell the restaurant about a "new order" that must not be cooked.
+        this.logger.error(`Order ${order.orderNumber} was paid after it was cancelled and needs a refund`);
+        await this.activityLog.log({
+          tenantId: order.tenantId,
+          restaurantId: order.restaurantId,
+          actorType: 'SYSTEM',
+          action: 'ORDER_PAID_AFTER_CANCEL',
+          description: `Order ${order.orderNumber} was paid with ${label} after it was cancelled. Refund it from the order page.`,
+          metadata: { orderId },
+        });
+        return true;
+      }
+      this.notifyRestaurantOwner(orderId);
       await this.activityLog.log({
         tenantId: order.tenantId,
         restaurantId: order.restaurantId,
         actorType: 'SYSTEM',
         action: 'ORDER_PAID',
-        description: `Order ${order.orderNumber} paid with PayPay`,
+        description: `Order ${order.orderNumber} paid with ${label}`,
         metadata: { orderId },
       });
     }

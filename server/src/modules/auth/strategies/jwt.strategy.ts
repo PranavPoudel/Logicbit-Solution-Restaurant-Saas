@@ -11,6 +11,8 @@ export interface JwtPayload {
   roles: string[];
   tenantId: string;
   isSuperAdmin: boolean;
+  /** Token version. Tokens issued before it existed have none and count as version 0. */
+  tv?: number;
 }
 
 @Injectable()
@@ -39,6 +41,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     const user = await this.prisma.user.findUnique({ where: { id: payload.sub } });
     if (!user || !user.isActive) {
       throw new UnauthorizedException('Account is no longer active');
+    }
+    if ((payload.tv ?? 0) !== user.tokenVersion) {
+      throw new UnauthorizedException('Session is no longer valid. Please log in again.');
     }
 
     return {

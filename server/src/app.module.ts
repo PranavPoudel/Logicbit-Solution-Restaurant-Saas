@@ -7,6 +7,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { CustomerAuthModule } from './modules/customer-auth/customer-auth.module';
+import { SocialAuthModule } from './modules/social-auth/social-auth.module';
 import { RolesModule } from './modules/roles/roles.module';
 import { PermissionsModule } from './modules/permissions/permissions.module';
 import { RestaurantModule } from './modules/restaurant/restaurant.module';
@@ -60,6 +61,7 @@ import { AdminSubscriptionModule } from './modules/platform-admin-subscription/p
 
     AuthModule,
     CustomerAuthModule,
+    SocialAuthModule,
     RolesModule,
     PermissionsModule,
     RestaurantModule,

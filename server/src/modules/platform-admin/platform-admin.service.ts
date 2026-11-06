@@ -2,6 +2,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ActivityLogService } from '../activity-log/activity-log.service';
+import { withoutPaymentSecrets } from '../../common/utils/restaurant-secrets.util';
+import { encryptSecret } from '../../common/utils/secret-box.util';
 
 @Injectable()
 export class PlatformAdminService {
@@ -134,7 +136,7 @@ export class PlatformAdminService {
       this.prisma.restaurant.count(),
     ]);
 
-    return { success: true, data: restaurants, meta: { total, page, limit } };
+    return { success: true, data: restaurants.map(withoutPaymentSecrets), meta: { total, page, limit } };
   }
 
   async getRestaurantFullDetail(id: string) {
@@ -156,16 +158,21 @@ export class PlatformAdminService {
 
     return { 
       success: true, 
-      data: { ...restaurant, subscription, storefrontConfig } 
+      data: { ...withoutPaymentSecrets(restaurant), subscription, storefrontConfig } 
     };
   }
 
   async overrideRestaurantSetting(id: string, data: Record<string, any>) {
+    // A payment key set from here is encrypted like one saved by the owner.
+    const safeData = { ...data };
+    for (const field of ['stripeSecretKey', 'paypayApiSecret']) {
+      if (typeof safeData[field] === 'string' && safeData[field]) safeData[field] = encryptSecret(safeData[field]);
+    }
     const restaurant = await this.prisma.restaurant.update({
       where: { id },
-      data, 
+      data: safeData, 
     });
-    return { success: true, data: restaurant };
+    return { success: true, data: withoutPaymentSecrets(restaurant) };
   }
 
   async suspendRestaurant(id: string, suspend: boolean) {
@@ -181,7 +188,7 @@ export class PlatformAdminService {
       description: `Restaurant ${restaurant.name} was ${suspend ? 'suspended' : 'unsuspended'}`,
     });
 
-    return { success: true, data: restaurant };
+    return { success: true, data: withoutPaymentSecrets(restaurant) };
   }
 
   async updateCommissionRate(id: string, percent: number) {
@@ -189,7 +196,7 @@ export class PlatformAdminService {
       where: { id },
       data: { platformCommissionPercent: percent },
     });
-    return { success: true, data: restaurant };
+    return { success: true, data: withoutPaymentSecrets(restaurant) };
   }
 
   async removeStorefrontBanner(id: string) {
