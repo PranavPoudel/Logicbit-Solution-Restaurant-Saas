@@ -88,6 +88,18 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-up, .animate-slide-in-left { animation: none; }
 }
+/* A sticker that lands with a small overshoot, after the words have arrived. */
+@keyframes pop-in {
+  0% { opacity: 0; transform: scale(0.3); }
+  70% { opacity: 1; transform: scale(1.12); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.animate-pop-in {
+  animation: pop-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.45s both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-pop-in { animation: none; }
+}
 
 /* ==========================================
    THERMAL RECEIPT PRINT STYLES

@@ -8,6 +8,7 @@ import {
   ArrayMaxSize,
   ValidateNested,
   IsEnum,
+  Matches,
   Min,
   Max,
   MaxLength,
@@ -186,6 +187,12 @@ export class UpdateRestaurantDto {
   @IsString()
   @IsOptional()
   paypayApiSecret?: string;
+
+  /** The restaurant's Stripe secret key (or restricted key). Write-only: it is never returned. */
+  @IsString()
+  @IsOptional()
+  @Matches(/^(sk|rk)_(test|live)_[A-Za-z0-9]+$/, { message: 'That does not look like a Stripe secret key. It starts with sk_test_ or sk_live_' })
+  stripeSecretKey?: string;
 
   @IsBoolean()
   @IsOptional()

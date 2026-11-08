@@ -289,10 +289,11 @@ export class DeliveryService {
       }),
     ]);
 
-    if (orderStatus !== order.status) {
+    // The pickup email already says the order is on its way, so the ON_THE_WAY step sends none.
+    if (status === 'PICKED_UP') {
       void this.notificationService
-        .notifyOrderStatusChange(order.customerId, order.tenantId, order.orderNumber, orderStatus)
-        .catch((err) => this.logger.error(`Order status email failed for ${order.orderNumber}`, err as Error));
+        .notifyOrderUpdate(orderId, 'PICKED_UP')
+        .catch((err) => this.logger.error(`Pickup email failed for ${order.orderNumber}`, err as Error));
     }
 
     return { success: true, message: 'Delivery status updated' };

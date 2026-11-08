@@ -114,7 +114,10 @@ export default function OwnerRegisterPage() {
       const user = response.user || response.data?.user;
       const restaurants = response.restaurants || response.data?.restaurants || [];
 
-      if (tokens && user) {
+      if (!tokens && user) {
+        // The server creates the account without a session, and has just emailed a 6-digit code to confirm the address.
+        router.push(`/owner/verify-email?email=${encodeURIComponent(user.email)}`);
+      } else if (tokens && user) {
         setAuth({
           accessToken: tokens.accessToken,
           refreshToken: tokens.refreshToken,

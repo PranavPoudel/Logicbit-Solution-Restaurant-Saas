@@ -53,6 +53,8 @@ export interface SettingsForm {
   paypayMerchantId: string;
   paypayApiKey: string;
   paypayApiSecret: string;
+  /** Write-only: filled in only to save or replace the key. The saved key is never sent back. */
+  stripeSecretKey: string;
   supportsCod: boolean;
   supportsCreditCard: boolean;
   supportsEsewa: boolean;
@@ -68,7 +70,7 @@ const EMPTY_FORM: SettingsForm = {
   supportsDelivery: true, supportsPickup: false, supportsDineIn: false, isOpen: true,
   openingHours: DEFAULT_HOURS, timezone: "Asia/Kathmandu", selfDeliveryRadiusKm: "5",
   selfDeliveryFlatFee: "60", maxDeliveryRadiusKm: "10", paypayMerchantId: "", paypayApiKey: "",
-  paypayApiSecret: "", supportsCod: true, supportsCreditCard: false, supportsEsewa: false,
+  paypayApiSecret: "", stripeSecretKey: "", supportsCod: true, supportsCreditCard: false, supportsEsewa: false,
   supportsKhalti: false, supportsIps: false, supportsPhonePay: false, supportsPaypay: false,
 };
 
@@ -166,12 +168,16 @@ export default function SettingsPage() {
       if (hasNewSecret && form.paypayApiSecret.trim().length > 0) {
         payload.paypayApiSecret = form.paypayApiSecret;
       }
+      if (form.stripeSecretKey.trim().length > 0) {
+        payload.stripeSecretKey = form.stripeSecretKey.trim();
+      }
 
       return updateMyRestaurant(restaurantId as string, payload);
     },
     onSuccess: async () => {
       setSavedAt(Date.now());
       setHasNewSecret(false);
+      set("stripeSecretKey", "");
       queryClient.invalidateQueries({ queryKey: ["owner-restaurant", restaurantId] });
       queryClient.invalidateQueries({ queryKey: ["restaurant-cuisines", restaurantId] });
       try {
@@ -269,7 +275,7 @@ export default function SettingsPage() {
           {activeTab === "delivery" && <DeliveryTab form={form} set={set} />}
           {activeTab === "branding" && <BrandingTab form={form} set={set} />}
           {activeTab === "service" && <ServiceTab form={form} set={set} hoursEdited={hoursEdited} setHoursEdited={setHoursEdited} />}
-          {activeTab === "payments" && <PaymentsTab form={form} set={set} hasNewSecret={hasNewSecret} setHasNewSecret={setHasNewSecret} />}
+          {activeTab === "payments" && <PaymentsTab form={form} set={set} hasNewSecret={hasNewSecret} setHasNewSecret={setHasNewSecret} hasStripeKey={(restaurantQuery.data as Record<string, unknown> | undefined)?.hasStripeKey === true} restaurantId={restaurantId} />}
         </div>
       </div>
     </div>
