@@ -9,6 +9,8 @@ import { DeliveryPartnerService } from './delivery-partner.service';
 import { DeliveryJwtStrategy } from './strategies/delivery-jwt.strategy';
 import { DeliveryIntegrationService } from './integration/delivery-integration.service';
 import { DeliveryWebhookController } from './integration/delivery-webhook.controller';
+import { UberDirectAccountService } from './integration/uber-direct-account.service';
+import { UberDirectSettingsController } from './integration/uber-direct-settings.controller';
 
 @Module({
   imports: [
@@ -23,8 +25,8 @@ import { DeliveryWebhookController } from './integration/delivery-webhook.contro
       }),
     }),
   ],
-  controllers: [DeliveryPersonManagementController, DeliveryPartnerController, DeliveryAuthController, DeliveryController, DeliveryWebhookController],
-  providers: [DeliveryService, DeliveryPartnerService, DeliveryJwtStrategy, DeliveryIntegrationService],
+  controllers: [DeliveryPersonManagementController, DeliveryPartnerController, DeliveryAuthController, DeliveryController, DeliveryWebhookController, UberDirectSettingsController],
+  providers: [DeliveryService, DeliveryPartnerService, DeliveryJwtStrategy, DeliveryIntegrationService, UberDirectAccountService],
   exports: [DeliveryIntegrationService],
 })
 export class DeliveryModule {}

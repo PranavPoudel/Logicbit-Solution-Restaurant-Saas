@@ -271,6 +271,7 @@ model Restaurant {
   deliveryPartners DeliveryPartner[]
   reservations   Reservation[]
   chatSessions   ChatSession[]
+  uberDirect     RestaurantUberDirect?
 
   @@index([tenantId])
   @@index([latitude, longitude])
@@ -1283,6 +1284,21 @@ model Reservation {
 enum DeliveryPartnerFeeType {
   FLAT
   PERCENT
+}
+
+// The restaurant's own Uber Direct account, so Uber bills the restaurant and not the platform. It lives in its own
+// table, away from Restaurant, so no code that sends a restaurant row to a browser can carry these secrets along.
+model RestaurantUberDirect {
+  id           String   @id @default(uuid())
+  restaurantId String   @unique
+  clientId     String
+  clientSecret String   // saved encrypted (enc:v1:...)
+  customerId   String
+  signingKey   String   // verifies Uber's webhooks; saved encrypted (enc:v1:...)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
 }
 
 model DeliveryPartner {
