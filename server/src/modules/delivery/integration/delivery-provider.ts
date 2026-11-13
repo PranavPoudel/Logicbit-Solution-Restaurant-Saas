@@ -7,7 +7,8 @@ import { DeliveryEventDto } from './delivery-event.dto';
 type DeliveryEventType = 'ASSIGNED' | 'PICKED_UP' | 'ON_THE_WAY' | 'DELIVERED' | 'FAILED';
 
 export interface DeliveryEvent {
-  orderId: string;
+  /** Missing when the provider did not echo our order id; the delivery is then found by externalRef. */
+  orderId?: string;
   event: DeliveryEventType;
   externalRef?: string;
   driver?: { name?: string; phone?: string; vehicle?: string };
@@ -19,8 +20,10 @@ export interface BookableOrder {
   id: string;
   orderNumber: string;
   deliveryAddress: string | null;
+  deliveryLatitude?: number | null;
+  deliveryLongitude?: number | null;
   notes?: string | null;
-  restaurant: { name: string; address: string | null; phone: string | null };
+  restaurant: { id: string; name: string; address: string | null; phone: string | null; country?: string | null; latitude?: number | null; longitude?: number | null };
   customer: { name: string; phone: string | null };
   items: { quantity: number; name: string }[];
 }

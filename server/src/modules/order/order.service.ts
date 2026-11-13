@@ -605,8 +605,10 @@ export class OrderService {
       id: order.id,
       orderNumber: order.orderNumber,
       deliveryAddress: order.deliveryAddress,
+      deliveryLatitude: order.deliveryLatitude,
+      deliveryLongitude: order.deliveryLongitude,
       notes: order.notes,
-      restaurant: { name: restaurant.name, address: restaurant.address, phone: restaurant.phone },
+      restaurant: { id: restaurant.id, name: restaurant.name, address: restaurant.address, phone: restaurant.phone, country: restaurant.country, latitude: restaurant.latitude, longitude: restaurant.longitude },
       customer: { name: order.customer?.name ?? 'Customer', phone: order.customer?.phone ?? null },
       items: (order.items ?? []).map((i: any) => ({ quantity: i.quantity, name: i.menuItem?.name ?? 'Item' })),
     });
