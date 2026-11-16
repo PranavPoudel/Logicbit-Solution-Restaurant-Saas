@@ -13,7 +13,7 @@ export const customerSignupSchema = z
     fullName: z.string().min(2, "validation.fullName"),
     email: z.string().email("validation.email"),
     phone: z.string().min(7, "validation.phone"),
-    password: z.string().min(6, "validation.passwordMin"),
+    password: z.string().min(8, "validation.passwordMin8"),
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {

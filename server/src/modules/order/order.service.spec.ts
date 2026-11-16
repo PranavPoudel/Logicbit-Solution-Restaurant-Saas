@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test';
 import { strict as assert } from 'node:assert';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { canMoveOrderStatus, deliveryBlockedReason, OrderService, ownDeliveryBlockedReason, paymentBlockedReason, refundBlockedReason, refundGoesThroughCard, refundGoesThroughPayPay, refundMethodBlockedReason } from './order.service';
+import { canMoveOrderStatus, deliveryBlockedReason, OrderService, ownDeliveryBlockedReason, paymentBlockedReason, paymentMethodAvailable, refundBlockedReason, refundGoesThroughCard, refundGoesThroughPayPay, refundMethodBlockedReason } from './order.service';
 
 describe('ownDeliveryBlockedReason', () => {
   const waiting = { orderType: 'DELIVERY', deliveryHandledBy: 'THIRD_PARTY', delivery: null };
@@ -331,5 +331,32 @@ describe('card payments', () => {
     assert.match(refundMethodBlockedReason(yen, 'CARD', 100.5)!, /whole number of yen/);
     assert.equal(refundMethodBlockedReason(yen, 'CARD', 100), null);
     assert.equal(refundMethodBlockedReason({ paymentMethod: 'CREDIT_CARD', currencyCode: 'USD' }, 'CARD', 100.5), null);
+  });
+});
+
+describe('paymentMethodAvailable', () => {
+  const restaurant = { supportsCod: true, supportsCreditCard: true, supportsPaypay: false, supportsEsewa: false, stripeSecretKey: 'enc:v1:x' };
+
+  it('only allows methods the restaurant switched on', () => {
+    assert.equal(paymentMethodAvailable(restaurant, 'COD'), true);
+    assert.equal(paymentMethodAvailable(restaurant, 'PAYPAY'), false);
+    assert.equal(paymentMethodAvailable(restaurant, 'ESEWA'), false);
+    assert.equal(paymentMethodAvailable({ ...restaurant, supportsCod: false }, 'COD'), false);
+  });
+
+  it('needs a saved Stripe key for card, and refuses a method it does not know', () => {
+    assert.equal(paymentMethodAvailable(restaurant, 'CREDIT_CARD'), true);
+    assert.equal(paymentMethodAvailable({ ...restaurant, stripeSecretKey: null }, 'CREDIT_CARD'), false);
+    assert.equal(paymentMethodAvailable({ ...restaurant, supportsCreditCard: false }, 'CREDIT_CARD'), false);
+    assert.equal(paymentMethodAvailable(restaurant, 'BITCOIN'), false);
+  });
+});
+
+describe('OrderService.checkout payment method', () => {
+  it('refuses a payment method the restaurant has switched off, before doing anything else', async () => {
+    const prisma = { restaurant: { findFirst: async () => ({ id: 'r1', isActive: true, isOpen: true, supportsCod: true, supportsPaypay: false }) } };
+    const service = new OrderService(prisma as any, null as any, null as any, null as any, null as any, null as any);
+    const dto = { restaurantId: 'r1', items: [], orderType: 'PICKUP', paymentMethod: 'PAYPAY' };
+    await assert.rejects(service.checkout('c1', dto as any), (e: Error) => e instanceof BadRequestException && /does not accept/.test(e.message));
   });
 });

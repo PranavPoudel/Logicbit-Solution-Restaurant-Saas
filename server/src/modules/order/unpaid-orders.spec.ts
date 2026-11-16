@@ -27,13 +27,15 @@ interface Setup {
   resume?: any;
   cancelPayment?: { paid: boolean } | Error;
   check?: any;
+  usage?: any;
 }
 
-function build({ order = unpaidCard, stale = [], resume = { redirectUrl: 'https://pay.test/x', providerReference: 'cs_old' }, cancelPayment = { paid: false }, check = { paid: false } }: Setup = {}) {
+function build({ order = unpaidCard, stale = [], resume = { redirectUrl: 'https://pay.test/x', providerReference: 'cs_old' }, cancelPayment = { paid: false }, check = { paid: false }, usage = null }: Setup = {}) {
   const updates: any[] = [];
   const history: any[] = [];
   const logged: any[] = [];
   const calls: string[] = [];
+  const couponBack: any[] = [];
   const prisma = {
     order: {
       findUnique: async () => order,
@@ -43,6 +45,8 @@ function build({ order = unpaidCard, stale = [], resume = { redirectUrl: 'https:
     },
     restaurant: { findUnique: async () => ({ cancellationWindowMinutes: 5 }) },
     orderStatusHistory: { create: async (a: any) => history.push(a) },
+    couponUsage: { findUnique: async () => usage, delete: async () => ({}) },
+    coupon: { update: async (a: any) => (couponBack.push(a), {}) },
     $transaction: async (fn: any) => fn(prisma),
   };
   const payments = {
@@ -58,7 +62,7 @@ function build({ order = unpaidCard, stale = [], resume = { redirectUrl: 'https:
   const notified: unknown[] = [];
   const notifications = { notifyNewOrder: async (id: unknown) => notified.push(id) };
   const service = new OrderService(prisma as any, null as any, payments as any, notifications as any, { log: async (l: unknown) => logged.push(l) } as any, null as any);
-  return { service, updates, history, logged, calls, notified };
+  return { service, updates, history, logged, calls, notified, couponBack };
 }
 
 describe('OrderService.payNow', () => {
@@ -228,5 +232,31 @@ describe('cancelExpiredUnpaidOrders when the payment page cannot be checked', ()
     (service as any).prisma.order.findMany = async (a: any) => ((args = a), []);
     await service.cancelExpiredUnpaidOrders();
     assert.deepEqual(args.orderBy, { createdAt: 'desc' });
+  });
+});
+
+describe('giving the coupon back when an unpaid card order is cancelled', () => {
+  const usage = { couponId: 'cp1', orderId: ORDER_ID };
+
+  it('returns it when the customer cancels', async () => {
+    const { service, couponBack } = build({ usage });
+    await service.cancel('CUSTOMER', 'c1', ORDER_ID, {} as any);
+    assert.equal(couponBack.length, 1);
+    assert.equal(couponBack[0].where.id, 'cp1');
+    assert.deepEqual(couponBack[0].data, { usedCount: { decrement: 1 } });
+  });
+
+  it('returns it when the order expires unpaid', async () => {
+    const stale = [{ id: ORDER_ID, orderNumber: 'ORD-9', tenantId: 't1', restaurantId: 'r1', paymentMethod: 'CREDIT_CARD', createdAt: new Date(Date.now() - 40 * MINUTE) }];
+    const { service, couponBack } = build({ stale, usage });
+    assert.equal(await service.cancelExpiredUnpaidOrders(), 1);
+    assert.equal(couponBack.length, 1);
+  });
+
+  it('keeps the coupon used when a cash order is cancelled', async () => {
+    const cash = { ...unpaidCard, paymentMethod: 'COD', createdAt: new Date() };
+    const { service, couponBack } = build({ order: cash, usage });
+    await service.cancel('CUSTOMER', 'c1', ORDER_ID, {} as any);
+    assert.equal(couponBack.length, 0);
   });
 });

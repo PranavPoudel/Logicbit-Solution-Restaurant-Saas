@@ -50,6 +50,24 @@ export function paymentBlockedReason(order: { paymentMethod: string; paymentStat
   return null;
 }
 
+/** The restaurant setting that switches each payment method on. */
+const PAYMENT_METHOD_SETTING: Record<string, string> = {
+  COD: 'supportsCod',
+  CREDIT_CARD: 'supportsCreditCard',
+  ESEWA: 'supportsEsewa',
+  KHALTI: 'supportsKhalti',
+  IPS: 'supportsIps',
+  PHONEPAY: 'supportsPhonePay',
+  PAYPAY: 'supportsPaypay',
+};
+
+/** A customer can only pay with a method the restaurant switched on. Card also needs the restaurant's saved Stripe key. */
+export function paymentMethodAvailable(restaurant: { stripeSecretKey?: string | null } & Record<string, unknown>, method: string) {
+  const setting = PAYMENT_METHOD_SETTING[method];
+  if (!setting || restaurant[setting] !== true) return false;
+  return method !== 'CREDIT_CARD' || !!restaurant.stripeSecretKey;
+}
+
 /** Online orders the customer has not paid for yet are hidden from the restaurant until the payment is confirmed. */
 const AWAITING_PAYMENT = { paymentMethod: { not: 'COD' }, paymentStatus: 'UNPAID', status: 'PENDING' } as const;
 
@@ -142,6 +160,7 @@ export class OrderService {
     });
     if (!restaurant) throw new NotFoundException('Restaurant not found');
     if (!computeOpenStatus(restaurant).isOpen) throw new BadRequestException('This restaurant is currently closed');
+    if (!paymentMethodAvailable(restaurant, dto.paymentMethod ?? 'COD')) throw new BadRequestException('This restaurant does not accept that payment method');
 
     // --- 1. हरेक item को price DB बाट taजा निकालेर calculate गर्ने ---
     let subtotal = 0;
@@ -751,6 +770,8 @@ export class OrderService {
       await tx.orderStatusHistory.create({
         data: { orderId, status: 'CANCELLED', note: dto.reason ?? 'Order cancelled', changedBy: requesterId },
       });
+      // An unpaid online order never reached the restaurant, so its coupon goes back to the customer.
+      if (this.isUnpaidClosable(order)) await this.releaseCoupon(tx, orderId);
 
       return result;
     });
@@ -800,6 +821,14 @@ export class OrderService {
     const year = new Date().getFullYear();
     const random = Math.floor(100000 + Math.random() * 900000);
     return `ORD-${year}-${random}`;
+  }
+
+  /** Gives the order's coupon back: removes the usage record and lowers the coupon's count. */
+  private async releaseCoupon(db: Pick<PrismaService, 'couponUsage' | 'coupon'>, orderId: string) {
+    const usage = await db.couponUsage.findUnique({ where: { orderId } });
+    if (!usage) return;
+    await db.couponUsage.delete({ where: { orderId } });
+    await db.coupon.update({ where: { id: usage.couponId }, data: { usedCount: { decrement: 1 } } });
   }
 
   /** An online order whose payment page we can reopen and close, and that has not been paid. */
@@ -867,6 +896,7 @@ export class OrderService {
         if (count !== 1) continue;
         cancelled++;
         await this.prisma.orderStatusHistory.create({ data: { orderId: order.id, status: 'CANCELLED', note: 'The payment was not completed in time', changedBy: 'system' } });
+        await this.releaseCoupon(this.prisma, order.id);
         await this.activityLog.log({
           tenantId: order.tenantId,
           restaurantId: order.restaurantId,
