@@ -244,7 +244,7 @@ async updateBanner(tenantId: string, restaurantId: string, id: string, dto: Upda
         offers,
         about: config?.aboutText ?? null,
         contact: {
-          phone: config?.contactPhone ?? restaurant.address,
+          phone: config?.contactPhone || restaurant.phone || null,
           email: config?.contactEmail ?? null,
           address: config?.contactAddress ?? restaurant.address,
         },
