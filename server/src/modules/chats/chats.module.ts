@@ -1,3 +1,4 @@
+// src/modules/chats/chats.module.ts
 import { Module } from '@nestjs/common';
 import { AiReplyService } from './ai-reply.service';
 import { ChatBotService } from './chat-bot.service';

@@ -1,3 +1,4 @@
+// hooks/use-chat-restaurant.ts
 import { useEffect } from "react";
 import { useChatContextStore, type ChatRestaurant } from "@/store/chat-context-store";
 

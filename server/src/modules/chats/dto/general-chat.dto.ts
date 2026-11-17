@@ -1,3 +1,4 @@
+// src/modules/chats/dto/general-chat.dto.ts
 import {
   ArrayMaxSize,
   IsArray,

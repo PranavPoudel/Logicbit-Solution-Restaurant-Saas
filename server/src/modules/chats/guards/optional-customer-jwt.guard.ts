@@ -1,3 +1,4 @@
+// src/modules/chats/guards/optional-customer-jwt.guard.ts
 import { Injectable } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
