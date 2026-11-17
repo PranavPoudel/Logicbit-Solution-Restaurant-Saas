@@ -1,3 +1,4 @@
+// src/modules/chats/dto/send-chat-message.dto.ts
 import { IsString, MaxLength, MinLength } from 'class-validator';
 
 // Used for the visitor's message and for owner/admin replies. Who sent it

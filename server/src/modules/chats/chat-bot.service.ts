@@ -1,3 +1,4 @@
+// src/modules/chats/chat-bot.service.ts
 // chat-bot.service.ts — the auto-reply "brain" behind the chat widget.
 //
 // 1. Keyword rules answer from REAL database data (menu, prices, address,

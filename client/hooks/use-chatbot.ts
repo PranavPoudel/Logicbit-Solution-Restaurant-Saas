@@ -1,3 +1,4 @@
+// client/hooks/use-chatbot.ts
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useChatContextStore } from "@/store/chat-context-store";
 import { useCustomerAuthStore } from "@/store/customer-auth-store";

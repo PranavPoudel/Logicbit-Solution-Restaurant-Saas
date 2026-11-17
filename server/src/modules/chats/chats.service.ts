@@ -1,3 +1,4 @@
+// src/modules/chats/chats.service.ts
 // chats.service.ts — chat sessions between a visitor and a restaurant.
 //
 // Visitor side (no login needed, the unguessable session id is the access

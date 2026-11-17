@@ -1,3 +1,4 @@
+// src/modules/chats/ai-reply.service.ts
 // ai-reply.service.ts — optional AI fallback for chats.service.ts.
 //
 // Used only when the keyword rules in ChatsService don't match anything.

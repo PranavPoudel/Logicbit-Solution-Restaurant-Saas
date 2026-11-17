@@ -1,3 +1,4 @@
+// src/modules/chats/dto/start-chat.dto.ts
 import { IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
 
 export class StartChatDto {
