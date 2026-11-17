@@ -1,8 +1,3 @@
-// lib/api/chats.ts — chat widget (visitor) + owner / platform-admin inbox.
-//
-// Visitor calls use the customer apiClient: if a customer is logged in their
-// token is attached (so the chat is linked to them), otherwise the call goes
-// out as a guest. The backend never rejects a guest on these routes.
 import { apiClient } from "@/lib/api/client";
 import { ownerApiClient } from "@/lib/api/owner-client";
 import { platformApiClient } from "@/lib/api/platform-client";
@@ -16,13 +11,9 @@ export interface ChatThreadMessage {
   createdAt: string;
 }
 
-// ---- visitor / widget -------------------------------------------------------
-
 export interface SendChatResult {
-  /** A human (owner/admin) has joined: the bot stays quiet. */
   takenOver: boolean;
-  /** null = no bot reply (human took over, or the bot failed) */
-  reply: { id: string; text: string } | null;
+  reply: { id: string; text: string; followUps?: string[] } | null;
 }
 
 export interface ChatThread {
@@ -53,7 +44,6 @@ export async function endChatSession(sessionId: string) {
   await apiClient.post(`/chats/${sessionId}/end`);
 }
 
-/** Platform-wide assistant. Nothing is stored. Resolves to null when AI is off or failed. */
 export async function askGeneralChat(input: {
   message: string;
   history: { from: string; text: string }[];
@@ -63,8 +53,6 @@ export async function askGeneralChat(input: {
   const { data } = await apiClient.post<{ reply: string | null }>("/chats/general", input);
   return data.reply;
 }
-
-// ---- inbox (restaurant owner + platform staff) -----------------------------
 
 export interface ChatSession {
   id: string;
@@ -81,7 +69,6 @@ export interface ChatSession {
 export interface ChatInboxApi {
   list: () => Promise<ChatSession[]>;
   reply: (sessionId: string, text: string) => Promise<ChatThreadMessage>;
-  /** Resolves to the closing message (null if the chat was already ended). */
   close: (sessionId: string) => Promise<ChatThreadMessage | null>;
 }
 
@@ -90,15 +77,10 @@ type Client = typeof ownerApiClient;
 function inboxApi(client: Client, listPath: string, basePath: string): ChatInboxApi {
   return {
     list: async () => (await client.get<ChatSession[]>(listPath)).data,
-    reply: async (sessionId, text) =>
-      (await client.post<ChatThreadMessage>(`${basePath}/${sessionId}/reply`, { text })).data,
-    close: async (sessionId) =>
-      (await client.post<{ ended: boolean; message: ChatThreadMessage | null }>(`${basePath}/${sessionId}/close`)).data.message,
+    reply: async (sessionId, text) => (await client.post<ChatThreadMessage>(`${basePath}/${sessionId}/reply`, { text })).data,
+    close: async (sessionId) => (await client.post<{ ended: boolean; message: ChatThreadMessage | null }>(`${basePath}/${sessionId}/close`)).data.message,
   };
 }
 
-/** Restaurant owner: chats on restaurants in their own tenant. */
 export const ownerChatsApi = inboxApi(ownerApiClient, "/chats/received", "/chats");
-
-/** Platform staff: every chat on every restaurant. */
 export const adminChatsApi = inboxApi(platformApiClient, "/platform-admin/chats", "/platform-admin/chats");

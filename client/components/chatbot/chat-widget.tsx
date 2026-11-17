@@ -1,14 +1,50 @@
-// components/chatbot/chat-widget.tsx
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Icon } from "@/components/ui/primitives";
 import { useEscapeKey } from "@/hooks/use-escape-key";
 import { useChatbot, type ChatMessage } from "@/hooks/use-chatbot";
+import { useTypewriter } from "@/hooks/use-typewriter";
 import { renderChatText } from "@/lib/utils/chat-text";
 import { theme } from "@/config/theme";
+
+function ChatMessageBubble({
+  m,
+  isLatest,
+  t,
+  brand,
+  renderAction,
+}: {
+  m: ChatMessage;
+  isLatest: boolean;
+  t: ReturnType<typeof useTranslations>;
+  brand: string;
+  renderAction: (m: ChatMessage) => React.ReactNode;
+}) {
+  const human = m.from === "owner" || m.from === "admin";
+  const { displayed } = useTypewriter(m.text ?? "", isLatest);
+  
+  const rawText = m.text ? displayed : t(`reply.${m.key}`, { brand, ...m.values });
+  const body = m.from === "bot" ? renderChatText(rawText) : rawText;
+
+  return (
+    <div className={`animate-fade-up flex ${m.from === "user" ? "justify-end" : "justify-start"}`}>
+      <div className={`max-w-[85%] rounded-2xl px-4 py-3 text-base leading-snug ${
+        m.from === "user" 
+          ? "rounded-br-md bg-crimson text-cream" 
+          : human 
+            ? "rounded-bl-md border-2 border-crimson/30 bg-paper text-ink" 
+            : "shadow-soft rounded-bl-md bg-paper text-ink"
+      }`}>
+        {human && <p className="mb-1 text-xs font-bold text-crimson">{t(m.from === "admin" ? "admin" : "owner")}</p>}
+        <p className="whitespace-pre-line break-words">{body}</p>
+        {!isLatest ? renderAction(m) : null}
+      </div>
+    </div>
+  );
+}
 
 export function ChatWidget() {
   const t = useTranslations("chatbot");
@@ -54,7 +90,12 @@ export function ChatWidget() {
     );
   };
 
-  const lastIsBot = messages[messages.length - 1]?.from === "bot";
+  const lastBotMessageIndex = useMemo(() => {
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].from === "bot" && messages[i].text) return i;
+    }
+    return -1;
+  }, [messages]);
 
   return (
     <>
@@ -83,20 +124,17 @@ export function ChatWidget() {
         </header>
 
         <div ref={log} role="log" aria-live="polite" className="no-scrollbar flex-1 space-y-3 overflow-y-auto px-4 py-5">
-          {messages.map((m) => {
-            const human = m.from === "owner" || m.from === "admin";
-            // user + owner/admin text is shown as plain text; only bot text may use **bold** / links.
-            const body = m.from === "bot" ? renderChatText(m.text ?? t(`reply.${m.key}`, { brand, ...m.values })) : m.text;
-            return (
-              <div key={m.id} className={`animate-fade-up flex ${m.from === "user" ? "justify-end" : "justify-start"}`}>
-                <div className={`max-w-[85%] rounded-2xl px-4 py-3 text-base leading-snug ${m.from === "user" ? "rounded-br-md bg-crimson text-cream" : human ? "rounded-bl-md border-2 border-crimson/30 bg-paper text-ink" : "shadow-soft rounded-bl-md bg-paper text-ink"}`}>
-                  {human && <p className="mb-1 text-xs font-bold text-crimson">{t(m.from === "admin" ? "admin" : "owner")}</p>}
-                  <p className="whitespace-pre-line break-words">{body}</p>
-                  {action(m)}
-                </div>
-              </div>
-            );
-          })}
+          {messages.map((m, index) => (
+            <ChatMessageBubble
+              key={m.id}
+              m={m}
+              isLatest={index === lastBotMessageIndex}
+              t={t}
+              brand={brand}
+              renderAction={action}
+            />
+          ))}
+          
           {typing && (
             <div className="animate-fade-up flex justify-start" aria-label={t("typing")}>
               <div className="shadow-soft flex gap-1.5 rounded-2xl rounded-bl-md bg-paper px-4 py-4">
@@ -106,20 +144,36 @@ export function ChatWidget() {
               </div>
             </div>
           )}
+          
           {askName && (
             <label className="animate-fade-up block text-sm font-medium text-ink/75">
               {t("nameLabel", { name: restaurant?.name ?? "" })}
               <input value={visitorName} onChange={(e) => setVisitorName(e.target.value)} maxLength={40} placeholder={t("namePlaceholder")} className="mt-1.5 min-h-11 w-full rounded-2xl border-2 border-ink/15 bg-paper px-4 text-base text-ink outline-none placeholder:text-ink/50 focus:border-ink" />
             </label>
           )}
-          {lastIsBot && !typing && (
-            <div className="flex flex-wrap gap-2 pt-1">
-              {quickReplies.map((q, i) => (
-                <button key={q.id} type="button" onClick={() => void send(t(`suggest.${q.id}`), q.id)} style={{ animationDelay: `${i * 70}ms` }} className="animate-fade-up inline-flex min-h-11 items-center gap-2 rounded-full border-2 border-crimson/40 bg-paper px-4 font-bold text-crimson hover:border-crimson hover:bg-crimson hover:text-cream">
-                  <Icon name={q.icon} className="h-4 w-4" />{t(`suggest.${q.id}`)}
-                </button>
-              ))}
-            </div>
+          
+          {lastBotMessageIndex !== -1 && !typing && (
+            <>
+              {/* Static quick replies */}
+              <div className="flex flex-wrap gap-2 pt-1">
+                {quickReplies.map((q, i) => (
+                  <button key={q.id} type="button" onClick={() => void send(t(`suggest.${q.id}`), q.id)} style={{ animationDelay: `${i * 70}ms` }} className="animate-fade-up inline-flex min-h-11 items-center gap-2 rounded-full border-2 border-crimson/40 bg-paper px-4 font-bold text-crimson hover:border-crimson hover:bg-crimson hover:text-cream">
+                    <Icon name={q.icon} className="h-4 w-4" />{t(`suggest.${q.id}`)}
+                  </button>
+                ))}
+              </div>
+              
+              {/* Dynamic follow-ups from the bot's last message */}
+              {messages[lastBotMessageIndex]?.followUps && (
+                <div className="flex flex-wrap gap-2 pt-2">
+                  {messages[lastBotMessageIndex].followUps!.map((q, i) => (
+                    <button key={i} type="button" onClick={() => void send(q)} style={{ animationDelay: `${(quickReplies.length + i) * 70}ms` }} className="animate-fade-up inline-flex min-h-11 items-center gap-2 rounded-full border-2 border-ink/20 bg-paper px-4 text-sm font-medium text-ink hover:border-ink hover:bg-ink hover:text-cream">
+                      {q}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </div>
 

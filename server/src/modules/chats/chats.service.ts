@@ -126,9 +126,9 @@ export class ChatsService {
     const recent: MessageRow[] = session.messages;
     const history = [...recent].reverse().map((m) => ({ from: m.from, text: m.text }));
 
-    let replyText: string;
+    let botReply: { text: string; followUps?: string[] };
     try {
-      replyText = await this.bot.reply(session.restaurantId, text, history);
+      botReply = await this.bot.reply(session.restaurantId, text, history);
     } catch (err) {
       // A bot failure must not break the chat: return no reply and the widget
       // falls back to its built-in canned answers.
@@ -147,12 +147,20 @@ export class ChatsService {
 
     const [botMessage] = await this.prisma.$transaction([
       this.prisma.chatMessage.create({
-        data: { sessionId, from: 'bot', text: replyText },
+        data: { sessionId, from: 'bot', text: botReply.text },
         select: { id: true, text: true },
       }),
       this.prisma.chatSession.update({ where: { id: sessionId }, data: { updatedAt: new Date() } }),
     ]);
-    return { takenOver: false, reply: { id: botMessage.id, text: botMessage.text } };
+    
+    return { 
+      takenOver: false, 
+      reply: { 
+        id: botMessage.id, 
+        text: botMessage.text,
+        followUps: botReply.followUps // Pass follow-ups to the frontend
+      } 
+    };
   }
 
   // Visitor polling (every few seconds from the widget) so owner/admin
