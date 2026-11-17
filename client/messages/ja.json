@@ -2,6 +2,10 @@
   "metadata": {
     "description": "近くのレストランから 음식을 주문하세요."
   },
+  "seo": {
+    "restaurantDescription": "{city}の{name}をオンラインで注文。デリバリー・テイクアウト対応。",
+    "restaurantDescriptionNoCity": "{name}をオンラインで注文。デリバリー・テイクアウト対応。"
+  },
   "header": {
     "forRestaurants": "レストラン向け",
     "account": "アカウント",

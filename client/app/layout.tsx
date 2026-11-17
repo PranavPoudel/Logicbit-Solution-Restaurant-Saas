@@ -4,6 +4,7 @@ import { getLocale } from "next-intl/server";
 import "./globals.css";
 import { QueryProvider } from "@/providers/query-provider";
 import { theme, themeCssVariables } from "@/config/theme";
+import { SITE_URL } from "@/lib/seo";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -42,6 +43,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: theme.brand.name,
   description: "Order food from restaurants near you.",
 };

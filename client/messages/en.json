@@ -2,6 +2,10 @@
   "metadata": {
     "description": "Order food from restaurants near you."
   },
+  "seo": {
+    "restaurantDescription": "Order online from {name} in {city}. Delivery and pickup.",
+    "restaurantDescriptionNoCity": "Order online from {name}. Delivery and pickup."
+  },
   "header": {
     "forRestaurants": "For restaurants",
     "account": "Account",

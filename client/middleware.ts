@@ -1,5 +1,6 @@
 import createMiddleware from 'next-intl/middleware';
-import { NextRequest } from 'next/server'; 
+import { NextRequest, NextResponse } from 'next/server';
+import { isPrivatePath } from '@/lib/seo';
 
 const intlMiddleware = createMiddleware({
   locales: ['en', 'ja'],
@@ -20,11 +21,10 @@ export default function middleware(request: NextRequest) {
 
   const isExcluded = excludedPrefixes.some(prefix => pathname.startsWith(prefix));
 
-  if (isExcluded) {
-    return;
-  }
-
-  return intlMiddleware(request);
+  const response = isExcluded ? NextResponse.next() : intlMiddleware(request);
+  // Pages for one person or one restaurant's staff must not show up in search results.
+  if (isPrivatePath(pathname)) response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+  return response;
 }
 
 export const config = {

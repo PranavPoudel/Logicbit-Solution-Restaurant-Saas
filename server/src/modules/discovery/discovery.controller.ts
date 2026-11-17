@@ -21,6 +21,12 @@ export class DiscoveryController {
     return this.discoveryService.findNearby(query);
   }
 
+  /** Slugs of every live restaurant, for the website's sitemap. */
+  @Get('sitemap/restaurants')
+  findSitemapRestaurants() {
+    return this.discoveryService.findSitemapRestaurants();
+  }
+
   @Get('trending-items')
   getTrendingItems() {
     return this.discoveryService.getTrendingItems();

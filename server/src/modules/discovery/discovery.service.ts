@@ -152,6 +152,12 @@ export class DiscoveryService {
     };
   }
 
+  /** Slug and last change of every live restaurant, for the website's sitemap. */
+  async findSitemapRestaurants() {
+    const data = await this.prisma.restaurant.findMany({ where: { isActive: true }, select: { slug: true, updatedAt: true }, orderBy: { createdAt: 'asc' } });
+    return { success: true, data };
+  }
+
   /** एउटा restaurant को public profile (customer-facing) */
   async findPublicOne(idOrSlug: string) {
     const restaurant = await this.prisma.restaurant.findFirst({
