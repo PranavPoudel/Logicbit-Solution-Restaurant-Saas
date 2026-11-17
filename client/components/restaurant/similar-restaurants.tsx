@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { RestaurantCard } from "@/components/restaurant/restaurant-card";
 import type { DiscoveryRestaurant } from "@/types/restaurant";
-import { Icon, Squiggle } from "@/components/ui/primitives";
+import { Icon } from "@/components/ui/primitives";
 
 export function SimilarRestaurants({ restaurants, loading, error, onRetry }: { restaurants: DiscoveryRestaurant[]; loading: boolean; error: boolean; onRetry: () => void }) {
   const t = useTranslations("restaurant");
@@ -16,7 +16,6 @@ export function SimilarRestaurants({ restaurants, loading, error, onRetry }: { r
       <div className="flex flex-wrap items-end justify-between gap-4">
         <h2 id="similar" className="relative inline-block font-display text-[32px] font-extrabold tracking-tight md:text-[40px]">
           {t("similar")}
-          <Squiggle className="absolute -bottom-1 left-0 h-3 w-full text-[var(--accent,var(--brand-chili))]" />
         </h2>
         <Link href="/restaurants" className="group flex min-h-11 items-center gap-2 font-bold">
           <span className="underline-offset-4 group-hover:underline">{t("seeAll")}</span>

@@ -21,7 +21,7 @@ export function SignatureDishes({ items, onOpen }: { items: MenuItem[]; onOpen: 
           const name = d.name ?? t("fallbackItem");
           return (
             <article key={d.id} className="shadow-soft relative flex w-[80%] shrink-0 snap-start flex-col rounded-[32px] bg-paper p-5 md:w-auto">
-              <span className={`shadow-hard absolute -top-3 right-5 z-10 rounded-xl bg-saffron px-3 py-1 font-display text-base font-extrabold text-espresso ${i % 2 ? "rotate-6" : "-rotate-6"}`}>{t("chefsPick")}</span>
+              <span className={`shadow-hard absolute -top-3 right-5 z-10 rounded-xl bg-ink px-3 py-1 font-display text-base font-extrabold text-cream ${i % 2 ? "rotate-6" : "-rotate-6"}`}>{t("chefsPick")}</span>
               {src && (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={getFullImageUrl(src)} alt={name} className="blob shadow-warm mx-auto aspect-square w-[80%] border-[6px] border-cream object-cover" />
@@ -49,7 +49,7 @@ const CATEGORY_ICONS: [RegExp, string][] = [
   [/pizza|pasta/i, "pizza"],
 ];
 const categoryIcon = (name = "") => CATEGORY_ICONS.find(([re]) => re.test(name))?.[1] ?? "utensils";
-const TILES = ["bg-[var(--accent,var(--brand-chili))] text-[var(--accent-ink,var(--brand-parchment))]", "bg-saffron text-espresso", "bg-herb text-parchment", "bg-tangerine text-espresso"];
+const TILE = "bg-cream-deep text-ink";
 
 export function PopularCategories({ categories, onJump }: { categories: MenuCategory[]; onJump: (id: string) => void }) {
   const t = useTranslations("menu");
@@ -59,11 +59,11 @@ export function PopularCategories({ categories, onJump }: { categories: MenuCate
     <section aria-labelledby="pc">
       <h2 id="pc" className="font-display text-2xl font-extrabold">{t("popularCategories")}</h2>
       <ul className="no-scrollbar -mx-5 mt-4 flex gap-6 overflow-x-auto px-5 py-3 md:mx-0 md:px-1">
-        {cats.map((c, i) => (
+        {cats.map((c) => (
           <li key={c.id} className="shrink-0">
             <button type="button" onClick={() => onJump(c.id)} className="group flex w-36 flex-col items-center gap-3 rounded-3xl p-1 text-center active:scale-95">
               <span className="relative">
-                <span className={`blob shadow-warm grid h-32 w-32 place-items-center overflow-hidden border-4 border-paper transition group-hover:-translate-y-1 group-hover:rotate-3 ${TILES[i % TILES.length]}`}>
+                <span className={`blob shadow-warm grid h-32 w-32 place-items-center overflow-hidden border-4 border-paper transition group-hover:-translate-y-1 group-hover:rotate-3 ${TILE}`}>
                   {c.image ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={getFullImageUrl(c.image)} alt="" className="h-full w-full object-cover" />

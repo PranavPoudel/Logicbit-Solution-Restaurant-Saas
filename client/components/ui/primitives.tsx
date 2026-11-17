@@ -61,11 +61,6 @@ export const Icon = ({ name, className = "h-5 w-5", fill = false }: { name: stri
 );
 
 /* ---------- Doodles ---------- */
-export const Squiggle = ({ className = "" }: { className?: string }) => (
-  <svg viewBox="0 0 300 24" className={className} fill="none" preserveAspectRatio="none" aria-hidden>
-    <path d="M3 15c25-12 45 10 70 0s45-12 70 0 45 10 70 0 45-12 84-2" stroke="currentColor" strokeWidth="6" strokeLinecap="round" />
-  </svg>
-);
 export const Arrow = ({ className = "" }: { className?: string }) => (
   <svg viewBox="0 0 100 80" className={className} fill="none" aria-hidden>
     <path d="M5 10c30 0 60 15 70 55" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
@@ -170,7 +165,7 @@ export const Card = ({ children, className = "" }: { children: ReactNode; classN
 export const SectionTitle = ({ n, children, aside }: { n?: number; children: ReactNode; aside?: ReactNode }) => (
   <div className="mb-5 flex items-center justify-between gap-3">
     <h2 className="flex items-center gap-3 font-display text-2xl font-extrabold md:text-3xl">
-      {n && <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-saffron text-xl text-espresso">{n}</span>}
+      {n && <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-ink text-xl text-cream">{n}</span>}
       {children}
     </h2>
     {aside}
@@ -195,8 +190,8 @@ export function AllergenAlert({ text: raw, compact }: { text: string; compact?: 
 export function RefundNote({ text, className = "" }: { text?: string | null; className?: string }) {
   const t = useTranslations("common");
   return (
-    <div className={`flex gap-3 rounded-2xl border border-herb/25 bg-herb/10 p-4 ${className}`}>
-      <Icon name="info" className="mt-0.5 h-5 w-5 shrink-0 text-herb" />
+    <div className={`flex gap-3 rounded-2xl border border-ink/10 bg-cream-deep p-4 ${className}`}>
+      <Icon name="info" className="mt-0.5 h-5 w-5 shrink-0 text-chili" />
       <p className="whitespace-pre-line text-[15px] leading-relaxed text-ink">
         <b>{t("refundTitle")}</b> {text?.trim() || t("refundFallback")}
       </p>
@@ -208,7 +203,7 @@ export function Choice({ type, checked, onChange, label, extra, disabled, name }
   return (
     <label className={`relative flex min-h-14 cursor-pointer items-center gap-4 rounded-2xl border-2 px-4 py-2 transition ${checked ? "border-[var(--accent,var(--brand-chili))] bg-[var(--accent,var(--brand-chili))]/10" : "border-ink/15 hover:border-ink/40"} ${disabled ? "cursor-not-allowed opacity-45" : ""}`}>
       <input type={type} name={name} checked={checked} onChange={onChange} disabled={disabled} className="peer sr-only" />
-      <span className={`grid h-6 w-6 shrink-0 place-items-center border-2 peer-focus-visible:ring-4 peer-focus-visible:ring-saffron ${type === "radio" ? "rounded-full" : "rounded-md"} ${checked ? "border-[var(--accent,var(--brand-chili))] bg-[var(--accent,var(--brand-chili))] text-[var(--accent-ink,var(--brand-parchment))]" : "border-ink/40"}`}>
+      <span className={`grid h-6 w-6 shrink-0 place-items-center border-2 peer-focus-visible:ring-4 peer-focus-visible:ring-chili ${type === "radio" ? "rounded-full" : "rounded-md"} ${checked ? "border-[var(--accent,var(--brand-chili))] bg-[var(--accent,var(--brand-chili))] text-[var(--accent-ink,var(--brand-parchment))]" : "border-ink/40"}`}>
         {checked && (type === "radio" ? <span className="h-2.5 w-2.5 rounded-full bg-current" /> : <Icon name="check" className="h-4 w-4" />)}
       </span>
       <span className="flex-1 font-medium">{label}</span>
@@ -226,11 +221,11 @@ export function Progress({ step, steps }: { step: number; steps?: string[] }) {
     <ol className="flex items-center gap-2" aria-label={t("progress")}>
       {labels.map((s, i) => (
         <li key={s} className="flex flex-1 items-center gap-2 last:flex-none" aria-current={i === step ? "step" : undefined}>
-          <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-full font-display text-lg font-extrabold ${i < step ? "bg-herb text-parchment" : i === step ? "bg-chili text-parchment ring-4 ring-chili/25" : "bg-ink/10 text-ink/60"}`}>
+          <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-full font-display text-lg font-extrabold ${i < step ? "bg-ink text-cream" : i === step ? "bg-chili text-parchment ring-4 ring-chili/25" : "bg-ink/10 text-ink/60"}`}>
             {i < step ? <Icon name="check" /> : i + 1}
           </span>
           <span className={`font-bold ${i === step ? "" : "text-ink/60"} ${labels.length > 3 ? "hidden md:inline" : ""}`}>{s}</span>
-          {i < labels.length - 1 && <span className={`mx-1 h-1 flex-1 rounded-full ${i < step ? "bg-herb" : "bg-ink/10"}`} />}
+          {i < labels.length - 1 && <span className={`mx-1 h-1 flex-1 rounded-full ${i < step ? "bg-ink" : "bg-ink/10"}`} />}
         </li>
       ))}
     </ol>

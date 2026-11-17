@@ -13,7 +13,7 @@ export type MenuView = "cards" | "list" | "table";
 export function DishImage({ item, className }: { item: MenuItem; className: string }) {
   const src = getItemImage(item);
   if (!src) {
-    return <div className={`grid place-items-center bg-tangerine/50 font-display text-6xl font-extrabold text-espresso/25 ${className}`}>{(item.name ?? "").charAt(0)}</div>;
+    return <div className={`grid place-items-center bg-cream-deep font-display text-6xl font-extrabold text-ink/20 ${className}`}>{(item.name ?? "").charAt(0)}</div>;
   }
   // eslint-disable-next-line @next/next/no-img-element
   return <img src={getFullImageUrl(src)} alt="" className={className} />;
@@ -78,7 +78,7 @@ export function DishListRow({ item, onOpen }: { item: MenuItem; onOpen: () => vo
       <div className="relative shrink-0">
         <DishImage item={item} className={`blob h-24 w-24 object-cover md:h-28 md:w-28 ${out ? "grayscale" : ""}`} />
         {out && <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 -rotate-6 whitespace-nowrap rounded-lg bg-ink px-2 font-bold text-cream">{tc("soldOut")}</span>}
-        {item.isFeatured && !out && <span className="absolute -left-1 -top-1 -rotate-12 rounded-lg bg-saffron px-2 font-bold text-espresso">★</span>}
+        {item.isFeatured && !out && <span className="absolute -left-1 -top-1 -rotate-12 rounded-lg bg-ink px-2 font-bold text-cream">★</span>}
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2"><VegDot item={item} /><h3 className="truncate font-display text-xl font-extrabold">{item.name ?? t("fallbackItem")}</h3></div>

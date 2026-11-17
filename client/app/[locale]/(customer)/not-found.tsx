@@ -1,7 +1,7 @@
 // app/(customer)/not-found.tsx
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { Button, Icon, Squiggle } from "@/components/ui/primitives";
+import { Button, Icon } from "@/components/ui/primitives";
 
 
 export default function NotFound() {
@@ -15,8 +15,7 @@ export default function NotFound() {
         <h1 className="mt-6 font-display text-[56px] font-extrabold leading-[0.92] tracking-tight md:text-[88px]">
           {t("titleStart")}{" "}
           <span className="relative inline-block text-chili">
-            {t("titleAccent")}<Squiggle className="absolute -bottom-2 left-0 h-4 w-full text-crimson md:-bottom-3 md:h-6" />
-          </span>
+            {t("titleAccent")}          </span>
         </h1>
         <p className="mt-6 max-w-md text-lg text-ink/80">{t("body")}</p>
         <div className="mt-8 flex flex-wrap gap-3">

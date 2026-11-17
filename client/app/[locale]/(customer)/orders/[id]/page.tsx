@@ -41,7 +41,7 @@ function BackToOrders() {
 }
 
 function Confetti() {
-  const colors = ["var(--brand-chili)", "var(--brand-saffron)", "var(--brand-herb)", "var(--brand-blush)"];
+  const colors = ["var(--brand-chili)", "var(--brand-crimson)", "var(--brand-espresso)"];
   return (
     <>
       {Array.from({ length: 18 }).map((_, i) => (
@@ -127,7 +127,7 @@ export default function OrderTrackingPage({
   const directionsUrl = restaurantPlace ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(restaurantPlace)}` : null;
   const orderNumber = order.orderNumber ?? order.id.slice(0, 8);
   const hasMap = !isPickup && order.deliveryLatitude != null && order.deliveryLongitude != null && !cancelled;
-  const payTone = order.paymentStatus === "PAID" ? "herb" : order.paymentStatus === "REFUNDED" ? "saffron" : "soft";
+  const payTone = order.paymentStatus === "PAID" ? "ink" : order.paymentStatus === "REFUNDED" ? "soft" : "chili";
   const refundMethod = order.refund?.method && t.has(`refundMethod.${order.refund.method}`) ? t(`refundMethod.${order.refund.method}`) : null;
   const refundRef = order.refund?.reference;
   const payText =
@@ -182,7 +182,7 @@ export default function OrderTrackingPage({
       <div className="relative grid min-h-[80vh] place-items-center overflow-hidden px-5 py-10">
         <Confetti />
         <div className="relative max-w-lg text-center text-espresso">
-          <div className="pop mx-auto grid h-36 w-36 place-items-center rounded-full bg-herb text-parchment shadow-hard"><Icon name="check" className="h-20 w-20" /></div>
+          <div className="pop mx-auto grid h-36 w-36 place-items-center rounded-full bg-ink text-cream shadow-hard"><Icon name="check" className="h-20 w-20" /></div>
           <h1 className="mt-8 font-display text-6xl font-extrabold leading-[0.9] tracking-tight md:text-8xl">{t("orderIn")}</h1>
           <p className="mt-4 text-lg">{t("hasYourOrder", { restaurant: restaurantName })}</p>
           <div className="mt-6 inline-flex flex-wrap justify-center gap-3">
@@ -214,13 +214,13 @@ export default function OrderTrackingPage({
                 <>{t("awaitingHead")} <span className="text-chili">{t("awaitingAccent")}</span></>
               ) : (
                 <>
-                  {headHead} <span className={normalized === "DELIVERED" ? "text-herb" : "text-chili"}>{headAccent}</span>
+                  {headHead} <span className={normalized === "DELIVERED" ? "text-ink" : "text-chili"}>{headAccent}</span>
                 </>
               )}
             </h1>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Badge tone={payTone}><Icon name="check" className="h-4 w-4" />{payText}</Badge>
+            <Badge tone={payTone} className={payTone === "chili" ? "!bg-crimson" : ""}><Icon name="check" className="h-4 w-4" />{payText}</Badge>
           </div>
         </div>
 
@@ -238,9 +238,9 @@ export default function OrderTrackingPage({
                 return (
                   <li key={s} className="relative flex items-center gap-4 md:flex-col md:text-center" aria-current={cur ? "step" : undefined}>
                     {i < steps.length - 1 && (
-                      <span className={`absolute left-6 top-12 h-[calc(100%-8px)] w-1.5 rounded-full md:left-[calc(50%+28px)] md:top-6 md:h-1.5 md:w-[calc(100%-56px)] ${i < current ? "bg-herb" : "bg-ink/10"}`} aria-hidden />
+                      <span className={`absolute left-6 top-12 h-[calc(100%-8px)] w-1.5 rounded-full md:left-[calc(50%+28px)] md:top-6 md:h-1.5 md:w-[calc(100%-56px)] ${i < current ? "bg-ink" : "bg-ink/10"}`} aria-hidden />
                     )}
-                    <span className={`relative z-10 grid shrink-0 place-items-center rounded-full font-display font-extrabold transition ${cur ? "h-14 w-14 bg-chili text-parchment ring-8 ring-chili/20" : done ? "h-12 w-12 bg-herb text-parchment" : "h-12 w-12 bg-ink/10 text-ink/50"}`}>
+                    <span className={`relative z-10 grid shrink-0 place-items-center rounded-full font-display font-extrabold transition ${cur ? "h-14 w-14 bg-chili text-parchment ring-8 ring-chili/20" : done ? "h-12 w-12 bg-ink text-cream" : "h-12 w-12 bg-ink/10 text-ink/50"}`}>
                       {done ? <Icon name="check" /> : i + 1}
                     </span>
                     <div className="md:mt-3">
@@ -298,13 +298,13 @@ export default function OrderTrackingPage({
                 </div>
                 {rider && normalized === "OUT_FOR_DELIVERY" && (
                   <div className="flex items-center gap-4 p-5">
-                    <span className="grid h-14 w-14 place-items-center rounded-full bg-saffron font-display text-2xl font-extrabold text-ink ring-4 ring-saffron/40">{(rider.name ?? t("riderFallback")).charAt(0)}</span>
+                    <span className="grid h-14 w-14 place-items-center rounded-full bg-ink font-display text-2xl font-extrabold text-cream ring-4 ring-ink/20">{(rider.name ?? t("riderFallback")).charAt(0)}</span>
                     <div className="flex-1">
                       <p className="font-display text-xl font-extrabold">{rider.name ?? t("riderFallback")}</p>
                       <p className="text-ink/70">{t("yourRider")}</p>
                     </div>
                     {rider.phone && (
-                      <a href={`tel:${rider.phone}`} className="flex min-h-12 items-center gap-2 rounded-full bg-herb px-5 font-bold text-parchment shadow-hard"><Icon name="phone" />{t("call")}</a>
+                      <a href={`tel:${rider.phone}`} className="flex min-h-12 items-center gap-2 rounded-full bg-chili px-5 font-bold text-parchment shadow-hard"><Icon name="phone" />{t("call")}</a>
                     )}
                   </div>
                 )}
@@ -312,7 +312,7 @@ export default function OrderTrackingPage({
             )}
 
             {canReview && (
-              <Card className="border-4 border-saffron">
+              <Card className="border-4 border-cream-deep">
                 <h2 className="font-display text-3xl font-extrabold">{t("howWasIt")}</h2>
                 <p className="mt-2 text-lg text-ink/75">{t("howWasItBody", { restaurant: restaurantName })}</p>
                 <Button size="lg" className="mt-4" onClick={() => setShowReviewModal(true)}>{t("rate")}</Button>
@@ -383,7 +383,7 @@ export default function OrderTrackingPage({
             </Card>
 
             {isPickup && !cancelled && order.restaurant?.address && (
-              <Card className="!bg-saffron text-espresso">
+              <Card className="!bg-cream-deep text-ink">
                 <p className="font-display text-2xl font-extrabold">{t("collectFrom")}</p>
                 <p className="mt-1 font-bold">{restaurantName}</p>
                 <p className="mt-1">{order.restaurant.address}</p>
@@ -391,7 +391,7 @@ export default function OrderTrackingPage({
             )}
 
             {order.deliveryAddress && (
-              <Card className="!bg-saffron text-espresso">
+              <Card className="!bg-cream-deep text-ink">
                 <p className="font-display text-2xl font-extrabold">{t("deliveringTo")}</p>
                 <p className="mt-1">{order.deliveryAddress}</p>
                 {order.customer?.phone && <p className="mt-1">{order.customer.phone}</p>}

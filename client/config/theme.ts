@@ -1,5 +1,5 @@
 // config/theme.ts
-export type HomeSection = "hero" | "offers" | "cuisines" | "restaurants" | "trending" | "howItWorks" | "why" | "owner" | "cities";
+export type HomeSection = "hero" | "offers" | "cuisines" | "restaurants" | "howItWorks" | "why" | "owner" | "cities";
 
 export const theme = {
   colors: {
@@ -22,6 +22,7 @@ export const theme = {
     openSoftText: "#2F6B3C",
     // Customer storefront palette (light mode)
     cream: "#FFF4E2",
+    creamDeep: "#EEE2D1",
     warmInk: "#2A120A",
     footer: "#2A120A",
     paper: "#FFFFFF",
@@ -47,8 +48,9 @@ export const theme = {
   // Dark-mode values for the flipping customer colours above
   night: {
     cream: "#1D0E08",
+    creamDeep: "#2A150D",
     warmInk: "#FFF1DC",
-    footer: "#593B12",
+    footer: "#2E0E14",
     paper: "#2E1810",
     chiliDeep: "#FF6A55",
     herbInk: "#7FD6A0",
@@ -69,8 +71,8 @@ export const theme = {
     PAYPAY: "#FF0033",
   } as Record<string, string>,
   layout: {
-    homeSections: ["hero", "offers", "cuisines", "restaurants", "trending", "howItWorks", "why", "owner", "cities"] as HomeSection[],
-    guestOnlySections: ["trending", "howItWorks", "why", "owner"] as HomeSection[],
+    homeSections: ["hero", "offers", "cuisines", "restaurants", "howItWorks", "why", "owner", "cities"] as HomeSection[],
+    guestOnlySections: ["howItWorks", "why", "owner"] as HomeSection[],
   },
   brand: {
     name: "LogicBit",
@@ -174,6 +176,7 @@ export const themeCssVariables = {
   "--brand-open-bg": theme.colors.openSoftBg,
   "--brand-open-text": theme.colors.openSoftText,
   "--brand-cream": theme.colors.cream,
+  "--brand-cream-deep": theme.colors.creamDeep,
   "--brand-warm-ink": theme.colors.warmInk,
   "--brand-footer": theme.colors.footer,
   "--brand-paper": theme.colors.paper,
@@ -194,6 +197,7 @@ export const themeCssVariables = {
   "--brand-map-water": theme.colors.mapWater,
   "--brand-map-road": theme.colors.mapRoad,
   "--night-cream": theme.night.cream,
+  "--night-cream-deep": theme.night.creamDeep,
   "--night-warm-ink": theme.night.warmInk,
   "--night-footer": theme.night.footer,
   "--night-paper": theme.night.paper,

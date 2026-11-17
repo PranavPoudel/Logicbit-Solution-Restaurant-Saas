@@ -10,7 +10,7 @@ import { useRequireLogin } from "@/hooks/use-require-login";
 import { useMoney } from "@/hooks/use-money";
 import { playSound } from "@/lib/utils/sound";
 import type { MenuCategory, MenuItem } from "@/types/menu";
-import { Badge, Chip, Icon, IconButton, Squiggle } from "@/components/ui/primitives";
+import { Badge, Chip, Icon, IconButton } from "@/components/ui/primitives";
 import { DishImage, DishListRow, DishTable, ViewToggle, type MenuView } from "@/components/menu/menu-views";
 import { DishTags } from "@/components/menu/dish-tags";
 import { MenuPager } from "@/components/menu/menu-pager";
@@ -33,7 +33,7 @@ function DishCard({ item, onOpen }: { item: MenuItem; onOpen: () => void }) {
       <button type="button" onClick={onOpen} disabled={out} className="relative block aspect-[4/3] overflow-hidden disabled:cursor-not-allowed" aria-label={`${name}, ${money(price)}${out ? `, ${t("soldOutSuffix")}` : ""}`}>
         <DishImage item={item} className={`h-full w-full object-cover transition duration-500 ${out ? "opacity-60 grayscale" : "group-hover:scale-105"}`} />
         <div className="absolute left-3 top-3 flex flex-wrap gap-2">
-          {item.isFeatured && !out && <Badge tone="saffron"><Icon name="star" fill className="h-4 w-4" />{tc("popular")}</Badge>}
+          {item.isFeatured && !out && <Badge tone="ink"><Icon name="star" fill className="h-4 w-4" />{tc("popular")}</Badge>}
           {out && <Badge tone="ink">{tc("soldOut")}</Badge>}
         </div>
       </button>
@@ -245,7 +245,6 @@ export function MenuSection({ categories, onOpenModifiers }: { categories: MenuC
               <section key={c.id} id={catId(c.id)} aria-labelledby={`h-${c.id}`}>
                 <h2 id={`h-${c.id}`} className="relative mb-6 inline-block font-display text-[40px] font-extrabold leading-tight tracking-tight">
                   {c.name ?? t("fallbackName")}
-                  <Squiggle className="absolute -bottom-1 left-0 h-3 w-full text-[var(--accent,var(--brand-chili))]" />
                 </h2>
                 {view === "table" ? (
                   <DishTable items={items} onOpen={open} />

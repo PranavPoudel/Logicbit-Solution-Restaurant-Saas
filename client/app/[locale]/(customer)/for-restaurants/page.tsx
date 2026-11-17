@@ -11,7 +11,7 @@ import { geocodeAddress } from "@/lib/geocode";
 import { useOwnerAuthStore } from "@/store/owner-auth-store";
 import { theme } from "@/config/theme";
 import { formatMoney } from "@/lib/utils/money";
-import { Button, Card, Icon, Progress, Squiggle, Stamp } from "@/components/ui/primitives";
+import { Button, Card, Icon, Progress, Stamp } from "@/components/ui/primitives";
 import { AuthError, AuthInput, AuthPassword, PasswordStrength } from "@/components/auth/auth-shell";
 
 const STEPS = ["stepKitchen", "stepOwner", "stepReview"] as const;
@@ -43,8 +43,7 @@ function Hero({ onStart }: { onStart: () => void }) {
         <h1 className="mt-6 font-display text-[52px] font-extrabold leading-[0.92] tracking-[-0.04em] md:text-[96px]">
           {t("titleStart")}{" "}
           <span className="relative inline-block text-chili-deep">
-            {t("titleAccent")}<Squiggle className="absolute -bottom-2 left-0 h-4 w-full text-saffron md:-bottom-3 md:h-6" />
-          </span>
+            {t("titleAccent")}          </span>
         </h1>
         <p className="mt-6 max-w-lg text-lg leading-relaxed text-ink/85">{t("body")}</p>
         <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
@@ -295,7 +294,7 @@ export default function ForRestaurantsPage() {
       <Benefits />
       <section aria-labelledby="apply-h" className="mx-auto max-w-[1100px] px-4 py-16 md:px-10">
         <h2 id="apply-h" className="mb-8 text-center font-display text-[40px] font-extrabold leading-tight tracking-tight md:text-[56px]">
-          {t("applyStart")} <span className="relative inline-block">{t("applyAccent")}<Squiggle className="absolute -bottom-1 left-0 h-3 w-full text-saffron" /></span>
+          {t("applyStart")} <span className="relative inline-block">{t("applyAccent")}</span>
         </h2>
         <Wizard />
       </section>

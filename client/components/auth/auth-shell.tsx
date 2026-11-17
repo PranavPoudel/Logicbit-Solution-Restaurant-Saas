@@ -4,7 +4,7 @@
 import { useState, type InputHTMLAttributes, type ReactNode } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { Icon, IconButton, Squiggle, Stamp } from "@/components/ui/primitives";
+import { Icon, IconButton, Stamp } from "@/components/ui/primitives";
 
 type Mode = "login" | "signup";
 
@@ -215,7 +215,7 @@ export function AuthShell({ mode, children, footer, heading }: { mode: Mode; chi
 
           <div key={mode} className="animate-fade-up">
             <h1 className="font-display text-[40px] font-extrabold leading-[1.05] tracking-tight md:text-[48px]">
-              {heading ? heading.title : t(`copy.${mode}.title`)} <span className="relative inline-block">{heading ? heading.accent : t(`copy.${mode}.accent`)}<Squiggle className="absolute -bottom-1 left-0 h-3 w-full text-chili" /></span>
+              {heading ? heading.title : t(`copy.${mode}.title`)} <span className="relative inline-block">{heading ? heading.accent : t(`copy.${mode}.accent`)}</span>
             </h1>
             <p className="mt-3 text-lg text-ink/75">{heading ? heading.sub : t(`copy.${mode}.sub`)}</p>
 
