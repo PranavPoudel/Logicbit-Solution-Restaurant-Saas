@@ -3,13 +3,15 @@
 import { SettingsField } from "@/components/owner-settings/settings-field";
 import { useCurrencyCode } from "@/hooks/use-money";
 import { SettingsForm } from "@/app/owner/(owner-dashboard)/settings/page";
+import { UberDirectCard } from "@/components/owner-settings/uber-direct-card";
 
 interface DeliveryTabProps {
   form: SettingsForm;
   set: <K extends keyof SettingsForm>(key: K, value: SettingsForm[K]) => void;
+  restaurantId: string | null;
 }
 
-export function DeliveryTab({ form, set }: DeliveryTabProps) {
+export function DeliveryTab({ form, set, restaurantId }: DeliveryTabProps) {
   const currency = useCurrencyCode();
   return (
     <div className="space-y-4">
@@ -32,6 +34,7 @@ export function DeliveryTab({ form, set }: DeliveryTabProps) {
         value={form.maxDeliveryRadiusKm}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => set("maxDeliveryRadiusKm", e.target.value)}
       />
+      <UberDirectCard restaurantId={restaurantId} />
     </div>
   );
 }

@@ -241,6 +241,10 @@ model Restaurant {
   paypayApiKey     String?
   paypayApiSecret  String?
 
+  // --- Card payments through Stripe Checkout (Per-Restaurant Credentials) ---
+  // The restaurant's own secret key (sk_live_... or sk_test_...). Never sent back to any client.
+  stripeSecretKey String?
+
    // --- Enabled Payment Methods ---
   supportsCod          Boolean @default(true)
   supportsCreditCard   Boolean @default(false)
@@ -267,6 +271,7 @@ model Restaurant {
   deliveryPartners DeliveryPartner[]
   reservations   Reservation[]
   chatSessions   ChatSession[]
+  uberDirect     RestaurantUberDirect?
 
   @@index([tenantId])
   @@index([latitude, longitude])
@@ -548,6 +553,7 @@ enum RefundMethod {
   CASH
   BANK_TRANSFER
   PAYPAY
+  CARD
   OTHER
 }
 
@@ -578,6 +584,8 @@ model Order {
 
   paymentStatus PaymentStatus @default(UNPAID)
   paymentMethod PaymentMethod @default(COD)
+  // The gateway's own id for this payment (a Stripe Checkout Session id for card payments).
+  paymentReference String?
 
  // --- Printing ---
   printedAt     DateTime?       //  Null = unprinted, Timestamp = printed
@@ -1276,6 +1284,21 @@ model Reservation {
 enum DeliveryPartnerFeeType {
   FLAT
   PERCENT
+}
+
+// The restaurant's own Uber Direct account, so Uber bills the restaurant and not the platform. It lives in its own
+// table, away from Restaurant, so no code that sends a restaurant row to a browser can carry these secrets along.
+model RestaurantUberDirect {
+  id           String   @id @default(uuid())
+  restaurantId String   @unique
+  clientId     String
+  clientSecret String   // saved encrypted (enc:v1:...)
+  customerId   String
+  signingKey   String   // verifies Uber's webhooks; saved encrypted (enc:v1:...)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
 }
 
 model DeliveryPartner {

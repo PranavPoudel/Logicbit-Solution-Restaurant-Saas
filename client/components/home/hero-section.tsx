@@ -21,8 +21,13 @@ export function HeroSection({ cuisines, openCount, topRating, city }: { cuisines
   const router = useRouter();
   const [q, setQ] = useState("");
   const chips = byCuisineOrder(cuisines).slice(0, 5);
-  const split = city ? Math.max(1, Math.floor(city.length / 2)) : 0;
-  const width = Math.max(textWidth((city ?? "") + t("heroC")), textWidth(t("heroD") + t("heroE")));
+  // A "|" in the headline text starts a new line, so a longer phrase can be split into short lines and still be set large.
+  // The headline: the lead lines in the text colour, the last line in the brand red, then the punctuation as a sticker.
+  const phrase = t("heroD").split("|");
+  const width = Math.max(
+    ...phrase.slice(0, -1).map(textWidth),
+    textWidth(phrase[phrase.length - 1]) + 0.9, // the sticker is about 0.9em wide with its gap
+  );
 
   const search = (value: string) => router.push(value ? `/restaurants?q=${encodeURIComponent(value)}` : "/restaurants");
 
@@ -38,20 +43,26 @@ export function HeroSection({ cuisines, openCount, topRating, city }: { cuisines
             style={{ "--w": width } as CSSProperties}
             className={`font-display mt-6 whitespace-nowrap font-extrabold tracking-[-0.05em] ${locale === "ja" ? "leading-[1.1]" : "leading-[0.85]"} [font-size:min(17vw,calc((100vw-40px)/var(--w)))] md:[font-size:min(176px,calc((100vw-80px)/var(--w)))] lg:[font-size:min(176px,calc((min(100vw,1440px)-128px)/(2*var(--w))))]`}
           >
-            {city ? (
-              <>
-                <span className="block">
-                  {city.slice(0, split)}<span className="text-chili">{city.slice(split)}</span>{t("heroC")}
+            {phrase.map((line, i) => {
+              const last = i === phrase.length - 1;
+              return (
+                <span
+                  key={i}
+                  className={`animate-fade-up block font-extrabold ${last ? "text-chili" : ""}`}
+                  style={{ animationDelay: `${i * 90}ms` }}
+                >
+                  {line}
+                  {last && (
+                    // The punctuation is set as a tilted saffron sticker, like the "Hot deal" badge and the tilted pill above, and pops in after the words.
+                    <span className="animate-pop-in ml-[0.14em] inline-flex h-[0.74em] w-[0.74em] rotate-[8deg] items-center justify-center rounded-[0.22em] bg-saffron align-[-0.02em] text-[0.62em] leading-none tracking-normal text-[#2b1410] shadow-soft">
+                      {t("heroE")}
+                    </span>
+                  )}
                 </span>
-                <span className="inline-block">
-                  {t("heroD")}<span className="text-chili">{t("heroE")}</span>
-                </span>
-              </>
-            ) : (
-              t("heroNoCity")
-            )}
+              );
+            })}
           </h1>
-          <p className="mt-8 max-w-md text-lg leading-relaxed">{t.rich("heroBody", { b: (chunks) => <b>{chunks}</b>, city: city ?? t("yourArea") })}</p>
+          <p className="mt-10 max-w-md text-lg leading-relaxed">{t.rich("heroBody", { b: (chunks) => <b>{chunks}</b>, city: city ?? t("yourArea") })}</p>
 
           <form
             role="search"

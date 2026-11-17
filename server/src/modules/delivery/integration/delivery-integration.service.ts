@@ -2,7 +2,7 @@ import { Injectable, Logger, NotFoundException, UnauthorizedException } from '@n
 import { ConfigService } from '@nestjs/config';
 import { DeliveryService } from '../delivery.service';
 import { BookableOrder, DeliveryProvider, GenericDeliveryProvider, WebhookHeaders } from './delivery-provider';
-import { UberDirectClient } from './uber-direct.client';
+import { UberDirectAccountService } from './uber-direct-account.service';
 import { UberDirectProvider } from './uber-direct.provider';
 
 @Injectable()
@@ -13,20 +13,25 @@ export class DeliveryIntegrationService {
   constructor(
     config: ConfigService,
     private readonly deliveries: DeliveryService,
+    private readonly uberAccounts: UberDirectAccountService,
   ) {
     this.register(new GenericDeliveryProvider(() => config.get<string>('DELIVERY_WEBHOOK_SECRET')));
-    this.register(
-      new UberDirectProvider(
-        () => config.get<string>('UBER_DIRECT_SIGNING_KEY'),
-        new UberDirectClient(() => ({
-          clientId: config.get<string>('UBER_DIRECT_CLIENT_ID'),
-          clientSecret: config.get<string>('UBER_DIRECT_CLIENT_SECRET'),
-          customerId: config.get<string>('UBER_DIRECT_CUSTOMER_ID'),
-          apiUrl: config.get<string>('UBER_DIRECT_API_URL') ?? 'https://api.uber.com',
-          authUrl: config.get<string>('UBER_DIRECT_AUTH_URL') ?? 'https://auth.uber.com',
-        })),
-      ),
-    );
+  }
+
+  /** The restaurant's own Uber Direct account as a provider, or null when it has none. */
+  private async uberFor(restaurantId: string) {
+    const account = await this.uberAccounts.forRestaurant(restaurantId);
+    return account ? new UberDirectProvider(() => account.signingKey, account.client) : null;
+  }
+
+  /** Uber calls a different address for every restaurant, and only that restaurant's signing key is accepted. */
+  async handleUber(restaurantId: string, headers: WebhookHeaders, rawBody: Buffer | undefined, payload: unknown) {
+    const provider = await this.uberFor(restaurantId);
+    if (!provider || !provider.authenticate(headers, rawBody)) throw new UnauthorizedException('Invalid delivery provider credentials');
+
+    const event = provider.parse(payload);
+    if (!event) return { success: true, ignored: true };
+    return this.deliveries.applyExternalEvent(provider.name, event, restaurantId);
   }
 
   register(provider: DeliveryProvider) {
@@ -44,7 +49,14 @@ export class DeliveryIntegrationService {
   }
 
   async requestCourier(order: BookableOrder) {
-    for (const provider of this.providers.values()) {
+    let uber: UberDirectProvider | null = null;
+    try {
+      uber = await this.uberFor(order.restaurant.id);
+    } catch (err) {
+      this.logger.error(`Could not load the Uber Direct account for order ${order.orderNumber}`, err as Error);
+    }
+
+    for (const provider of [...this.providers.values(), ...(uber ? [uber] : [])]) {
       if (!provider.book) continue;
       try {
         const booking = await provider.book(order);
