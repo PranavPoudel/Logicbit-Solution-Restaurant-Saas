@@ -1,0 +1,5712 @@
+{
+  "meta": {
+    "source": "https://namastedining.logicbitsolution.com",
+    "siteTitle": "NAMASTE DINING OTSUKA-ナマステダイニング",
+    "currency": "JPY (assumed: prices are whole yen)",
+    "counts": {
+      "categories": 29,
+      "items": 142,
+      "variantsTotal": 38,
+      "banners": 2
+    },
+    "ignored": {
+      "custom_css": 2,
+      "nav_menu_item": 22,
+      "page": 9,
+      "post": 1648,
+      "wpcf7_contact_form": 2,
+      "wp_global_styles": 2,
+      "wp_navigation": 1
+    }
+  },
+  "categories": [
+    {
+      "wpTermId": "100",
+      "slug": "biryani",
+      "name": "Biryani",
+      "parentSlug": null,
+      "path": [
+        "Biryani"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "113",
+      "slug": "combo-sets",
+      "name": "Combo Sets",
+      "parentSlug": null,
+      "path": [
+        "Combo Sets"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "93",
+      "slug": "dessert",
+      "name": "Dessert",
+      "parentSlug": null,
+      "path": [
+        "Dessert"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "90",
+      "slug": "dinner-set",
+      "name": "Dinner Set",
+      "parentSlug": null,
+      "path": [
+        "Dinner Set"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "95",
+      "slug": "drinks",
+      "name": "Drinks",
+      "parentSlug": null,
+      "path": [
+        "Drinks"
+      ],
+      "flags": {
+        "duplicateName": true
+      }
+    },
+    {
+      "wpTermId": "98",
+      "slug": "highball",
+      "name": "Highball",
+      "parentSlug": "drinks",
+      "path": [
+        "Drinks",
+        "Highball"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "109",
+      "slug": "masala-curry",
+      "name": "Masala Curry",
+      "parentSlug": null,
+      "path": [
+        "Masala Curry"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "92",
+      "slug": "nan",
+      "name": "Nan",
+      "parentSlug": null,
+      "path": [
+        "Nan"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "107",
+      "slug": "nepali-menu",
+      "name": "Nepali Menu",
+      "parentSlug": null,
+      "path": [
+        "Nepali Menu"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "114",
+      "slug": "new-menu",
+      "name": "New Menu",
+      "parentSlug": null,
+      "path": [
+        "New Menu"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "99",
+      "slug": "others",
+      "name": "Others",
+      "parentSlug": "drinks",
+      "path": [
+        "Drinks",
+        "Others"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "94",
+      "slug": "party-menu",
+      "name": "Party Menu",
+      "parentSlug": null,
+      "path": [
+        "Party Menu"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "91",
+      "slug": "rice",
+      "name": "Rice",
+      "parentSlug": null,
+      "path": [
+        "Rice"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "106",
+      "slug": "salad",
+      "name": "Salad",
+      "parentSlug": null,
+      "path": [
+        "Salad"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "105",
+      "slug": "set",
+      "name": "Set",
+      "parentSlug": null,
+      "path": [
+        "Set"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "111",
+      "slug": "set-choice-curry",
+      "name": "Set Choice Curry",
+      "parentSlug": null,
+      "path": [
+        "Set Choice Curry"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "116",
+      "slug": "shochu",
+      "name": "Shochu",
+      "parentSlug": "drinks",
+      "path": [
+        "Drinks",
+        "Shochu"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "110",
+      "slug": "snacks",
+      "name": "Snacks",
+      "parentSlug": null,
+      "path": [
+        "Snacks"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "115",
+      "slug": "sour",
+      "name": "Sour",
+      "parentSlug": "drinks",
+      "path": [
+        "Drinks",
+        "Sour"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "112",
+      "slug": "special-drinks",
+      "name": "Special Drinks",
+      "parentSlug": null,
+      "path": [
+        "Special Drinks"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "101",
+      "slug": "takeout",
+      "name": "Takeout",
+      "parentSlug": null,
+      "path": [
+        "Takeout"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "89",
+      "slug": "tandoori",
+      "name": "Tandoori",
+      "parentSlug": null,
+      "path": [
+        "Tandoori"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "108",
+      "slug": "thai-menu",
+      "name": "Thai Menu",
+      "parentSlug": null,
+      "path": [
+        "Thai Menu"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "97",
+      "slug": "umeshu",
+      "name": "Umeshu",
+      "parentSlug": "drinks",
+      "path": [
+        "Drinks",
+        "Umeshu"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "15",
+      "slug": "uncategorized",
+      "name": "Uncategorized",
+      "parentSlug": null,
+      "path": [
+        "Uncategorized"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "96",
+      "slug": "beer",
+      "name": "Beer",
+      "parentSlug": "drinks",
+      "path": [
+        "Drinks",
+        "Beer"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "103",
+      "slug": "bento",
+      "name": "Bento",
+      "parentSlug": "takeout",
+      "path": [
+        "Takeout",
+        "Bento"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "102",
+      "slug": "curry-set",
+      "name": "Curry Set",
+      "parentSlug": "takeout",
+      "path": [
+        "Takeout",
+        "Curry Set"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "104",
+      "slug": "drinks-takeout",
+      "name": "Drinks",
+      "parentSlug": "takeout",
+      "path": [
+        "Takeout",
+        "Drinks"
+      ],
+      "flags": {
+        "duplicateName": true
+      }
+    }
+  ],
+  "items": [
+    {
+      "wpId": "935",
+      "wpStatus": "publish",
+      "wpSlug": "tandoori-chicken-wings-4p",
+      "dto": {
+        "name": "Tandoori Chicken Wings (4P)",
+        "description": "Crispy and juicy grilled chicken wings",
+        "price": 600,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Tandoori-Chicken-Wings-4P-1.png",
+        "primaryCategory": "tandoori",
+        "categories": [
+          "tandoori"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-01",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "937",
+      "wpStatus": "publish",
+      "wpSlug": "mix-grill",
+      "dto": {
+        "name": "Mix Grill",
+        "description": "Assorted tandoori grill: Tandoori Chicken, Chicken Tikka, Garlic Tikka, Sheek Kabab, Malai Tikka (1 each)",
+        "price": 1100,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Mix-Grill-1.png",
+        "primaryCategory": "tandoori",
+        "categories": [
+          "tandoori"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-02",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "939",
+      "wpStatus": "publish",
+      "wpSlug": "tandoori-chicken-1p",
+      "dto": {
+        "name": "Tandoori Chicken (1P)",
+        "description": "Bone-in spicy grilled chicken",
+        "price": 550,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-132908-1.png",
+        "primaryCategory": "tandoori",
+        "categories": [
+          "tandoori"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-03",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "941",
+      "wpStatus": "publish",
+      "wpSlug": "tandoori-tebamoto-4p",
+      "dto": {
+        "name": "Tandoori Tebamoto (4P)",
+        "description": "Slow-cooked spicy grilled drumettes",
+        "price": 825,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-133119-1.png",
+        "primaryCategory": "tandoori",
+        "categories": [
+          "tandoori"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-04",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": true,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "943",
+      "wpStatus": "publish",
+      "wpSlug": "grilled-pork",
+      "dto": {
+        "name": "Grilled Pork",
+        "description": "Spice-seasoned grilled pork",
+        "price": 990,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-133207-1.png",
+        "primaryCategory": "tandoori",
+        "categories": [
+          "tandoori"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-05",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "945",
+      "wpStatus": "publish",
+      "wpSlug": "tandoori-prawn-4p",
+      "dto": {
+        "name": "Tandoori Prawn (4P)",
+        "description": "Plump spicy grilled prawns",
+        "price": 1089,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-133508-1.png",
+        "primaryCategory": "tandoori",
+        "categories": [
+          "tandoori"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-06",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "947",
+      "wpStatus": "publish",
+      "wpSlug": "single-curry-set",
+      "dto": {
+        "name": "Single Curry Set",
+        "description": "One Choice Curry With Nan or Rice, Salad & Softdrink",
+        "price": 1210,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-133621-1.png",
+        "primaryCategory": "dinner-set",
+        "categories": [
+          "dinner-set"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-07",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "949",
+      "wpStatus": "publish",
+      "wpSlug": "double-curry-set",
+      "dto": {
+        "name": "Double Curry Set",
+        "description": "Two Choice Curry With Nan & Rice, Salad & Softdrink",
+        "price": 1320,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-133711-1.png",
+        "primaryCategory": "dinner-set",
+        "categories": [
+          "dinner-set"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-08",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "951",
+      "wpStatus": "publish",
+      "wpSlug": "garlic-nan-set",
+      "dto": {
+        "name": "Garlic Nan Set",
+        "description": "Two Choice Curry With Garlic Nan, Garlic Tikka, Salad & Softdrink",
+        "price": 1430,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-133923-1.png",
+        "primaryCategory": "dinner-set",
+        "categories": [
+          "dinner-set"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-09",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "953",
+      "wpStatus": "publish",
+      "wpSlug": "cheese-nan-set",
+      "dto": {
+        "name": "Cheese Nan Set",
+        "description": "Two Choice Curry With Nan or Rice, Tandoori Chicken(1P), Garlic Tikka(1P), Salad, Softdrink",
+        "price": 1760,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-134007-1.png",
+        "primaryCategory": "dinner-set",
+        "categories": [
+          "dinner-set"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-10",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "955",
+      "wpStatus": "publish",
+      "wpSlug": "barbeque-set",
+      "dto": {
+        "name": "Barbeque Set",
+        "description": "Two Choice Curry With Nan or Rice, Tandoori Chicken(1P), Garlic Tikka(1P), Salad, Softdrink",
+        "price": 1760,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-134052-1.png",
+        "primaryCategory": "dinner-set",
+        "categories": [
+          "dinner-set"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-11",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "957",
+      "wpStatus": "publish",
+      "wpSlug": "couple-set",
+      "dto": {
+        "name": "Couple Set",
+        "description": "Two Choice Curry, Salad, Cheese Nan, Plain Nan or Rice, Tandoori Chicken, Sheek Kabab, 2 Drinks (Draft Beer/Glass Wine/Softdrink)",
+        "price": 3850,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-141013-1.png",
+        "primaryCategory": "dinner-set",
+        "categories": [
+          "dinner-set"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-12",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "959",
+      "wpStatus": "publish",
+      "wpSlug": "saffron-rice",
+      "dto": {
+        "name": "Saffron Rice",
+        "description": "Indian-style yellow rice",
+        "price": 385,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-141129-1.png",
+        "primaryCategory": "rice",
+        "categories": [
+          "rice"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-13",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "961",
+      "wpStatus": "publish",
+      "wpSlug": "garlic-butter-rice",
+      "dto": {
+        "name": "Garlic Butter Rice",
+        "description": "Garlic butter flavored rice",
+        "price": 605,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-141231-1.png",
+        "primaryCategory": "rice",
+        "categories": [
+          "rice"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-14",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "963",
+      "wpStatus": "publish",
+      "wpSlug": "tomyum-chahan",
+      "dto": {
+        "name": "Tomyum Chahan",
+        "description": "Sour and spicy Thai-style fried rice with shrimp",
+        "price": 1089,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-141344-1.png",
+        "primaryCategory": "rice",
+        "categories": [
+          "rice"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-15",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "965",
+      "wpStatus": "publish",
+      "wpSlug": "jeera-fry-rice",
+      "dto": {
+        "name": "Jeera Fry Rice",
+        "description": "Fried rice with cumin",
+        "price": 605,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-141434-1.png",
+        "primaryCategory": "rice",
+        "categories": [
+          "rice"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-16",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "967",
+      "wpStatus": "publish",
+      "wpSlug": "plain-nan",
+      "dto": {
+        "name": "Plain Nan",
+        "description": "Baked in our signature tandoor oven",
+        "price": 330,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-143500-1.png",
+        "primaryCategory": "nan",
+        "categories": [
+          "nan"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-17",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "969",
+      "wpStatus": "publish",
+      "wpSlug": "cheese-garlic-nan",
+      "dto": {
+        "name": "Cheese Garlic Nan",
+        "description": "Nan loaded with cheese and garlic",
+        "price": 715,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-141701-1.png",
+        "primaryCategory": "nan",
+        "categories": [
+          "nan"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-18",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "971",
+      "wpStatus": "publish",
+      "wpSlug": "chocolate-nan",
+      "dto": {
+        "name": "Chocolate Nan",
+        "description": "Nan filled with melted chocolate",
+        "price": 660,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-141826-1.png",
+        "primaryCategory": "nan",
+        "categories": [
+          "nan"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-19",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "973",
+      "wpStatus": "publish",
+      "wpSlug": "cheese-nan",
+      "dto": {
+        "name": "Cheese Nan",
+        "description": "Nan loaded with melty cheese",
+        "price": 605,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-141920-1.png",
+        "primaryCategory": "nan",
+        "categories": [
+          "nan"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-20",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "977",
+      "wpStatus": "publish",
+      "wpSlug": "anko-nan",
+      "dto": {
+        "name": "Anko Nan",
+        "description": "Japanese-style nan filled with sweet red bean paste",
+        "price": 550,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-142013-1.png",
+        "primaryCategory": "nan",
+        "categories": [
+          "nan"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-21",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "979",
+      "wpStatus": "publish",
+      "wpSlug": "choco-ice",
+      "dto": {
+        "name": "Choco Ice",
+        "description": "Chocolate ice cream",
+        "price": 330,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-142307-1.png",
+        "primaryCategory": "dessert",
+        "categories": [
+          "dessert"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-22",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "981",
+      "wpStatus": "publish",
+      "wpSlug": "vanilla-ice",
+      "dto": {
+        "name": "Vanilla Ice",
+        "description": "Vanilla ice cream",
+        "price": 330,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-142346-1.png",
+        "primaryCategory": "dessert",
+        "categories": [
+          "dessert"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-23",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "983",
+      "wpStatus": "publish",
+      "wpSlug": "mango-ice",
+      "dto": {
+        "name": "Mango Ice",
+        "description": "Mango ice cream",
+        "price": 330,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-142426-1.png",
+        "primaryCategory": "dessert",
+        "categories": [
+          "dessert"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-24",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "985",
+      "wpStatus": "publish",
+      "wpSlug": "course-a-a",
+      "dto": {
+        "name": "Course A",
+        "description": "13 dishes, 120min all-you-can-drink included: Mame Salad, Mix Grill(5 types), Samosa, Pakoda, Nama Harumaki, Papad, Nan or Rice(free refill), 3 Curry(free refill), Dessert",
+        "price": 4400,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-142537-1.png",
+        "primaryCategory": "party-menu",
+        "categories": [
+          "party-menu"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-25",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "987",
+      "wpStatus": "publish",
+      "wpSlug": "course-b-b",
+      "dto": {
+        "name": "Course B",
+        "description": "9 dishes, 120min all-you-can-drink included: Green Salad, Mame Salad, Malai Tikka, Pakoda, Papad, Seekh Kabab, 3 Curry(free refill), Nan or Rice(free refill), Dessert",
+        "price": 3800,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-142642-1.png",
+        "primaryCategory": "party-menu",
+        "categories": [
+          "party-menu"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-26",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "989",
+      "wpStatus": "publish",
+      "wpSlug": "course-c-c",
+      "dto": {
+        "name": "Course C",
+        "description": "7 dishes, 120min all-you-can-drink included: Green Salad, Pakoda, Papad, Chicken Tikka, Dessert, 2 Curry(free refill), Nan or Rice(free refill)",
+        "price": 3300,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-142729-1.png",
+        "primaryCategory": "party-menu",
+        "categories": [
+          "party-menu"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-27",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "991",
+      "wpStatus": "publish",
+      "wpSlug": "draft-beer-medium",
+      "dto": {
+        "name": "Draft Beer - Medium",
+        "description": "Asahi Super Dry Beer, Medium",
+        "price": 605,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-142921-1.png",
+        "primaryCategory": "beer",
+        "categories": [
+          "beer",
+          "drinks"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-28",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": true,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "992",
+      "wpStatus": "publish",
+      "wpSlug": "draft-beer-small",
+      "dto": {
+        "name": "Draft Beer - Small",
+        "description": "Asahi Super Dry Beer, Small",
+        "price": 440,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-142921-1.png",
+        "primaryCategory": "beer",
+        "categories": [
+          "beer",
+          "drinks"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-29",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": true,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "993",
+      "wpStatus": "publish",
+      "wpSlug": "bottled-beer",
+      "dto": {
+        "name": "Bottled Beer",
+        "description": "Bottled Beer",
+        "price": 660,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-142921-1.png",
+        "primaryCategory": "beer",
+        "categories": [
+          "beer",
+          "drinks"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-30",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": true,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "995",
+      "wpStatus": "publish",
+      "wpSlug": "nojun-umeshu",
+      "dto": {
+        "name": "Nojun Umeshu",
+        "description": "Plum liqueur",
+        "price": 495,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-143147-1.png",
+        "primaryCategory": "umeshu",
+        "categories": [
+          "drinks",
+          "umeshu"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-31",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": true,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "997",
+      "wpStatus": "publish",
+      "wpSlug": "kirishima-bottle",
+      "dto": {
+        "name": "Kirishima - Bottle",
+        "description": "Miyazaki-exclusive shochu, bottle",
+        "price": 2200,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-10-123200-1.png",
+        "primaryCategory": "highball",
+        "categories": [
+          "drinks",
+          "highball"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-32",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": true,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "999",
+      "wpStatus": "publish",
+      "wpSlug": "black-nikka-clear",
+      "dto": {
+        "name": "Black Nikka Clear",
+        "description": "Black Nikka Clear",
+        "price": 440,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-164401-1.png",
+        "primaryCategory": "highball",
+        "categories": [
+          "drinks",
+          "highball"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-33",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": true,
+        "hasVariants": false,
+        "descriptionHadHtml": true,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1001",
+      "wpStatus": "publish",
+      "wpSlug": "black-highball-rich-blend",
+      "dto": {
+        "name": "Black Highball - Rich Blend",
+        "description": "Black Highball - Rich Blend",
+        "price": 495,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-10-161254-1.png",
+        "primaryCategory": "highball",
+        "categories": [
+          "drinks",
+          "highball"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-34",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": true,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1003",
+      "wpStatus": "publish",
+      "wpSlug": "black-highball-kaku",
+      "dto": {
+        "name": "Black Highball - Kaku",
+        "description": "Black Highball - Kaku",
+        "price": 550,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-10-161556-1.png",
+        "primaryCategory": "highball",
+        "categories": [
+          "drinks",
+          "highball"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-35",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": true,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1005",
+      "wpStatus": "publish",
+      "wpSlug": "gin",
+      "dto": {
+        "name": "Gin",
+        "description": "On the Rocks or with Soda or with Tonic",
+        "price": 495,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-164816-1.png",
+        "primaryCategory": "others",
+        "categories": [
+          "drinks",
+          "others"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-36",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": true,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1007",
+      "wpStatus": "publish",
+      "wpSlug": "rum-khukri-nepal-bottle",
+      "dto": {
+        "name": "Rum Khukri (Nepal) - Bottle",
+        "description": "Rum Khukri (Nepal) - Bottle",
+        "price": 550,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-10-161647-1.png",
+        "primaryCategory": "others",
+        "categories": [
+          "drinks",
+          "others"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-37",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": true,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1009",
+      "wpStatus": "publish",
+      "wpSlug": "rum-chai-nepal",
+      "dto": {
+        "name": "Rum Chai (Nepal)",
+        "description": "Rum Chai (Nepal)",
+        "price": 550,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-10-161914-1.png",
+        "primaryCategory": "others",
+        "categories": [
+          "drinks",
+          "others"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-38",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": true,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1011",
+      "wpStatus": "publish",
+      "wpSlug": "tequila",
+      "dto": {
+        "name": "Tequila",
+        "description": "On the Rocks or with Soda or with Tonic",
+        "price": 495,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-170058-1.png",
+        "primaryCategory": "others",
+        "categories": [
+          "drinks",
+          "others"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-39",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": true,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1013",
+      "wpStatus": "publish",
+      "wpSlug": "vegetable-biryani",
+      "dto": {
+        "name": "Vegetable Biryani",
+        "description": "Salad, Soup, Raita, Softdrink",
+        "price": 1210,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-164223-1.png",
+        "primaryCategory": "biryani",
+        "categories": [
+          "biryani"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-40",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1015",
+      "wpStatus": "publish",
+      "wpSlug": "chicken-biryani",
+      "dto": {
+        "name": "Chicken Biryani",
+        "description": "Salad, Soup, Raita, Softdrink",
+        "price": 1320,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-164318-1.png",
+        "primaryCategory": "biryani",
+        "categories": [
+          "biryani"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-41",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1017",
+      "wpStatus": "publish",
+      "wpSlug": "prawn-biryani",
+      "dto": {
+        "name": "Prawn Biryani",
+        "description": "Salad, Soup, Raita, Softdrink",
+        "price": 1430,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-164357-1.png",
+        "primaryCategory": "biryani",
+        "categories": [
+          "biryani"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-42",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1019",
+      "wpStatus": "publish",
+      "wpSlug": "a-set-a",
+      "dto": {
+        "name": "A Set",
+        "description": "One Choice Curry(1-5) With Nan or Rice, Salad",
+        "price": 702,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-170307-1.png",
+        "primaryCategory": "curry-set",
+        "categories": [
+          "curry-set",
+          "takeout"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": {
+        "name": "Option",
+        "options": [
+          {
+            "wpId": "1314",
+            "label": "Curry Only",
+            "price": 702,
+            "priceDelta": 0
+          },
+          {
+            "wpId": "1315",
+            "label": "Full Set (with Nan/Rice & Salad)",
+            "price": 900,
+            "priceDelta": 198
+          }
+        ]
+      },
+      "not_supported": {
+        "sku": "nd-menu-43",
+        "wpProductType": "variable",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": true,
+        "hasVariants": true,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1021",
+      "wpStatus": "publish",
+      "wpSlug": "b-set-b",
+      "dto": {
+        "name": "B Set",
+        "description": "One Choice Curry (6-10): Sag Chicken/Prawn Curry/Butter Chicken/Pork Curry/Mix Seafood Curry",
+        "price": 810,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-170744-1.png",
+        "primaryCategory": "curry-set",
+        "categories": [
+          "curry-set",
+          "takeout"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": {
+        "name": "Option",
+        "options": [
+          {
+            "wpId": "1317",
+            "label": "Curry Only",
+            "price": 810,
+            "priceDelta": 0
+          },
+          {
+            "wpId": "1318",
+            "label": "Full Set (with Nan/Rice & Salad)",
+            "price": 1000,
+            "priceDelta": 190
+          }
+        ]
+      },
+      "not_supported": {
+        "sku": "nd-menu-44",
+        "wpProductType": "variable",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": true,
+        "hasVariants": true,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1023",
+      "wpStatus": "publish",
+      "wpSlug": "green-curry-bento",
+      "dto": {
+        "name": "Green Curry Bento",
+        "description": "With Nan or Rice, Salad",
+        "price": 1026,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-165746-1.png",
+        "primaryCategory": "bento",
+        "categories": [
+          "bento",
+          "takeout"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-45",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": true,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1025",
+      "wpStatus": "publish",
+      "wpSlug": "mutton-curry-bento",
+      "dto": {
+        "name": "Mutton Curry Bento",
+        "description": "With Nan or Rice, Salad",
+        "price": 1080,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-165920-1.png",
+        "primaryCategory": "bento",
+        "categories": [
+          "bento",
+          "takeout"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-46",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": true,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1027",
+      "wpStatus": "publish",
+      "wpSlug": "beef-curry-bento",
+      "dto": {
+        "name": "Beef Curry Bento",
+        "description": "With Nan or Rice, Salad",
+        "price": 1134,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-170023-1.png",
+        "primaryCategory": "bento",
+        "categories": [
+          "bento",
+          "takeout"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-47",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": true,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1034",
+      "wpStatus": "publish",
+      "wpSlug": "double-curry-bento",
+      "dto": {
+        "name": "Double Curry Bento",
+        "description": "Two mini choice curry(1-10) With Nan or Rice, Salad",
+        "price": 1188,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-172155-1.png",
+        "primaryCategory": "bento",
+        "categories": [
+          "bento",
+          "takeout"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-52",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": true,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1036",
+      "wpStatus": "publish",
+      "wpSlug": "garlic-nan-bento",
+      "dto": {
+        "name": "Garlic Nan Bento",
+        "description": "Two mini choice curry (1-10) with Garlic Nan, Salad",
+        "price": 1296,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-172326-1.png",
+        "primaryCategory": "bento",
+        "categories": [
+          "bento",
+          "takeout"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-53",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": true,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1038",
+      "wpStatus": "publish",
+      "wpSlug": "cheese-nan-bento",
+      "dto": {
+        "name": "Cheese Nan Bento",
+        "description": "Two mini choice curry(1-10) with Cheese Nan, Salad",
+        "price": 1404,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-172603-1.png",
+        "primaryCategory": "bento",
+        "categories": [
+          "bento",
+          "takeout"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-54",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": true,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1040",
+      "wpStatus": "publish",
+      "wpSlug": "namaste-special-bento-set",
+      "dto": {
+        "name": "Namaste Special Bento Set",
+        "description": "One choice curry(A-B), Nan & Rice, Chicken Tikka",
+        "price": 1134,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-172654-1.png",
+        "primaryCategory": "bento",
+        "categories": [
+          "bento",
+          "takeout"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-55",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": true,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1042",
+      "wpStatus": "publish",
+      "wpSlug": "bbq-bento-set",
+      "dto": {
+        "name": "BBQ Bento Set",
+        "description": "One choice curry(A-B), Nan & Rice, Chicken Tikka, Sheek Kabab",
+        "price": 1512,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-172827-1.png",
+        "primaryCategory": "bento",
+        "categories": [
+          "bento",
+          "takeout"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-56",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": true,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1044",
+      "wpStatus": "publish",
+      "wpSlug": "chocolate-nan-set",
+      "dto": {
+        "name": "Chocolate Nan Set",
+        "description": "One choice curry(A-B), Chocolate Nan, Salad",
+        "price": 1296,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-172936-1.png",
+        "primaryCategory": "bento",
+        "categories": [
+          "bento",
+          "takeout"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-57",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": true,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1046",
+      "wpStatus": "publish",
+      "wpSlug": "3-curry-bento-3",
+      "dto": {
+        "name": "3 Curry Bento",
+        "description": "Three mini choice curry(from 1-10), 2 Nan or 2 Rice, 3 BBQ, Salad",
+        "price": 3240,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-173023-1.png",
+        "primaryCategory": "bento",
+        "categories": [
+          "bento",
+          "takeout"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-58",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": true,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1047",
+      "wpStatus": "publish",
+      "wpSlug": "lassi",
+      "dto": {
+        "name": "Lassi",
+        "description": "Lassi",
+        "price": 270,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-16-112931.png",
+        "primaryCategory": "drinks-takeout",
+        "categories": [
+          "drinks-takeout",
+          "takeout"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-59",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": true,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": true
+      }
+    },
+    {
+      "wpId": "1049",
+      "wpStatus": "publish",
+      "wpSlug": "mango-lassi",
+      "dto": {
+        "name": "Mango Lassi",
+        "description": "Mango Lassi",
+        "price": 270,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-170419-1.png",
+        "primaryCategory": "drinks-takeout",
+        "categories": [
+          "drinks-takeout",
+          "takeout"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-60",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": true,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": true
+      }
+    },
+    {
+      "wpId": "1051",
+      "wpStatus": "publish",
+      "wpSlug": "strawberry-lassi",
+      "dto": {
+        "name": "Strawberry Lassi",
+        "description": "Strawberry Lassi",
+        "price": 270,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-171038-1.png",
+        "primaryCategory": "drinks-takeout",
+        "categories": [
+          "drinks-takeout",
+          "takeout"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-61",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": true,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": true
+      }
+    },
+    {
+      "wpId": "1053",
+      "wpStatus": "publish",
+      "wpSlug": "blueberry-lassi",
+      "dto": {
+        "name": "Blueberry Lassi",
+        "description": "Blueberry Lassi",
+        "price": 270,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-171314-1.png",
+        "primaryCategory": "drinks-takeout",
+        "categories": [
+          "drinks-takeout",
+          "takeout"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-62",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": true,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": true
+      }
+    },
+    {
+      "wpId": "1055",
+      "wpStatus": "publish",
+      "wpSlug": "cocoa-lassi",
+      "dto": {
+        "name": "Cocoa Lassi",
+        "description": "Cocoa Lassi",
+        "price": 270,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-172052-1.png",
+        "primaryCategory": "drinks-takeout",
+        "categories": [
+          "drinks-takeout",
+          "takeout"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-63",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": true,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": true
+      }
+    },
+    {
+      "wpId": "1057",
+      "wpStatus": "publish",
+      "wpSlug": "coconut-lassi",
+      "dto": {
+        "name": "Coconut Lassi",
+        "description": "Coconut Lassi",
+        "price": 270,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-174754-1.png",
+        "primaryCategory": "drinks-takeout",
+        "categories": [
+          "drinks-takeout",
+          "takeout"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-64",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": true,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": true
+      }
+    },
+    {
+      "wpId": "1059",
+      "wpStatus": "publish",
+      "wpSlug": "cassis-orange-lassi",
+      "dto": {
+        "name": "Cassis Orange Lassi",
+        "description": "Cassis Orange Lassi",
+        "price": 270,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-174940-1.png",
+        "primaryCategory": "drinks-takeout",
+        "categories": [
+          "drinks-takeout",
+          "takeout"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-65",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": true,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": true
+      }
+    },
+    {
+      "wpId": "1061",
+      "wpStatus": "publish",
+      "wpSlug": "chocolate-lassi",
+      "dto": {
+        "name": "Chocolate Lassi",
+        "description": "Chocolate Lassi",
+        "price": 270,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-194225-1.png",
+        "primaryCategory": "drinks-takeout",
+        "categories": [
+          "drinks-takeout",
+          "takeout"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-66",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": true,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": true
+      }
+    },
+    {
+      "wpId": "1063",
+      "wpStatus": "publish",
+      "wpSlug": "orange-lassi",
+      "dto": {
+        "name": "Orange Lassi",
+        "description": "Orange Lassi",
+        "price": 270,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-194346-1.png",
+        "primaryCategory": "drinks-takeout",
+        "categories": [
+          "drinks-takeout",
+          "takeout"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-67",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": true,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": true
+      }
+    },
+    {
+      "wpId": "1065",
+      "wpStatus": "publish",
+      "wpSlug": "apple-lassi",
+      "dto": {
+        "name": "Apple Lassi",
+        "description": "Apple Lassi",
+        "price": 270,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-194526-1.png",
+        "primaryCategory": "drinks-takeout",
+        "categories": [
+          "drinks-takeout",
+          "takeout"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-68",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": true,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": true
+      }
+    },
+    {
+      "wpId": "1067",
+      "wpStatus": "publish",
+      "wpSlug": "otumami-set",
+      "dto": {
+        "name": "Otumami Set",
+        "description": "Draft Beer, Tandoori Chicken, Sheek Kabab, Papad, Salad",
+        "price": 1089,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-174511-1.png",
+        "primaryCategory": "set",
+        "categories": [
+          "set"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-69",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1069",
+      "wpStatus": "publish",
+      "wpSlug": "delhi-set",
+      "dto": {
+        "name": "Delhi Set",
+        "description": "One choice curry, Nan or Rice, Salad, Chicken Tikka, Garlic Tikka, Mango Lassi",
+        "price": 1628,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-174558-1.png",
+        "primaryCategory": "set",
+        "categories": [
+          "set"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-70",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1071",
+      "wpStatus": "publish",
+      "wpSlug": "namaste-special-set",
+      "dto": {
+        "name": "Namaste Special Set",
+        "description": "One choice curry, Nan or Rice, Garlic Nan, Chicken Tikka, Sheek Kabab, Garlic Tikka, Salad, Dessert, Draft Beer or Softdrink",
+        "price": 1980,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-174657-1.png",
+        "primaryCategory": "set",
+        "categories": [
+          "set"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-71",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1073",
+      "wpStatus": "publish",
+      "wpSlug": "chicken-salad",
+      "dto": {
+        "name": "Chicken Salad",
+        "description": "Fresh vegetable salad with spicy grilled chicken",
+        "price": 626,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-174756-1.png",
+        "primaryCategory": "salad",
+        "categories": [
+          "salad"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-72",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1075",
+      "wpStatus": "publish",
+      "wpSlug": "mini-vegetable-salad",
+      "dto": {
+        "name": "Mini Vegetable Salad",
+        "description": "Recommended for a small appetite - mini green salad",
+        "price": 410,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-190342-1.png",
+        "primaryCategory": "salad",
+        "categories": [
+          "salad"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-73",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1077",
+      "wpStatus": "publish",
+      "wpSlug": "steam-momo",
+      "dto": {
+        "name": "Steam Momo",
+        "description": "Freshly steamed Nepali-style dumplings",
+        "price": 715,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-192054-1.png",
+        "primaryCategory": "nepali-menu",
+        "categories": [
+          "nepali-menu"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-74",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1079",
+      "wpStatus": "publish",
+      "wpSlug": "soup-momo",
+      "dto": {
+        "name": "Soup Momo",
+        "description": "Delicious Nepali dumplings in soup",
+        "price": 870,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-192028-1.png",
+        "primaryCategory": "nepali-menu",
+        "categories": [
+          "nepali-menu"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-75",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1081",
+      "wpStatus": "publish",
+      "wpSlug": "samosa-chat",
+      "dto": {
+        "name": "Samosa Chat",
+        "description": "Samosa topped with yogurt - an Indian snack",
+        "price": 825,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-192004-1.png",
+        "primaryCategory": "nepali-menu",
+        "categories": [
+          "nepali-menu"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-76",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1083",
+      "wpStatus": "publish",
+      "wpSlug": "chatpat",
+      "dto": {
+        "name": "Chatpat",
+        "description": "Vegetables and soybeans mixed with spices",
+        "price": 715,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-191938-1.png",
+        "primaryCategory": "nepali-menu",
+        "categories": [
+          "nepali-menu"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-77",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1085",
+      "wpStatus": "publish",
+      "wpSlug": "bhatmas-sadeko",
+      "dto": {
+        "name": "Bhatmas Sadeko",
+        "description": "Beans and vegetables mixed with spices",
+        "price": 715,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-191911-1.png",
+        "primaryCategory": "nepali-menu",
+        "categories": [
+          "nepali-menu"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-78",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1087",
+      "wpStatus": "publish",
+      "wpSlug": "mutton-sukuti",
+      "dto": {
+        "name": "Mutton Sukuti",
+        "description": "Nepali-style mutton jerky",
+        "price": 990,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-191827-1.png",
+        "primaryCategory": "nepali-menu",
+        "categories": [
+          "nepali-menu"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-79",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1089",
+      "wpStatus": "publish",
+      "wpSlug": "chicken-choila",
+      "dto": {
+        "name": "Chicken Choila",
+        "description": "Spiced stir-fried chicken",
+        "price": 825,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-191802-1.png",
+        "primaryCategory": "nepali-menu",
+        "categories": [
+          "nepali-menu"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-80",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1091",
+      "wpStatus": "publish",
+      "wpSlug": "mutton-choila",
+      "dto": {
+        "name": "Mutton Choila",
+        "description": "Spiced stir-fried lamb",
+        "price": 1090,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-191727-1.png",
+        "primaryCategory": "nepali-menu",
+        "categories": [
+          "nepali-menu"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-81",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1093",
+      "wpStatus": "publish",
+      "wpSlug": "mutton-bhutan",
+      "dto": {
+        "name": "Mutton Bhutan",
+        "description": "Stir-fried mutton offal",
+        "price": 1090,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-200501-1.png",
+        "primaryCategory": "nepali-menu",
+        "categories": [
+          "nepali-menu"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-82",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1095",
+      "wpStatus": "publish",
+      "wpSlug": "chicken-sekuwa",
+      "dto": {
+        "name": "Chicken Sekuwa",
+        "description": "Nepali-style grilled skewered chicken",
+        "price": 1090,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-200548-1.png",
+        "primaryCategory": "nepali-menu",
+        "categories": [
+          "nepali-menu"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-83",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1097",
+      "wpStatus": "publish",
+      "wpSlug": "chowmien",
+      "dto": {
+        "name": "Chowmien",
+        "description": "Nepali-style fried noodles",
+        "price": 990,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-194823-1.png",
+        "primaryCategory": "nepali-menu",
+        "categories": [
+          "nepali-menu"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-84",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1099",
+      "wpStatus": "publish",
+      "wpSlug": "vegetable-thali-set",
+      "dto": {
+        "name": "Vegetable Thali Set",
+        "description": "Rice, Dal, Veg Curry, Achar, Papad, Salad, Soup, Softdrink",
+        "price": 1210,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-200728-1.png",
+        "primaryCategory": "nepali-menu",
+        "categories": [
+          "nepali-menu"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-85",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1101",
+      "wpStatus": "publish",
+      "wpSlug": "thai-green-curry-set",
+      "dto": {
+        "name": "Thai Green Curry Set",
+        "description": "With Nan or Rice, Salad, Softdrink. Green chili curry with coconut milk",
+        "price": 1200,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-200937-1.png",
+        "primaryCategory": "thai-menu",
+        "categories": [
+          "thai-menu"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-86",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1103",
+      "wpStatus": "publish",
+      "wpSlug": "gapao-rice-set",
+      "dto": {
+        "name": "Gapao Rice Set",
+        "description": "With Salad, Softdrink. Ground chicken stir-fried with basil over rice",
+        "price": 1200,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-201041-1.png",
+        "primaryCategory": "thai-menu",
+        "categories": [
+          "thai-menu"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-87",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1105",
+      "wpStatus": "publish",
+      "wpSlug": "chicken-tikka-masala",
+      "dto": {
+        "name": "Chicken Tikka Masala",
+        "description": "Spicy curry with chicken tikka",
+        "price": 1210,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-202308-1.png",
+        "primaryCategory": "masala-curry",
+        "categories": [
+          "masala-curry"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-88",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1107",
+      "wpStatus": "publish",
+      "wpSlug": "fish-masala",
+      "dto": {
+        "name": "Fish Masala",
+        "description": "Fish curry seasoned with rich spices",
+        "price": 1210,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-202402-1.png",
+        "primaryCategory": "masala-curry",
+        "categories": [
+          "masala-curry"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-89",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1109",
+      "wpStatus": "publish",
+      "wpSlug": "mutton-masala",
+      "dto": {
+        "name": "Mutton Masala",
+        "description": "Mutton curry loaded with spices",
+        "price": 1210,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-202759-1.png",
+        "primaryCategory": "masala-curry",
+        "categories": [
+          "masala-curry"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-90",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1111",
+      "wpStatus": "publish",
+      "wpSlug": "paneer-butter-masala",
+      "dto": {
+        "name": "Paneer Butter Masala",
+        "description": "Homemade Indian cheese curry with tomato and butter",
+        "price": 1210,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-202905-1.png",
+        "primaryCategory": "masala-curry",
+        "categories": [
+          "masala-curry"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-91",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1113",
+      "wpStatus": "publish",
+      "wpSlug": "chicken-sheek-kabab-masala",
+      "dto": {
+        "name": "Chicken Sheek Kabab Masala",
+        "description": "Spicy curry with chicken sheek kabab",
+        "price": 1210,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-203025-1.png",
+        "primaryCategory": "masala-curry",
+        "categories": [
+          "masala-curry"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-92",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1115",
+      "wpStatus": "publish",
+      "wpSlug": "chicken-garlic-masala",
+      "dto": {
+        "name": "Chicken Garlic Masala",
+        "description": "Chicken curry slow-cooked with plenty of spices",
+        "price": 1210,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-203212-1.png",
+        "primaryCategory": "masala-curry",
+        "categories": [
+          "masala-curry"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-93",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1117",
+      "wpStatus": "publish",
+      "wpSlug": "chana-masala",
+      "dto": {
+        "name": "Chana Masala",
+        "description": "Spicy chickpea curry",
+        "price": 1210,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-203353-1.png",
+        "primaryCategory": "masala-curry",
+        "categories": [
+          "masala-curry"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-94",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": true,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1119",
+      "wpStatus": "publish",
+      "wpSlug": "aloo-bhindi-masala",
+      "dto": {
+        "name": "Aloo Bhindi Masala",
+        "description": "Potato and okra curry",
+        "price": 1210,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-203516-1.png",
+        "primaryCategory": "masala-curry",
+        "categories": [
+          "masala-curry"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-95",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1121",
+      "wpStatus": "publish",
+      "wpSlug": "horenso-itame",
+      "dto": {
+        "name": "Horenso Itame",
+        "description": "Stir-fried leafy greens",
+        "price": 605,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-203853-1.png",
+        "primaryCategory": "snacks",
+        "categories": [
+          "snacks"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-96",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1123",
+      "wpStatus": "publish",
+      "wpSlug": "chicken-wings-4p",
+      "dto": {
+        "name": "Chicken Wings (4P)",
+        "description": "Pepper-flavored grilled chicken wings",
+        "price": 605,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-204401-1.png",
+        "primaryCategory": "snacks",
+        "categories": [
+          "snacks"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-97",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1125",
+      "wpStatus": "publish",
+      "wpSlug": "momo",
+      "dto": {
+        "name": "Momo",
+        "description": "Piping hot Nepali steamed dumplings",
+        "price": 715,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-204515-1.png",
+        "primaryCategory": "snacks",
+        "categories": [
+          "snacks"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-98",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1127",
+      "wpStatus": "publish",
+      "wpSlug": "deep-fried-spring-roll-4p",
+      "dto": {
+        "name": "Deep Fried Spring Roll (4P)",
+        "description": "Fried spring rolls with glass noodle, shrimp, and meat",
+        "price": 605,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-204610-1.png",
+        "primaryCategory": "snacks",
+        "categories": [
+          "snacks"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-99",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1129",
+      "wpStatus": "publish",
+      "wpSlug": "kabab-roll-2p",
+      "dto": {
+        "name": "Kabab Roll (2P)",
+        "description": "Grilled chicken and vegetable roll",
+        "price": 605,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-204659-1.png",
+        "primaryCategory": "snacks",
+        "categories": [
+          "snacks"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-100",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1131",
+      "wpStatus": "publish",
+      "wpSlug": "edamame",
+      "dto": {
+        "name": "Edamame",
+        "description": "Salt-boiled edamame with a nice snap",
+        "price": 275,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-08-204748-1.png",
+        "primaryCategory": "snacks",
+        "categories": [
+          "snacks"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-101",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1133",
+      "wpStatus": "publish",
+      "wpSlug": "fried-potato",
+      "dto": {
+        "name": "Fried Potato",
+        "description": "Fluffy potato with crispy skin",
+        "price": 330,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-080116-1.png",
+        "primaryCategory": "snacks",
+        "categories": [
+          "snacks"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-102",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1135",
+      "wpStatus": "publish",
+      "wpSlug": "cheese-omelet",
+      "dto": {
+        "name": "Cheese Omelet",
+        "description": "Fluffy, gooey cheese omelet",
+        "price": 605,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-080154-1.png",
+        "primaryCategory": "snacks",
+        "categories": [
+          "snacks"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-103",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1137",
+      "wpStatus": "publish",
+      "wpSlug": "ebisen",
+      "dto": {
+        "name": "Ebisen",
+        "description": "Lightly fried thin shrimp crackers",
+        "price": 330,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-080239-1.png",
+        "primaryCategory": "snacks",
+        "categories": [
+          "snacks"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-104",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1139",
+      "wpStatus": "publish",
+      "wpSlug": "deep-fried-nankotsu",
+      "dto": {
+        "name": "Deep Fried Nankotsu",
+        "description": "Crunchy fried chicken cartilage",
+        "price": 605,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-080325-1.png",
+        "primaryCategory": "snacks",
+        "categories": [
+          "snacks"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-105",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1141",
+      "wpStatus": "publish",
+      "wpSlug": "chicken-curry",
+      "dto": {
+        "name": "Chicken Curry",
+        "description": "Basic curry with tender meat",
+        "price": 1078,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-080813-1.png",
+        "primaryCategory": "set-choice-curry",
+        "categories": [
+          "set-choice-curry"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-106",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1143",
+      "wpStatus": "publish",
+      "wpSlug": "vegetable-curry",
+      "dto": {
+        "name": "Vegetable Curry",
+        "description": "Spicy curry with assorted vegetables",
+        "price": 1078,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-080857-1.png",
+        "primaryCategory": "set-choice-curry",
+        "categories": [
+          "set-choice-curry"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-107",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1145",
+      "wpStatus": "publish",
+      "wpSlug": "sag-keema",
+      "dto": {
+        "name": "Sag Keema",
+        "description": "Spinach-based keema curry",
+        "price": 1078,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-080939-1.png",
+        "primaryCategory": "set-choice-curry",
+        "categories": [
+          "set-choice-curry"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-108",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1147",
+      "wpStatus": "publish",
+      "wpSlug": "butter-chicken",
+      "dto": {
+        "name": "Butter Chicken",
+        "description": "Mild tomato-butter chicken curry",
+        "price": 1100,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-081019-1.png",
+        "primaryCategory": "set-choice-curry",
+        "categories": [
+          "set-choice-curry"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-109",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1149",
+      "wpStatus": "publish",
+      "wpSlug": "prawn-curry",
+      "dto": {
+        "name": "Prawn Curry",
+        "description": "Curry loaded with plump prawns",
+        "price": 1100,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-081057-1.png",
+        "primaryCategory": "set-choice-curry",
+        "categories": [
+          "set-choice-curry"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-110",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1151",
+      "wpStatus": "publish",
+      "wpSlug": "mutton-curry",
+      "dto": {
+        "name": "Mutton Curry",
+        "description": "Basic curry with tender mutton",
+        "price": 1100,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-081134-1.png",
+        "primaryCategory": "set-choice-curry",
+        "categories": [
+          "set-choice-curry"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-111",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1153",
+      "wpStatus": "publish",
+      "wpSlug": "dal-curry",
+      "dto": {
+        "name": "Dal Curry",
+        "description": "Mild curry loaded with lentils",
+        "price": 1045,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-081225-1.png",
+        "primaryCategory": "set-choice-curry",
+        "categories": [
+          "set-choice-curry"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-112",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1155",
+      "wpStatus": "publish",
+      "wpSlug": "sag-chicken",
+      "dto": {
+        "name": "Sag Chicken",
+        "description": "Spinach-based chicken curry",
+        "price": 1045,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-081301-1.png",
+        "primaryCategory": "set-choice-curry",
+        "categories": [
+          "set-choice-curry"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-113",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1157",
+      "wpStatus": "publish",
+      "wpSlug": "seafood-curry",
+      "dto": {
+        "name": "Seafood Curry",
+        "description": "Curry loaded with seafood",
+        "price": 1100,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-081341-1.png",
+        "primaryCategory": "set-choice-curry",
+        "categories": [
+          "set-choice-curry"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-114",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1158",
+      "wpStatus": "publish",
+      "wpSlug": "pork-curry",
+      "dto": {
+        "name": "Pork Curry",
+        "description": "Basic curry with tender pork",
+        "price": 1078,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/pork-curry.jpg",
+        "primaryCategory": "set-choice-curry",
+        "categories": [
+          "set-choice-curry"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-115",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1160",
+      "wpStatus": "publish",
+      "wpSlug": "sag-paneer-curry",
+      "dto": {
+        "name": "Sag Paneer Curry",
+        "description": "Spinach-based homemade Indian cheese curry",
+        "price": 1100,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-081743-1.png",
+        "primaryCategory": "set-choice-curry",
+        "categories": [
+          "set-choice-curry"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-116",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1162",
+      "wpStatus": "publish",
+      "wpSlug": "nasu-keema",
+      "dto": {
+        "name": "Nasu Keema",
+        "description": "Eggplant and ground chicken curry",
+        "price": 1078,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-081829-1.png",
+        "primaryCategory": "set-choice-curry",
+        "categories": [
+          "set-choice-curry"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-117",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1164",
+      "wpStatus": "publish",
+      "wpSlug": "lassi-2",
+      "dto": {
+        "name": "Lassi",
+        "description": "Lassi",
+        "price": 250,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-170223-1.png",
+        "primaryCategory": "special-drinks",
+        "categories": [
+          "special-drinks"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-118",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": true
+      }
+    },
+    {
+      "wpId": "1171",
+      "wpStatus": "publish",
+      "wpSlug": "mango-lassi-2",
+      "dto": {
+        "name": "Mango Lassi",
+        "description": "Mango Lassi",
+        "price": 250,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-170419-1.png",
+        "primaryCategory": "special-drinks",
+        "categories": [
+          "special-drinks"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-119",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": true
+      }
+    },
+    {
+      "wpId": "1172",
+      "wpStatus": "publish",
+      "wpSlug": "chocolate-lassi-2",
+      "dto": {
+        "name": "Chocolate Lassi",
+        "description": "Chocolate Lassi",
+        "price": 250,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-194225-1.png",
+        "primaryCategory": "special-drinks",
+        "categories": [
+          "special-drinks"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-120",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": true
+      }
+    },
+    {
+      "wpId": "1173",
+      "wpStatus": "publish",
+      "wpSlug": "strawberry-lassi-2",
+      "dto": {
+        "name": "Strawberry Lassi",
+        "description": "Strawberry Lassi",
+        "price": 250,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-171038-1.png",
+        "primaryCategory": "special-drinks",
+        "categories": [
+          "special-drinks"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-121",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": true
+      }
+    },
+    {
+      "wpId": "1174",
+      "wpStatus": "publish",
+      "wpSlug": "blueberry-lassi-2",
+      "dto": {
+        "name": "Blueberry Lassi",
+        "description": "Blueberry Lassi",
+        "price": 250,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-171314-1.png",
+        "primaryCategory": "special-drinks",
+        "categories": [
+          "special-drinks"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-122",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": true
+      }
+    },
+    {
+      "wpId": "1175",
+      "wpStatus": "publish",
+      "wpSlug": "cassis-orange-lassi-2",
+      "dto": {
+        "name": "Cassis Orange Lassi",
+        "description": "Cassis Orange Lassi",
+        "price": 250,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-174940-1.png",
+        "primaryCategory": "special-drinks",
+        "categories": [
+          "special-drinks"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-123",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": true
+      }
+    },
+    {
+      "wpId": "1176",
+      "wpStatus": "publish",
+      "wpSlug": "coconut-lassi-2",
+      "dto": {
+        "name": "Coconut Lassi",
+        "description": "Coconut Lassi",
+        "price": 250,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-174754-1.png",
+        "primaryCategory": "special-drinks",
+        "categories": [
+          "special-drinks"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-124",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": true
+      }
+    },
+    {
+      "wpId": "1177",
+      "wpStatus": "publish",
+      "wpSlug": "cocoa-lassi-2",
+      "dto": {
+        "name": "Cocoa Lassi",
+        "description": "Cocoa Lassi",
+        "price": 250,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-172052-1.png",
+        "primaryCategory": "special-drinks",
+        "categories": [
+          "special-drinks"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-125",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": true
+      }
+    },
+    {
+      "wpId": "1178",
+      "wpStatus": "publish",
+      "wpSlug": "apple-lassi-2",
+      "dto": {
+        "name": "Apple Lassi",
+        "description": "Apple Lassi",
+        "price": 250,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-194526-1.png",
+        "primaryCategory": "special-drinks",
+        "categories": [
+          "special-drinks"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-126",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": true
+      }
+    },
+    {
+      "wpId": "1179",
+      "wpStatus": "publish",
+      "wpSlug": "orange-lassi-2",
+      "dto": {
+        "name": "Orange Lassi",
+        "description": "Orange Lassi",
+        "price": 250,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-194346-1.png",
+        "primaryCategory": "special-drinks",
+        "categories": [
+          "special-drinks"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-127",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": true
+      }
+    },
+    {
+      "wpId": "1181",
+      "wpStatus": "publish",
+      "wpSlug": "otsukaresama-set",
+      "dto": {
+        "name": "Otsukaresama Set",
+        "description": "Tandoori Chicken 1P, Garlic Tikka 2P, Sheek Kabab 2P, Tandoori Tebasaki 3P, Malai Tikka 2P, Samosa 1P, Potato Fry",
+        "price": 2138,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-083252-1.png",
+        "primaryCategory": "combo-sets",
+        "categories": [
+          "combo-sets"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-128",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1183",
+      "wpStatus": "publish",
+      "wpSlug": "child-set",
+      "dto": {
+        "name": "Child Set",
+        "description": "For children under 10. Salad, Mild Curry, Nan, Mini Rice, Orange or Apple Juice, Dessert",
+        "price": 715,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-083436-1.png",
+        "primaryCategory": "combo-sets",
+        "categories": [
+          "combo-sets"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-129",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1185",
+      "wpStatus": "publish",
+      "wpSlug": "korean-crispy-chicken",
+      "dto": {
+        "name": "Korean Crispy Chicken",
+        "description": "Crispy Korean-style fried chicken",
+        "price": 660,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-083847-1.png",
+        "primaryCategory": "new-menu",
+        "categories": [
+          "new-menu"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": {
+        "name": "Size",
+        "options": [
+          {
+            "wpId": "1302",
+            "label": "6P",
+            "price": 660,
+            "priceDelta": 0
+          },
+          {
+            "wpId": "1303",
+            "label": "10P",
+            "price": 880,
+            "priceDelta": 220
+          }
+        ]
+      },
+      "not_supported": {
+        "sku": "nd-menu-130",
+        "wpProductType": "variable",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": true,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1189",
+      "wpStatus": "publish",
+      "wpSlug": "chicken-tikka",
+      "dto": {
+        "name": "Chicken Tikka",
+        "description": "Boneless spicy grilled chicken",
+        "price": 440,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-084213-1.png",
+        "primaryCategory": "tandoori",
+        "categories": [
+          "tandoori"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": {
+        "name": "Size",
+        "options": [
+          {
+            "wpId": "1300",
+            "label": "2P",
+            "price": 440,
+            "priceDelta": 0
+          },
+          {
+            "wpId": "1301",
+            "label": "4P",
+            "price": 825,
+            "priceDelta": 385
+          }
+        ]
+      },
+      "not_supported": {
+        "sku": "nd-menu-133",
+        "wpProductType": "variable",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": true,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1193",
+      "wpStatus": "publish",
+      "wpSlug": "sheek-kabab",
+      "dto": {
+        "name": "Sheek Kabab",
+        "description": "Pepper-flavored grilled chicken wings",
+        "price": 440,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-084351-1.png",
+        "primaryCategory": "tandoori",
+        "categories": [
+          "tandoori"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": {
+        "name": "Size",
+        "options": [
+          {
+            "wpId": "1298",
+            "label": "2P",
+            "price": 440,
+            "priceDelta": 0
+          },
+          {
+            "wpId": "1299",
+            "label": "4P",
+            "price": 825,
+            "priceDelta": 385
+          }
+        ]
+      },
+      "not_supported": {
+        "sku": "nd-menu-136",
+        "wpProductType": "variable",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": true,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1197",
+      "wpStatus": "publish",
+      "wpSlug": "garlic-tikka",
+      "dto": {
+        "name": "Garlic Tikka",
+        "description": "Garlic-flavored boneless grilled chicken",
+        "price": 440,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-084507-1.png",
+        "primaryCategory": "tandoori",
+        "categories": [
+          "tandoori"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": {
+        "name": "Size",
+        "options": [
+          {
+            "wpId": "1296",
+            "label": "2P",
+            "price": 440,
+            "priceDelta": 0
+          },
+          {
+            "wpId": "1297",
+            "label": "4P",
+            "price": 825,
+            "priceDelta": 385
+          }
+        ]
+      },
+      "not_supported": {
+        "sku": "nd-menu-139",
+        "wpProductType": "variable",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": true,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1201",
+      "wpStatus": "publish",
+      "wpSlug": "samosa",
+      "dto": {
+        "name": "Samosa",
+        "description": "Indian-style spicy croquette",
+        "price": 330,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-084626-1.png",
+        "primaryCategory": "snacks",
+        "categories": [
+          "snacks"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": {
+        "name": "Size",
+        "options": [
+          {
+            "wpId": "1294",
+            "label": "1P",
+            "price": 330,
+            "priceDelta": 0
+          },
+          {
+            "wpId": "1295",
+            "label": "2P",
+            "price": 605,
+            "priceDelta": 275
+          }
+        ]
+      },
+      "not_supported": {
+        "sku": "nd-menu-142",
+        "wpProductType": "variable",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": true,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1204",
+      "wpStatus": "publish",
+      "wpSlug": "foreign-beer",
+      "dto": {
+        "name": "Foreign Beer",
+        "description": "Choose your favorite imported beer",
+        "price": 660,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-10-162124-1.png",
+        "primaryCategory": "beer",
+        "categories": [
+          "beer",
+          "drinks"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": {
+        "name": "Flavor",
+        "options": [
+          {
+            "wpId": "1290",
+            "label": "Nepal Beer",
+            "price": 660,
+            "priceDelta": 0
+          },
+          {
+            "wpId": "1291",
+            "label": "Indian Beer",
+            "price": 660,
+            "priceDelta": 0
+          },
+          {
+            "wpId": "1292",
+            "label": "Heineken",
+            "price": 660,
+            "priceDelta": 0
+          },
+          {
+            "wpId": "1293",
+            "label": "Corona",
+            "price": 660,
+            "priceDelta": 0
+          }
+        ]
+      },
+      "not_supported": {
+        "sku": "nd-menu-145",
+        "wpProductType": "variable",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": true,
+        "hasVariants": true,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1219",
+      "wpStatus": "publish",
+      "wpSlug": "sour",
+      "dto": {
+        "name": "Sour",
+        "description": "Choice of Lemon, Lime, Kyoho Grape, Peach, Ume, Calpico",
+        "price": 440,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-10-190715-1.png",
+        "primaryCategory": "sour",
+        "categories": [
+          "drinks",
+          "sour"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": {
+        "name": "Flavor",
+        "options": [
+          {
+            "wpId": "1284",
+            "label": "Lemon",
+            "price": 440,
+            "priceDelta": 0
+          },
+          {
+            "wpId": "1285",
+            "label": "Lime",
+            "price": 440,
+            "priceDelta": 0
+          },
+          {
+            "wpId": "1286",
+            "label": "Kyoho Grape",
+            "price": 440,
+            "priceDelta": 0
+          },
+          {
+            "wpId": "1287",
+            "label": "Peach",
+            "price": 440,
+            "priceDelta": 0
+          },
+          {
+            "wpId": "1288",
+            "label": "Ume",
+            "price": 440,
+            "priceDelta": 0
+          },
+          {
+            "wpId": "1289",
+            "label": "Calpico",
+            "price": 440,
+            "priceDelta": 0
+          }
+        ]
+      },
+      "not_supported": {
+        "sku": "nd-menu-150",
+        "wpProductType": "variable",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": true,
+        "hasVariants": true,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1221",
+      "wpStatus": "publish",
+      "wpSlug": "shochu-glass",
+      "dto": {
+        "name": "Shochu - Glass",
+        "description": "Choice of Obisugi, Kobiki Blue, Hyuga Kobiki, Kirishima (Black/White)",
+        "price": 495,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-10-185316-1.png",
+        "primaryCategory": "shochu",
+        "categories": [
+          "drinks",
+          "shochu"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": {
+        "name": "Flavor",
+        "options": [
+          {
+            "wpId": "1279",
+            "label": "Obisugi",
+            "price": 495,
+            "priceDelta": 0
+          },
+          {
+            "wpId": "1280",
+            "label": "Kobiki Blue",
+            "price": 495,
+            "priceDelta": 0
+          },
+          {
+            "wpId": "1281",
+            "label": "Hyuga Kobiki",
+            "price": 495,
+            "priceDelta": 0
+          },
+          {
+            "wpId": "1282",
+            "label": "Kirishima Black",
+            "price": 495,
+            "priceDelta": 0
+          },
+          {
+            "wpId": "1283",
+            "label": "Kirishima White",
+            "price": 495,
+            "priceDelta": 0
+          }
+        ]
+      },
+      "not_supported": {
+        "sku": "nd-menu-151",
+        "wpProductType": "variable",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": true,
+        "hasVariants": true,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1232",
+      "wpStatus": "publish",
+      "wpSlug": "isiyaki-set",
+      "dto": {
+        "name": "Isiyaki Set",
+        "description": "Spicy grilled chicken salad with fresh vegetables; includes Rice, Salad, Softdrink; egg & cheese topping available",
+        "price": 1320,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-085258-1.png",
+        "primaryCategory": "set",
+        "categories": [
+          "set"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": {
+        "name": "Curry Choice",
+        "options": [
+          {
+            "wpId": "1276",
+            "label": "Keema Curry",
+            "price": 1320,
+            "priceDelta": 0
+          },
+          {
+            "wpId": "1277",
+            "label": "Sag Chicken Curry",
+            "price": 1320,
+            "priceDelta": 0
+          },
+          {
+            "wpId": "1278",
+            "label": "Prawn Curry",
+            "price": 1320,
+            "priceDelta": 0
+          }
+        ]
+      },
+      "not_supported": {
+        "sku": "nd-menu-157",
+        "wpProductType": "variable",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": true,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1237",
+      "wpStatus": "publish",
+      "wpSlug": "nepali-thali-set",
+      "dto": {
+        "name": "Nepali Thali Set",
+        "description": "Rice, Dal, Sag Bhuteko, Achar, Papad, Yogurt, Salad, Soup, Softdrink",
+        "price": 1375,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-085445-1.png",
+        "primaryCategory": "nepali-menu",
+        "categories": [
+          "nepali-menu"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": {
+        "name": "Curry Choice",
+        "options": [
+          {
+            "wpId": "1274",
+            "label": "Chicken Curry",
+            "price": 1375,
+            "priceDelta": 0
+          },
+          {
+            "wpId": "1275",
+            "label": "Mutton Curry",
+            "price": 1375,
+            "priceDelta": 0
+          }
+        ]
+      },
+      "not_supported": {
+        "sku": "nd-menu-161",
+        "wpProductType": "variable",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": true,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1241",
+      "wpStatus": "publish",
+      "wpSlug": "student-set",
+      "dto": {
+        "name": "Student Set",
+        "description": "For junior high to high school students. One Choice Curry (Dal/Chicken/Butter Chicken/Vegetable/Keema), Nan or Rice, Salad, Softdrink",
+        "price": 930,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-085613-1.png",
+        "primaryCategory": "combo-sets",
+        "categories": [
+          "combo-sets"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": {
+        "name": "Nan Choice",
+        "options": [
+          {
+            "wpId": "1272",
+            "label": "Plain Nan",
+            "price": 930,
+            "priceDelta": 0
+          },
+          {
+            "wpId": "1273",
+            "label": "Cheese Nan",
+            "price": 1080,
+            "priceDelta": 150
+          }
+        ]
+      },
+      "not_supported": {
+        "sku": "nd-menu-164",
+        "wpProductType": "variable",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": true,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1245",
+      "wpStatus": "publish",
+      "wpSlug": "mutton-biryani",
+      "dto": {
+        "name": "Mutton Biryani",
+        "description": "Salad, Soup, Raita, Softdrink",
+        "price": 1430,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-090003-1.png",
+        "primaryCategory": "biryani",
+        "categories": [
+          "biryani"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-167",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1247",
+      "wpStatus": "publish",
+      "wpSlug": "malai-tikka",
+      "dto": {
+        "name": "Malai Tikka",
+        "description": "Cream-based mild grilled chicken",
+        "price": 440,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-090140-1.png",
+        "primaryCategory": "tandoori",
+        "categories": [
+          "tandoori"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": {
+        "name": "Size",
+        "options": [
+          {
+            "wpId": "1270",
+            "label": "2P",
+            "price": 440,
+            "priceDelta": 0
+          },
+          {
+            "wpId": "1271",
+            "label": "4P",
+            "price": 825,
+            "priceDelta": 385
+          }
+        ]
+      },
+      "not_supported": {
+        "sku": "nd-menu-168",
+        "wpProductType": "variable",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": true,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1251",
+      "wpStatus": "publish",
+      "wpSlug": "garlic-nan",
+      "dto": {
+        "name": "Garlic Nan",
+        "description": "Nan loaded with garlic",
+        "price": 495,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-090336-1.png",
+        "primaryCategory": "nan",
+        "categories": [
+          "nan"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-171",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1253",
+      "wpStatus": "publish",
+      "wpSlug": "spinach-nan",
+      "dto": {
+        "name": "Spinach Nan",
+        "description": "Nan loaded with spinach",
+        "price": 495,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/029e5a46-c1ac-4195-abd8-e8c077c8f224-1.png",
+        "primaryCategory": "nan",
+        "categories": [
+          "nan"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-172",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1255",
+      "wpStatus": "publish",
+      "wpSlug": "rum-khukri-nepal-rock",
+      "dto": {
+        "name": "Rum Khukri (Nepal) - Rock",
+        "description": "Rum Khukri (Nepal) - Rock",
+        "price": 550,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-10-161758-1.png",
+        "primaryCategory": "others",
+        "categories": [
+          "drinks",
+          "others"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-173",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": true,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "1257",
+      "wpStatus": "publish",
+      "wpSlug": "rum-cola-nepal",
+      "dto": {
+        "name": "Rum Cola (Nepal)",
+        "description": "Rum Cola (Nepal)",
+        "price": 550,
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/Screenshot-2026-09-09-165255-1.png",
+        "primaryCategory": "others",
+        "categories": [
+          "drinks",
+          "others"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": "nd-menu-174",
+        "wpProductType": "simple",
+        "totalSales": 0,
+        "wcAverageRating": "0",
+        "wcReviewCount": 0,
+        "taxStatus": "taxable",
+        "manageStock": "no"
+      },
+      "flags": {
+        "multiCategory": true,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    }
+  ],
+  "banners": [
+    {
+      "wpId": "416",
+      "title": "Namaste Dining",
+      "dto": {
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/namastebanner.jpeg",
+        "badge": "🍽️ With the flames of the tandoor",
+        "titleLine1": "Nepali & Indian Cuisine",
+        "titleLine2": "Made Fresh, Served With Spice",
+        "description": "From tandoori grills and curry sets to bento boxes and biryani — order online for delivery or dine in at Namaste Dining Otsuka.",
+        "buttonText": "Order Online",
+        "buttonUrl": "/shop/",
+        "isActive": true
+      },
+      "flags": {
+        "looksLikeTestData": false
+      }
+    },
+    {
+      "wpId": "1322",
+      "title": "Namaste",
+      "dto": {
+        "image": "https://namastedining.logicbitsolution.com/wp-content/uploads/2026/09/namastenew.jpeg",
+        "badge": "🍽️ With the flames of the tandoor",
+        "titleLine1": "This is only For testing page",
+        "titleLine2": "do not order",
+        "description": "Enjoy authentic Indian cuisine, whether delivered or dine-in.",
+        "buttonText": "Order Online",
+        "buttonUrl": "#",
+        "isActive": true
+      },
+      "flags": {
+        "looksLikeTestData": true
+      }
+    }
+  ]
+}
