@@ -277,10 +277,11 @@ export async function getRestaurantStorefrontPopup(restaurantId: string): Promis
 
 const FETCH_SIZE = 50;
 const MAX_FETCH_PAGES = 10;
+const ALL_KITCHENS_KM = 20100; // every kitchen on the platform, not only those near the visitor
 
 export async function getAllNearby(lat: number, lng: number) {
-  const first = await getNearbyRestaurants({ lat, lng, radiusKm: 50, limit: FETCH_SIZE });
+  const first = await getNearbyRestaurants({ lat, lng, radiusKm: ALL_KITCHENS_KM, limit: FETCH_SIZE });
   const pages = Math.min(Math.ceil(first.total / FETCH_SIZE), MAX_FETCH_PAGES);
-  const rest = await Promise.all(Array.from({ length: pages - 1 }, (_, i) => getNearbyRestaurants({ lat, lng, radiusKm: 50, limit: FETCH_SIZE, page: i + 2 })));
+  const rest = await Promise.all(Array.from({ length: pages - 1 }, (_, i) => getNearbyRestaurants({ lat, lng, radiusKm: ALL_KITCHENS_KM, limit: FETCH_SIZE, page: i + 2 })));
   return { rows: [first, ...rest].flatMap((p) => p.data), total: first.total };
 }

@@ -1,6 +1,9 @@
 import { Type } from 'class-transformer';
 import { IsNumber, IsOptional, IsString, IsBoolean, Min, Max } from 'class-validator';
 
+/** Half of Earth's circumference, so a search from anywhere can reach every restaurant. */
+export const MAX_RADIUS_KM = 20100;
+
 export class NearbyQueryDto {
   @Type(() => Number)
   @IsNumber()
@@ -17,7 +20,7 @@ export class NearbyQueryDto {
   @Type(() => Number)
   @IsNumber()
   @Min(0.5)
-  @Max(50)
+  @Max(MAX_RADIUS_KM)
   @IsOptional()
   radiusKm?: number = 5;
 
