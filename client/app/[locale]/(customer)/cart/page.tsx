@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { CouponInput } from "@/components/cart/coupon-input";
 import { ClosedNotice } from "@/components/restaurant/closed-notice";
-import { AllergenAlert, Button, Card, Icon, IconButton, Progress, RefundNote, Squiggle, Stepper } from "@/components/ui/primitives";
+import { AllergenAlert, Button, Card, Icon, IconButton, Progress, RefundNote, Stepper } from "@/components/ui/primitives";
 import { useCartStore, type CartItem } from "@/store/cart-store";
 import { useIsMounted } from "@/hooks/use-is-mounted";
 import { getRestaurantByIdOrSlug } from "@/lib/api/discovery";
@@ -95,7 +95,7 @@ function ItemRow({ i }: { i: CartItem }) {
         // eslint-disable-next-line @next/next/no-img-element
         <img src={getFullImageUrl(i.image)} alt="" className="h-[72px] w-[72px] rounded-2xl object-cover" />
       ) : (
-        <span className="grid h-[72px] w-[72px] place-items-center rounded-2xl bg-saffron/30 font-display text-2xl font-extrabold text-ink/40">{i.name.charAt(0)}</span>
+        <span className="grid h-[72px] w-[72px] place-items-center rounded-2xl bg-cream-deep font-display text-2xl font-extrabold text-ink/40">{i.name.charAt(0)}</span>
       )}
       <div className="min-w-0">
         <p className="text-lg font-bold leading-snug">{i.name}</p>
@@ -130,19 +130,18 @@ function EmptyCart() {
     <div className="mx-auto max-w-xl px-5 py-16 text-center">
       <svg viewBox="0 0 240 200" className="mx-auto w-56" aria-hidden>
         <ellipse cx="120" cy="170" rx="90" ry="12" fill="currentColor" opacity=".08" />
-        <circle cx="120" cy="105" r="78" fill="var(--brand-saffron)" />
+        <circle cx="120" cy="105" r="78" fill="var(--brand-cream-deep)" />
         <circle cx="120" cy="105" r="56" fill="var(--color-paper)" />
         <circle cx="102" cy="96" r="6" fill="currentColor" />
         <circle cx="138" cy="96" r="6" fill="currentColor" />
         <path d="M100 128c12-10 28-10 40 0" stroke="currentColor" strokeWidth="6" fill="none" strokeLinecap="round" />
         <path d="M30 40v50M22 40v22a8 8 0 0016 0V40" stroke="var(--brand-chili)" strokeWidth="6" fill="none" strokeLinecap="round" />
-        <path d="M210 40c-10 10-10 30 0 40v30" stroke="var(--brand-herb)" strokeWidth="6" fill="none" strokeLinecap="round" />
+        <path d="M210 40c-10 10-10 30 0 40v30" stroke="var(--brand-espresso)" strokeWidth="6" fill="none" strokeLinecap="round" />
       </svg>
       <h1 className="mt-6 font-display text-[40px] font-extrabold leading-tight">
         {t("emptyTitleA")}{" "}
         <span className="relative inline-block">
           {t("emptyTitleB")}
-          <Squiggle className="absolute -bottom-1 left-0 h-3 w-full text-chili" />
         </span>
       </h1>
       <p className="mt-3 text-lg text-ink/75">{t("emptyBody")}</p>

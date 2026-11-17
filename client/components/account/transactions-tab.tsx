@@ -26,9 +26,9 @@ type FilterKey = "all" | "paid" | "refunded";
 
 function getState(row: TransactionRow) {
   if (row.paymentStatus === "REFUNDED" || row.refund?.status === "PROCESSED") return { key: "refunded", tone: "ink" as const };
-  if (row.paymentStatus === "PAID") return { key: "paid", tone: "herb" as const };
+  if (row.paymentStatus === "PAID") return { key: "paid", tone: "ink" as const };
   if (row.status === "CANCELLED") return { key: "cancelled", tone: "soft" as const };
-  return { key: "unpaid", tone: "saffron" as const };
+  return { key: "unpaid", tone: "chili" as const };
 }
 
 const STATE_LABEL = { refunded: "stateRefunded", paid: "statePaid", cancelled: "stateCancelled", unpaid: "stateUnpaid" } as const;
@@ -58,11 +58,11 @@ export function TransactionsTab() {
   return (
     <div className="max-w-3xl space-y-4 pb-5">
       <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-[24px] bg-herb p-4 text-parchment shadow-soft md:p-5">
+        <div className="rounded-[24px] bg-ink p-4 text-cream shadow-soft md:p-5">
           <p className="font-bold opacity-90">{t("totalPaid")}</p>
           <p className="mt-1 font-display text-3xl font-extrabold">{formatMoney(totalPaid, currency)}</p>
         </div>
-        <div className="rounded-[24px] bg-saffron p-4 text-espresso shadow-soft md:p-5">
+        <div className="rounded-[24px] bg-cream-deep p-4 text-ink shadow-soft md:p-5">
           <p className="font-bold">{t("totalRefunded")}</p>
           <p className="mt-1 font-display text-3xl font-extrabold">{formatMoney(totalRefunded, currency)}</p>
         </div>

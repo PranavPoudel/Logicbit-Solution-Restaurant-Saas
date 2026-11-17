@@ -8,13 +8,12 @@ import { CitiesNearMe } from "@/components/home/cities-near-me";
 import { HeroSection } from "@/components/home/hero-section";
 import { CuisineSelector } from "@/components/home/cuisine-selector";
 import { RestaurantsNearYou } from "@/components/home/restaurants-near-you";
-import { TrendingDishes, type TrendingDish } from "@/components/home/trending-dishes";
 import { BannerCarousel } from "@/components/home/banner-carousel";
 import { HowItWorks } from "@/components/home/how-it-works";
 import { WhyLogicBit } from "@/components/home/why-logicbit";
 import { OwnerBanner } from "@/components/home/owner-banner";
 import { PopupAd } from "@/components/home/popup-ad";
-import { getAllNearby, getTrendingItems } from "@/lib/api/discovery";
+import { getAllNearby } from "@/lib/api/discovery";
 import { listCuisines } from "@/lib/api/cuisines";
 import { listCities } from "@/lib/api/cities";
 import { cityLabel, countCities, pickHomeCity } from "@/lib/utils/cities";
@@ -45,17 +44,6 @@ export default function HomePage() {
   const cuisines = cuisinesQuery.data ?? [];
   const cities = useMemo(() => citiesQuery.data ?? [], [citiesQuery.data]);
 
-  const trendingQuery = useQuery<(Omit<TrendingDish, "restaurant" | "slug" | "currencyCode"> & { restaurant: { name: string; slug: string; currencyCode?: string } })[]>({
-    queryKey: ["trending-items"],
-    queryFn: getTrendingItems,
-    enabled: showGuestSections && SECTIONS.includes("trending"),
-  });
-
-  const trending = useMemo<TrendingDish[]>(
-    () => (trendingQuery.data ?? []).map((d) => ({ ...d, restaurant: d.restaurant.name, slug: d.restaurant.slug, currencyCode: d.restaurant.currencyCode })),
-    [trendingQuery.data],
-  );
-
   const cityCounts = useMemo(() => countCities(restaurants), [restaurants]);
   const homeCity = useMemo(() => pickHomeCity(cities, cityCounts, position), [cities, cityCounts, position]);
 
@@ -69,7 +57,6 @@ export default function HomePage() {
     offers: <BannerCarousel />,
     cuisines: <CuisineSelector cuisines={cuisines} />,
     restaurants: <RestaurantsNearYou restaurants={restaurants} loading={loading} error={restaurantsQuery.isError} onRetry={() => restaurantsQuery.refetch()} />,
-    trending: <TrendingDishes dishes={trending} />,
     howItWorks: <HowItWorks />,
     why: <WhyLogicBit rating={averageRating} />,
     owner: <OwnerBanner />,

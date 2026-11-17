@@ -114,7 +114,7 @@ export function RestaurantHeader({ restaurant }: { restaurant: RestaurantDetail 
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          <span className="flex min-h-11 items-center gap-2 rounded-full bg-saffron px-4 font-bold text-espresso">
+          <span className="flex min-h-11 items-center gap-2 rounded-full bg-cream-deep px-4 font-bold text-ink">
             <Icon name="star" fill className="h-5 w-5" />
             {rating > 0 ? rating.toFixed(1) : t("new")}
           </span>

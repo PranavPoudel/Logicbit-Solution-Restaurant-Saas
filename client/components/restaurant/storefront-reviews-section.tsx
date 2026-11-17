@@ -6,13 +6,13 @@ import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 import { getRestaurantReviews, type Review } from "@/lib/api/reviews";
-import { Button, Icon, Squiggle } from "@/components/ui/primitives";
+import { Button, Icon } from "@/components/ui/primitives";
 import { Pager } from "@/components/ui/pager";
 import { SortMenu } from "@/components/ui/sort-menu";
 
 const PAGE_SIZE = 4;
-const AVATARS = ["bg-chili text-parchment", "bg-saffron text-espresso", "bg-herb text-parchment", "bg-ink text-cream"];
-const TINTS = ["bg-paper", "bg-saffron/15", "bg-herb/10", "bg-paper"];
+const AVATARS = ["bg-ink text-cream"];
+const TINTS = ["bg-paper"];
 const RATE_LINK = "shadow-red inline-flex h-14 items-center justify-center gap-2 rounded-full bg-[var(--accent,var(--brand-chili))] px-7 text-lg font-bold text-[var(--accent-ink,var(--brand-parchment))] transition hover:-translate-y-0.5";
 type Filter = "all" | 5 | 4 | 3;
 type Sort = "newest" | "high" | "low";
@@ -23,7 +23,7 @@ function Stars({ n, size = "h-5 w-5" }: { n: number; size?: string }) {
   const t = useTranslations("review");
   return (
     <span className="inline-flex gap-0.5" role="img" aria-label={t("starsOf", { n: n.toFixed(1) })}>
-      {[1, 2, 3, 4, 5].map((i) => <Icon key={i} name="star" fill className={`${size} ${i <= Math.round(n) ? "text-saffron" : "text-ink/15"}`} />)}
+      {[1, 2, 3, 4, 5].map((i) => <Icon key={i} name="star" fill className={`${size} ${i <= Math.round(n) ? "text-chili" : "text-ink/15"}`} />)}
     </span>
   );
 }
@@ -33,7 +33,7 @@ function Summary({ reviews, rating, total, filter, onBar }: { reviews: Review[];
   const counts = [5, 4, 3, 2, 1].map((s) => reviews.filter((r) => r.rating === s).length);
   return (
     <div className="shadow-soft relative grid gap-6 rounded-[32px] bg-paper p-6 md:grid-cols-[auto_1fr_auto] md:items-center md:gap-10 md:p-8">
-      {rating >= 4.5 && <span className="shadow-hard absolute -top-4 right-6 rotate-6 rounded-xl bg-saffron px-3 py-1 font-display text-base font-extrabold text-espresso md:left-36 md:right-auto">{t("favourite")}</span>}
+      {rating >= 4.5 && <span className="shadow-hard absolute -top-4 right-6 rotate-6 rounded-xl bg-ink px-3 py-1 font-display text-base font-extrabold text-cream md:left-36 md:right-auto">{t("favourite")}</span>}
       <div>
         <p className="font-display text-[88px] font-extrabold leading-[.85] tracking-[-0.05em] md:text-[112px]">{rating.toFixed(1)}</p>
         <Stars n={rating} size="h-6 w-6" />
@@ -47,7 +47,7 @@ function Summary({ reviews, rating, total, filter, onBar }: { reviews: Review[];
               <button type="button" onClick={() => onBar(s >= 4 ? (s as 5 | 4) : 3)} aria-pressed={on} aria-label={t("showStars", { stars: s, count: counts[i] })} className={`group flex min-h-11 w-full items-center gap-3 rounded-full px-2 transition hover:bg-ink/5 ${on ? "bg-[var(--accent,var(--brand-chili))]/10" : ""}`}>
                 <span className="w-8 shrink-0 font-bold">{s}★</span>
                 <span className="h-3.5 flex-1 overflow-hidden rounded-full bg-ink/10">
-                  <span className={`block h-full rounded-full transition-all ${on ? "bg-[var(--accent,var(--brand-chili))]" : "bg-saffron group-hover:bg-[var(--accent,var(--brand-chili))]"}`} style={{ width: `${Math.max(2, (counts[i] / reviews.length) * 100)}%` }} />
+                  <span className={`block h-full rounded-full transition-all ${on ? "bg-[var(--accent,var(--brand-chili))]" : "bg-ink/20 group-hover:bg-[var(--accent,var(--brand-chili))]"}`} style={{ width: `${Math.max(2, (counts[i] / reviews.length) * 100)}%` }} />
                 </span>
                 <span className="w-10 shrink-0 text-right text-ink/80">{counts[i]}</span>
               </button>
@@ -67,9 +67,9 @@ function ReviewCard({ review, index }: { review: Review; index: number }) {
   const name = review.customer?.name || review.customerName || t("anonymous");
   const long = (review.comment ?? "").length > 160;
   return (
-    <article className={`${TINTS[index % 4]} ${index % 3 === 1 ? "md:rotate-[.6deg]" : index % 3 === 2 ? "md:-rotate-[.6deg]" : ""} shadow-soft mb-6 break-inside-avoid rounded-[28px] p-5 md:p-6`}>
+    <article className={`${TINTS[0]} ${index % 3 === 1 ? "md:rotate-[.6deg]" : index % 3 === 2 ? "md:-rotate-[.6deg]" : ""} shadow-soft mb-6 break-inside-avoid rounded-[28px] p-5 md:p-6`}>
       <header className="flex items-start gap-3">
-        <span className={`blob grid h-12 w-12 shrink-0 place-items-center font-display text-xl font-extrabold ${AVATARS[index % 4]}`} aria-hidden>{name.charAt(0).toUpperCase()}</span>
+        <span className={`blob grid h-12 w-12 shrink-0 place-items-center font-display text-xl font-extrabold ${AVATARS[0]}`} aria-hidden>{name.charAt(0).toUpperCase()}</span>
         <div className="min-w-0 flex-1">
           <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <b className="text-lg">{name}</b>
@@ -110,7 +110,6 @@ export function StorefrontReviewsSection({ title, restaurantId, rating, total }:
     <section aria-labelledby="rv" className="mx-auto w-full max-w-[1440px] border-t border-ink/10 px-5 pt-10 md:px-10">
       <h2 id="rv" className="relative inline-block font-display text-[32px] font-extrabold tracking-tight md:text-[40px]">
         {title}
-        <Squiggle className="absolute -bottom-1 left-0 h-3 w-full text-[var(--accent,var(--brand-chili))]" />
       </h2>
 
       {isError ? (
@@ -125,7 +124,7 @@ export function StorefrontReviewsSection({ title, restaurantId, rating, total }:
         </div>
       ) : reviews.length === 0 ? (
         <div role="status" className="mt-8 rounded-[32px] border-2 border-dashed border-ink/20 px-6 py-12 text-center">
-          <Icon name="star" fill className="mx-auto h-12 w-12 text-saffron" />
+          <Icon name="star" fill className="mx-auto h-12 w-12 text-chili" />
           <p className="mt-4 font-display text-[28px] font-extrabold leading-tight">{t("noReviews")}</p>
           <Link href="/account" className={`${RATE_LINK} mt-6`}>{t("rateFromOrders")}</Link>
         </div>

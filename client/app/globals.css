@@ -30,6 +30,7 @@
 
   /* Customer storefront tokens (values live in config/theme.ts) */
   --color-cream: var(--brand-cream);
+  --color-cream-deep: var(--brand-cream-deep);
   --color-ink: var(--brand-warm-ink);
   --color-footer: var(--brand-footer);
   --color-paper: var(--brand-paper);
@@ -178,6 +179,7 @@ body {
 }
 .customer.dark {
   --brand-cream: var(--night-cream);
+  --brand-cream-deep: var(--night-cream-deep);
   --brand-warm-ink: var(--night-warm-ink);
   --brand-footer: var(--night-footer);
   --brand-paper: var(--night-paper);
