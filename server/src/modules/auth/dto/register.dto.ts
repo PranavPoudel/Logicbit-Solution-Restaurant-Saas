@@ -25,6 +25,10 @@ export class RegisterDto {
   @IsNotEmpty()
   restaurantAddress: string;
 
+  @IsString()
+  @IsOptional()
+  city?: string;
+
   @IsBoolean()
   @Equals(true, { message: 'You must accept the terms and conditions' })
   acceptTerms: boolean;

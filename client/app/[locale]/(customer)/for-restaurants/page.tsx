@@ -4,10 +4,12 @@
 import { useRef, useState, type CSSProperties } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { registerOwner } from "@/lib/api/auth";
 import { geocodeAddress } from "@/lib/geocode";
+import { listCities } from "@/lib/api/cities";
+import { isValidPhone, normalizePhone } from "@/lib/utils/phone";
 import { useOwnerAuthStore } from "@/store/owner-auth-store";
 import { theme } from "@/config/theme";
 import { formatMoney } from "@/lib/utils/money";
@@ -153,24 +155,29 @@ function Wizard() {
   const setAuth = useOwnerAuthStore((s) => s.setAuth);
   const top = useRef<HTMLDivElement>(null);
   const [step, setStep] = useState(0);
-  const [k, setK] = useState({ restaurantName: "", phone: "", restaurantAddress: "" });
+  const [k, setK] = useState({ restaurantName: "", phone: "", restaurantAddress: "", city: "" });
+  const cities = useQuery({ queryKey: ["cities"], queryFn: listCities });
   const [o, setO] = useState({ name: "", email: "", password: "" });
   const [terms, setTerms] = useState(false);
   const [err, setErr] = useState<Record<string, string>>({});
 
   const mutation = useMutation({
     mutationFn: async () => {
-      const place = await geocodeAddress(k.restaurantAddress).catch(() => null);
+      const place = await geocodeAddress(`${k.restaurantAddress}, ${k.city}`).catch(() => null);
       if (!place) throw new Error(t("errGeocode"));
-      const response = await registerOwner({ ...o, ...k, latitude: place.lat, longitude: place.lng, acceptTerms: terms });
-      if (!(response.tokens || response.data?.tokens) || !(response.user || response.data?.user)) {
-        throw new Error(response.message ?? t("errFailed"));
-      }
+      const response = await registerOwner({ ...o, ...k, phone: normalizePhone(k.phone).trim(), latitude: place.lat, longitude: place.lng, acceptTerms: terms });
+      if (!(response.user || response.data?.user)) throw new Error(response.message ?? t("errFailed"));
       return response;
     },
     onSuccess: (response) => {
       const tokens = response.tokens || response.data?.tokens;
       const user = response.user || response.data?.user;
+      // The server creates the account without a session. It emails a code first when verification is on; otherwise the owner just logs in.
+      if (!tokens) {
+        const needsVerification = response.needsVerification ?? response.data?.needsVerification;
+        router.push(needsVerification === false ? "/owner/login?registered=1" : `/owner/verify-email?email=${encodeURIComponent(user.email)}`);
+        return;
+      }
       setAuth({ accessToken: tokens.accessToken, refreshToken: tokens.refreshToken, user, restaurants: response.restaurants || response.data?.restaurants || [] });
       router.push("/owner/dashboard");
     },
@@ -187,8 +194,9 @@ function Wizard() {
     const e: Record<string, string> = {};
     if (s === 0) {
       if (k.restaurantName.trim().length < 2) e.restaurantName = t("errKitchen");
-      if (!/^(9[78]\d{8}|0\d{1,2}\d{6,7})$/.test(k.phone.replace(/[\s-]/g, ""))) e.phone = t("errPhone");
+      if (!isValidPhone(k.phone)) e.phone = t("errPhone");
       if (k.restaurantAddress.trim().length < 4) e.restaurantAddress = t("errAddress");
+      if (k.city.trim().length < 2) e.city = t("errCity");
     }
     if (s === 1) {
       if (o.name.trim().length < 2) e.name = t("errName");
@@ -219,10 +227,12 @@ function Wizard() {
           {step === 0 && (
             <div className="grid gap-6 md:grid-cols-2">
               <AuthInput id="restaurantName" label={t("kitchenName")} icon="bag" value={k.restaurantName} onChange={(e) => setK({ ...k, restaurantName: e.target.value })} error={err.restaurantName} placeholder="Sita's Momo Pasal" />
-              <AuthInput id="phone" label={t("kitchenPhone")} icon="phone" inputMode="tel" value={k.phone} onChange={(e) => setK({ ...k, phone: e.target.value })} error={err.phone} autoComplete="tel" placeholder="98XXXXXXXX" />
+              <AuthInput id="phone" label={t("kitchenPhone")} icon="phone" inputMode="tel" value={k.phone} onChange={(e) => setK({ ...k, phone: e.target.value })} error={err.phone} autoComplete="tel" placeholder="090-1234-5678" />
               <div className="md:col-span-2">
-                <AuthInput id="restaurantAddress" label={t("address")} icon="pin" value={k.restaurantAddress} onChange={(e) => setK({ ...k, restaurantAddress: e.target.value })} error={err.restaurantAddress} placeholder="Mangal Bazaar, near Patan Durbar Square" hint={<p className="mt-2 text-ink/75">{t("addressHint")}</p>} />
+                <AuthInput id="restaurantAddress" label={t("address")} icon="pin" value={k.restaurantAddress} onChange={(e) => setK({ ...k, restaurantAddress: e.target.value })} error={err.restaurantAddress} placeholder="1-2-3 Otsukacho, Miyazaki" hint={<p className="mt-2 text-ink/75">{t("addressHint")}</p>} />
               </div>
+              <AuthInput id="city" label={t("kitchenCity")} icon="pin" list="city-options" value={k.city} onChange={(e) => setK({ ...k, city: e.target.value })} error={err.city} autoComplete="address-level2" placeholder="Miyazaki" />
+              <datalist id="city-options">{(cities.data ?? []).map((c) => <option key={c.id} value={c.name} />)}</datalist>
             </div>
           )}
 
@@ -241,7 +251,7 @@ function Wizard() {
               <div className="grid gap-4 md:grid-cols-2">
                 <SummaryCard title={t("stepKitchen")} onEdit={() => goTo(0)}>
                   <p className="font-bold text-ink">{k.restaurantName}</p>
-                  <p>{k.restaurantAddress}</p>
+                  <p>{k.restaurantAddress}, {k.city}</p>
                   <p>{k.phone}</p>
                 </SummaryCard>
                 <SummaryCard title={t("stepOwner")} onEdit={() => goTo(1)}>

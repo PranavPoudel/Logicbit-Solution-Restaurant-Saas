@@ -21,8 +21,8 @@ import { useOwnerAuthStore } from "@/store/owner-auth-store";
 import { theme } from "@/config/theme";
 import { FormField } from "@/components/ui/form-field";
 
-export default function OwnerLoginPage({ searchParams }: { searchParams: Promise<{ verified?: string; reset?: string }> }) {
-  const { verified, reset } = use(searchParams);
+export default function OwnerLoginPage({ searchParams }: { searchParams: Promise<{ verified?: string; reset?: string; registered?: string }> }) {
+  const { verified, reset, registered } = use(searchParams);
   const router = useRouter();
   const { setAuth, setRestaurants } = useOwnerAuthStore();
 
@@ -108,6 +108,7 @@ export default function OwnerLoginPage({ searchParams }: { searchParams: Promise
           onSubmit={handleSubmit(onSubmit)}
           className="space-y-4"
         >
+          {registered && <OwnerAuthNotice>Account created. Log in to get started.</OwnerAuthNotice>}
           {verified && <OwnerAuthNotice>Email confirmed. You can log in now.</OwnerAuthNotice>}
           {reset && <OwnerAuthNotice>Password updated. Log in with your new password.</OwnerAuthNotice>}
 
