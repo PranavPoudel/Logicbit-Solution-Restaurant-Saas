@@ -272,7 +272,7 @@ export default function SettingsPage() {
             />
           )}
           {activeTab === "location" && <LocationTab form={form} set={set} browserLat={lat} browserLng={lng} />}
-          {activeTab === "delivery" && <DeliveryTab form={form} set={set} />}
+          {activeTab === "delivery" && <DeliveryTab form={form} set={set} restaurantId={restaurantId} />}
           {activeTab === "branding" && <BrandingTab form={form} set={set} />}
           {activeTab === "service" && <ServiceTab form={form} set={set} hoursEdited={hoursEdited} setHoursEdited={setHoursEdited} />}
           {activeTab === "payments" && <PaymentsTab form={form} set={set} hasNewSecret={hasNewSecret} setHasNewSecret={setHasNewSecret} hasStripeKey={(restaurantQuery.data as Record<string, unknown> | undefined)?.hasStripeKey === true} restaurantId={restaurantId} />}

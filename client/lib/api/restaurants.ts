@@ -87,6 +87,39 @@ export async function removeMyStripeKey(id: string) {
   return data;
 }
 
+/** The restaurant's own Uber Direct account. The secrets are write-only: the server never sends them back. */
+export interface UberDirectStatus {
+  connected: boolean;
+  clientId: string | null;
+  customerId: string | null;
+  webhookPath: string;
+  webhookUrl: string | null;
+}
+
+export interface UberDirectInput {
+  clientId: string;
+  clientSecret: string;
+  customerId: string;
+  signingKey: string;
+}
+
+export async function getMyUberDirect(id: string) {
+  const { data } = await ownerApiClient.get<UberDirectStatus>(`/restaurants/${id}/uber-direct`);
+  return data;
+}
+
+/** The server checks the login with Uber before it saves anything. */
+export async function saveMyUberDirect(id: string, input: UberDirectInput) {
+  const { data } = await ownerApiClient.put<UberDirectStatus>(`/restaurants/${id}/uber-direct`, input);
+  return data;
+}
+
+/** Refused while an Uber courier is still on a delivery. */
+export async function removeMyUberDirect(id: string) {
+  const { data } = await ownerApiClient.delete<UberDirectStatus>(`/restaurants/${id}/uber-direct`);
+  return data;
+}
+
 export async function updateMyRestaurant(id: string, input: UpdateRestaurantInput) {
   const { data } = await ownerApiClient.patch(`/restaurants/${id}`, input);
   return data;
