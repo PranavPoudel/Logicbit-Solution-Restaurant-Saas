@@ -8,6 +8,8 @@ import { registerOwner, type OwnerRegisterInput } from "@/lib/api/auth";
 import { useOwnerAuthStore } from "@/store/owner-auth-store"; 
 import { theme } from "@/config/theme";
 import { DynamicMapPicker } from "@/components/map/dynamic-map-picker";
+import { normalizePhone } from "@/lib/utils/phone";
+import { geocodeAddress } from "@/lib/geocode";
 
 export default function OwnerRegisterPage() {
   const router = useRouter();
@@ -16,6 +18,8 @@ export default function OwnerRegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isGeocoding, setIsGeocoding] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // The pin starts in Kathmandu; a restaurant must not be registered there unless the owner actually placed it.
+  const [pinSet, setPinSet] = useState(false);
 
   const [formData, setFormData] = useState<OwnerRegisterInput>({
     name: "",
@@ -33,41 +37,24 @@ export default function OwnerRegisterPage() {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: type === "checkbox" ? checked : name === "phone" ? normalizePhone(value) : value,
     }));
   };
 
   // 1. Forward Geocoding: Address -> Map
   const handleGeocodeAddress = async () => {
     if (!formData.restaurantAddress.trim()) return;
-    
     setIsGeocoding(true);
     setError(null);
-    
     try {
-      // Using OpenStreetMap Nominatim (Free, no API key needed for low volume)
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(formData.restaurantAddress)}&limit=1`,
-        {
-          headers: {
-            'User-Agent': 'LogicBitAI/1.0 (owner@logicbit.ai)' // Required by Nominatim
-          }
-        }
-      );
-      const data = await response.json();
-      
-      if (data && data.length > 0) {
-        const { lat, lon, display_name } = data[0];
-        setFormData((prev) => ({
-          ...prev,
-          latitude: parseFloat(lat),
-          longitude: parseFloat(lon),
-          // Optional: Standardize the address to the official OSM format for accuracy
-          restaurantAddress: display_name, 
-        }));
-      } else {
+      const found = await geocodeAddress(formData.restaurantAddress);
+      if (!found) {
         setError("Could not find this address. Please try a more specific location or adjust the pin manually.");
+        return;
       }
+      setPinSet(true);
+      // Standardize the address to the official OSM format for accuracy
+      setFormData((prev) => ({ ...prev, latitude: found.lat, longitude: found.lng, restaurantAddress: found.address }));
     } catch (err) {
       console.error("Geocoding error:", err);
       setError("Failed to search address. Please check your connection or adjust the pin manually.");
@@ -79,6 +66,7 @@ export default function OwnerRegisterPage() {
   // 2. Reverse Geocoding: Map -> Address (Triggered on dragend)
   const handleMapChange = async (lat: number, lng: number) => {
     // Update coordinates immediately for responsive UI
+    setPinSet(true);
     setFormData((prev) => ({ ...prev, latitude: lat, longitude: lng }));
     
     try {
@@ -106,7 +94,17 @@ export default function OwnerRegisterPage() {
     setIsLoading(true);
 
     try {
-      const response = await registerOwner(formData);
+      // An owner who never touched the map would be registered at the default Kathmandu pin, so place it from the address.
+      let details = formData;
+      if (!pinSet) {
+        const found = await geocodeAddress(formData.restaurantAddress).catch(() => null);
+        if (!found) {
+          setError("We couldn't place your restaurant on the map. Press Find, or drag the pin to its location.");
+          return;
+        }
+        details = { ...formData, latitude: found.lat, longitude: found.lng };
+      }
+      const response = await registerOwner(details);
       
       // ✅ FIX: The interceptor unwraps { success, data, message } -> data.
       // So `response` is the inner payload. We check for tokens directly on it.
@@ -116,7 +114,9 @@ export default function OwnerRegisterPage() {
 
       if (!tokens && user) {
         // The server creates the account without a session, and has just emailed a 6-digit code to confirm the address.
-        router.push(`/owner/verify-email?email=${encodeURIComponent(user.email)}`);
+        // Only ask for the code when the server says verification is on; otherwise there is no code to enter and the owner can simply log in.
+        const needsVerification = response.needsVerification ?? response.data?.needsVerification;
+        router.push(needsVerification === false ? "/owner/login?registered=1" : `/owner/verify-email?email=${encodeURIComponent(user.email)}`);
       } else if (tokens && user) {
         setAuth({
           accessToken: tokens.accessToken,
@@ -195,7 +195,7 @@ export default function OwnerRegisterPage() {
               value={formData.phone}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-[#1B2333] focus:border-transparent outline-none transition"
-              placeholder="9841000000"
+              placeholder="090-1234-5678"
             />
           </div>
 
