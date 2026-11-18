@@ -1,5 +1,5 @@
 // components/restaurant/storefront-about-section.tsx
-import { Icon, Squiggle } from "@/components/ui/primitives";
+import { Icon } from "@/components/ui/primitives";
 import { getFullImageUrl } from "@/lib/utils/image";
 import { OpeningHours } from "@/components/restaurant/opening-hours";
 import type { RestaurantDetail } from "@/types/menu";
@@ -62,7 +62,6 @@ export function StorefrontAboutSection({ title, aboutText, restaurant }: { title
     <section aria-labelledby="about" className="mx-auto w-full max-w-[1440px] border-t border-ink/10 px-5 py-10 md:px-10">
       <h2 id="about" className="relative inline-block font-display text-[32px] font-extrabold tracking-tight md:text-[40px]">
         {title}
-        <Squiggle className="absolute -bottom-1 left-0 h-3 w-full text-[var(--accent,var(--brand-chili))]" />
       </h2>
       <div className="shadow-warm relative mt-8 overflow-hidden rounded-[32px] bg-paper p-6 md:p-10">
         {aboutText && (
@@ -79,7 +78,7 @@ export function StorefrontAboutSection({ title, aboutText, restaurant }: { title
                 <span className="font-bold">{restaurant.name}</span>
                 {rated && (
                   <span className="inline-flex items-center gap-1 font-bold text-ink/75">
-                    <Icon name="star" fill className="h-4 w-4 text-saffron" />{restaurant.avgRating!.toFixed(1)}
+                    <Icon name="star" fill className="h-4 w-4 text-chili" />{restaurant.avgRating!.toFixed(1)}
                     {restaurant.totalReviews ? <span className="font-normal">({restaurant.totalReviews})</span> : null}
                   </span>
                 )}

@@ -18,7 +18,7 @@ export function CustomerFooter() {
           <p className="font-display text-4xl font-bold leading-tight">
             {t("footer.stillScrolling")}
             <br />
-            <span className="text-saffron">{t("footer.stomach")}</span>
+            <span className="text-chili">{t("footer.stomach")}</span>
           </p>
           <Link href="/restaurants" className="mt-6 inline-flex h-14 items-center gap-2 rounded-full bg-chili px-8 font-display text-lg font-extrabold text-parchment transition hover:-translate-y-0.5 hover:bg-parchment hover:text-espresso active:translate-y-0">
             {t("footer.orderNow")}
@@ -27,11 +27,11 @@ export function CustomerFooter() {
         </div>
         {columns.map(([heading, links]) => (
           <div key={heading}>
-            <p className="font-bold text-saffron">{heading}</p>
+            <p className="font-bold text-cream dark:text-ink">{heading}</p>
             <ul className="mt-1">
               {links.map(([label, href]) => (
                 <li key={href}>
-                  <Link href={href} className="inline-flex min-h-11 items-center hover:text-saffron">
+                  <Link href={href} className="inline-flex min-h-11 items-center hover:text-cream dark:hover:text-ink">
                     {label}
                   </Link>
                 </li>
@@ -45,8 +45,8 @@ export function CustomerFooter() {
       </p>
       <p className="relative mx-auto max-w-[1440px] py-6 text-xs text-cream/70 dark:text-ink/70">
         © {new Date().getFullYear()} {theme.brand.name} ·{" "}
-        <a href={`mailto:${theme.content.contactEmail}`} className="-my-3 inline-block py-3 hover:text-saffron hover:underline">{theme.content.contactEmail}</a> ·{" "}
-        <a href={`tel:${theme.content.contactPhone.replace(/[^\d+]/g, "")}`} className="-my-3 inline-block py-3 hover:text-saffron hover:underline">{theme.content.contactPhone}</a>
+        <a href={`mailto:${theme.content.contactEmail}`} className="-my-3 inline-block py-3 hover:text-cream hover:underline dark:hover:text-ink">{theme.content.contactEmail}</a> ·{" "}
+        <a href={`tel:${theme.content.contactPhone.replace(/[^\d+]/g, "")}`} className="-my-3 inline-block py-3 hover:text-cream hover:underline dark:hover:text-ink">{theme.content.contactPhone}</a>
       </p>
     </footer>
   );

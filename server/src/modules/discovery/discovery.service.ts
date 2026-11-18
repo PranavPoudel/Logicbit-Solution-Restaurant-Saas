@@ -10,6 +10,9 @@ import { AdvertisementService } from '../advertisement/advertisement.service';
 import { calculateDeliveryQuote } from '../../common/utils/delivery-fee.util';
 import { computeOpenStatus } from '../../common/utils/opening-hours.util';
 
+/** Distance only counts towards the ranking within this many km, however wide the search is. */
+const RANKING_RADIUS_KM = 50;
+
 @Injectable()
 export class DiscoveryService {
   private trending?: { value: { success: boolean; data: unknown[] }; expires: number };
@@ -101,7 +104,7 @@ export class DiscoveryService {
         const isSponsored = sponsoredIds.has(r.id);
         const baseScore = calculateRankingScore({
           distanceKm: r.distanceKm,
-          searchRadiusKm: radiusKm,
+          searchRadiusKm: Math.min(radiusKm, RANKING_RADIUS_KM),
           avgRating: r.avgRating ?? 0,
           totalOrders: r.totalOrders ?? 0,
           maxOrdersInArea,
@@ -389,7 +392,9 @@ export class DiscoveryService {
 
   //ADDED: Expose enabled payment methods to the public checkout flow
       supportsCod: r.supportsCod ?? true,
-      supportsCreditCard: r.supportsCreditCard ?? false,
+      // Card is only offered to customers when the restaurant has a Stripe key saved: with the switch on and no key,
+      // customers would fill a cart and then get an error at checkout.
+      supportsCreditCard: (r.supportsCreditCard ?? false) && !!r.stripeSecretKey,
       supportsEsewa: r.supportsEsewa ?? false,
       supportsKhalti: r.supportsKhalti ?? false,
       supportsIps: r.supportsIps ?? false,

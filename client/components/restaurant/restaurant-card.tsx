@@ -9,17 +9,11 @@ import { useCuisineLabel } from "@/hooks/use-cuisine-label";
 import type { DiscoveryRestaurant } from "@/types/restaurant";
 import { Icon, IconButton, OpenBadge } from "@/components/ui/primitives";
 
-const TINTS = [
-  { bg: "bg-saffron", text: "text-ink" },
-  { bg: "bg-chili", text: "text-cream" },
-  { bg: "bg-herb", text: "text-cream" },
-];
 const ROTS = ["-rotate-2", "rotate-2", "-rotate-1", "rotate-1"];
 
 export function RestaurantCard({ r, index, compact }: { r: DiscoveryRestaurant; index: number; compact?: boolean }) {
   const t = useTranslations("restaurant");
   const cuisineLabel = useCuisineLabel();
-  const tint = TINTS[index % TINTS.length];
   const open = r.isOpen !== false;
   const rating = r.avgRating ?? 0;
   const hasOrders = (r.totalOrders ?? 0) > 0;
@@ -47,13 +41,13 @@ export function RestaurantCard({ r, index, compact }: { r: DiscoveryRestaurant; 
         />
       </div>
 
-      <div className={`${tint.bg} ${tint.text} absolute -right-4 -top-5 z-10 grid h-20 w-20 rotate-12 place-items-center rounded-full border-4 border-paper font-display text-2xl font-extrabold shadow-hard`}>
+      <div className={`bg-chili text-parchment absolute -right-4 -top-5 z-10 grid h-20 w-20 rotate-12 place-items-center rounded-full border-4 border-paper font-display text-2xl font-extrabold shadow-hard`}>
         {hasOrders || rating > 0 ? `★${rating.toFixed(1)}` : t("new")}
       </div>
 
       <div className={`px-2 pt-4 ${open ? "" : "opacity-75"}`}>
         <h3 className="font-display text-2xl font-bold leading-tight">
-          <Link href={href} className="text-left after:absolute after:inset-0 after:rounded-[28px] focus-visible:outline-none focus-visible:after:ring-4 focus-visible:after:ring-saffron">
+          <Link href={href} className="text-left after:absolute after:inset-0 after:rounded-[28px] focus-visible:outline-none focus-visible:after:ring-4 focus-visible:after:ring-chili">
             {name}
           </Link>
         </h3>

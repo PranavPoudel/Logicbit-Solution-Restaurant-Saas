@@ -1,9 +1,10 @@
 // src/modules/payment/payment.service.ts
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { PaymentCheck, PaymentContext, PaymentProvider } from './payment-provider.interface';
+import { PaymentCheck, PaymentContext, PaymentProvider, PaymentResume } from './payment-provider.interface';
 import { CodProvider } from './providers/cod.provider';
-import { CreditCardProvider, EsewaProvider, KhaltiProvider, IpsProvider, PhonePayProvider } from './providers/future-providers.stub';
+import { EsewaProvider, KhaltiProvider, IpsProvider, PhonePayProvider } from './providers/future-providers.stub';
 import { PayPayProvider } from './providers/paypay.provider';
+import { StripeProvider } from './providers/stripe.provider';
 
 @Injectable()
 export class PaymentService {
@@ -11,7 +12,7 @@ export class PaymentService {
 
   constructor(
     private readonly cod: CodProvider,
-    private readonly creditCard: CreditCardProvider,
+    private readonly stripe: StripeProvider,
     private readonly esewa: EsewaProvider,
     private readonly khalti: KhaltiProvider,
     private readonly ips: IpsProvider,
@@ -21,7 +22,7 @@ export class PaymentService {
     // नयाँ gateway थप्दा यहाँ एउटा लाइन थप्ने मात्र हो।
     this.providers = {
       COD: this.cod,
-      CREDIT_CARD: this.creditCard,
+      CREDIT_CARD: this.stripe,
       ESEWA: this.esewa,
       KHALTI: this.khalti,
       IPS: this.ips,
@@ -43,6 +44,22 @@ export class PaymentService {
   async checkPayment(method: string, orderId: string): Promise<PaymentCheck> {
     const provider = this.getProvider(method);
     return provider.checkPayment ? provider.checkPayment(orderId) : { paid: false };
+  }
+
+  /** Whether an unpaid order of this method can be paid again and closed: only gateways whose payment pages are ours to reopen. */
+  canResume(method: string): boolean {
+    return !!this.providers[method]?.resume;
+  }
+
+  async resume(method: string, orderId: string): Promise<PaymentResume> {
+    const provider = this.getProvider(method);
+    if (!provider.resume) throw new BadRequestException('This payment method cannot be continued');
+    return provider.resume(orderId);
+  }
+
+  async cancelPayment(method: string, orderId: string): Promise<{ paid: boolean }> {
+    const provider = this.getProvider(method);
+    return provider.cancelPayment ? provider.cancelPayment(orderId) : { paid: false };
   }
 
   async refund(method: string, orderId: string, amount: number, existingRefundId?: string) {

@@ -21,8 +21,13 @@ export function HeroSection({ cuisines, openCount, topRating, city }: { cuisines
   const router = useRouter();
   const [q, setQ] = useState("");
   const chips = byCuisineOrder(cuisines).slice(0, 5);
-  const split = city ? Math.max(1, Math.floor(city.length / 2)) : 0;
-  const width = Math.max(textWidth((city ?? "") + t("heroC")), textWidth(t("heroD") + t("heroE")));
+  // A "|" in the headline text starts a new line, so a longer phrase can be split into short lines and still be set large.
+  // The headline: the lead lines in the text colour, the last line in the brand red, then the punctuation as a sticker.
+  const phrase = t("heroD").split("|");
+  const width = Math.max(
+    ...phrase.slice(0, -1).map(textWidth),
+    textWidth(phrase[phrase.length - 1]) + 0.9, // the sticker is about 0.9em wide with its gap
+  );
 
   const search = (value: string) => router.push(value ? `/restaurants?q=${encodeURIComponent(value)}` : "/restaurants");
 
@@ -31,27 +36,33 @@ export function HeroSection({ cuisines, openCount, topRating, city }: { cuisines
       <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-12">
         <div>
           <span className="inline-flex -rotate-2 items-center gap-2 rounded-full bg-ink px-4 py-2 text-sm font-bold text-cream">
-            <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-herb motion-reduce:animate-none" />
+            <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-chili motion-reduce:animate-none" />
             {openCount > 0 ? t("openRight", { count: openCount }) : t("openSoon")}
           </span>
           <h1
             style={{ "--w": width } as CSSProperties}
             className={`font-display mt-6 whitespace-nowrap font-extrabold tracking-[-0.05em] ${locale === "ja" ? "leading-[1.1]" : "leading-[0.85]"} [font-size:min(17vw,calc((100vw-40px)/var(--w)))] md:[font-size:min(176px,calc((100vw-80px)/var(--w)))] lg:[font-size:min(176px,calc((min(100vw,1440px)-128px)/(2*var(--w))))]`}
           >
-            {city ? (
-              <>
-                <span className="block">
-                  {city.slice(0, split)}<span className="text-chili">{city.slice(split)}</span>{t("heroC")}
+            {phrase.map((line, i) => {
+              const last = i === phrase.length - 1;
+              return (
+                <span
+                  key={i}
+                  className={`animate-fade-up block font-extrabold ${last ? "text-chili" : ""}`}
+                  style={{ animationDelay: `${i * 90}ms` }}
+                >
+                  {line}
+                  {last && (
+                    // The punctuation is set as a tilted chocolate sticker, like the "Hot deal" badge and the tilted pill above, and pops in after the words.
+                    <span className="animate-pop-in ml-[0.14em] inline-flex h-[0.74em] w-[0.74em] rotate-[8deg] items-center justify-center rounded-[0.22em] bg-ink align-[-0.02em] text-[0.62em] leading-none tracking-normal text-cream shadow-soft">
+                      {t("heroE")}
+                    </span>
+                  )}
                 </span>
-                <span className="inline-block">
-                  {t("heroD")}<span className="text-chili">{t("heroE")}</span>
-                </span>
-              </>
-            ) : (
-              t("heroNoCity")
-            )}
+              );
+            })}
           </h1>
-          <p className="mt-8 max-w-md text-lg leading-relaxed">{t.rich("heroBody", { b: (chunks) => <b>{chunks}</b>, city: city ?? t("yourArea") })}</p>
+          <p className="mt-10 max-w-md text-lg leading-relaxed">{t.rich("heroBody", { b: (chunks) => <b>{chunks}</b>, city: city ?? t("yourArea") })}</p>
 
           <form
             role="search"
@@ -92,7 +103,7 @@ export function HeroSection({ cuisines, openCount, topRating, city }: { cuisines
             <img src={heroImages[1] ?? heroImages[0]} alt={t("heroAlt2")} className="h-full w-full object-cover" />
           </div>
           {topRating > 0 && (
-            <span className="absolute -right-1 -top-1 z-30 grid h-16 w-16 rotate-12 place-items-center rounded-full border-4 border-cream bg-ink font-display text-lg font-extrabold text-saffron md:h-20 md:w-20 md:text-xl">★{topRating.toFixed(1)}</span>
+            <span className="absolute -right-1 -top-1 z-30 grid h-16 w-16 rotate-12 place-items-center rounded-full border-4 border-cream bg-chili font-display text-lg font-extrabold text-parchment md:h-20 md:w-20 md:text-xl">★{topRating.toFixed(1)}</span>
           )}
         </div>
       </div>

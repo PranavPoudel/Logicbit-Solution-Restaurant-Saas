@@ -4,6 +4,7 @@ import { PaymentProvider, PaymentInitiationResult, PaymentContext, PaymentCheck,
 import { PrismaService } from '../../../prisma/prisma.service';
 import { PayPayUtil } from '../../../common/utils/paypay.util';
 import { ConfigService } from '@nestjs/config';
+import { decryptSecret } from '../../../common/utils/secret-box.util';
 
 /** Sandbox by default; set PAYPAY_BASE_URL=https://apigw.paypay.ne.jp for live payments. */
 const SANDBOX_BASE_URL = 'https://apigw.sandbox.paypay.ne.jp';
@@ -60,7 +61,7 @@ export class PayPayProvider implements PaymentProvider {
     const response = await fetch(`${baseUrl}${path}`, {
       method,
       headers: {
-        Authorization: PayPayUtil.generateAuthHeader(account.paypayApiKey, account.paypayApiSecret, path, method, body ?? null),
+        Authorization: PayPayUtil.generateAuthHeader(account.paypayApiKey, decryptSecret(account.paypayApiSecret), path, method, body ?? null),
         'Content-Type': PayPayUtil.contentType,
         'X-ASSUME-MERCHANT': account.paypayMerchantId,
       },

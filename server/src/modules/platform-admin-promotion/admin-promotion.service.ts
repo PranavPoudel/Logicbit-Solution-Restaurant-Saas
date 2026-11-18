@@ -3,6 +3,7 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { PrismaService } from '../../prisma/prisma.service';
 import { UpdatePromotionLimitsDto } from './dto/update-promotion-limit.dto';
 import { ReviewPromotionDto } from './dto/review-promotion.dto';
+import { withoutPaymentSecrets } from '../../common/utils/restaurant-secrets.util';
 
 @Injectable()
 export class AdminPromotionService {
@@ -32,7 +33,7 @@ export class AdminPromotionService {
       }
     });
 
-    return { success: true, data: updated };
+    return { success: true, data: withoutPaymentSecrets(updated) };
   }
 
   async reviewPendingPromotion(adminId: string, couponId: string, dto: ReviewPromotionDto) {

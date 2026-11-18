@@ -5,17 +5,18 @@ import { useRouter } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { isAxiosError } from "axios";
 import { customerSignupSchema, type CustomerSignupInput } from "@/lib/validation/auth-schemas";
 import { customerSignup } from "@/lib/api/customer-auth";
-import { postLoginPath } from "@/lib/utils/redirect";
+import { startGoogleLogin } from "@/lib/utils/google-login";
 import { playSound } from "@/lib/utils/sound";
 import { useCustomerAuthStore } from "@/store/customer-auth-store";
-import { AuthError, AuthInput, AuthPassword, AuthSubmit, PasswordStrength } from "@/components/auth/auth-shell";
+import { AuthError, AuthInput, AuthPassword, AuthSubmit, GoogleButton, OrDivider, PasswordStrength } from "@/components/auth/auth-shell";
 
 export default function CustomerSignupPage() {
   const t = useTranslations("auth");
+  const locale = useLocale();
   const router = useRouter();
   const setAuth = useCustomerAuthStore((s) => s.setAuth);
 
@@ -32,10 +33,11 @@ export default function CustomerSignupPage() {
     mutationFn: (input: CustomerSignupInput) => {
       return customerSignup({ fullName: input.fullName, email: input.email, phone: input.phone, password: input.password });
     },
-    onSuccess: (data) => {
+    onSuccess: (result, input) => {
       playSound("success");
-      setAuth(data);
-      router.push(postLoginPath());
+      // A session exists unless the server wants the email confirmed first. Either way a code was just emailed.
+      if (result.auth) setAuth(result.auth);
+      router.push(`/verify-email?email=${encodeURIComponent(input.email)}`);
     },
     onError: () => playSound("error"),
   });
@@ -59,6 +61,8 @@ export default function CustomerSignupPage() {
       <AuthPassword id="password" label={t("password")} autoComplete="new-password" error={errors.password?.message && t(errors.password.message)} hint={<PasswordStrength value={password ?? ""} />} {...register("password")} />
       <AuthPassword id="confirmPassword" label={t("confirmPassword")} autoComplete="new-password" error={errors.confirmPassword?.message && t(errors.confirmPassword.message)} {...register("confirmPassword")} />
       <AuthSubmit pending={mutation.isPending} pendingLabel={t("creating")}>{t("createAccount")}</AuthSubmit>
+      <OrDivider />
+      <GoogleButton onClick={() => startGoogleLogin(locale)}>{t("google")}</GoogleButton>
     </form>
   );
 }

@@ -31,6 +31,17 @@ export async function checkout(input: CheckoutInput) {
   return data;
 }
 
+/** "Pay now" on an order still waiting for its card payment: the page to send the customer to, or paid:true if it already went through. */
+export async function payOrderNow(id: string): Promise<{ paid: boolean; redirectUrl?: string }> {
+  const { data } = await apiClient.post(`/orders/${id}/pay`);
+  return data;
+}
+
+export async function cancelMyOrder(id: string, reason?: string) {
+  const { data } = await apiClient.patch(`/orders/${id}/cancel`, reason ? { reason } : {});
+  return data;
+}
+
 export async function listMyOrders() {
   const { data } = await apiClient.get("/orders");
   return data;

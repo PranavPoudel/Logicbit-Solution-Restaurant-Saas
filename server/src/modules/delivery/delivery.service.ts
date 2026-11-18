@@ -180,9 +180,16 @@ export class DeliveryService {
     return { success: true, data: delivery };
   }
 
-  async applyExternalEvent(provider: string, event: DeliveryEvent) {
-    const order = await this.prisma.order.findUnique({ where: { id: event.orderId }, include: { delivery: true } });
-    if (!order) throw new NotFoundException('Order not found');
+  /** With restaurantId, only that restaurant's own orders can be changed: a restaurant's Uber account must not reach another restaurant's deliveries. */
+  async applyExternalEvent(provider: string, event: DeliveryEvent, restaurantId?: string) {
+    const orderId =
+      event.orderId ??
+      (event.externalRef
+        ? (await this.prisma.delivery.findFirst({ where: { externalRef: event.externalRef, ...(restaurantId && { order: { restaurantId } }) }, select: { orderId: true } }))?.orderId
+        : undefined);
+    if (!orderId) throw new NotFoundException('Order not found');
+    const order = await this.prisma.order.findUnique({ where: { id: orderId }, include: { delivery: true } });
+    if (!order || (restaurantId && order.restaurantId !== restaurantId)) throw new NotFoundException('Order not found');
     if (order.orderType !== 'DELIVERY' || order.deliveryHandledBy === 'SELF_DELIVERY') {
       throw new BadRequestException('This order is not open for delivery partners');
     }
@@ -289,10 +296,11 @@ export class DeliveryService {
       }),
     ]);
 
-    if (orderStatus !== order.status) {
+    // The pickup email already says the order is on its way, so the ON_THE_WAY step sends none.
+    if (status === 'PICKED_UP') {
       void this.notificationService
-        .notifyOrderStatusChange(order.customerId, order.tenantId, order.orderNumber, orderStatus)
-        .catch((err) => this.logger.error(`Order status email failed for ${order.orderNumber}`, err as Error));
+        .notifyOrderUpdate(orderId, 'PICKED_UP')
+        .catch((err) => this.logger.error(`Pickup email failed for ${order.orderNumber}`, err as Error));
     }
 
     return { success: true, message: 'Delivery status updated' };

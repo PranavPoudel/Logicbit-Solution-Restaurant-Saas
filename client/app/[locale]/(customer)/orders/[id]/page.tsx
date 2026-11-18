@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { getMyOrder } from "@/lib/api/orders";
+import { cancelMyOrder, getMyOrder, payOrderNow } from "@/lib/api/orders";
 import { useMoney } from "@/hooks/use-money";
 import { playSound } from "@/lib/utils/sound";
 import { ORDER_STATUS_STEPS, PICKUP_STATUS_STEPS } from "@/types/order";
@@ -41,7 +41,7 @@ function BackToOrders() {
 }
 
 function Confetti() {
-  const colors = ["var(--brand-chili)", "var(--brand-saffron)", "var(--brand-herb)", "var(--brand-blush)"];
+  const colors = ["var(--brand-chili)", "var(--brand-crimson)", "var(--brand-espresso)"];
   return (
     <>
       {Array.from({ length: 18 }).map((_, i) => (
@@ -70,6 +70,9 @@ export default function OrderTrackingPage({
   const queryClient = useQueryClient();
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(sp.placed === "1");
+  const [paymentBusy, setPaymentBusy] = useState<"pay" | "cancel" | null>(null);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [confirmCancel, setConfirmCancel] = useState(false);
 
   const { data: order, isLoading, isError } = useQuery({
     queryKey: ["order", id],
@@ -120,9 +123,11 @@ export default function OrderTrackingPage({
   const headAccent = isPickup && t.has(`headline.${hk}.pickup`) ? t(`headline.${hk}.pickup`) : t(`headline.${hk}.accent`);
   const phone = order.restaurant?.phone ?? "none";
   const phoneLink = (chunks: React.ReactNode) => <a className="font-bold underline" href={`tel:${phone}`}>{chunks}</a>;
+  const restaurantPlace = order.restaurant?.latitude != null && order.restaurant?.longitude != null ? `${order.restaurant.latitude},${order.restaurant.longitude}` : order.restaurant?.address;
+  const directionsUrl = restaurantPlace ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(restaurantPlace)}` : null;
   const orderNumber = order.orderNumber ?? order.id.slice(0, 8);
   const hasMap = !isPickup && order.deliveryLatitude != null && order.deliveryLongitude != null && !cancelled;
-  const payTone = order.paymentStatus === "PAID" ? "herb" : order.paymentStatus === "REFUNDED" ? "saffron" : "soft";
+  const payTone = order.paymentStatus === "PAID" ? "ink" : order.paymentStatus === "REFUNDED" ? "soft" : "chili";
   const refundMethod = order.refund?.method && t.has(`refundMethod.${order.refund.method}`) ? t(`refundMethod.${order.refund.method}`) : null;
   const refundRef = order.refund?.reference;
   const payText =
@@ -134,6 +139,39 @@ export default function OrderTrackingPage({
           ? (isPickup ? t("payAtPickup") : t("payOnDelivery"))
           : t("paymentPending");
 
+  // A card order the customer has not paid for yet: the restaurant has not received it.
+  const awaitingPayment = order.paymentMethod === "CREDIT_CARD" && order.paymentStatus === "UNPAID" && normalized === "PENDING";
+
+  const handlePayNow = async () => {
+    setPaymentBusy("pay");
+    setPaymentError(null);
+    try {
+      const result = await payOrderNow(id);
+      if (result.paid || !result.redirectUrl) {
+        await queryClient.invalidateQueries({ queryKey: ["order", id] });
+        setPaymentBusy(null);
+        return;
+      }
+      window.location.href = result.redirectUrl;
+    } catch {
+      setPaymentError(t("payError"));
+      setPaymentBusy(null);
+    }
+  };
+
+  const handleCancelUnpaid = async () => {
+    setPaymentBusy("cancel");
+    setPaymentError(null);
+    try {
+      await cancelMyOrder(id);
+      setConfirmCancel(false);
+      await queryClient.invalidateQueries({ queryKey: ["order", id] });
+    } catch {
+      setPaymentError(t("cancelUnpaidError"));
+    }
+    setPaymentBusy(null);
+  };
+
   const dismissConfirm = () => {
     setConfirmOpen(false);
     router.replace(`/orders/${id}`);
@@ -144,7 +182,7 @@ export default function OrderTrackingPage({
       <div className="relative grid min-h-[80vh] place-items-center overflow-hidden px-5 py-10">
         <Confetti />
         <div className="relative max-w-lg text-center text-espresso">
-          <div className="pop mx-auto grid h-36 w-36 place-items-center rounded-full bg-herb text-parchment shadow-hard"><Icon name="check" className="h-20 w-20" /></div>
+          <div className="pop mx-auto grid h-36 w-36 place-items-center rounded-full bg-ink text-cream shadow-hard"><Icon name="check" className="h-20 w-20" /></div>
           <h1 className="mt-8 font-display text-6xl font-extrabold leading-[0.9] tracking-tight md:text-8xl">{t("orderIn")}</h1>
           <p className="mt-4 text-lg">{t("hasYourOrder", { restaurant: restaurantName })}</p>
           <div className="mt-6 inline-flex flex-wrap justify-center gap-3">
@@ -172,15 +210,17 @@ export default function OrderTrackingPage({
             <h1 className="font-display text-5xl font-extrabold leading-none tracking-tight md:text-7xl">
               {cancelled ? (
                 <>{t("cancelledHead")} <span className="text-chili">{t("cancelledAccent")}</span></>
+              ) : awaitingPayment ? (
+                <>{t("awaitingHead")} <span className="text-chili">{t("awaitingAccent")}</span></>
               ) : (
                 <>
-                  {headHead} <span className={normalized === "DELIVERED" ? "text-herb" : "text-chili"}>{headAccent}</span>
+                  {headHead} <span className={normalized === "DELIVERED" ? "text-ink" : "text-chili"}>{headAccent}</span>
                 </>
               )}
             </h1>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Badge tone={payTone}><Icon name="check" className="h-4 w-4" />{payText}</Badge>
+            <Badge tone={payTone} className={payTone === "chili" ? "!bg-crimson" : ""}><Icon name="check" className="h-4 w-4" />{payText}</Badge>
           </div>
         </div>
 
@@ -198,9 +238,9 @@ export default function OrderTrackingPage({
                 return (
                   <li key={s} className="relative flex items-center gap-4 md:flex-col md:text-center" aria-current={cur ? "step" : undefined}>
                     {i < steps.length - 1 && (
-                      <span className={`absolute left-6 top-12 h-[calc(100%-8px)] w-1.5 rounded-full md:left-[calc(50%+28px)] md:top-6 md:h-1.5 md:w-[calc(100%-56px)] ${i < current ? "bg-herb" : "bg-ink/10"}`} aria-hidden />
+                      <span className={`absolute left-6 top-12 h-[calc(100%-8px)] w-1.5 rounded-full md:left-[calc(50%+28px)] md:top-6 md:h-1.5 md:w-[calc(100%-56px)] ${i < current ? "bg-ink" : "bg-ink/10"}`} aria-hidden />
                     )}
-                    <span className={`relative z-10 grid shrink-0 place-items-center rounded-full font-display font-extrabold transition ${cur ? "h-14 w-14 bg-chili text-parchment ring-8 ring-chili/20" : done ? "h-12 w-12 bg-herb text-parchment" : "h-12 w-12 bg-ink/10 text-ink/50"}`}>
+                    <span className={`relative z-10 grid shrink-0 place-items-center rounded-full font-display font-extrabold transition ${cur ? "h-14 w-14 bg-chili text-parchment ring-8 ring-chili/20" : done ? "h-12 w-12 bg-ink text-cream" : "h-12 w-12 bg-ink/10 text-ink/50"}`}>
                       {done ? <Icon name="check" /> : i + 1}
                     </span>
                     <div className="md:mt-3">
@@ -213,7 +253,32 @@ export default function OrderTrackingPage({
                 );
               })}
             </ol>
-            {statusMessage && <p className="mt-6 text-center text-lg text-ink/75">{statusMessage}</p>}
+            {awaitingPayment ? (
+              <div className="mt-6 text-center" role="status">
+                <p className="text-lg text-ink/75">{t("awaitingBody")}</p>
+                {confirmCancel ? (
+                  <div className="mt-4 flex flex-col items-center gap-3">
+                    <p className="font-bold">{t("cancelUnpaidConfirm")}</p>
+                    <div className="flex flex-wrap justify-center gap-3">
+                      <Button variant="ink" disabled={paymentBusy !== null} onClick={handleCancelUnpaid}>
+                        {paymentBusy === "cancel" ? t("cancelling") : t("cancelUnpaidYes")}
+                      </Button>
+                      <Button variant="outline" disabled={paymentBusy !== null} onClick={() => setConfirmCancel(false)}>{t("cancelUnpaidKeep")}</Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mt-4 flex flex-wrap justify-center gap-3">
+                    <Button size="lg" disabled={paymentBusy !== null} onClick={handlePayNow}>
+                      {paymentBusy === "pay" ? t("paying") : t("payNow")}
+                    </Button>
+                    <Button size="lg" variant="outline" disabled={paymentBusy !== null} onClick={() => setConfirmCancel(true)}>{t("cancelUnpaid")}</Button>
+                  </div>
+                )}
+                {paymentError && <p role="alert" className="mt-3 font-bold text-chili">{paymentError}</p>}
+              </div>
+            ) : (
+              statusMessage && <p className="mt-6 text-center text-lg text-ink/75">{statusMessage}</p>
+            )}
           </Card>
         )}
 
@@ -233,13 +298,13 @@ export default function OrderTrackingPage({
                 </div>
                 {rider && normalized === "OUT_FOR_DELIVERY" && (
                   <div className="flex items-center gap-4 p-5">
-                    <span className="grid h-14 w-14 place-items-center rounded-full bg-saffron font-display text-2xl font-extrabold text-ink ring-4 ring-saffron/40">{(rider.name ?? t("riderFallback")).charAt(0)}</span>
+                    <span className="grid h-14 w-14 place-items-center rounded-full bg-ink font-display text-2xl font-extrabold text-cream ring-4 ring-ink/20">{(rider.name ?? t("riderFallback")).charAt(0)}</span>
                     <div className="flex-1">
                       <p className="font-display text-xl font-extrabold">{rider.name ?? t("riderFallback")}</p>
                       <p className="text-ink/70">{t("yourRider")}</p>
                     </div>
                     {rider.phone && (
-                      <a href={`tel:${rider.phone}`} className="flex min-h-12 items-center gap-2 rounded-full bg-herb px-5 font-bold text-parchment shadow-hard"><Icon name="phone" />{t("call")}</a>
+                      <a href={`tel:${rider.phone}`} className="flex min-h-12 items-center gap-2 rounded-full bg-chili px-5 font-bold text-parchment shadow-hard"><Icon name="phone" />{t("call")}</a>
                     )}
                   </div>
                 )}
@@ -247,7 +312,7 @@ export default function OrderTrackingPage({
             )}
 
             {canReview && (
-              <Card className="border-4 border-saffron">
+              <Card className="border-4 border-cream-deep">
                 <h2 className="font-display text-3xl font-extrabold">{t("howWasIt")}</h2>
                 <p className="mt-2 text-lg text-ink/75">{t("howWasItBody", { restaurant: restaurantName })}</p>
                 <Button size="lg" className="mt-4" onClick={() => setShowReviewModal(true)}>{t("rate")}</Button>
@@ -297,13 +362,28 @@ export default function OrderTrackingPage({
               ) : (
                 <p className="mt-3 text-ink/75">{t("contact", { restaurant: restaurantName })}</p>
               )}
-              {order.restaurant?.phone && (
-                <a href={`tel:${order.restaurant.phone}`} className="mt-4 flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-ink px-5 font-bold text-cream shadow-soft"><Icon name="phone" />{t("callRestaurant", { restaurant: restaurantName })}</a>
+              <div className="mt-4 space-y-2 border-t-2 border-ink/10 pt-4">
+                <p className="font-bold">{restaurantName}</p>
+                {order.restaurant?.address && <p className="flex items-start gap-2 text-ink/75"><Icon name="pin" className="mt-0.5 h-5 w-5 shrink-0" />{order.restaurant.address}</p>}
+                <p className="flex items-center gap-2 text-ink/75">
+                  <Icon name="phone" className="h-5 w-5 shrink-0" />
+                  {order.restaurant?.phone ? <a href={`tel:${order.restaurant.phone}`} className="font-bold underline">{order.restaurant.phone}</a> : t("noPhone")}
+                </p>
+              </div>
+              {(order.restaurant?.phone || directionsUrl) && (
+                <div className="mt-4 grid gap-2">
+                  {order.restaurant?.phone && (
+                    <a href={`tel:${order.restaurant.phone}`} className="flex min-h-12 items-center justify-center gap-2 rounded-full bg-ink px-5 font-bold text-cream shadow-soft"><Icon name="phone" />{t("callRestaurant", { restaurant: restaurantName })}</a>
+                  )}
+                  {directionsUrl && (
+                    <a href={directionsUrl} target="_blank" rel="noopener noreferrer" className="flex min-h-12 items-center justify-center gap-2 rounded-full border-2 border-ink px-5 font-bold"><Icon name="pin" />{t("directions")}</a>
+                  )}
+                </div>
               )}
             </Card>
 
             {isPickup && !cancelled && order.restaurant?.address && (
-              <Card className="!bg-saffron text-espresso">
+              <Card className="!bg-cream-deep text-ink">
                 <p className="font-display text-2xl font-extrabold">{t("collectFrom")}</p>
                 <p className="mt-1 font-bold">{restaurantName}</p>
                 <p className="mt-1">{order.restaurant.address}</p>
@@ -311,7 +391,7 @@ export default function OrderTrackingPage({
             )}
 
             {order.deliveryAddress && (
-              <Card className="!bg-saffron text-espresso">
+              <Card className="!bg-cream-deep text-ink">
                 <p className="font-display text-2xl font-extrabold">{t("deliveringTo")}</p>
                 <p className="mt-1">{order.deliveryAddress}</p>
                 {order.customer?.phone && <p className="mt-1">{order.customer.phone}</p>}

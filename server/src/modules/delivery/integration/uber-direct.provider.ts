@@ -1,6 +1,5 @@
 import { createHmac } from 'node:crypto';
 import { BadRequestException } from '@nestjs/common';
-import { isUUID } from 'class-validator';
 import { BookableOrder, CourierBooking, DeliveryEvent, DeliveryProvider, WebhookHeaders, safeEqual } from './delivery-provider';
 import { UberDirectClient } from './uber-direct.client';
 
@@ -16,12 +15,11 @@ interface UberDeliveryWebhook {
   delivery_id?: string;
   data?: {
     id?: string;
-    external_id?: string;
     status?: string;
     tracking_url?: string;
     courier?: UberCourier;
     undeliverable_reason?: string;
-    cancelation_reason?: { primary_reason?: string };
+    cancelation_reason?: { secondary_reason?: string };
   };
 }
 
@@ -45,10 +43,11 @@ export class UberDirectProvider implements DeliveryProvider {
     const body = payload as UberDeliveryWebhook;
     if (body.kind !== 'event.delivery_status') return null;
 
-    const orderId = body.data?.external_id;
-    if (!orderId || !isUUID(orderId)) return null;
+    // The delivery is found by Uber's own delivery id, which we saved when booking.
+    const externalRef = body.delivery_id ?? body.data?.id;
+    if (!externalRef) return null;
 
-    const base = { orderId, externalRef: body.delivery_id ?? body.data?.id, trackingUrl: body.data?.tracking_url };
+    const base = { externalRef, trackingUrl: body.data?.tracking_url };
     switch (body.status ?? body.data?.status) {
       case 'pickup': {
         const courier = body.data?.courier;
@@ -66,7 +65,8 @@ export class UberDirectProvider implements DeliveryProvider {
         return { ...base, event: 'DELIVERED' };
       case 'canceled':
       case 'returned':
-        return { ...base, event: 'FAILED', failureReason: body.data?.cancelation_reason?.primary_reason ?? body.data?.undeliverable_reason ?? 'Uber Direct delivery was cancelled' };
+        // Uber's primary_reason is always "#Uber"; the secondary one (e.g. COURIER_CANCEL) says who cancelled.
+        return { ...base, event: 'FAILED', failureReason: body.data?.cancelation_reason?.secondary_reason ?? body.data?.undeliverable_reason ?? 'Uber Direct delivery was cancelled' };
       default:
         return null;
     }

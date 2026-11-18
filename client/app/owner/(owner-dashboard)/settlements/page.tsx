@@ -45,9 +45,7 @@ export default function SettlementsPage() {
     );
   }
 
-  const outstanding = outstandingQuery.data as
-    | { commissionDue?: number; totalCodAmount?: number }
-    | undefined;
+  const outstanding = outstandingQuery.data as { totalCommissionOwed?: number } | undefined;
 
   return (
     <div className="max-w-3xl">
@@ -63,7 +61,7 @@ export default function SettlementsPage() {
         <div>
           <p className="text-xs text-neutral-500">Outstanding commission</p>
           <p className="text-xl font-semibold text-neutral-900 font-mono">
-            {outstandingQuery.isLoading ? "…" : money(outstanding?.commissionDue ?? 0)}
+            {outstandingQuery.isLoading ? "…" : money(outstanding?.totalCommissionOwed ?? 0)}
           </p>
         </div>
       </div>

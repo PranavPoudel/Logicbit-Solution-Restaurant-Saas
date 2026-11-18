@@ -1,4 +1,4 @@
-// chats.controller.ts
+// src/modules/chats/chats.controller.ts
 //
 // Visitor / widget (no login needed; guests have no JWT, so the unguessable
 // session id acts as the access token):

@@ -14,10 +14,10 @@ export function OwnerBanner() {
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src="/images/cuisine-newari.jpg.avif" alt="" className="absolute -bottom-8 right-[33%] hidden h-[290px] w-[210px] -rotate-6 rounded-[28px] border-8 border-cream object-cover shadow-warm xl:block" />
       <div className="relative max-w-xl md:max-w-[46%] xl:max-w-xl">
-        <p className="font-bold uppercase tracking-widest text-saffron">{t("ownerKicker")}</p>
+        <p className="font-bold uppercase tracking-widest text-parchment">{t("ownerKicker")}</p>
         <h2 className="font-display mt-2 text-4xl font-extrabold leading-[0.95] tracking-tight [text-wrap:balance] md:text-6xl">{t("ownerTitle")}</h2>
         <p className="mt-4 max-w-lg text-base lg:text-lg">{t("ownerBody", { brand: theme.brand.name })}</p>
-        <Link href="/for-restaurants" className="shadow-hard mt-7 inline-flex h-14 items-center rounded-full bg-saffron px-8 font-display text-lg font-extrabold text-ink transition hover:-translate-y-0.5 hover:bg-cream active:translate-y-0">
+        <Link href="/for-restaurants" className="shadow-hard mt-7 inline-flex h-14 items-center rounded-full bg-parchment px-8 font-display text-lg font-extrabold text-espresso transition hover:-translate-y-0.5 hover:bg-espresso hover:text-parchment active:translate-y-0">
           {t("listMy")}{t("listKitchen")}
         </Link>
       </div>

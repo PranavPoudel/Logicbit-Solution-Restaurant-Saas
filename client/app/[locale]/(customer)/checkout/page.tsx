@@ -279,7 +279,7 @@ export default function CheckoutPage() {
                     </span>
                   </Selectable>
                   <Selectable on={isPickup} onClick={() => { setOrderType("PICKUP"); setError(""); }}>
-                    <Icon name="store" className="h-8 w-8 text-herb" />
+                    <Icon name="store" className="h-8 w-8 text-chili" />
                     <span>
                       <b className="block text-lg">{t("pickup")}</b>
                       <span className="text-ink/70">{t("pickupHint")}</span>

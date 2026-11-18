@@ -5,20 +5,25 @@ import { quickRepliesFor, resolveReply } from "@/lib/utils/chat-replies";
 import { chatSafe } from "@/lib/utils/chat-text";
 import { askGeneralChat, endChatSession, fetchChatThread, sendChatMessage, startChat } from "@/lib/api/chats";
 
-// Bot lines from the canned replies carry a translation `key`; lines from the
-// server (bot, owner, admin) carry plain `text`.
-export type ChatMessage = { id: string; from: "bot" | "user" | "owner" | "admin"; key?: string; values?: Record<string, string>; text?: string; href?: string; action?: string };
+export type ChatMessage = { 
+  id: string; 
+  from: "bot" | "user" | "owner" | "admin"; 
+  key?: string; 
+  values?: Record<string, string>; 
+  text?: string; 
+  href?: string; 
+  action?: string;
+  followUps?: string[]; 
+};
 
-// Server-side chat session for one conversation (restaurant chats only).
 type SessionMeta = { id: string; takenOver: boolean; ended: boolean };
 
 const MAX_THREADS = 8;
 const MAX_MESSAGES = 40;
-const REPLY_DELAY_MS = 900; // minimum "typing" time so replies don't feel instant
+const THINKING_DELAY_MS = 1000;
 const POLL_MS = 4000;
 const NEARBY_WORDS = /near|close|closest|nearest|around|近/i;
 
-// Small localStorage-backed store usable with useSyncExternalStore.
 function createStore<T>(storageKey: string, normalize: (value: T) => T) {
   const EMPTY: Record<string, T> = {};
   const listeners = new Set<() => void>();
@@ -46,7 +51,7 @@ function createStore<T>(storageKey: string, normalize: (value: T) => T) {
       try {
         window.localStorage.setItem(storageKey, JSON.stringify(cache));
       } catch {
-        // Storage blocked (private mode): the chat just won't resume.
+        // Storage blocked
       }
       listeners.forEach((l) => l());
     },
@@ -76,7 +81,6 @@ function httpError(err: unknown) {
   return { status: response?.status, message: String(response?.data?.message ?? "") };
 }
 
-// Browser location, asked for ONLY when the visitor asks about "nearest/closest".
 function locate(text: string): Promise<{ latitude?: number; longitude?: number }> {
   if (!NEARBY_WORDS.test(text) || typeof navigator === "undefined" || !("geolocation" in navigator)) return Promise.resolve({});
   return new Promise((resolve) =>
@@ -88,7 +92,6 @@ function locate(text: string): Promise<{ latitude?: number; longitude?: number }
   );
 }
 
-/** `active` = the widget is open; only then do we poll for owner/admin replies. */
 export function useChatbot(active = false) {
   const restaurant = useChatContextStore((s) => s.restaurant);
   const customer = useCustomerAuthStore((s) => s.customer);
@@ -113,8 +116,6 @@ export function useChatbot(active = false) {
   const append = (key: string, base: ChatMessage[], added: ChatMessage[]) =>
     threadStore.update((t) => ({ ...t, [key]: [...(t[key] ?? base), ...added] }));
 
-  // While open: pick up replies a restaurant owner / admin wrote, and notice
-  // when the chat was ended from their side.
   const sessionId = session?.id;
   const sessionDone = session?.ended;
   useEffect(() => {
@@ -139,7 +140,7 @@ export function useChatbot(active = false) {
           setSession(key, { ...latest, takenOver: thread.takenOver, ended: thread.ended });
         }
       } catch (err) {
-        if (httpError(err).status === 404) setSession(key, null); // session is gone: forget it
+        if (httpError(err).status === 404) setSession(key, null);
       }
     };
 
@@ -158,14 +159,13 @@ export function useChatbot(active = false) {
     const base = messages;
     const named = askName && who ? [{ key: "named", values: { name: chatSafe(who) } }] : [];
 
-    // A human is already in this chat: just deliver the message, no bot, no typing.
     const humanHere = !!restaurant && takenOver;
     append(key, base, [{ id: newId(), from: "user", text: value }]);
     if (!humanHere) setTypingKey(key);
     const startedAt = Date.now();
 
-    let serverReply: { id: string; text: string } | null = null;
-    let useCanned = true; // fall back to the built-in answers unless the server handled it
+    let serverReply: { id: string; text: string; followUps?: string[] } | null = null;
+    let useCanned = true;
 
     try {
       if (restaurant) {
@@ -181,11 +181,9 @@ export function useChatbot(active = false) {
           serverReply = result.reply;
           useCanned = false;
         } else if (result.takenOver) {
-          useCanned = false; // a human will answer
+          useCanned = false;
         }
       } else if (!forcedKey) {
-        // Typed question with no restaurant open: platform-wide assistant. Quick-reply
-        // chips keep their fixed built-in answers.
         const coords = await locate(value);
         const history = base.filter((m) => m.text).slice(-8).map((m) => ({ from: m.from === "user" ? "user" : "bot", text: m.text as string }));
         const reply = await askGeneralChat({ message: value, history, ...coords });
@@ -202,23 +200,31 @@ export function useChatbot(active = false) {
         if (meta) setSession(key, { ...meta, ended: true });
         useCanned = false;
       }
-      // anything else (network, 429, 500): use the built-in answer below
     }
 
     if (!humanHere) {
-      const wait = REPLY_DELAY_MS - (Date.now() - startedAt);
+      const wait = THINKING_DELAY_MS - (Date.now() - startedAt);
       if (wait > 0) await sleep(wait);
     }
 
     const added: ChatMessage[] = [];
     if (serverReply || useCanned) added.push(...named.map((r) => ({ id: newId(), from: "bot" as const, ...r })));
-    if (serverReply) added.push({ id: serverReply.id, from: "bot", text: serverReply.text });
-    else if (useCanned) added.push({ id: newId(), from: "bot", ...resolveReply(value, forcedKey, restaurant, who) });
+    
+    if (serverReply) {
+      added.push({ 
+        id: serverReply.id, 
+        from: "bot", 
+        text: serverReply.text,
+        followUps: serverReply.followUps 
+      });
+    } else if (useCanned) {
+      added.push({ id: newId(), from: "bot", ...resolveReply(value, forcedKey, restaurant, who) });
+    }
+    
     if (added.length) append(key, base, added);
     setTypingKey(null);
   };
 
-  // Ends the chat (best effort on the server) and starts over locally.
   const endChat = () => {
     setTypingKey(null);
     if (session && !session.ended) void endChatSession(session.id).catch(() => undefined);
