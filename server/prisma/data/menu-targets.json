@@ -10,7 +10,8 @@
       "name": "Indian Restaurant Bollywood"
     },
     {
-      "name": "Bhetghat Halal Foods and Restaurants"
+      "name": "Bhetghat Halal Foods and Restaurants",
+      "menuFile": "bhetghat-menu.json"
     },
     {
       "name": "Odaan Restaurant"

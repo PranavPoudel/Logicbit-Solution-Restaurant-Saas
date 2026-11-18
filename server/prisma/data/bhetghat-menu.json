@@ -1,0 +1,1316 @@
+{
+  "meta": {
+    "source": "https://www.bhetghathalalfood.com",
+    "siteTitle": "Bhetghat Halal Foods and Restaurants",
+    "currency": "JPY (assumed: prices are whole yen)",
+    "counts": {
+      "categories": 9,
+      "items": 31,
+      "variantsTotal": 14,
+      "banners": 0
+    },
+    "ignored": {}
+  },
+  "categories": [
+    {
+      "wpTermId": "1",
+      "slug": "nepali-cuisine",
+      "name": "Nepali Cuisine",
+      "parentSlug": null,
+      "path": [
+        "Nepali Cuisine"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "2",
+      "slug": "curry",
+      "name": "Curry",
+      "parentSlug": null,
+      "path": [
+        "Curry"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "3",
+      "slug": "biryani",
+      "name": "Biryani",
+      "parentSlug": null,
+      "path": [
+        "Biryani"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "4",
+      "slug": "tandoori",
+      "name": "Tandoori",
+      "parentSlug": null,
+      "path": [
+        "Tandoori"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "5",
+      "slug": "naan-roti",
+      "name": "Naan & Roti",
+      "parentSlug": null,
+      "path": [
+        "Naan & Roti"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "6",
+      "slug": "snacks",
+      "name": "Snacks",
+      "parentSlug": null,
+      "path": [
+        "Snacks"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "7",
+      "slug": "drinks",
+      "name": "Drinks",
+      "parentSlug": null,
+      "path": [
+        "Drinks"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "8",
+      "slug": "desserts",
+      "name": "Desserts",
+      "parentSlug": null,
+      "path": [
+        "Desserts"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "9",
+      "slug": "set-menus",
+      "name": "Set Menus",
+      "parentSlug": null,
+      "path": [
+        "Set Menus"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    }
+  ],
+  "items": [
+    {
+      "wpId": "101",
+      "wpStatus": "publish",
+      "wpSlug": "momo",
+      "dto": {
+        "name": "Momo",
+        "description": "Dumplings filled with spiced ground meat or vegetables, steamed or lightly pan-fried, served with a dipping sauce.",
+        "price": 715,
+        "image": "https://www.bhetghathalalfood.com/wp-content/uploads/2024/08/momo1.jpg",
+        "primaryCategory": "nepali-cuisine",
+        "categories": [
+          "nepali-cuisine"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": {
+        "name": "Filling",
+        "options": [
+          {
+            "wpId": "1011",
+            "label": "Chicken",
+            "price": 715,
+            "priceDelta": 0
+          },
+          {
+            "wpId": "1012",
+            "label": "Lamb",
+            "price": 715,
+            "priceDelta": 0
+          },
+          {
+            "wpId": "1013",
+            "label": "Vegetable",
+            "price": 715,
+            "priceDelta": 0
+          }
+        ]
+      },
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "variable",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": true,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": true,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "102",
+      "wpStatus": "publish",
+      "wpSlug": "dal-bhat",
+      "dto": {
+        "name": "Dal Bhat",
+        "description": "Steamed rice with lentil soup and side dishes such as vegetable curries, pickles, and salad.",
+        "price": 1210,
+        "image": null,
+        "primaryCategory": "nepali-cuisine",
+        "categories": [
+          "nepali-cuisine"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": true,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "112",
+      "wpStatus": "publish",
+      "wpSlug": "thukpa",
+      "dto": {
+        "name": "Thukpa",
+        "description": "Thukpa, a traditional dish from our Nepali cuisine menu.",
+        "price": 990,
+        "image": null,
+        "primaryCategory": "nepali-cuisine",
+        "categories": [
+          "nepali-cuisine"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": true,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "103",
+      "wpStatus": "publish",
+      "wpSlug": "sukuti",
+      "dto": {
+        "name": "Sukuti",
+        "description": "Marinated, slow-cooked, dried meat, often served with salad and chutney.",
+        "price": 990,
+        "image": "https://www.bhetghathalalfood.com/wp-content/uploads/2024/08/sukuti1.jpg",
+        "primaryCategory": "nepali-cuisine",
+        "categories": [
+          "nepali-cuisine"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": {
+        "name": "Meat",
+        "options": [
+          {
+            "wpId": "1031",
+            "label": "Chicken",
+            "price": 990,
+            "priceDelta": 0
+          },
+          {
+            "wpId": "1032",
+            "label": "Lamb",
+            "price": 990,
+            "priceDelta": 0
+          }
+        ]
+      },
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "variable",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": true,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": true,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "113",
+      "wpStatus": "publish",
+      "wpSlug": "sekuwa",
+      "dto": {
+        "name": "Sekuwa",
+        "description": "Chicken or lamb sekuwa from our Nepali cuisine menu.",
+        "price": 1090,
+        "image": null,
+        "primaryCategory": "nepali-cuisine",
+        "categories": [
+          "nepali-cuisine"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": {
+        "name": "Meat",
+        "options": [
+          {
+            "wpId": "1131",
+            "label": "Chicken",
+            "price": 1090,
+            "priceDelta": 0
+          },
+          {
+            "wpId": "1132",
+            "label": "Lamb",
+            "price": 1090,
+            "priceDelta": 0
+          }
+        ]
+      },
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "variable",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": true,
+        "descriptionHadHtml": false,
+        "noImage": true,
+        "noDescription": false,
+        "variantPriceMismatch": true,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "104",
+      "wpStatus": "publish",
+      "wpSlug": "butter-chicken",
+      "dto": {
+        "name": "Butter Chicken",
+        "description": "Chicken in a rich, mildly spiced butter curry.",
+        "price": 1100,
+        "image": null,
+        "primaryCategory": "curry",
+        "categories": [
+          "curry"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": true,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "105",
+      "wpStatus": "publish",
+      "wpSlug": "lamb-curry",
+      "dto": {
+        "name": "Lamb Curry",
+        "description": "Lamb cooked in a spiced curry sauce.",
+        "price": 1100,
+        "image": null,
+        "primaryCategory": "curry",
+        "categories": [
+          "curry"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": true,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "114",
+      "wpStatus": "publish",
+      "wpSlug": "chicken-tikka-masala",
+      "dto": {
+        "name": "Chicken Tikka Masala",
+        "description": "Chicken tikka masala from our curry menu.",
+        "price": 1210,
+        "image": null,
+        "primaryCategory": "curry",
+        "categories": [
+          "curry"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": true,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "115",
+      "wpStatus": "publish",
+      "wpSlug": "lamb-rogan-josh",
+      "dto": {
+        "name": "Lamb Rogan Josh",
+        "description": "Lamb rogan josh from our curry menu.",
+        "price": 1210,
+        "image": null,
+        "primaryCategory": "curry",
+        "categories": [
+          "curry"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": true,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "116",
+      "wpStatus": "publish",
+      "wpSlug": "paneer-butter-masala",
+      "dto": {
+        "name": "Paneer Butter Masala",
+        "description": "Paneer butter masala from our curry menu.",
+        "price": 1210,
+        "image": null,
+        "primaryCategory": "curry",
+        "categories": [
+          "curry"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": true,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "106",
+      "wpStatus": "publish",
+      "wpSlug": "biryani",
+      "dto": {
+        "name": "Biryani",
+        "description": "Spiced meat or vegetable rice, served with raita.",
+        "price": 1210,
+        "image": null,
+        "primaryCategory": "biryani",
+        "categories": [
+          "biryani"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": {
+        "name": "Filling",
+        "options": [
+          {
+            "wpId": "1061",
+            "label": "Vegetable",
+            "price": 1210,
+            "priceDelta": 0
+          },
+          {
+            "wpId": "1062",
+            "label": "Chicken",
+            "price": 1320,
+            "priceDelta": 110
+          },
+          {
+            "wpId": "1063",
+            "label": "Lamb",
+            "price": 1430,
+            "priceDelta": 220
+          },
+          {
+            "wpId": "1064",
+            "label": "Beef",
+            "price": 1430,
+            "priceDelta": 220
+          }
+        ]
+      },
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "variable",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": true,
+        "descriptionHadHtml": false,
+        "noImage": true,
+        "noDescription": false,
+        "variantPriceMismatch": true,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "107",
+      "wpStatus": "publish",
+      "wpSlug": "tandoori-chicken",
+      "dto": {
+        "name": "Tandoori Chicken",
+        "description": "Chicken marinated in yogurt and spices, served with mint chutney.",
+        "price": 550,
+        "image": null,
+        "primaryCategory": "tandoori",
+        "categories": [
+          "tandoori"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": true,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "117",
+      "wpStatus": "publish",
+      "wpSlug": "tandoori-lamb",
+      "dto": {
+        "name": "Tandoori Lamb",
+        "description": "Lamb prepared tandoori style.",
+        "price": 990,
+        "image": null,
+        "primaryCategory": "tandoori",
+        "categories": [
+          "tandoori"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": true,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "118",
+      "wpStatus": "publish",
+      "wpSlug": "tandoori-lamb-chops",
+      "dto": {
+        "name": "Tandoori Lamb Chops",
+        "description": "Lamb chops prepared tandoori style.",
+        "price": 990,
+        "image": null,
+        "primaryCategory": "tandoori",
+        "categories": [
+          "tandoori"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": true,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "119",
+      "wpStatus": "publish",
+      "wpSlug": "tandoori-paneer",
+      "dto": {
+        "name": "Tandoori Paneer",
+        "description": "Paneer prepared tandoori style.",
+        "price": 770,
+        "image": null,
+        "primaryCategory": "tandoori",
+        "categories": [
+          "tandoori"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": true,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "120",
+      "wpStatus": "publish",
+      "wpSlug": "tandoori-vegetables",
+      "dto": {
+        "name": "Tandoori Vegetables",
+        "description": "Vegetables prepared tandoori style.",
+        "price": 770,
+        "image": null,
+        "primaryCategory": "tandoori",
+        "categories": [
+          "tandoori"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": true,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "108",
+      "wpStatus": "publish",
+      "wpSlug": "naan",
+      "dto": {
+        "name": "Naan",
+        "description": "Freshly baked Indian flatbread.",
+        "price": 330,
+        "image": "https://www.bhetghathalalfood.com/wp-content/uploads/2024/08/nan.jpg",
+        "primaryCategory": "naan-roti",
+        "categories": [
+          "naan-roti"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": {
+        "name": "Type",
+        "options": [
+          {
+            "wpId": "1081",
+            "label": "Plain",
+            "price": 330,
+            "priceDelta": 0
+          },
+          {
+            "wpId": "1082",
+            "label": "Garlic",
+            "price": 495,
+            "priceDelta": 165
+          },
+          {
+            "wpId": "1083",
+            "label": "Butter",
+            "price": 330,
+            "priceDelta": 0
+          }
+        ]
+      },
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "variable",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": true,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": false,
+        "variantPriceMismatch": true,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "121",
+      "wpStatus": "publish",
+      "wpSlug": "whole-wheat-roti",
+      "dto": {
+        "name": "Whole Wheat Roti",
+        "description": "Whole wheat roti, an Indian flatbread.",
+        "price": 330,
+        "image": null,
+        "primaryCategory": "naan-roti",
+        "categories": [
+          "naan-roti"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": true,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "109",
+      "wpStatus": "publish",
+      "wpSlug": "samosa",
+      "dto": {
+        "name": "Samosa",
+        "description": "Crispy fried pastry with a spiced filling.",
+        "price": 330,
+        "image": null,
+        "primaryCategory": "snacks",
+        "categories": [
+          "snacks"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": true,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "110",
+      "wpStatus": "publish",
+      "wpSlug": "chatpate",
+      "dto": {
+        "name": "Chatpate",
+        "description": "Nepalese-style spicy, tangy snack.",
+        "price": 715,
+        "image": null,
+        "primaryCategory": "snacks",
+        "categories": [
+          "snacks"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": true,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "122",
+      "wpStatus": "publish",
+      "wpSlug": "pakora",
+      "dto": {
+        "name": "Pakora",
+        "description": "Pakora from our snacks menu.",
+        "price": 605,
+        "image": null,
+        "primaryCategory": "snacks",
+        "categories": [
+          "snacks"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": true,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "123",
+      "wpStatus": "publish",
+      "wpSlug": "chaat",
+      "dto": {
+        "name": "Chaat",
+        "description": "Chaat from our snacks menu.",
+        "price": 825,
+        "image": null,
+        "primaryCategory": "snacks",
+        "categories": [
+          "snacks"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": true,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "124",
+      "wpStatus": "publish",
+      "wpSlug": "gulab-jamun",
+      "dto": {
+        "name": "Gulab Jamun",
+        "description": "Gulab jamun from our dessert menu.",
+        "price": 330,
+        "image": null,
+        "primaryCategory": "desserts",
+        "categories": [
+          "desserts"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": true,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "125",
+      "wpStatus": "publish",
+      "wpSlug": "rasgulla",
+      "dto": {
+        "name": "Rasgulla",
+        "description": "Rasgulla from our dessert menu.",
+        "price": 330,
+        "image": null,
+        "primaryCategory": "desserts",
+        "categories": [
+          "desserts"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": true,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "126",
+      "wpStatus": "publish",
+      "wpSlug": "kheer",
+      "dto": {
+        "name": "Kheer",
+        "description": "Kheer from our dessert menu.",
+        "price": 330,
+        "image": null,
+        "primaryCategory": "desserts",
+        "categories": [
+          "desserts"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": true,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "111",
+      "wpStatus": "publish",
+      "wpSlug": "lassi",
+      "dto": {
+        "name": "Lassi",
+        "description": "Traditional yogurt drink.",
+        "price": 250,
+        "image": null,
+        "primaryCategory": "drinks",
+        "categories": [
+          "drinks"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": true,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "127",
+      "wpStatus": "publish",
+      "wpSlug": "masala-chai",
+      "dto": {
+        "name": "Masala Chai",
+        "description": "Traditional masala chai.",
+        "price": 250,
+        "image": null,
+        "primaryCategory": "drinks",
+        "categories": [
+          "drinks"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": true,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "128",
+      "wpStatus": "publish",
+      "wpSlug": "soft-drinks",
+      "dto": {
+        "name": "Soft Drinks",
+        "description": "Soft drinks.",
+        "price": 250,
+        "image": null,
+        "primaryCategory": "drinks",
+        "categories": [
+          "drinks"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": true,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "129",
+      "wpStatus": "publish",
+      "wpSlug": "nepali-set",
+      "dto": {
+        "name": "Nepali Set",
+        "description": "Set menu of Nepali dishes.",
+        "price": 1375,
+        "image": null,
+        "primaryCategory": "set-menus",
+        "categories": [
+          "set-menus"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": true,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "130",
+      "wpStatus": "publish",
+      "wpSlug": "indian-set",
+      "dto": {
+        "name": "Indian Set",
+        "description": "Set menu of Indian dishes.",
+        "price": 1628,
+        "image": null,
+        "primaryCategory": "set-menus",
+        "categories": [
+          "set-menus"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": true,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "131",
+      "wpStatus": "publish",
+      "wpSlug": "fusion-set",
+      "dto": {
+        "name": "Fusion Set",
+        "description": "Set menu of fusion dishes.",
+        "price": 1535,
+        "image": null,
+        "primaryCategory": "set-menus",
+        "categories": [
+          "set-menus"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": true,
+        "noDescription": false,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    }
+  ],
+  "banners": []
+}
