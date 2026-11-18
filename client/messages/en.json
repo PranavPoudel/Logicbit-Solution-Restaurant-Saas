@@ -416,6 +416,16 @@
     "payCreditCard": "Credit Card",
     "payBankTransfer": "Bank Transfer",
     "facilitiesTitle": "Facilities / Amenities",
+    "facility": {
+      "parking": "Parking",
+      "wifi": "Wi-Fi",
+      "air_conditioning": "Air conditioning",
+      "outdoor_seating": "Outdoor seating",
+      "family_friendly": "Family friendly",
+      "wheelchair_accessible": "Wheelchair accessible",
+      "kids_menu": "Kids menu",
+      "smoking_area": "Smoking area"
+    },
     "payCard": "Card",
     "mapStyle": "Map style",
     "mapCartoon": "Illustrated",

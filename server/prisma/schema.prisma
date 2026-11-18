@@ -195,6 +195,8 @@ model Restaurant {
   supportsDelivery Boolean @default(true)
   supportsPickup   Boolean @default(true)
   supportsDineIn   Boolean @default(false)
+  // Amenities shown on the restaurant page. Keys come from FACILITY_KEYS; labels are translated in the client.
+  facilities       String[] @default([])
 
   maxActivePromotions Int          @default(5)
   maxDiscountCap      Float        @default(50) // Maximum flat amount or percentage allowed without admin approval

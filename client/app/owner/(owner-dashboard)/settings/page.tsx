@@ -44,6 +44,7 @@ export interface SettingsForm {
   supportsDelivery: boolean;
   supportsPickup: boolean;
   supportsDineIn: boolean;
+  facilities: string[];
   isOpen: boolean;
   openingHours: DayHours[];
   timezone: string;
@@ -67,7 +68,7 @@ export interface SettingsForm {
 const EMPTY_FORM: SettingsForm = {
   name: "", address: "", phone: "", refundPolicy: "", city: "", latitude: "", longitude: "",
   primaryColor: "#E3A008", secondaryColor: "#17181C", heroHeading: "", heroSubheading: "",
-  supportsDelivery: true, supportsPickup: false, supportsDineIn: false, isOpen: true,
+  supportsDelivery: true, supportsPickup: false, supportsDineIn: false, facilities: [], isOpen: true,
   openingHours: DEFAULT_HOURS, timezone: "Asia/Kathmandu", selfDeliveryRadiusKm: "5",
   selfDeliveryFlatFee: "60", maxDeliveryRadiusKm: "10", paypayMerchantId: "", paypayApiKey: "",
   paypayApiSecret: "", stripeSecretKey: "", supportsCod: true, supportsCreditCard: false, supportsEsewa: false,
@@ -112,6 +113,7 @@ export default function SettingsPage() {
       isOpen: r.isOpen != null ? Boolean(r.isOpen) : prev.isOpen,
       openingHours: Array.isArray(r.openingHours) ? (r.openingHours as DayHours[]) : prev.openingHours,
       timezone: (r.timezone as string) ?? prev.timezone,
+      facilities: Array.isArray(r.facilities) ? (r.facilities as string[]) : prev.facilities,
       paypayMerchantId: (r.paypayMerchantId as string) ?? prev.paypayMerchantId,
       paypayApiKey: (r.paypayApiKey as string) ?? prev.paypayApiKey,
       supportsCod: r.supportsCod != null ? Boolean(r.supportsCod) : prev.supportsCod,
@@ -151,6 +153,7 @@ export default function SettingsPage() {
         supportsDelivery: form.supportsDelivery,
         supportsPickup: form.supportsPickup,
         supportsDineIn: form.supportsDineIn,
+        facilities: form.facilities,
         selfDeliveryRadiusKm: parseNumber(form.selfDeliveryRadiusKm),
         selfDeliveryFlatFee: parseNumber(form.selfDeliveryFlatFee),
         maxDeliveryRadiusKm: parseNumber(form.maxDeliveryRadiusKm),

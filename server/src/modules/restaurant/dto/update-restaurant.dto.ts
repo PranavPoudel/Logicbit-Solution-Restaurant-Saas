@@ -5,6 +5,8 @@ import {
   IsNumber,
   IsBoolean,
   IsArray,
+  IsIn,
+  ArrayUnique,
   ArrayMaxSize,
   ValidateNested,
   IsEnum,
@@ -15,6 +17,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { DayHoursDto } from './opening-hours.dto';
+import { FACILITY_KEYS } from '../facilities';
 
 export class UpdateRestaurantDto {
   @IsString()
@@ -121,6 +124,12 @@ export class UpdateRestaurantDto {
   @IsBoolean()
   @IsOptional()
   supportsDineIn?: boolean;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayUnique()
+  @IsIn(FACILITY_KEYS, { each: true })
+  facilities?: string[];
 
   @IsNumber()
   @Min(0)

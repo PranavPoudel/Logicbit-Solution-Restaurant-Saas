@@ -2,6 +2,7 @@
 import { useTranslations } from "next-intl";
 import { Icon } from "@/components/ui/primitives";
 import { getFullImageUrl } from "@/lib/utils/image";
+import { isFacilityKey } from "@/lib/facilities";
 import { OpeningHours } from "@/components/restaurant/opening-hours";
 import type { RestaurantDetail } from "@/types/menu";
 
@@ -48,7 +49,7 @@ export function StorefrontAboutSection({ title, aboutText, restaurant }: { title
     r.supportsIps && t("payBankTransfer"),
   ].filter(Boolean) as string[];
 
-  const facilities = r.facilities ?? [];
+  const facilities = (r.facilities ?? []).filter(isFacilityKey).map((key) => t(`facility.${key}`));
   const hasInfo = payments.length > 0 || facilities.length > 0;
 
   return (
