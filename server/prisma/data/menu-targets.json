@@ -1,0 +1,31 @@
+{
+  "defaultMenuFile": "namaste-menu-extracted.json",
+  "restaurants": [
+    {
+      "name": "Asian Dining & Bar Shanti",
+      "menuFile": "shanti-menu.json",
+      "keepEmptyCategories": true
+    },
+    {
+      "name": "Indian Restaurant Bollywood"
+    },
+    {
+      "name": "Bhetghat Halal Foods and Restaurants"
+    },
+    {
+      "name": "Odaan Restaurant"
+    },
+    {
+      "name": "Darbar Restaurants"
+    },
+    {
+      "name": "Indian Family Restaurant Prakriti Palace"
+    },
+    {
+      "name": "Aishworya Indian & Nepali Restaurant"
+    },
+    {
+      "name": "PathiBhara Restaurants"
+    }
+  ]
+}

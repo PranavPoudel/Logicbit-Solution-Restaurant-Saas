@@ -11,6 +11,8 @@
 //   --file=<path>            JSON to read. Default: prisma/data/namaste-menu-extracted.json
 //   --skip-images            Leave every image field empty.
 //   --skip-banners           Don't import the hero banners.
+//   --keep-empty-categories  Also create categories that hold no items (mirror the source site's category
+//                            list exactly). Default: empty categories are skipped.
 //   --mirror-dir=<dir>       Download images into <dir> instead of linking to the WordPress site...
 //   --public-base-url=<url>  ...and store <url>/<filename> in the database. Both flags are needed
 //                            together; you then host <dir> yourself (S3, /public, a CDN...).
@@ -65,6 +67,7 @@ export type Options = {
   dryRun: boolean;
   skipImages: boolean;
   skipBanners: boolean;
+  keepEmptyCategories?: boolean;
   mirrorDir?: string;
   publicBaseUrl?: string;
 };
@@ -180,6 +183,7 @@ export async function runImport(prisma: any, data: MenuFile, o: Options, log: Lo
     const parent = catBySlug.get(slug)!.parentSlug;
     if (parent) needed.add(parent);
   }
+  if (o.keepEmptyCategories) for (const c of data.categories) needed.add(c.slug); // mirror the source site, empty ones included
   const ordered = data.categories.filter((c) => needed.has(c.slug)).sort((a, b) => Number(!!a.parentSlug) - Number(!!b.parentSlug));
   const categoryId = new Map<string, string>();
   let catOrder = 0;
@@ -327,6 +331,7 @@ if (require.main === module) {
     await runImport(prisma, data, {
       restaurantSlug, mirrorDir, publicBaseUrl,
       dryRun: flag('dry-run'), skipImages: flag('skip-images'), skipBanners: flag('skip-banners'),
+      keepEmptyCategories: flag('keep-empty-categories'),
     });
   })()
     .catch((e) => { console.error(e); process.exit(1); })

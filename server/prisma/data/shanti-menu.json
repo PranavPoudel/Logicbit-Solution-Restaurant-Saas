@@ -1,0 +1,2615 @@
+{
+  "meta": {
+    "source": "https://www.asiandiningshanti.com",
+    "siteTitle": "Asian Dining & Bar Shanti",
+    "currency": "JPY (assumed: prices are whole yen)",
+    "counts": {
+      "categories": 18,
+      "items": 68,
+      "variantsTotal": 0,
+      "banners": 0
+    },
+    "ignored": {}
+  },
+  "categories": [
+    {
+      "wpTermId": "1",
+      "slug": "setmenu",
+      "name": "Set Menu",
+      "parentSlug": null,
+      "path": [
+        "Set Menu"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "2",
+      "slug": "curry",
+      "name": "Curry",
+      "parentSlug": null,
+      "path": [
+        "Curry"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "3",
+      "slug": "salad",
+      "name": "Salad",
+      "parentSlug": null,
+      "path": [
+        "Salad"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "4",
+      "slug": "soup",
+      "name": "Soup",
+      "parentSlug": null,
+      "path": [
+        "Soup"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "5",
+      "slug": "snack",
+      "name": "Snack",
+      "parentSlug": null,
+      "path": [
+        "Snack"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "6",
+      "slug": "thai-menu",
+      "name": "Thai Menu",
+      "parentSlug": null,
+      "path": [
+        "Thai Menu"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "7",
+      "slug": "tandoori",
+      "name": "Tandoori",
+      "parentSlug": null,
+      "path": [
+        "Tandoori"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "8",
+      "slug": "naan",
+      "name": "Naan",
+      "parentSlug": null,
+      "path": [
+        "Naan"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "9",
+      "slug": "rice",
+      "name": "Rice",
+      "parentSlug": null,
+      "path": [
+        "Rice"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "10",
+      "slug": "menus",
+      "name": "Menus",
+      "parentSlug": null,
+      "path": [
+        "Menus"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "11",
+      "slug": "dessert",
+      "name": "Dessert",
+      "parentSlug": null,
+      "path": [
+        "Dessert"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "12",
+      "slug": "drinks",
+      "name": "Drinks",
+      "parentSlug": null,
+      "path": [
+        "Drinks"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "13",
+      "slug": "alcohol-menu",
+      "name": "Alcohol Menu",
+      "parentSlug": null,
+      "path": [
+        "Alcohol Menu"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "14",
+      "slug": "chicken",
+      "name": "Chicken",
+      "parentSlug": null,
+      "path": [
+        "Chicken"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "15",
+      "slug": "family-set",
+      "name": "Family Set",
+      "parentSlug": null,
+      "path": [
+        "Family Set"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "16",
+      "slug": "take-out-cat",
+      "name": "Take-out",
+      "parentSlug": null,
+      "path": [
+        "Take-out"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "17",
+      "slug": "dinner-menu",
+      "name": "Dinner Menu",
+      "parentSlug": null,
+      "path": [
+        "Dinner Menu"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    },
+    {
+      "wpTermId": "18",
+      "slug": "lunch-menu",
+      "name": "Lunch Menu",
+      "parentSlug": null,
+      "path": [
+        "Lunch Menu"
+      ],
+      "flags": {
+        "duplicateName": false
+      }
+    }
+  ],
+  "items": [
+    {
+      "wpId": "101",
+      "wpStatus": "publish",
+      "wpSlug": "gapao-rice-set",
+      "dto": {
+        "name": "Gapao Rice Set",
+        "description": null,
+        "price": 1639,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/A09AF3A2-FA12-46D8-AE12-18B390145BF4.jpeg",
+        "primaryCategory": "setmenu",
+        "categories": [
+          "setmenu"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "102",
+      "wpStatus": "publish",
+      "wpSlug": "butter-chicken-curry",
+      "dto": {
+        "name": "Butter chicken curry",
+        "description": null,
+        "price": 1150,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/113AD673-4470-4EE4-8C3B-8334369B58A7-450x450.jpeg",
+        "primaryCategory": "curry",
+        "categories": [
+          "curry"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "103",
+      "wpStatus": "publish",
+      "wpSlug": "chana-masala",
+      "dto": {
+        "name": "Chana Masala",
+        "description": null,
+        "price": 999,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/chana-masala.jpg",
+        "primaryCategory": "curry",
+        "categories": [
+          "curry"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "104",
+      "wpStatus": "publish",
+      "wpSlug": "chicken-curry",
+      "dto": {
+        "name": "Chicken Curry",
+        "description": null,
+        "price": 1000,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/chicken-curry.jpg",
+        "primaryCategory": "curry",
+        "categories": [
+          "curry"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "105",
+      "wpStatus": "publish",
+      "wpSlug": "chicken-masala",
+      "dto": {
+        "name": "Chicken Masala",
+        "description": null,
+        "price": 1099,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2024/03/chicken-masala.jpg",
+        "primaryCategory": "curry",
+        "categories": [
+          "curry"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "106",
+      "wpStatus": "publish",
+      "wpSlug": "chicken-tikka-masala",
+      "dto": {
+        "name": "Chicken Tikka Masala",
+        "description": null,
+        "price": 1120,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2023/01/chicken-tikka-masala.jpg",
+        "primaryCategory": "curry",
+        "categories": [
+          "curry"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "107",
+      "wpStatus": "publish",
+      "wpSlug": "coconut-chicken",
+      "dto": {
+        "name": "Coconut Chicken",
+        "description": null,
+        "price": 1070,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/coconut-chicken.jpg",
+        "primaryCategory": "curry",
+        "categories": [
+          "curry"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "108",
+      "wpStatus": "publish",
+      "wpSlug": "dal-curry",
+      "dto": {
+        "name": "Dal Curry",
+        "description": null,
+        "price": 950,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/dal-curry.jpg",
+        "primaryCategory": "curry",
+        "categories": [
+          "curry"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "109",
+      "wpStatus": "publish",
+      "wpSlug": "green-curry",
+      "dto": {
+        "name": "Green Curry",
+        "description": null,
+        "price": 1050,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/A8C03080-265C-4D28-A51E-9A8AE0A7D74A-450x450.jpeg",
+        "primaryCategory": "curry",
+        "categories": [
+          "curry"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "110",
+      "wpStatus": "publish",
+      "wpSlug": "keema-cheese",
+      "dto": {
+        "name": "Keema Cheese",
+        "description": null,
+        "price": 1030,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/keema-cheese.jpg",
+        "primaryCategory": "curry",
+        "categories": [
+          "curry"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "111",
+      "wpStatus": "publish",
+      "wpSlug": "keema-curry",
+      "dto": {
+        "name": "Keema Curry",
+        "description": null,
+        "price": 1000,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2024/03/keema-curry.jpg",
+        "primaryCategory": "curry",
+        "categories": [
+          "curry"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "112",
+      "wpStatus": "publish",
+      "wpSlug": "keema-nasu-eggplant",
+      "dto": {
+        "name": "Keema Nasu(Eggplant)",
+        "description": null,
+        "price": 1040,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2024/03/keema-nasueggplant.jpg",
+        "primaryCategory": "curry",
+        "categories": [
+          "curry"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "113",
+      "wpStatus": "publish",
+      "wpSlug": "keema-spinach",
+      "dto": {
+        "name": "Keema Spinach",
+        "description": null,
+        "price": 1050,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2024/03/keema-spinach.jpg",
+        "primaryCategory": "curry",
+        "categories": [
+          "curry"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "114",
+      "wpStatus": "publish",
+      "wpSlug": "mutton-curry",
+      "dto": {
+        "name": "Mutton curry",
+        "description": null,
+        "price": 1080,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/059307EB-7893-45BC-84BD-32826F18C032-450x450.jpeg",
+        "primaryCategory": "curry",
+        "categories": [
+          "curry"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "115",
+      "wpStatus": "publish",
+      "wpSlug": "mutton-masala",
+      "dto": {
+        "name": "Mutton Masala",
+        "description": null,
+        "price": 1120,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2024/03/mutton-masala.jpg",
+        "primaryCategory": "curry",
+        "categories": [
+          "curry"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "116",
+      "wpStatus": "publish",
+      "wpSlug": "pork-curry",
+      "dto": {
+        "name": "Pork Curry",
+        "description": null,
+        "price": 1020,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2024/03/pork-curry.jpg",
+        "primaryCategory": "curry",
+        "categories": [
+          "curry"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "117",
+      "wpStatus": "publish",
+      "wpSlug": "seafood-curry",
+      "dto": {
+        "name": "Seafood curry",
+        "description": null,
+        "price": 1000,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/seafood-curry-1.jpg",
+        "primaryCategory": "curry",
+        "categories": [
+          "curry"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "118",
+      "wpStatus": "publish",
+      "wpSlug": "spinach-chicken",
+      "dto": {
+        "name": "Spinach Chicken",
+        "description": null,
+        "price": 1090,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/ECE78AE9-03FF-44A5-8148-AB8236DEF4A2-450x450.jpeg",
+        "primaryCategory": "curry",
+        "categories": [
+          "curry"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "119",
+      "wpStatus": "publish",
+      "wpSlug": "spinach-mutton",
+      "dto": {
+        "name": "Spinach Mutton",
+        "description": null,
+        "price": 1110,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/spinach-mutton.jpg",
+        "primaryCategory": "curry",
+        "categories": [
+          "curry"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "120",
+      "wpStatus": "publish",
+      "wpSlug": "spinach-paneer",
+      "dto": {
+        "name": "Spinach Paneer",
+        "description": null,
+        "price": 1080,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/spnach-paneer.jpg",
+        "primaryCategory": "curry",
+        "categories": [
+          "curry"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "121",
+      "wpStatus": "publish",
+      "wpSlug": "spinach-prawn",
+      "dto": {
+        "name": "Spinach Prawn",
+        "description": null,
+        "price": 1150,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/spinach-prawn.jpg",
+        "primaryCategory": "curry",
+        "categories": [
+          "curry"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "122",
+      "wpStatus": "publish",
+      "wpSlug": "vegetable-curry",
+      "dto": {
+        "name": "Vegetable Curry",
+        "description": null,
+        "price": 999,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2024/03/veg-curry.jpg",
+        "primaryCategory": "curry",
+        "categories": [
+          "curry"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "123",
+      "wpStatus": "publish",
+      "wpSlug": "caesar-salad",
+      "dto": {
+        "name": "Caesar Salad",
+        "description": null,
+        "price": 650,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/818D2329-AF4B-429F-83DF-8CFF4173B4F4-450x450.jpeg",
+        "primaryCategory": "salad",
+        "categories": [
+          "salad"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "124",
+      "wpStatus": "publish",
+      "wpSlug": "chicken-salad",
+      "dto": {
+        "name": "Chicken Salad",
+        "description": null,
+        "price": 699,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/0FC0E310-C34A-4E9E-BBAE-C5A6C6FB75A8-450x450.jpeg",
+        "primaryCategory": "salad",
+        "categories": [
+          "salad"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "125",
+      "wpStatus": "publish",
+      "wpSlug": "green-salad",
+      "dto": {
+        "name": "Green salad",
+        "description": null,
+        "price": 550,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/AF2025A2-461E-4E78-A384-ACD9F1AA78AE-450x450.jpeg",
+        "primaryCategory": "salad",
+        "categories": [
+          "salad"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "126",
+      "wpStatus": "publish",
+      "wpSlug": "namaharumaki-2p",
+      "dto": {
+        "name": "Namaharumaki (2p)",
+        "description": null,
+        "price": 750,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/FC0A4DD5-60B7-4954-88E5-AF520A4324A8-450x450.jpeg",
+        "primaryCategory": "salad",
+        "categories": [
+          "salad"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "127",
+      "wpStatus": "publish",
+      "wpSlug": "papaya-salad",
+      "dto": {
+        "name": "Papaya salad",
+        "description": null,
+        "price": 940,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/2FBD54DB-8682-4577-AC8C-441D8145D966-450x450.jpeg",
+        "primaryCategory": "salad",
+        "categories": [
+          "salad"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "128",
+      "wpStatus": "publish",
+      "wpSlug": "shanti-special-salad-seafood",
+      "dto": {
+        "name": "Shanti Special salad (seafood)",
+        "description": null,
+        "price": 750,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/FF9B9F21-B9EC-4A4A-B11F-EDA4E754A625-450x450.jpeg",
+        "primaryCategory": "salad",
+        "categories": [
+          "salad"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "129",
+      "wpStatus": "publish",
+      "wpSlug": "tomato-cheese-salad",
+      "dto": {
+        "name": "Tomato Cheese salad",
+        "description": null,
+        "price": 650,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/chhese_tamoto-450x450.png",
+        "primaryCategory": "salad",
+        "categories": [
+          "salad"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "130",
+      "wpStatus": "publish",
+      "wpSlug": "yamusen-salad",
+      "dto": {
+        "name": "Yamusen salad",
+        "description": null,
+        "price": 940,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/CB226181-3B99-4A05-8DED-6BC2CF9A1243-450x450.jpeg",
+        "primaryCategory": "salad",
+        "categories": [
+          "salad"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "131",
+      "wpStatus": "publish",
+      "wpSlug": "tom-kha-gai-soup",
+      "dto": {
+        "name": "Tom Kha Gai Soup",
+        "description": null,
+        "price": 1250,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/849B43EC-EFF2-40DC-A06A-B9E26C4CA127-450x450.jpeg",
+        "primaryCategory": "soup",
+        "categories": [
+          "soup"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "132",
+      "wpStatus": "publish",
+      "wpSlug": "tomyum-kung-big-shrimp-2-p",
+      "dto": {
+        "name": "Tomyum kung(Big Shrimp 2 p)",
+        "description": null,
+        "price": 1200,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/3E655514-80D8-40E4-A3C7-956F3CB1AFD1-450x450.jpeg",
+        "primaryCategory": "soup",
+        "categories": [
+          "soup"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "133",
+      "wpStatus": "publish",
+      "wpSlug": "chicken-chilli",
+      "dto": {
+        "name": "Chicken chilli",
+        "description": null,
+        "price": 810,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/chicken-chilli.jpg",
+        "primaryCategory": "snack",
+        "categories": [
+          "snack"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "134",
+      "wpStatus": "publish",
+      "wpSlug": "chicken-pakoda-6p",
+      "dto": {
+        "name": "Chicken pakoda(6p)",
+        "description": null,
+        "price": 699,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/chicken-pakoda.jpg",
+        "primaryCategory": "snack",
+        "categories": [
+          "snack"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "135",
+      "wpStatus": "publish",
+      "wpSlug": "fry-potato",
+      "dto": {
+        "name": "Fry Potato",
+        "description": null,
+        "price": 500,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/fry-potato.jpg",
+        "primaryCategory": "snack",
+        "categories": [
+          "snack"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "136",
+      "wpStatus": "publish",
+      "wpSlug": "masala-papad-2p",
+      "dto": {
+        "name": "Masala papad (2p)",
+        "description": null,
+        "price": 550,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/masala-papad.jpg",
+        "primaryCategory": "snack",
+        "categories": [
+          "snack"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "137",
+      "wpStatus": "publish",
+      "wpSlug": "momo-6-pcs",
+      "dto": {
+        "name": "Momo (6 pcs)",
+        "description": null,
+        "price": 700,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/momo.jpg",
+        "primaryCategory": "snack",
+        "categories": [
+          "snack"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "138",
+      "wpStatus": "publish",
+      "wpSlug": "prawn-pakoda-6pcs",
+      "dto": {
+        "name": "Prawn Pakoda(6pcs)",
+        "description": null,
+        "price": 800,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2024/03/prawn-pakoda.jpg",
+        "primaryCategory": "snack",
+        "categories": [
+          "snack"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "139",
+      "wpStatus": "publish",
+      "wpSlug": "prawn-chilli",
+      "dto": {
+        "name": "Prawn Chilli",
+        "description": null,
+        "price": 899,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2024/03/prawn-chilli.jpg",
+        "primaryCategory": "snack",
+        "categories": [
+          "snack"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "140",
+      "wpStatus": "publish",
+      "wpSlug": "samosa-2p",
+      "dto": {
+        "name": "Samosa (2p)",
+        "description": null,
+        "price": 550,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/samosa.jpg",
+        "primaryCategory": "snack",
+        "categories": [
+          "snack"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "141",
+      "wpStatus": "publish",
+      "wpSlug": "vegetable-pakoda-6pcs",
+      "dto": {
+        "name": "Vegetable Pakoda(6pcs)",
+        "description": null,
+        "price": 699,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2024/03/veg-pakoda.jpg",
+        "primaryCategory": "snack",
+        "categories": [
+          "snack"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "142",
+      "wpStatus": "publish",
+      "wpSlug": "aaona-itame",
+      "dto": {
+        "name": "Aaona Itame",
+        "description": null,
+        "price": 789,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/D406BADB-2BD1-4601-AC88-B74B9BF034B2-450x450.jpeg",
+        "primaryCategory": "thai-menu",
+        "categories": [
+          "thai-menu"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "143",
+      "wpStatus": "publish",
+      "wpSlug": "age-harumaki-4p",
+      "dto": {
+        "name": "Age harumaki(4p)",
+        "description": null,
+        "price": 1100,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/6BFB8516-92D8-4654-A316-8EEC752C190B-450x450.jpeg",
+        "primaryCategory": "thai-menu",
+        "categories": [
+          "thai-menu"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "144",
+      "wpStatus": "publish",
+      "wpSlug": "ebi-chahan-prawn-fried-rice",
+      "dto": {
+        "name": "Ebi Chahan(Prawn Fried Rice)",
+        "description": null,
+        "price": 1300,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2024/03/ebi-chahan.jpg",
+        "primaryCategory": "thai-menu",
+        "categories": [
+          "thai-menu"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "145",
+      "wpStatus": "publish",
+      "wpSlug": "ebi-ninniku-prawn-garlic",
+      "dto": {
+        "name": "Ebi Ninniku(Prawn Garlic)",
+        "description": null,
+        "price": 1150,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/8F3A7D37-26A8-4A51-A6BC-8B635BBA968D-450x450.jpeg",
+        "primaryCategory": "thai-menu",
+        "categories": [
+          "thai-menu"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "146",
+      "wpStatus": "publish",
+      "wpSlug": "gapao-rice-single-item",
+      "dto": {
+        "name": "Gapao Rice (single Item)",
+        "description": null,
+        "price": 1200,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/6F27E4AB-E951-424D-9BB7-39268531F1A9-450x450.jpeg",
+        "primaryCategory": "thai-menu",
+        "categories": [
+          "thai-menu"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "147",
+      "wpStatus": "publish",
+      "wpSlug": "kani-ninniku-crab-garlic",
+      "dto": {
+        "name": "Kani Ninniku (Crab Garlic)",
+        "description": null,
+        "price": 1359,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/005369CB-B7DE-4A3D-A14B-CE677241D31E-450x450.jpeg",
+        "primaryCategory": "thai-menu",
+        "categories": [
+          "thai-menu"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "148",
+      "wpStatus": "publish",
+      "wpSlug": "padthai-single-item",
+      "dto": {
+        "name": "Padthai (Single Item)",
+        "description": null,
+        "price": 1200,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/A5B666EA-2C75-48D2-B690-9618C57D1214-450x450.jpeg",
+        "primaryCategory": "thai-menu",
+        "categories": [
+          "thai-menu"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "149",
+      "wpStatus": "publish",
+      "wpSlug": "prawn-broccoli",
+      "dto": {
+        "name": "Prawn Broccoli",
+        "description": null,
+        "price": 1239,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/E646059F-8E3B-4B5B-BE6B-F994340498EF-450x450.jpeg",
+        "primaryCategory": "thai-menu",
+        "categories": [
+          "thai-menu"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "150",
+      "wpStatus": "publish",
+      "wpSlug": "thai-garlic-chicken",
+      "dto": {
+        "name": "Thai Garlic Chicken",
+        "description": null,
+        "price": 859,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/60C44527-9041-46B3-88A4-DBBCE0BBEBBC-450x450.jpeg",
+        "primaryCategory": "thai-menu",
+        "categories": [
+          "thai-menu"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "151",
+      "wpStatus": "publish",
+      "wpSlug": "thai-omelet",
+      "dto": {
+        "name": "Thai Omelet",
+        "description": null,
+        "price": 600,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/94838D4D-0096-43C1-9D35-5742B6A6AD4D-450x450.jpeg",
+        "primaryCategory": "thai-menu",
+        "categories": [
+          "thai-menu"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "152",
+      "wpStatus": "publish",
+      "wpSlug": "chicken-tikka-4p",
+      "dto": {
+        "name": "Chicken Tikka(4p)",
+        "description": null,
+        "price": 1050,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2024/02/chicken-tikka4p.jpg",
+        "primaryCategory": "tandoori",
+        "categories": [
+          "tandoori"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "153",
+      "wpStatus": "publish",
+      "wpSlug": "fish-tikka-4p",
+      "dto": {
+        "name": "Fish tikka (4p)",
+        "description": null,
+        "price": 1250,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/fish-tikka4p.jpg",
+        "primaryCategory": "tandoori",
+        "categories": [
+          "tandoori"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "154",
+      "wpStatus": "publish",
+      "wpSlug": "garlic-chicken-tikka-4p",
+      "dto": {
+        "name": "Garlic Chicken Tikka(4p)",
+        "description": null,
+        "price": 1150,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/garlic-chicken-tikka4p.jpg",
+        "primaryCategory": "tandoori",
+        "categories": [
+          "tandoori"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "155",
+      "wpStatus": "publish",
+      "wpSlug": "lamb-chop-4p",
+      "dto": {
+        "name": "Lamb chop (4p)",
+        "description": null,
+        "price": 1800,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/lamb-chop4p.jpg",
+        "primaryCategory": "tandoori",
+        "categories": [
+          "tandoori"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "156",
+      "wpStatus": "publish",
+      "wpSlug": "malai-tikka-4p",
+      "dto": {
+        "name": "Malai Tikka(4p)",
+        "description": null,
+        "price": 1100,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2024/02/malai-tikka4p.jpg",
+        "primaryCategory": "tandoori",
+        "categories": [
+          "tandoori"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "157",
+      "wpStatus": "publish",
+      "wpSlug": "mix-grill-7-items",
+      "dto": {
+        "name": "Mix Grill (7 Items)",
+        "description": null,
+        "price": 2350,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/mix-grill.jpg",
+        "primaryCategory": "tandoori",
+        "categories": [
+          "tandoori"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "158",
+      "wpStatus": "publish",
+      "wpSlug": "seekh-kabab-4p",
+      "dto": {
+        "name": "Seekh kabab (4p)",
+        "description": null,
+        "price": 1050,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/seekh-kabab4p.jpg",
+        "primaryCategory": "tandoori",
+        "categories": [
+          "tandoori"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "159",
+      "wpStatus": "publish",
+      "wpSlug": "tandoori-chicken-4p",
+      "dto": {
+        "name": "Tandoori chicken(4p)",
+        "description": null,
+        "price": 1199,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/tandoori-chicken4p.jpg",
+        "primaryCategory": "tandoori",
+        "categories": [
+          "tandoori"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "160",
+      "wpStatus": "publish",
+      "wpSlug": "tandoori-prawn-4p",
+      "dto": {
+        "name": "Tandoori Prawn (4p)",
+        "description": null,
+        "price": 1300,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/tandoori-prawn4p.jpg",
+        "primaryCategory": "tandoori",
+        "categories": [
+          "tandoori"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "161",
+      "wpStatus": "publish",
+      "wpSlug": "cheese-naan",
+      "dto": {
+        "name": "Cheese Naan",
+        "description": null,
+        "price": 630,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2024/03/cheese-naan.jpg",
+        "primaryCategory": "naan",
+        "categories": [
+          "naan"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "162",
+      "wpStatus": "publish",
+      "wpSlug": "garlic-cheese-naan",
+      "dto": {
+        "name": "Garlic Cheese Naan",
+        "description": null,
+        "price": 730,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2024/03/garkic-cheese-naan.jpg",
+        "primaryCategory": "naan",
+        "categories": [
+          "naan"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "163",
+      "wpStatus": "publish",
+      "wpSlug": "garlic-naan",
+      "dto": {
+        "name": "Garlic Naan",
+        "description": null,
+        "price": 620,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/C813FE8F-1165-4B5C-B841-1273C86AD2F5-450x450.jpeg",
+        "primaryCategory": "naan",
+        "categories": [
+          "naan"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "164",
+      "wpStatus": "publish",
+      "wpSlug": "onion-kulcha",
+      "dto": {
+        "name": "Onion kulcha",
+        "description": null,
+        "price": 600,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/0F799220-3146-40C1-8779-CCEA721ADB2B-450x450.jpeg",
+        "primaryCategory": "naan",
+        "categories": [
+          "naan"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "165",
+      "wpStatus": "publish",
+      "wpSlug": "plain-naan",
+      "dto": {
+        "name": "Plain Naan",
+        "description": null,
+        "price": 399,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2024/03/plain-naan.jpg",
+        "primaryCategory": "naan",
+        "categories": [
+          "naan"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "166",
+      "wpStatus": "publish",
+      "wpSlug": "potato-nan",
+      "dto": {
+        "name": "Potato Nan",
+        "description": null,
+        "price": 600,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/8F2E26FF-F7DF-4AA3-BED1-48F0A0FA0387-450x450.jpeg",
+        "primaryCategory": "naan",
+        "categories": [
+          "naan"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "167",
+      "wpStatus": "publish",
+      "wpSlug": "sesame-naan",
+      "dto": {
+        "name": "Sesame Naan",
+        "description": null,
+        "price": 500,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/0B8610CB-D7F7-4F45-A715-7B08AE99735D-450x450.jpeg",
+        "primaryCategory": "naan",
+        "categories": [
+          "naan"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    },
+    {
+      "wpId": "168",
+      "wpStatus": "publish",
+      "wpSlug": "white-rice",
+      "dto": {
+        "name": "White Rice",
+        "description": null,
+        "price": 399,
+        "image": "https://www.asiandiningshanti.com/wp-content/uploads/2021/12/105FC0ED-3AC6-47C1-ABEE-B26D9417FE8F-450x450.jpeg",
+        "primaryCategory": "rice",
+        "categories": [
+          "rice"
+        ],
+        "isAvailable": true
+      },
+      "variantGroup": null,
+      "not_supported": {
+        "sku": null,
+        "wpProductType": "simple",
+        "totalSales": null,
+        "wcAverageRating": null,
+        "wcReviewCount": null,
+        "taxStatus": null,
+        "manageStock": null
+      },
+      "flags": {
+        "multiCategory": false,
+        "hasVariants": false,
+        "descriptionHadHtml": false,
+        "noImage": false,
+        "noDescription": true,
+        "variantPriceMismatch": false,
+        "duplicateName": false
+      }
+    }
+  ],
+  "banners": []
+}
