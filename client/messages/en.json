@@ -347,6 +347,8 @@
     "errKitchen": "Enter your kitchen name.",
     "errPhone": "Enter a valid phone number, e.g. 090-1234-5678.",
     "errAddress": "Enter a street address or landmark.",
+    "pinLabel": "Pin your kitchen on the map",
+    "errPin": "Press Find on map, or move the map until the pin sits on your kitchen.",
     "errCity": "Enter your city.",
     "errName": "Enter your full name.",
     "errEmail": "Enter a valid email, e.g. sita@gmail.com.",
