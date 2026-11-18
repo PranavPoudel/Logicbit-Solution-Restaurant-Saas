@@ -19,7 +19,7 @@ export function RestaurantCard({ r, index, compact }: { r: DiscoveryRestaurant; 
   const hasOrders = (r.totalOrders ?? 0) > 0;
   const name = r.name ?? t("fallbackName");
   const href = `/restaurants/${r.slug ?? r.id}`;
-  const phone = (r as DiscoveryRestaurant & { phone?: string | null }).phone;
+  const phone = r.phone;
 
   const { fav, toggle } = useFavorite(r.id);
 
@@ -69,7 +69,7 @@ export function RestaurantCard({ r, index, compact }: { r: DiscoveryRestaurant; 
           </p>
           {phone && (
             <p className="flex items-center gap-1.5 font-bold text-ink">
-              <span aria-hidden>☎</span>
+              <Icon name="phone" className="h-4 w-4" />
               {phone}
             </p>
           )}

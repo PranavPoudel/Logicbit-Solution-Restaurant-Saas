@@ -1,4 +1,6 @@
 // app/[locale]/(customer)/faq/page.tsx
+import { theme } from "@/config/theme";
+
 const FAQS = [
   {
     q: "How do I place an order?",
@@ -30,7 +32,7 @@ const FAQS = [
   },
   {
     q: "How can I contact support?",
-    a: "Email support@logicbit.com or use the Ask us chat button at the bottom right of the page.",
+    a: `Email ${theme.content.contactEmail} or use the Ask us chat button at the bottom right of the page.`,
   },
 ];
 

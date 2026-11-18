@@ -245,6 +245,7 @@
     "stomach": "Your stomach called. It's upset.",
     "orderNow": "Okay fine, order now",
     "eat": "Eat",
+    "faq": "FAQ",
     "search": "Search"
   },
   "notFound": {
@@ -410,6 +411,11 @@
     "zoomOut": "Zoom out",
     "weAccept": "We accept",
     "payCod": "Cash on delivery",
+    "paymentsTitle": "Payment Methods",
+    "payCash": "Cash",
+    "payCreditCard": "Credit Card",
+    "payBankTransfer": "Bank Transfer",
+    "facilitiesTitle": "Facilities / Amenities",
     "payCard": "Card",
     "mapStyle": "Map style",
     "mapCartoon": "Illustrated",

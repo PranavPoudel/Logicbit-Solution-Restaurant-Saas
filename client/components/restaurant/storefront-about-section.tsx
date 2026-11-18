@@ -1,13 +1,11 @@
 // components/restaurant/storefront-about-section.tsx
+import { useTranslations } from "next-intl";
 import { Icon } from "@/components/ui/primitives";
 import { getFullImageUrl } from "@/lib/utils/image";
 import { OpeningHours } from "@/components/restaurant/opening-hours";
 import type { RestaurantDetail } from "@/types/menu";
 
 type RestaurantExtras = {
-  supportsDelivery?: boolean;
-  supportsPickup?: boolean;
-  supportsDineIn?: boolean;
   supportsCod?: boolean;
   supportsCreditCard?: boolean;
   supportsEsewa?: boolean;
@@ -36,27 +34,22 @@ function InfoBlock({ title, items }: { title: string; items: string[] }) {
 }
 
 export function StorefrontAboutSection({ title, aboutText, restaurant }: { title: string; aboutText?: string | null; restaurant: RestaurantDetail }) {
+  const t = useTranslations("restaurant");
   const rated = (restaurant.avgRating ?? 0) > 0;
   const r = restaurant as RestaurantDetail & RestaurantExtras;
 
-  const options = [
-    r.supportsDelivery && "Delivery",
-    r.supportsPickup && "Takeaway",
-    r.supportsDineIn && "Dine-in",
-  ].filter(Boolean) as string[];
-
   const payments = [
-    r.supportsCod && "Cash",
-    r.supportsCreditCard && "Credit Card",
+    r.supportsCod && t("payCash"),
+    r.supportsCreditCard && t("payCreditCard"),
     r.supportsPaypay && "PayPay",
     r.supportsEsewa && "eSewa",
     r.supportsKhalti && "Khalti",
     r.supportsPhonePay && "PhonePe",
-    r.supportsIps && "Bank Transfer",
+    r.supportsIps && t("payBankTransfer"),
   ].filter(Boolean) as string[];
 
   const facilities = r.facilities ?? [];
-  const hasInfo = options.length > 0 || payments.length > 0 || facilities.length > 0;
+  const hasInfo = payments.length > 0 || facilities.length > 0;
 
   return (
     <section aria-labelledby="about" className="mx-auto w-full max-w-[1440px] border-t border-ink/10 px-5 py-10 md:px-10">
@@ -91,9 +84,8 @@ export function StorefrontAboutSection({ title, aboutText, restaurant }: { title
 
         {hasInfo && (
           <div className={`grid gap-4 md:grid-cols-2 ${aboutText ? "mt-8 border-t border-ink/10 pt-8" : ""}`}>
-            <InfoBlock title="Options" items={options} />
-            <InfoBlock title="Payment Methods" items={payments} />
-            <InfoBlock title="Facilities / Amenities" items={facilities} />
+            <InfoBlock title={t("paymentsTitle")} items={payments} />
+            <InfoBlock title={t("facilitiesTitle")} items={facilities} />
           </div>
         )}
 
