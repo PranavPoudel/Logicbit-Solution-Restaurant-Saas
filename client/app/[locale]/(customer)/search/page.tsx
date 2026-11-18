@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { RestaurantCard } from "@/components/restaurant/restaurant-card";
 import { RestaurantCardSkeleton } from "@/components/restaurant/restaurant-card-skeleton";
-import { Button, Icon, IconButton, Squiggle } from "@/components/ui/primitives";
+import { Button, Icon, IconButton } from "@/components/ui/primitives";
 import { getAllNearby } from "@/lib/api/discovery";
 import { matchesQuery } from "@/lib/utils/cuisine";
 import { useGeolocation } from "@/hooks/use-geolocation";
@@ -38,7 +38,6 @@ export default function SearchPage({ searchParams }: { searchParams: Promise<{ q
         {t("title")}{" "}
         <span className="relative inline-block">
           {t("accent")}
-          <Squiggle className="absolute -bottom-2 left-0 h-4 w-full text-chili md:-bottom-3 md:h-6" />
         </span>
       </h1>
 

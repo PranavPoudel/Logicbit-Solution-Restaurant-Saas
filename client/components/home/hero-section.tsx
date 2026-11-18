@@ -36,7 +36,7 @@ export function HeroSection({ cuisines, openCount, topRating, city }: { cuisines
       <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-12">
         <div>
           <span className="inline-flex -rotate-2 items-center gap-2 rounded-full bg-ink px-4 py-2 text-sm font-bold text-cream">
-            <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-herb motion-reduce:animate-none" />
+            <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-chili motion-reduce:animate-none" />
             {openCount > 0 ? t("openRight", { count: openCount }) : t("openSoon")}
           </span>
           <h1
@@ -53,8 +53,8 @@ export function HeroSection({ cuisines, openCount, topRating, city }: { cuisines
                 >
                   {line}
                   {last && (
-                    // The punctuation is set as a tilted saffron sticker, like the "Hot deal" badge and the tilted pill above, and pops in after the words.
-                    <span className="animate-pop-in ml-[0.14em] inline-flex h-[0.74em] w-[0.74em] rotate-[8deg] items-center justify-center rounded-[0.22em] bg-saffron align-[-0.02em] text-[0.62em] leading-none tracking-normal text-[#2b1410] shadow-soft">
+                    // The punctuation is set as a tilted chocolate sticker, like the "Hot deal" badge and the tilted pill above, and pops in after the words.
+                    <span className="animate-pop-in ml-[0.14em] inline-flex h-[0.74em] w-[0.74em] rotate-[8deg] items-center justify-center rounded-[0.22em] bg-ink align-[-0.02em] text-[0.62em] leading-none tracking-normal text-cream shadow-soft">
                       {t("heroE")}
                     </span>
                   )}
@@ -103,7 +103,7 @@ export function HeroSection({ cuisines, openCount, topRating, city }: { cuisines
             <img src={heroImages[1] ?? heroImages[0]} alt={t("heroAlt2")} className="h-full w-full object-cover" />
           </div>
           {topRating > 0 && (
-            <span className="absolute -right-1 -top-1 z-30 grid h-16 w-16 rotate-12 place-items-center rounded-full border-4 border-cream bg-ink font-display text-lg font-extrabold text-saffron md:h-20 md:w-20 md:text-xl">★{topRating.toFixed(1)}</span>
+            <span className="absolute -right-1 -top-1 z-30 grid h-16 w-16 rotate-12 place-items-center rounded-full border-4 border-cream bg-chili font-display text-lg font-extrabold text-parchment md:h-20 md:w-20 md:text-xl">★{topRating.toFixed(1)}</span>
           )}
         </div>
       </div>

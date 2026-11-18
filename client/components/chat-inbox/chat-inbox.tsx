@@ -1,3 +1,4 @@
+// components/chat-inbox/chat-inbox.tsx
 "use client";
 
 // ChatInbox — shared chat list + live reply box.

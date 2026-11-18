@@ -1,3 +1,4 @@
+// src/modules/chats/chat-bot.service.ts
 // chat-bot.service.ts — the auto-reply "brain" behind the chat widget.
 //
 // 1. Keyword rules answer from REAL database data (menu, prices, address,
@@ -21,6 +22,11 @@ import {
   AiReplyService,
   RestaurantAiContext,
 } from './ai-reply.service';
+
+interface BotReply {
+  text: string;
+  followUps?: string[]; // Suggested follow-up questions
+}
 
 interface RestaurantRow {
   id: string;
@@ -129,6 +135,48 @@ const mapUrl = (query: string) => {
   return `https://www.google.com/maps/search/?api=1&query=${q}`;
 };
 
+function levenshteinDistance(a: string, b: string): number {
+  const matrix: number[][] = [];
+  
+  for (let i = 0; i <= b.length; i++) {
+    matrix[i] = [i];
+  }
+  for (let j = 0; j <= a.length; j++) {
+    matrix[0][j] = j;
+  }
+  
+  for (let i = 1; i <= b.length; i++) {
+    for (let j = 1; j <= a.length; j++) {
+      if (b.charAt(i - 1) === a.charAt(j - 1)) {
+        matrix[i][j] = matrix[i - 1][j - 1];
+      } else {
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j - 1] + 1,
+          matrix[i][j - 1] + 1,
+          matrix[i - 1][j] + 1,
+        );
+      }
+    }
+  }
+  
+  return matrix[b.length][a.length];
+}
+
+function fuzzyMatch(query: string, target: string, threshold: number = 0.7): boolean {
+  const q = query.toLowerCase().trim();
+  const t = target.toLowerCase().trim();
+  
+  // Exact substring match (fast path)
+  if (t.includes(q) || q.includes(t)) return true;
+  
+  // Fuzzy match using Levenshtein distance
+  const distance = levenshteinDistance(q, t);
+  const maxLen = Math.max(q.length, t.length);
+  const similarity = 1 - (distance / maxLen);
+  
+  return similarity >= threshold;
+}
+
 @Injectable()
 export class ChatBotService {
   constructor(
@@ -144,51 +192,72 @@ export class ChatBotService {
     restaurantId: string,
     userText: string,
     history: AiChatMessage[] = [],
-  ): Promise<string> {
+  ): Promise<BotReply> {
     const r = await this.loadRestaurant(restaurantId);
-    if (!r) return this.genericFallback(null, hasJapanese(userText));
+    const ja = hasJapanese(userText);
+    const L = (en: string, jp: string) => (ja ? jp : en);
+
+    if (!r) {
+      return { 
+        text: this.genericFallback(null, ja), 
+        followUps: ja ? ['メニューを見せて', '営業時間は？', '住所は？'] : ['Show me the menu', 'Opening hours?', 'Address?'] 
+      };
+    }
 
     const text = userText.trim();
-    const ja = hasJapanese(text);
-    const L = (en: string, jp: string) => (ja ? jp : en);
     const name = safe(r.name);
     const contact = r.phone ? ` (${safe(r.phone)})` : '';
 
     if (RE.track.test(text)) {
-      return L(
-        `📦 **Your order:**\n\nI can't see individual orders from this chat. Open your account and choose Orders to track it, or contact ${name}${contact}.`,
-        `📦 **ご注文について:**\n\nこのチャットでは個別の注文を確認できません。アカウントの「注文」から追跡するか、${name}${contact}へご連絡ください。`,
-      );
+      return {
+        text: L(
+          `📦 **Your order:**\n\nI can't see individual orders from this chat. Open your account and choose Orders to track it, or contact ${name}${contact}.`,
+          `📦 **ご注文について:**\n\nこのチャットでは個別の注文を確認できません。アカウントの「注文」から追跡するか、${name}${contact}へご連絡ください。`,
+        ),
+        followUps: ja ? ['電話番号は？', '住所は？'] : ['Phone number?', 'Address?'],
+      };
     }
 
     if (RE.greeting.test(text)) {
-      return L(
-        `Hello! I'm the assistant for ${name}. Ask me about the menu, offers, delivery, payment or how to reach us.`,
-        `こんにちは！${name}のアシスタントです。メニュー、クーポン、配達、お支払い、連絡先などをお尋ねください。`,
-      );
+      return {
+        text: L(
+          `Hello! I'm the assistant for ${name}. Ask me about the menu, offers, delivery, payment or how to reach us.`,
+          `こんにちは！${name}のアシスタントです。メニュー、クーポン、配達、お支払い、連絡先などをお尋ねください。`,
+        ),
+        followUps: ja ? ['メニューを見せて', '営業時間は？'] : ['Show me the menu', 'Opening hours?'],
+      };
     }
 
     if (RE.offers.test(text)) {
       const offers = await this.loadOffers(r);
       if (!offers.length) {
-        return L(
-          `🎟️ **Offers:**\n\n${name} has no active offers right now.`,
-          `🎟️ **クーポン:**\n\n現在、${name}で利用できるクーポンはありません。`,
-        );
+        return {
+          text: L(
+            `🎟️ **Offers:**\n\n${name} has no active offers right now.`,
+            `🎟️ **クーポン:**\n\n現在、${name}で利用できるクーポンはありません。`,
+          ),
+          followUps: ja ? ['メニューを見せて', '配達料金は？'] : ['Show me the menu', 'Delivery fees?'],
+        };
       }
-      return `🎟️ **${L('Offers at', 'クーポン:')} ${name}:**\n\n${offers
-        .slice(0, MAX_OFFERS_SHOWN)
-        .map((o) => `• ${this.describeOffer(o, r.currencyCode, ja)}`)
-        .join('\n')}`;
+      return {
+        text: `🎟️ **${L('Offers at', 'クーポン:')} ${name}:**\n\n${offers
+          .slice(0, MAX_OFFERS_SHOWN)
+          .map((o) => `• ${this.describeOffer(o, r.currencyCode, ja)}`)
+          .join('\n')}`,
+        followUps: ja ? ['使い方は？', '他のクーポンは？'] : ['How to use?', 'Other coupons?'],
+      };
     }
 
     if (RE.refund.test(text)) {
-      return r.refundPolicy
-        ? `💸 **${L('Refund policy', '返金ポリシー')}:**\n\n${safe(r.refundPolicy).slice(0, 500)}`
-        : L(
-            `💸 **Refund policy:**\n\n${name} hasn't published a refund policy. Please contact them directly${contact}.`,
-            `💸 **返金ポリシー:**\n\n${name}は返金ポリシーを公開していません。直接お問い合わせください${contact}。`,
-          );
+      return {
+        text: r.refundPolicy
+          ? `💸 **${L('Refund policy', '返金ポリシー')}:**\n\n${safe(r.refundPolicy).slice(0, 500)}`
+          : L(
+              `💸 **Refund policy:**\n\n${name} hasn't published a refund policy. Please contact them directly${contact}.`,
+              `💸 **返金ポリシー:**\n\n${name}は返金ポリシーを公開していません。直接お問い合わせください${contact}。`,
+            ),
+        followUps: ja ? ['電話番号は？', 'メニューを見せて'] : ['Phone number?', 'Show me the menu'],
+      };
     }
 
     let menu: MenuRow[] | null = null;
@@ -201,12 +270,18 @@ export class ChatBotService {
       );
       const label = wantVegan ? L('Vegan', 'ビーガン') : L('Vegetarian', 'ベジタリアン');
       if (!picks.length) {
-        return L(
-          `🥗 **${label} options:**\n\n${name} hasn't marked any dishes as ${label.toLowerCase()}. Please ask them directly${contact}.`,
-          `🥗 **${label}メニュー:**\n\n${name}では${label}と表示されている料理がありません。直接お問い合わせください${contact}。`,
-        );
+        return {
+          text: L(
+            `🥗 **${label} options:**\n\n${name} hasn't marked any dishes as ${label.toLowerCase()}. Please ask them directly${contact}.`,
+            `🥗 **${label}メニュー:**\n\n${name}では${label}と表示されている料理がありません。直接お問い合わせください${contact}。`,
+          ),
+          followUps: ja ? ['メニューを見せて', '配達料金は？'] : ['Show me the menu', 'Delivery fees?'],
+        };
       }
-      return `🥗 **${label} ${L('options at', 'メニュー:')} ${name}:**\n\n${this.listItems(picks.slice(0, 8), r.currencyCode, ja)}${picks.length > 8 ? '\n' + L(`…and ${picks.length - 8} more.`, `…ほか${picks.length - 8}品`) : ''}`;
+      return {
+        text: `🥗 **${label} ${L('options at', 'メニュー:')} ${name}:**\n\n${this.listItems(picks.slice(0, 8), r.currencyCode, ja)}${picks.length > 8 ? '\n' + L(`…and ${picks.length - 8} more.`, `…ほか${picks.length - 8}品`) : ''}`,
+        followUps: ja ? ['今日のおすすめは？', '注文する方法は？'] : ["Today's specials?", 'How do I order?'],
+      };
     }
 
     // Menu / price / allergen questions: if the visitor named a dish, answer
@@ -215,115 +290,164 @@ export class ChatBotService {
     const wantsAllergen = RE.allergen.test(text);
     if (wantsMenu || wantsAllergen) {
       const matched = this.matchItems(await getMenu(), text);
-      if (matched.length) return this.itemReply(matched, r, ja, wantsAllergen, contact);
+      if (matched.length) {
+        return {
+          text: this.itemReply(matched, r, ja, wantsAllergen, contact),
+          followUps: ja ? ['注文する方法は？', '配達料金は？'] : ['How do I order?', 'What are the delivery fees?'],
+        };
+      }
       if (wantsAllergen && !wantsMenu) {
-        return L(
-          `🍽️ **Dish details:**\n\nTell me which dish you're asking about and I'll share its ingredients and allergen info if ${name} has listed them.`,
-          `🍽️ **料理の詳細:**\n\nどの料理についてか教えてください。${name}が登録している原材料やアレルギー情報をお伝えします。`,
-        );
+        return {
+          text: L(
+            `🍽️ **Dish details:**\n\nTell me which dish you're asking about and I'll share its ingredients and allergen info if ${name} has listed them.`,
+            `🍽️ **料理の詳細:**\n\nどの料理についてか教えてください。${name}が登録している原材料やアレルギー情報をお伝えします。`,
+          ),
+          followUps: ja ? ['メニューを見せて', 'ベジタリアンメニューは？'] : ['Show me the menu', 'Vegetarian options?'],
+        };
       }
       const available = (await getMenu()).filter((m) => m.isAvailable);
       if (!available.length) {
-        return L(
-          `🍽️ **Menu:**\n\n${name} hasn't added menu items yet.`,
-          `🍽️ **メニュー:**\n\n${name}はまだメニューを登録していません。`,
-        );
+        return {
+          text: L(
+            `🍽️ **Menu:**\n\n${name} hasn't added menu items yet.`,
+            `🍽️ **メニュー:**\n\n${name}はまだメニューを登録していません。`,
+          ),
+          followUps: ja ? ['いつメニューが追加されますか？', '電話番号は？'] : ['When will the menu be added?', 'Phone number?'],
+        };
       }
       const more = available.length - MENU_PREVIEW;
-      return `🍽️ **${L('Menu highlights at', 'メニュー:')} ${name}:**\n\n${this.listItems(available.slice(0, MENU_PREVIEW), r.currencyCode, ja)}${more > 0 ? '\n\n' + L(`…and ${more} more on this page's menu.`, `…ほか${more}品はこのページのメニューをご覧ください。`) : ''}`;
+      return {
+        text: `🍽️ **${L('Menu highlights at', 'メニュー:')} ${name}:**\n\n${this.listItems(available.slice(0, MENU_PREVIEW), r.currencyCode, ja)}${more > 0 ? '\n\n' + L(`…and ${more} more on this page's menu.`, `…ほか${more}品はこのページのメニューをご覧ください。`) : ''}`,
+        followUps: ja ? ['ベジタリアンメニューは？', '今日のおすすめは？'] : ['Vegetarian options?', "Today's specials?"],
+      };
     }
 
     if (RE.dineIn.test(text)) {
-      return r.supportsDineIn
-        ? L(
-            `🪑 **Dine-in:**\n\n${name} offers dine-in. I can't book tables from this chat, so please call to reserve${contact}.`,
-            `🪑 **店内飲食:**\n\n${name}は店内飲食に対応しています。このチャットでは席の予約はできませんので、お電話でご予約ください${contact}。`,
-          )
-        : L(
-            `🪑 **Dine-in:**\n\n${name} doesn't list dine-in. ${this.serviceSummary(r, false)}`,
-            `🪑 **店内飲食:**\n\n${name}は店内飲食を案内していません。${this.serviceSummary(r, true)}`,
-          );
+      return {
+        text: r.supportsDineIn
+          ? L(
+              `🪑 **Dine-in:**\n\n${name} offers dine-in. I can't book tables from this chat, so please call to reserve${contact}.`,
+              `🪑 **店内飲食:**\n\n${name}は店内飲食に対応しています。このチャットでは席の予約はできませんので、お電話でご予約ください${contact}。`,
+            )
+          : L(
+              `🪑 **Dine-in:**\n\n${name} doesn't list dine-in. ${this.serviceSummary(r, false)}`,
+              `🪑 **店内飲食:**\n\n${name}は店内飲食を案内していません。${this.serviceSummary(r, true)}`,
+            ),
+        followUps: ja ? ['電話番号は？', '住所は？'] : ['Phone number?', 'Address?'],
+      };
     }
 
     if (RE.service.test(text)) {
-      return `🛵 **${L('Ordering options', 'ご利用方法')}:**\n\n${this.serviceSummary(r, ja)}\n\n${L(
-        "I don't have a delivery time estimate; the delivery fee is shown when you check out.",
-        '配達時間の目安は分かりません。配達料金はお会計時に表示されます。',
-      )}`;
+      return {
+        text: `🛵 **${L('Ordering options', 'ご利用方法')}:**\n\n${this.serviceSummary(r, ja)}\n\n${L(
+          "I don't have a delivery time estimate; the delivery fee is shown when you check out.",
+          '配達時間の目安は分かりません。配達料金はお会計時に表示されます。',
+        )}`,
+        followUps: ja ? ['配達料金は？', '支払い方法は？'] : ['Delivery fees?', 'Payment methods?'],
+      };
     }
 
     if (RE.hours.test(text)) {
-      return L(
-        `⏰ **Opening status:**\n\n${name} is currently ${r.isOpen ? 'open and accepting orders' : 'closed'}. Specific opening hours aren't listed, so it's best to call ahead${contact}.`,
-        `⏰ **営業状況:**\n\n${name}は現在${r.isOpen ? '営業中で注文を受け付けています' : '営業しておりません'}。具体的な営業時間は登録されていないため、お電話でご確認ください${contact}。`,
-      );
+      return {
+        text: L(
+          `⏰ **Opening status:**\n\n${name} is currently ${r.isOpen ? 'open and accepting orders' : 'closed'}. Specific opening hours aren't listed, so it's best to call ahead${contact}.`,
+          `⏰ **営業状況:**\n\n${name}は現在${r.isOpen ? '営業中で注文を受け付けています' : '営業しておりません'}。具体的な営業時間は登録されていないため、お電話でご確認ください${contact}。`,
+        ),
+        followUps: ja ? ['電話番号は？', '住所は？'] : ['Phone number?', 'Address?'],
+      };
     }
 
     if (RE.location.test(text)) {
       const where = [r.address, r.city].filter(Boolean).map(safe).join(', ');
       if (!where && r.latitude == null) {
-        return L(
-          `📍 **Address:**\n\n${name} hasn't listed an address yet.`,
-          `📍 **住所:**\n\n${name}はまだ住所を登録していません。`,
-        );
+        return {
+          text: L(
+            `📍 **Address:**\n\n${name} hasn't listed an address yet.`,
+            `📍 **住所:**\n\n${name}はまだ住所を登録していません。`,
+          ),
+          followUps: ja ? ['営業時間は？', '電話番号は？'] : ['Opening hours?', 'Phone number?'],
+        };
       }
       const query =
         r.latitude != null && r.longitude != null ? `${r.latitude},${r.longitude}` : `${name} ${where}`;
-      return `📍 **${L('Address', '住所')}:**\n${where || name}\n\n🗺️ [${L('View on map', '地図で見る')}](${mapUrl(query)})`;
+      return {
+        text: `📍 **${L('Address', '住所')}:**\n${where || name}\n\n🗺️ [${L('View on map', '地図で見る')}](${mapUrl(query)})`,
+        followUps: ja ? ['営業時間は？', '電話番号は？'] : ['Opening hours?', 'Phone number?'],
+      };
     }
 
     if (RE.reviews.test(text)) {
-      return r.totalReviews > 0
-        ? L(
-            `⭐ **Reviews:**\n\n${r.avgRating.toFixed(1)}★ from ${r.totalReviews} review${r.totalReviews === 1 ? '' : 's'}.`,
-            `⭐ **レビュー:**\n\n${r.totalReviews}件のレビューで${r.avgRating.toFixed(1)}★です。`,
-          )
-        : L(
-            `⭐ **Reviews:**\n\n${name} doesn't have any reviews yet.`,
-            `⭐ **レビュー:**\n\n${name}にはまだレビューがありません。`,
-          );
+      return {
+        text: r.totalReviews > 0
+          ? L(
+              `⭐ **Reviews:**\n\n${r.avgRating.toFixed(1)}★ from ${r.totalReviews} review${r.totalReviews === 1 ? '' : 's'}.`,
+              `⭐ **レビュー:**\n\n${r.totalReviews}件のレビューで${r.avgRating.toFixed(1)}★です。`,
+            )
+          : L(
+              `⭐ **Reviews:**\n\n${name} doesn't have any reviews yet.`,
+              `⭐ **レビュー:**\n\n${name}にはまだレビューがありません。`,
+            ),
+        followUps: ja ? ['メニューを見せて', '住所は？'] : ['Show me the menu', 'Address?'],
+      };
     }
 
     if (RE.payment.test(text)) {
       const methods = this.paymentMethods(r);
-      return methods.length
-        ? `💳 **${L('Payment methods', 'お支払い方法')}:**\n\n${methods.join(', ')}`
-        : L(
-            `💳 **Payment methods:**\n\n${name} hasn't listed accepted payment methods. Please ask them directly${contact}.`,
-            `💳 **お支払い方法:**\n\n${name}は対応する支払い方法を登録していません。直接お問い合わせください${contact}。`,
-          );
+      return {
+        text: methods.length
+          ? `💳 **${L('Payment methods', 'お支払い方法')}:**\n\n${methods.join(', ')}`
+          : L(
+              `💳 **Payment methods:**\n\n${name} hasn't listed accepted payment methods. Please ask them directly${contact}.`,
+              `💳 **お支払い方法:**\n\n${name}は対応する支払い方法を登録していません。直接お問い合わせください${contact}。`,
+            ),
+        followUps: ja ? ['注文する方法は？', '配達料金は？'] : ['How do I order?', 'Delivery fees?'],
+      };
     }
 
     if (RE.contact.test(text)) {
-      return r.phone
-        ? `📞 **${L('Phone number', '電話番号')}:**\n${safe(r.phone)}`
-        : L(
-            `📞 **Contact:**\n\n${name} hasn't listed a phone number yet.`,
-            `📞 **連絡先:**\n\n${name}はまだ電話番号を登録していません。`,
-          );
+      return {
+        text: r.phone
+          ? `📞 **${L('Phone number', '電話番号')}:**\n${safe(r.phone)}`
+          : L(
+              `📞 **Contact:**\n\n${name} hasn't listed a phone number yet.`,
+              `📞 **連絡先:**\n\n${name}はまだ電話番号を登録していません。`,
+            ),
+        followUps: ja ? ['住所は？', '営業時間は？'] : ['Address?', 'Opening hours?'],
+      };
     }
 
     if (RE.cuisine.test(text)) {
       const cuisines = r.cuisines.map((c) => safe(c.cuisine.name)).filter(Boolean);
-      return cuisines.length
-        ? `🍜 **${L('Cuisine', 'ジャンル')}:**\n\n${cuisines.join(', ')}`
-        : L(
-            `🍜 **Cuisine:**\n\n${name} hasn't listed a cuisine type.`,
-            `🍜 **ジャンル:**\n\n${name}はジャンルを登録していません。`,
-          );
+      return {
+        text: cuisines.length
+          ? `🍜 **${L('Cuisine', 'ジャンル')}:**\n\n${cuisines.join(', ')}`
+          : L(
+              `🍜 **Cuisine:**\n\n${name} hasn't listed a cuisine type.`,
+              `🍜 **ジャンル:**\n\n${name}はジャンルを登録していません。`,
+            ),
+        followUps: ja ? ['メニューを見せて', '住所は？'] : ['Show me the menu', 'Address?'],
+      };
     }
 
     // No keyword matched. A bare dish name ("momo?") still deserves a real
     // answer from the database before we involve the AI.
     const dishes = this.matchItems(await getMenu(), text);
-    if (dishes.length) return this.itemReply(dishes, r, ja, false, contact);
+    if (dishes.length) {
+      return {
+        text: this.itemReply(dishes, r, ja, false, contact),
+        followUps: ja ? ['注文する方法は？', '配達料金は？'] : ['How do I order?', 'What are the delivery fees?'],
+      };
+    }
 
     const ai = await this.aiReply.generateReply(
       await this.buildAiContext(r, await getMenu()),
       history,
       text,
     );
-    return ai ?? this.genericFallback(name, ja);
+    return {
+      text: ai ?? this.genericFallback(name, ja),
+      followUps: ja ? ['メニューを見せて', '配達料金は？'] : ['Show me the menu', 'Delivery fees?'],
+    };
   }
 
   // ===========================================================================
@@ -559,11 +683,26 @@ export class ChatBotService {
   // Dishes whose name appears in the visitor's message.
   private matchItems(menu: MenuRow[], text: string): MenuRow[] {
     const t = text.toLowerCase();
+    
     return menu
       .filter((m) => {
         const en = m.name.trim().toLowerCase();
         const jp = (m.nameJa ?? '').trim().toLowerCase();
-        return (en.length >= 3 && t.includes(en)) || (jp.length >= 2 && t.includes(jp));
+        
+        // Try exact substring first (fast)
+        if ((en.length >= 3 && t.includes(en)) || (jp.length >= 2 && t.includes(jp))) {
+          return true;
+        }
+        
+        // Try fuzzy match (handles typos like "chikcn momo")
+        const words = t.split(/\s+/).filter(w => w.length >= 3);
+        for (const word of words) {
+          if (fuzzyMatch(word, en, 0.7) || (jp && fuzzyMatch(word, jp, 0.7))) {
+            return true;
+          }
+        }
+        
+        return false;
       })
       .slice(0, MAX_ITEMS_DETAILED);
   }
