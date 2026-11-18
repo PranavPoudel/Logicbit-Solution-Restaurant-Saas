@@ -75,7 +75,7 @@ export function AddressesTab() {
         addresses.map((addr) => (
           <div key={addr.id} className="flex items-start justify-between gap-3 rounded-[24px] bg-paper p-4 shadow-soft md:p-5">
             <div className="flex items-start gap-3">
-              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-saffron text-espresso"><Icon name="pin" /></span>
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-chili/10 text-chili"><Icon name="pin" /></span>
               <div>
                 <p className="font-display text-xl font-extrabold">{addr.label ?? t("addressFallback")}</p>
                 <p className="mt-0.5 text-ink/75">{addr.fullAddress}</p>

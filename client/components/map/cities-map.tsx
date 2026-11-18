@@ -50,7 +50,7 @@ export function CitiesMap({ cities, onPick }: { cities: LiveCity[]; onPick: (nam
         {pinned.map((c) => (
           <Marker key={c.id} position={[c.latitude!, c.longitude!]} icon={pin} eventHandlers={{ click: () => onPick(c.name) }} keyboard>
             <Tooltip permanent direction="top" offset={[0, -44]} className="city-tip">
-              {cityLabel(c, locale)}<b className="ml-2 rounded-full bg-saffron px-2 py-0.5 text-xs text-espresso">{c.count}</b>
+              {cityLabel(c, locale)}<b className="ml-2 rounded-full bg-chili px-2 py-0.5 text-xs text-parchment">{c.count}</b>
             </Tooltip>
           </Marker>
         ))}

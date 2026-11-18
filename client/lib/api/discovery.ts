@@ -175,11 +175,6 @@ export async function getFeaturedItems(restaurantId: string) {
   return data;
 }
 
-export async function getTrendingItems() {
-  const { data } = await apiClient.get("/discovery/trending-items");
-  return data;
-}
-
 export async function getFeaturedCategories(restaurantId: string) {
   const { data } = await apiClient.get(
     `/discovery/restaurants/${restaurantId}/menu/featured-categories`

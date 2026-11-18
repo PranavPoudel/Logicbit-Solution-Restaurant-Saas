@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { useGeolocation } from "@/hooks/use-geolocation";
 import { CartoonMap } from "@/components/map/cartoon-map";
 import { DynamicRestaurantLocationMap } from "@/components/map/dynamic-restaurant-location-map";
-import { Button, Icon, Squiggle } from "@/components/ui/primitives";
+import { Button, Icon } from "@/components/ui/primitives";
 import { distanceKm } from "@/lib/utils/geo";
 import { useCopy } from "@/hooks/use-copy";
 import { useCuisineLabel } from "@/hooks/use-cuisine-label";
@@ -26,7 +26,7 @@ const SOCIAL: Record<string, { label: string; path: ReactNode }> = {
   whatsapp: { label: "WhatsApp", path: <path fill="currentColor" d="M12 2a10 10 0 00-8.6 15.1L2 22l5-1.3A10 10 0 1012 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-3.3-.8-2.8-1.1-4.5-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.4 0 .5l-.3.5-.4.4c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l2 1c.3.1.5.2.5.3.1.2.1.7-.1 1.3z" /> },
 };
 
-const TINTS = { herb: "bg-herb/15 text-herb", chili: "bg-chili/10 text-chili", saffron: "bg-saffron/30 text-espresso" };
+const TINTS = { herb: "bg-chili/10 text-chili", chili: "bg-chili/10 text-chili", saffron: "bg-chili/10 text-chili" };
 
 function ContactRow({ icon, tint, label, value, href, external }: { icon: string; tint: keyof typeof TINTS; label: string; value?: string; href: string; external?: boolean }) {
   if (!value) return null;
@@ -74,7 +74,6 @@ export function StorefrontContactSection({ title, restaurant, contact: saved, so
     <section aria-labelledby="find" className="mx-auto w-full max-w-[1440px] border-t border-ink/10 px-5 py-10 md:px-10">
       <h2 id="find" className="relative inline-block font-display text-[32px] font-extrabold tracking-tight md:text-[40px]">
         {title}
-        <Squiggle className="absolute -bottom-1 left-0 h-3 w-full text-[var(--accent,var(--brand-chili))]" />
       </h2>
       <div className="mt-8 grid grid-cols-1 items-stretch gap-6 md:grid-cols-12">
         {hasMap && (

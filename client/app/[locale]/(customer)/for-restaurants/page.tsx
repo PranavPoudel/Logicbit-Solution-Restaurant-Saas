@@ -7,13 +7,13 @@ import { useRouter } from "next/navigation";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { registerOwner } from "@/lib/api/auth";
-import { geocodeAddress } from "@/lib/geocode";
+import { AddressPicker, type AddressValue } from "@/components/map/address-picker";
 import { listCities } from "@/lib/api/cities";
 import { isValidPhone, normalizePhone } from "@/lib/utils/phone";
 import { useOwnerAuthStore } from "@/store/owner-auth-store";
 import { theme } from "@/config/theme";
 import { formatMoney } from "@/lib/utils/money";
-import { Button, Card, Icon, Progress, Squiggle, Stamp } from "@/components/ui/primitives";
+import { Button, Card, Icon, Progress, Stamp } from "@/components/ui/primitives";
 import { AuthError, AuthInput, AuthPassword, PasswordStrength } from "@/components/auth/auth-shell";
 
 const STEPS = ["stepKitchen", "stepOwner", "stepReview"] as const;
@@ -45,8 +45,7 @@ function Hero({ onStart }: { onStart: () => void }) {
         <h1 className="mt-6 font-display text-[52px] font-extrabold leading-[0.92] tracking-[-0.04em] md:text-[96px]">
           {t("titleStart")}{" "}
           <span className="relative inline-block text-chili-deep">
-            {t("titleAccent")}<Squiggle className="absolute -bottom-2 left-0 h-4 w-full text-saffron md:-bottom-3 md:h-6" />
-          </span>
+            {t("titleAccent")}          </span>
         </h1>
         <p className="mt-6 max-w-lg text-lg leading-relaxed text-ink/85">{t("body")}</p>
         <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
@@ -155,17 +154,19 @@ function Wizard() {
   const setAuth = useOwnerAuthStore((s) => s.setAuth);
   const top = useRef<HTMLDivElement>(null);
   const [step, setStep] = useState(0);
-  const [k, setK] = useState({ restaurantName: "", phone: "", restaurantAddress: "", city: "" });
+  const [k, setK] = useState({ restaurantName: "", phone: "", city: "" });
+  const [addr, setAddr] = useState<AddressValue>({ address: "", lat: null, lng: null });
   const cities = useQuery({ queryKey: ["cities"], queryFn: listCities });
+  const typedCity = k.city.trim().toLowerCase();
+  const startCity = (cities.data ?? []).find((c) => c.name.toLowerCase() === typedCity) ?? cities.data?.[0];
   const [o, setO] = useState({ name: "", email: "", password: "" });
   const [terms, setTerms] = useState(false);
   const [err, setErr] = useState<Record<string, string>>({});
 
   const mutation = useMutation({
     mutationFn: async () => {
-      const place = await geocodeAddress(`${k.restaurantAddress}, ${k.city}`).catch(() => null);
-      if (!place) throw new Error(t("errGeocode"));
-      const response = await registerOwner({ ...o, ...k, phone: normalizePhone(k.phone).trim(), latitude: place.lat, longitude: place.lng, acceptTerms: terms });
+      if (addr.lat == null || addr.lng == null) throw new Error(t("errPin"));
+      const response = await registerOwner({ ...o, ...k, restaurantAddress: addr.address, phone: normalizePhone(k.phone).trim(), latitude: addr.lat, longitude: addr.lng, acceptTerms: terms });
       if (!(response.user || response.data?.user)) throw new Error(response.message ?? t("errFailed"));
       return response;
     },
@@ -195,7 +196,8 @@ function Wizard() {
     if (s === 0) {
       if (k.restaurantName.trim().length < 2) e.restaurantName = t("errKitchen");
       if (!isValidPhone(k.phone)) e.phone = t("errPhone");
-      if (k.restaurantAddress.trim().length < 4) e.restaurantAddress = t("errAddress");
+      if (addr.address.trim().length < 4) e.restaurantAddress = t("errAddress");
+      else if (addr.lat == null) e.restaurantAddress = t("errPin");
       if (k.city.trim().length < 2) e.city = t("errCity");
     }
     if (s === 1) {
@@ -228,11 +230,21 @@ function Wizard() {
             <div className="grid gap-6 md:grid-cols-2">
               <AuthInput id="restaurantName" label={t("kitchenName")} icon="bag" value={k.restaurantName} onChange={(e) => setK({ ...k, restaurantName: e.target.value })} error={err.restaurantName} placeholder="Sita's Momo Pasal" />
               <AuthInput id="phone" label={t("kitchenPhone")} icon="phone" inputMode="tel" value={k.phone} onChange={(e) => setK({ ...k, phone: e.target.value })} error={err.phone} autoComplete="tel" placeholder="090-1234-5678" />
-              <div className="md:col-span-2">
-                <AuthInput id="restaurantAddress" label={t("address")} icon="pin" value={k.restaurantAddress} onChange={(e) => setK({ ...k, restaurantAddress: e.target.value })} error={err.restaurantAddress} placeholder="1-2-3 Otsukacho, Miyazaki" hint={<p className="mt-2 text-ink/75">{t("addressHint")}</p>} />
-              </div>
               <AuthInput id="city" label={t("kitchenCity")} icon="pin" list="city-options" value={k.city} onChange={(e) => setK({ ...k, city: e.target.value })} error={err.city} autoComplete="address-level2" placeholder="Miyazaki" />
               <datalist id="city-options">{(cities.data ?? []).map((c) => <option key={c.id} value={c.name} />)}</datalist>
+              <div className="md:col-span-2">
+                <p className="mb-2 font-bold">{t("address")}</p>
+                <AddressPicker
+                  value={addr}
+                  onChange={(v) => { setAddr(v); setErr({}); }}
+                  onError={(m) => setErr({ restaurantAddress: m })}
+                  placeholder="1-2-3 Otsukacho, Miyazaki"
+                  mapLabel={t("pinLabel")}
+                  startLat={startCity?.latitude}
+                  startLng={startCity?.longitude}
+                />
+                {err.restaurantAddress && <p className="mt-2 flex items-center gap-1.5 font-medium text-danger" role="alert"><Icon name="alert" className="h-4 w-4" />{err.restaurantAddress}</p>}
+              </div>
             </div>
           )}
 
@@ -251,7 +263,7 @@ function Wizard() {
               <div className="grid gap-4 md:grid-cols-2">
                 <SummaryCard title={t("stepKitchen")} onEdit={() => goTo(0)}>
                   <p className="font-bold text-ink">{k.restaurantName}</p>
-                  <p>{k.restaurantAddress}, {k.city}</p>
+                  <p>{addr.address}</p>
                   <p>{k.phone}</p>
                 </SummaryCard>
                 <SummaryCard title={t("stepOwner")} onEdit={() => goTo(1)}>
@@ -305,7 +317,7 @@ export default function ForRestaurantsPage() {
       <Benefits />
       <section aria-labelledby="apply-h" className="mx-auto max-w-[1100px] px-4 py-16 md:px-10">
         <h2 id="apply-h" className="mb-8 text-center font-display text-[40px] font-extrabold leading-tight tracking-tight md:text-[56px]">
-          {t("applyStart")} <span className="relative inline-block">{t("applyAccent")}<Squiggle className="absolute -bottom-1 left-0 h-3 w-full text-saffron" /></span>
+          {t("applyStart")} <span className="relative inline-block">{t("applyAccent")}</span>
         </h2>
         <Wizard />
       </section>

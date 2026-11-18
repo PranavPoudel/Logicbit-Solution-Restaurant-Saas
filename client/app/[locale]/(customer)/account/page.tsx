@@ -33,7 +33,7 @@ export default function AccountPage({ searchParams }: { searchParams: Promise<{ 
   return (
     <CustomerAuthGuard>
       <div className="mx-auto max-w-[1200px] px-4 py-6 md:px-10 md:py-10">
-        <header className="mb-8 flex flex-wrap items-center justify-between gap-4 rounded-[32px] bg-saffron p-5 text-espresso md:p-7">
+        <header className="mb-8 flex flex-wrap items-center justify-between gap-4 rounded-[32px] bg-[color-mix(in_srgb,var(--brand-cream)_45%,var(--brand-paper))] p-5 text-ink shadow-warm md:p-7">
           <div className="flex min-w-0 items-center gap-4 md:gap-5">
             <div className="blob grid h-16 w-16 shrink-0 place-items-center bg-chili font-display text-3xl font-extrabold text-parchment shadow-hard md:h-20 md:w-20 md:text-4xl">
               {(customer?.name ?? "?").charAt(0).toUpperCase()}

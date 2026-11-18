@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { DynamicCitiesMap } from "@/components/map/dynamic-cities-map";
-import { Icon, Squiggle } from "@/components/ui/primitives";
+import { Icon } from "@/components/ui/primitives";
 import type { City } from "@/lib/api/cities";
 import { cityLabel, liveCities, sameCity, type CityCounts } from "@/lib/utils/cities";
 
@@ -24,7 +24,6 @@ export function CitiesNearMe({ cities, counts, selected, loading }: { cities: Ci
           {t("titleStart")}{" "}
           <span className="relative inline-block">
             {t("titleAccent")}
-            <Squiggle className="absolute -bottom-1 left-0 h-3 w-full text-saffron md:h-4" />
           </span>
         </h2>
         <Link href="/restaurants" className="group flex min-h-11 items-center gap-2 font-bold hover:text-chili">
@@ -41,7 +40,7 @@ export function CitiesNearMe({ cities, counts, selected, loading }: { cities: Ci
         <div className="flex flex-col gap-5">
           <div>
             <p className="flex items-center gap-2 text-base font-bold uppercase tracking-wider text-ink/70">
-              <span className="h-3 w-3 animate-pulse rounded-full bg-herb motion-reduce:animate-none" />
+              <span className="h-3 w-3 animate-pulse rounded-full bg-chili motion-reduce:animate-none" />
               {t("deliveringNow", { count: live.length })}
             </p>
             <ul className="mt-4 space-y-3">

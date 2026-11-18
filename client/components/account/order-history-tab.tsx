@@ -29,7 +29,7 @@ function getCategory(status?: string): Exclude<Category, "all"> {
   return "active";
 }
 
-const TONES = { active: "saffron", completed: "herb", cancelled: "soft" } as const;
+const TONES = { active: "chili", completed: "ink", cancelled: "soft" } as const;
 
 export function OrderHistoryTab() {
   const t = useTranslations("account");
