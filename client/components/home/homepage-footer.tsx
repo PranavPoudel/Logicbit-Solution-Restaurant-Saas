@@ -7,7 +7,7 @@ import { Icon } from "@/components/ui/primitives";
 export function CustomerFooter() {
   const t = useTranslations();
   const columns: [string, [string, string][]][] = [
-    [t("footer.eat"), [[t("header.restaurants"), "/restaurants"], [t("header.myOrders"), "/account?tab=orders"], [t("footer.search"), "/search"]]],
+    [t("footer.eat"), [[t("header.restaurants"), "/restaurants"], [t("header.myOrders"), "/account?tab=orders"], [t("footer.search"), "/search"], ["FAQ", "/faq"]]],
     [theme.brand.name, [[t("header.forRestaurants"), "/for-restaurants"], [t("footer.privacy"), "/privacy"], [t("footer.terms"), "/terms"]]],
   ];
 
