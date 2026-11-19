@@ -19,6 +19,7 @@ export function RestaurantCard({ r, index, compact }: { r: DiscoveryRestaurant; 
   const hasOrders = (r.totalOrders ?? 0) > 0;
   const name = r.name ?? t("fallbackName");
   const href = `/restaurants/${r.slug ?? r.id}`;
+  const phone = r.phone;
 
   const { fav, toggle } = useFavorite(r.id);
 
@@ -55,15 +56,25 @@ export function RestaurantCard({ r, index, compact }: { r: DiscoveryRestaurant; 
             <span key={cuisineName(c)} className="rounded-full bg-ink/10 px-3 py-1 font-bold">{cuisineLabel(c)}</span>
           ))}
         </div>
-        <p className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-ink/75">
-          {r.estimatedDeliveryMinutes != null && (
-            <span className="flex items-center gap-1.5"><Icon name="clock" className="h-4 w-4" />{t("minutes", { count: r.estimatedDeliveryMinutes })}</span>
+
+        <div className="mt-3 space-y-1 text-ink/75">
+          <p className="flex flex-wrap gap-x-4 gap-y-1">
+            {r.distanceKm != null && (
+              <span className="flex items-center gap-1.5"><Icon name="pin" className="h-4 w-4" />{t("km", { value: r.distanceKm })}</span>
+            )}
+            {r.estimatedDeliveryMinutes != null && (
+              <span className="flex items-center gap-1.5"><Icon name="clock" className="h-4 w-4" />{t("minutes", { count: r.estimatedDeliveryMinutes })}</span>
+            )}
+            {r.city && <span className="flex items-center gap-1.5"><Icon name="store" className="h-4 w-4" />{r.city}</span>}
+          </p>
+          {phone && (
+            <p className="flex items-center gap-1.5 font-bold text-ink">
+              <Icon name="phone" className="h-4 w-4" />
+              {phone}
+            </p>
           )}
-          {r.distanceKm != null && (
-            <span className="flex items-center gap-1.5"><Icon name="pin" className="h-4 w-4" />{t("km", { value: r.distanceKm })}</span>
-          )}
-          {r.city && <span className="flex items-center gap-1.5"><Icon name="store" className="h-4 w-4" />{r.city}</span>}
-        </p>
+        </div>
+
         {!compact && (
           <div className="relative z-10 mt-4 flex items-center justify-end">
             <Link href={href} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-chili px-5 font-bold text-parchment shadow-red transition hover:-translate-y-0.5">

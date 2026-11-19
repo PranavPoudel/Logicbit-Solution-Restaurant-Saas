@@ -245,6 +245,7 @@
     "stomach": "お腹から電話です。ご立腹のようです。",
     "orderNow": "わかった、注文しよう",
     "eat": "食べる",
+    "faq": "よくある質問",
     "search": "検索"
   },
   "notFound": {
@@ -410,6 +411,21 @@
     "zoomOut": "縮小",
     "weAccept": "対応のお支払い",
     "payCod": "代金引換",
+    "paymentsTitle": "お支払い方法",
+    "payCash": "現金",
+    "payCreditCard": "クレジットカード",
+    "payBankTransfer": "銀行振込",
+    "facilitiesTitle": "設備・サービス",
+    "facility": {
+      "parking": "駐車場",
+      "wifi": "Wi-Fi",
+      "air_conditioning": "エアコン完備",
+      "outdoor_seating": "テラス席",
+      "family_friendly": "ファミリー歓迎",
+      "wheelchair_accessible": "車椅子対応",
+      "kids_menu": "お子様メニュー",
+      "smoking_area": "喫煙スペース"
+    },
     "payCard": "カード",
     "mapStyle": "地図の表示",
     "mapCartoon": "イラスト",

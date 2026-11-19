@@ -400,6 +400,7 @@ export class DiscoveryService {
       supportsIps: r.supportsIps ?? false,
       supportsPhonePay: r.supportsPhonePay ?? false,
       supportsPaypay: r.supportsPaypay ?? false,
+      facilities: r.facilities ?? [],
     };
     };
   }

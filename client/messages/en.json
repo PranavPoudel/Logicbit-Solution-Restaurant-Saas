@@ -245,6 +245,7 @@
     "stomach": "Your stomach called. It's upset.",
     "orderNow": "Okay fine, order now",
     "eat": "Eat",
+    "faq": "FAQ",
     "search": "Search"
   },
   "notFound": {
@@ -410,6 +411,21 @@
     "zoomOut": "Zoom out",
     "weAccept": "We accept",
     "payCod": "Cash on delivery",
+    "paymentsTitle": "Payment Methods",
+    "payCash": "Cash",
+    "payCreditCard": "Credit Card",
+    "payBankTransfer": "Bank Transfer",
+    "facilitiesTitle": "Facilities / Amenities",
+    "facility": {
+      "parking": "Parking",
+      "wifi": "Wi-Fi",
+      "air_conditioning": "Air conditioning",
+      "outdoor_seating": "Outdoor seating",
+      "family_friendly": "Family friendly",
+      "wheelchair_accessible": "Wheelchair accessible",
+      "kids_menu": "Kids menu",
+      "smoking_area": "Smoking area"
+    },
     "payCard": "Card",
     "mapStyle": "Map style",
     "mapCartoon": "Illustrated",

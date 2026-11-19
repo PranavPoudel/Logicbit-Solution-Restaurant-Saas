@@ -29,6 +29,7 @@ export interface UpdateRestaurantInput {
   supportsDelivery?: boolean;
   supportsPickup?: boolean;
   supportsDineIn?: boolean;
+  facilities?: string[];
   selfDeliveryRadiusKm?: number;
   selfDeliveryFlatFee?: number;
   maxDeliveryRadiusKm?: number;
@@ -64,6 +65,7 @@ export interface RestaurantUpdatePayload {
   supportsDelivery?: boolean;
   supportsPickup?: boolean;
   supportsDineIn?: boolean;
+  facilities?: string[];
   selfDeliveryRadiusKm?: number;
   selfDeliveryFlatFee?: number;
   maxDeliveryRadiusKm?: number;
