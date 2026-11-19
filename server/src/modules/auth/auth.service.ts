@@ -10,6 +10,7 @@ import { RegisterDto, InviteStaffDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { AccountSecurityService, RequestCtx } from '../account-security/account-security.service';
 import { hashPassword } from '../account-security/passwords';
+import { findCityByName, nearestCity } from '../../common/utils/city-match.util';
 
 @Injectable()
 export class AuthService {
@@ -34,6 +35,8 @@ export class AuthService {
 
     const passwordHash = await hashPassword(dto.password);
     const slug = this.slugify(dto.restaurantName);
+    const cities = await this.prisma.city.findMany({ where: { isActive: true } });
+    const city = (findCityByName(cities, dto.city) ?? nearestCity(cities, dto.latitude, dto.longitude))?.name;
 
     const result = await this.prisma.$transaction(async (tx) => {
       const tenant = await tx.tenant.create({
@@ -67,7 +70,7 @@ export class AuthService {
           slug: `${slug}-${tenant.id.slice(0, 8)}`,
           address: dto.restaurantAddress,
           phone: dto.phone,
-          city: dto.city?.trim() || undefined,
+          city,
           latitude: dto.latitude, 
           longitude: dto.longitude,
         },
