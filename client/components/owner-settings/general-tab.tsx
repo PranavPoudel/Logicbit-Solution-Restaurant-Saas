@@ -1,5 +1,7 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
+import { listCities } from "@/lib/api/cities";
 import { SettingsField, SettingsTextarea } from "@/components/owner-settings/settings-field";
 import { SettingsForm } from "@/app/owner/(owner-dashboard)/settings/page";
 
@@ -15,12 +17,27 @@ interface GeneralTabProps {
 }
 
 export function GeneralTab({ form, set, allCuisines, isLoadingCuisines, selectedCuisineIds, toggleCuisine, isUpdatingCuisines }: GeneralTabProps) {
+  const { data: cities = [] } = useQuery({ queryKey: ["cities"], queryFn: listCities });
+  const listed = cities.some((c) => c.name.toLowerCase() === form.city.trim().toLowerCase());
   return (
     <div className="space-y-4">
       <SettingsField label="Restaurant name" value={form.name} onChange={(e: React.ChangeEvent<HTMLInputElement>) => set("name", e.target.value)} />
       <SettingsField label="Address" value={form.address} onChange={(e: React.ChangeEvent<HTMLInputElement>) => set("address", e.target.value)} />
       <SettingsField label="Phone number" type="tel" value={form.phone} onChange={(e: React.ChangeEvent<HTMLInputElement>) => set("phone", e.target.value)} />
-      <SettingsField label="City" value={form.city} onChange={(e: React.ChangeEvent<HTMLInputElement>) => set("city", e.target.value)} />
+      <div>
+        <label htmlFor="restaurant-city" className="block text-sm font-medium text-neutral-700 mb-1.5">City</label>
+        <select
+          id="restaurant-city"
+          value={form.city}
+          onChange={(e: React.ChangeEvent<HTMLSelectElement>) => set("city", e.target.value)}
+          className="w-full bg-white border border-neutral-200 rounded-lg px-3.5 py-2.5 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#E3A008]/40 focus:border-[#E3A008]"
+        >
+          <option value="">Select your city</option>
+          {form.city && !listed && <option value={form.city}>{form.city} (not a listed city)</option>}
+          {cities.map((c) => <option key={c.id} value={c.name}>{c.name}</option>)}
+        </select>
+        <p className="text-xs text-neutral-400 mt-1">Customers find your restaurant under this city. Missing yours? Ask the platform admin to add it.</p>
+      </div>
       <SettingsTextarea
         id="refund-policy"
         label="Refund policy"

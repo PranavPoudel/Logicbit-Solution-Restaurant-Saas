@@ -9,6 +9,7 @@ import { encryptSecret } from '../../common/utils/secret-box.util';
 import { ActivityLogService } from '../activity-log/activity-log.service';
 import { PAYMENT_PAGE_GONE_MINUTES } from '../order/order.service';
 import { withoutPaymentSecrets } from '../../common/utils/restaurant-secrets.util';
+import { findCityByName } from '../../common/utils/city-match.util';
 
 @Injectable()
 export class RestaurantService {
@@ -36,7 +37,7 @@ export class RestaurantService {
         tenantId,
         name: dto.name,
         slug: dto.slug,
-        city: dto.city,
+        city: dto.city ? await this.resolveCity(dto.city, null) : undefined,
         isOpen: dto.isOpen ?? true,
         supportsDelivery: dto.supportsDelivery ?? true,
         supportsPickup: dto.supportsPickup ?? true,
@@ -97,17 +98,28 @@ export class RestaurantService {
     if (changes) throw new ForbiddenException('Only the owner can change payment keys');
   }
 
+  private async resolveCity(text: string, currentCity?: string | null) {
+    const wanted = text.trim();
+    if (!wanted) return null;
+    if (wanted === (currentCity ?? '').trim()) return currentCity;
+    const cities = await this.prisma.city.findMany({ where: { isActive: true } });
+    const match = findCityByName(cities, wanted);
+    if (!match) throw new BadRequestException('Choose your city from the list. If it is missing, ask the platform admin to add it.');
+    return match.name;
+  }
+
   async update(tenantId: string, id: string, dto: UpdateRestaurantDto, isOwner: boolean) {
     const current = await this.findOne(tenantId, id);
     if (!isOwner) this.assertMayChangePaymentKeys(dto, current as { paypayMerchantId?: string | null; paypayApiKey?: string | null });
 
     if (dto.timezone && !isValidTimeZone(dto.timezone)) throw new BadRequestException('Unknown timezone');
     
-    const { openingHours, ...rest } = dto;
+    const { openingHours, city, ...rest } = dto;
     await this.prisma.restaurant.updateMany({ 
       where: { id, tenantId }, 
       data: {
         ...rest,
+        ...(city !== undefined && { city: await this.resolveCity(city, current.city) }),
         // Payment keys are saved encrypted, never as plain text.
         ...(rest.stripeSecretKey && { stripeSecretKey: encryptSecret(rest.stripeSecretKey) }),
         ...(rest.paypayApiSecret && { paypayApiSecret: encryptSecret(rest.paypayApiSecret) }),
